@@ -1,74 +1,87 @@
-// src/Forms.jsx
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-const Form = ({ fields, onSubmit, loading, submitButtonText }) => {
-    const [formData, setFormData] = useState({});
-    const [fieldErrors, setFieldErrors] = useState({});
+const Forms = ({ onSubmit, onCancel }) => {
+    const [formData, setFormData] = useState({
+        type: '',
+        description: '',
+        location: '',
+        image: null
+    });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevState) => ({ ...prevState, [name]: value }));
-        setFieldErrors((prevState) => ({ ...prevState, [name]: "" })); // Clear error on change
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleImageChange = (e) => {
+        setFormData({ ...formData, image: e.target.files[0] });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        // Validate form before submit
-        let errors = {};
-        fields.forEach((field) => {
-            if (field.required && !formData[field.name]) {
-                errors[field.name] = "This field is required";
-            }
-        });
-
-        if (Object.keys(errors).length > 0) {
-            setFieldErrors(errors); // Show validation errors
-        } else {
-            onSubmit(formData); // Call the onSubmit prop
-        }
+        onSubmit(formData);
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            {fields.map((field) => (
-                <div key={field.name} className="form-group">
-                    <label htmlFor={field.name}>{field.label}</label>
-                    {field.type === "select" ? (
-                        <select
-                            id={field.name}
-                            name={field.name}
-                            value={formData[field.name] || ""}
-                            onChange={handleChange}
-                        >
-                            <option value="">Select...</option>
-                            {field.options.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                    ) : (
-                        <input
-                            id={field.name}
-                            name={field.name}
-                            type={field.type}
-                            value={formData[field.name] || ""}
-                            onChange={handleChange}
-                        />
-                    )}
+        <form onSubmit={handleSubmit} className="complaint-form">
+            <h3>טופס דיווח בעיה</h3>
 
-                    {fieldErrors[field.name] && (
-                        <span className="error">{fieldErrors[field.name]}</span>
-                    )}
-                </div>
-            ))}
+            <div className="form-group">
+                <label>סוג הבעיה:</label>
+                <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                    required
+                >
+                    <option value="">בחר סוג בעיה</option>
+                    <option value="תשתיות">תשתיות</option>
+                    <option value="ניקיון">ניקיון</option>
+                    <option value="בטיחות">בטיחות</option>
+                    <option value="אחר">אחר</option>
+                </select>
+            </div>
 
-            <button type="submit" disabled={loading}>
-                {loading ? "Submitting..." : submitButtonText}
-            </button>
+            <div className="form-group">
+                <label>תיאור הבעיה:</label>
+                <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    required
+                />
+            </div>
+
+            <div className="form-group">
+                <label>מיקום:</label>
+                <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    required
+                />
+            </div>
+
+            <div className="form-group">
+                <label>העלאת תמונה (אופציונלי):</label>
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                />
+            </div>
+
+            <div className="form-actions">
+                <button type="button" className="btn-secondary" onClick={onCancel}>
+                    ביטול
+                </button>
+                <button type="submit" className="btn-primary">
+                    שלח דיווח
+                </button>
+            </div>
         </form>
     );
 };
 
-export default Form;
+export default Forms;

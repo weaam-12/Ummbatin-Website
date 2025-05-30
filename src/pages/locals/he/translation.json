@@ -93,8 +93,14 @@
   "noRecords": "אין רשומות שירות זמינות",
   "user": "משתמש",
   "date": "תאריך",
-  "status": "סטטוס"
+  "status": "סטטוס",
+
+  "welcomeBack": "ברוך שובך",
+  "ourSolutions": "הפתרונות שלנו",
+  "getStarted": "התחל עכשיו",
+  "contactUsToday": "צור קשר היום"
 }
+
 
 
 

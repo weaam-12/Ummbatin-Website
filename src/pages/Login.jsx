@@ -1,32 +1,34 @@
+// src/pages/Login.jsx
 import React, { useState } from 'react';
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../AuthContext";  // Use custom hook
 import { useNavigate } from "react-router-dom";
 import './Login.css';
 
 const Login = () => {
-    const { login, user } = useAuth();
+    const { login, user, loading } = useAuth();  // Get login function and user state from context
     const navigate = useNavigate();
     const [loginRequest, setLoginRequest] = useState({
         email: '',
         password: ''
     });
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
-
         try {
-            await login(loginRequest);
-            navigate("/dashboard");
+            const userData = await login(loginRequest);  // Use return value from login
+
+            if (userData && userData.role === "ADMIN") {
+                navigate("/admin");
+            } else {
+                navigate("/dashboard");
+            }
         } catch (err) {
-            setError(err.message || 'הכניסה נכשלה. אנא נסה שוב.');
-        } finally {
-            setLoading(false);
+            setError(err.message || 'Login failed. Please try again.');
         }
     };
+
 
     return (
         <div className="login-container" dir="rtl">

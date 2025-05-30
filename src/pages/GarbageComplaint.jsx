@@ -31,8 +31,7 @@ const GarbageComplaint = () => {
             required: true,
             options: [
                 { value: "uncollected", label: "אשפה שלא נאספה" },
-                { value: "overflowing", label: "פחים עולים על גדותיהם" },
-                { value: "illegalDumping", label: "השלכת פסולת בלתי חוקית" },
+                { value: "newOne", label: "הזמנת פח חדש" },
             ],
         },
         { name: "images", label: "העלאת תמונות", type: "file", required: false },
