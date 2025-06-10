@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaAmbulance, FaFireExtinguisher, FaShieldAlt, FaPhoneAlt, FaMapMarkedAlt } from 'react-icons/fa';
 import { MdLocalPolice } from 'react-icons/md';
-import './EmergencyPage.css';
+import '../components/styles/EmergencyPage.css';
 
 const shelters = [
     { id: 1, location: 'רחוב הראשי 1', description: 'מקלט ציבורי ראשי' },

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import axiosInstance from './api/axiosInstance';
+import axiosInstance from './api';
 
 const AuthContext = createContext();
 
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         axiosInstance
-            .get("/user/profile")
+            .get("/users/profile")
             .then((res) => {
                 setUser(res.data);
             })
@@ -27,35 +27,38 @@ export const AuthProvider = ({ children }) => {
             .finally(() => setLoading(false));
     }, []);
 
-    const login = async ({ email, password }) => {
+    const login = async (credentials) => {
         try {
-            // Login request (no token yet, so use bare axios or axiosInstance without token)
-            // To handle this, you could create a separate axios instance without interceptor for auth calls,
-            // or just use axios directly here.
-            // But for simplicity, let's use bare axios just for login:
-            const axios = (await import("axios")).default;
+            const response = await axiosInstance.post("/auth/login", credentials, {
+                withCredentials: true
+            });
 
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api"}/auth/login`,
-                { email, password }
-            );
-            const { token } = response.data;
-            localStorage.setItem("token", token);
+            localStorage.setItem("token", response.data.token);
+            axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
 
-            // Now that token is set, axiosInstance interceptor will add auth header automatically
-            const profileResponse = await axiosInstance.get("/user/profile");
-            const user = profileResponse.data;
-            setUser(user);
-            return user;
+            const profileResponse = await axiosInstance.get("/users/profile");
+            setUser(profileResponse.data);
+
+            return true;
         } catch (error) {
-            throw error; // Let caller handle error (Login.jsx does it)
+            console.error("Login error:", error);
+            throw error;
         }
     };
 
     const logout = () => {
         localStorage.removeItem("token");
+        delete axiosInstance.defaults.headers.common["Authorization"];
         setUser(null);
     };
+
+    const register = async ({ email, password }) => {
+        const response = await axiosInstance.post('/auth/register', { email, password });
+        return response.data;
+    };
+
+
+
 
     return (
         <AuthContext.Provider value={{ user, loading, login, logout }}>
@@ -64,4 +67,10 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
+};

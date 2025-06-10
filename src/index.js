@@ -9,9 +9,9 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <PayPalScriptProvider options={{ "client-id": import.meta.env.REACT_APP_PAYPAL_CLIENT_ID }}>
         <script src="https://www.paypal.com/sdk/js?client-id="></script>
-        <UserProvider>
+        <React.StrictMode>
             <App />
-
-        </UserProvider>
+        </React.StrictMode>
     </PayPalScriptProvider>
 );
+

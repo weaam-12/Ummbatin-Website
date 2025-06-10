@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchServiceHistory } from "../api"; // Assuming API is set up for this
-import "./GarbageComplaint.css";
+import "../components/styles/GarbageComplaint.css";
 
 const ResidentServiceHistory = ({ userId }) => {
     const { t } = useTranslation();

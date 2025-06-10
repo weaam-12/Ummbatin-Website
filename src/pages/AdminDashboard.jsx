@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import axiosInstance from "../api/axiosInstance"; // ✅ This is your secured instance
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../api.js";
 
 function AdminDashboard() {
     const [users, setUsers] = useState([]);
+    const navigate = useNavigate();
 
-    // ✅ Use the secure axiosInstance here
     useEffect(() => {
         axiosInstance.get("/users/all")
             .then(res => setUsers(res.data))
             .catch(err => console.error("Failed to fetch users", err));
     }, []);
 
-    // ✅ Secure delete
     const deleteUser = (id) => {
         axiosInstance.delete(`/users/${id}`)
             .then(() => {
@@ -20,7 +20,7 @@ function AdminDashboard() {
             .catch(err => console.error("Delete failed", err));
     };
 
-    // ✅ Secure role update
+    // ✅ Change user role securely
     const changeRole = (id, newRole) => {
         axiosInstance.patch(`/users/${id}`, { role: newRole })
             .then(() => {
@@ -31,12 +31,25 @@ function AdminDashboard() {
             .catch(err => console.error("Role update failed", err));
     };
 
+    // ✅ Navigate to register page
+    const handleRegisterUser = () => {
+        navigate("/register");
+    };
+
     return (
-        <div>
+        <div style={{ padding: "2rem" }}>
             <h2>Admin Dashboard</h2>
-            <table>
+            <button onClick={handleRegisterUser} style={{ marginBottom: "1rem" }}>
+                ➕ Register New User
+            </button>
+
+            <table border="1" cellPadding="8" cellSpacing="0">
                 <thead>
-                <tr><th>Email</th><th>Role</th><th>Actions</th></tr>
+                <tr>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
                 </thead>
                 <tbody>
                 {users.map(user => (
@@ -44,11 +57,11 @@ function AdminDashboard() {
                         <td>{user.email}</td>
                         <td>{user.role}</td>
                         <td>
-                            <button onClick={() => deleteUser(user.id)}>Delete</button>
+                            <button onClick={() => deleteUser(user.id)}>🗑 Delete</button>
                             <button onClick={() =>
                                 changeRole(user.id, user.role === "USER" ? "ADMIN" : "USER")
                             }>
-                                Toggle Role
+                                🔁 Toggle Role
                             </button>
                         </td>
                     </tr>

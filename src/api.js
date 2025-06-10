@@ -81,13 +81,14 @@ export const fetchServiceHistory = async () => {
 // User Functions
 // in api.js
 export const fetchUserProfile = async () => {
-    const response = await axiosInstance.get('/user/profile');
+    const response = await axiosInstance.get('/users/profile');
     return response.data;
 };
 
 
-export const fetchUserNotifications = async (userId) => {
-    const response = await axiosInstance.get(`/user/${userId}/notifications`);
+export const fetchUserNotifications = async () => {
+    const response = await axiosInstance.get('/notifications/me')
+
     return response.data;
 };
 
@@ -102,10 +103,6 @@ export const fetchAnnouncements = async () => {
     return response.data;
 };
 
-export const fetchServices = async () => {
-    const response = await axiosInstance.get('/services');
-    return Array.isArray(response.data) ? response.data : [];
-};
 
 
 

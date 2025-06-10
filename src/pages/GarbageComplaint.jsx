@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { submitComplaint, fetchComplaintHistory } from "../api";
 import Form from "../pages/Forms";
-import "./GarbageComplaint.css";
+import "../components/styles/GarbageComplaint.css";
 
 const GarbageComplaint = () => {
     const { t } = useTranslation();

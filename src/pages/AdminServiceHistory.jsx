@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchServiceHistory, updateRequestStatus } from "../api";
-import "./AdminServiceHistory.css"; // Optional, for styling
+import "../components/styles/AdminServiceHistory.css"; // Optional, for styling
 
 const AdminServiceHistory = () => {
     const [serviceHistory, setServiceHistory] = useState([]);

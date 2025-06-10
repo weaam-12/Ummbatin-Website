@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchServiceHistory } from "../api";
-import "./UserServiceRequests.css";
+import "../components/styles/UserServiceRequests.css";
 
 const UserServiceRequests = () => {
     const [serviceHistory, setServiceHistory] = useState([]);

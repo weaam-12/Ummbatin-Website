@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { submitComplaint, getComplaints } from '../api';
-import './Complaints.css';
+import '../components/styles/Complaints.css';
 
 const Complaints = () => {
     const { user } = useAuth();

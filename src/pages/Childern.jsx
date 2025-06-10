@@ -1,4 +1,4 @@
-import './Children.css'
+import '../components/styles/Children.css'
 
 import React, { useState, useEffect } from 'react';
 const Children = () => {

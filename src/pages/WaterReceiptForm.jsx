@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./PaymentForm.css";
+import "../components/styles/PaymentForm.css";
 
 const PaymentForm = () => {
     const [formData, setFormData] = useState({

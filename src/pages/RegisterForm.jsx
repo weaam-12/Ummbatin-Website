@@ -1,62 +1,88 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-function RegisterForm() {
-    const [form, setForm] = useState({ email: "", password: "" });
+const Register = () => {
+    const [form, setForm] = useState({ name: "", email: "", password: "", role: "" });
     const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false); // For loading state
+    const [message, setMessage] = useState("");
+    const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleRegister = async (e) => {
         e.preventDefault();
-        setError("");  // Clear any previous error
-        setLoading(true); // Start loading state
-
         try {
-            const response = await axios.post("http://localhost:8080/api/users/register", form);
-            alert("Registered successfully!");
-            setForm({ email: "", password: "" }); // Clear form after successful registration
-        } catch (error) {
-            setError("Registration failed: " + (error.response?.data || error.message));
-        } finally {
-            setLoading(false); // End loading state
+            const token = localStorage.getItem("token");
+            await axios.post("http://localhost:8080/api/auth/register", form, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setMessage("המשתמש נרשם בהצלחה!");
+            setForm({ name: "", email: "", password: "", role: "" });
+        } catch (err) {
+            setError("שגיאה בהרשמה. אנא בדוק את הפרטים.");
         }
     };
 
     return (
-        <div className="max-w-md mx-auto p-6 bg-white rounded-md shadow-md">
-            <h2 className="text-2xl font-bold text-center mb-4">Register</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
+        <div className="flex items-center justify-center min-h-screen bg-gray-100 rtl">
+            <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
+                <h2 className="text-2xl font-bold mb-6 text-center">רישום משתמש חדש</h2>
+                {message && <p className="text-green-600 text-center mb-4">{message}</p>}
+                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+                <form onSubmit={handleRegister} className="space-y-4">
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="שם"
+                        value={form.name}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded"
+                        required
+                    />
                     <input
                         type="email"
+                        name="email"
+                        placeholder="דוא״ל"
                         value={form.email}
-                        onChange={e => setForm({ ...form, email: e.target.value })}
-                        placeholder="Email"
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md"
                     />
-                </div>
-                <div className="mb-4">
                     <input
                         type="password"
+                        name="password"
+                        placeholder="סיסמה"
                         value={form.password}
-                        onChange={e => setForm({ ...form, password: e.target.value })}
-                        placeholder="Password"
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md"
                     />
-                </div>
-                {error && <p className="text-red-600 text-center mb-4">{error}</p>}
-                <button
-                    type="submit"
-                    className={`w-full py-2 rounded-md ${loading ? "bg-gray-400" : "bg-blue-500"} text-white`}
-                    disabled={loading} // Disable button while loading
-                >
-                    {loading ? "Registering..." : "Register"}
-                </button>
-            </form>
+                    <select
+                        name="role"
+                        value={form.role}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded"
+                        required
+                    >
+                        <option value="">בחר תפקיד</option>
+                        <option value="ADMIN">מנהל</option>
+                        <option value="RESIDENT">תושב</option>
+                    </select>
+                    <button
+                        type="submit"
+                        className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+                    >
+                        רישום
+                    </button>
+                </form>
+            </div>
         </div>
     );
-}
+};
 
-export default RegisterForm;
+export default Register;

@@ -1,93 +1,88 @@
-// src/pages/Login.jsx
-import React, { useState } from 'react';
-import { useAuth } from "../AuthContext";  // Use custom hook
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import './Login.css';
+import { useAuth } from "../AuthContext";
+import '../components/styles/Login.css';
 
 const Login = () => {
-    const { login, user, loading } = useAuth();  // Get login function and user state from context
+    const [form, setForm] = useState({ email: "", password: "" });
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const [loginRequest, setLoginRequest] = useState({
-        email: '',
-        password: ''
-    });
-    const [error, setError] = useState('');
+    const { login } = useAuth();
 
-    const handleSubmit = async (e) => {
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleLogin = async (e) => {
         e.preventDefault();
-        setError('');
-        try {
-            const userData = await login(loginRequest);  // Use return value from login
+        setLoading(true);
+        setError("");
+        setSuccess("");
 
-            if (userData && userData.role === "ADMIN") {
-                navigate("/admin");
-            } else {
-                navigate("/dashboard");
-            }
+        try {
+            await login(form);
+            setSuccess("Login successful! Redirecting...");
+            setTimeout(() => navigate("/profile"), 1500);
         } catch (err) {
-            setError(err.message || 'Login failed. Please try again.');
+            setError(err.response?.data?.message || "Login failed. Please try again.");
+            console.error("Login error:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
-
     return (
-        <div className="login-container" dir="rtl">
-            <form className="login-form" onSubmit={handleSubmit}>
-                <div className="login-header">
-                    <h2>ברוך שובך</h2>
-                    <p>אנא הזן את פרטי הכניסה שלך</p>
-                </div>
-
-                <div className="input-container">
-                    <label htmlFor="email">אימייל</label>
-                    <input
-                        id="email"
-                        type="email"
-                        value={loginRequest.email}
-                        onChange={(e) =>
-                            setLoginRequest({ ...loginRequest, email: e.target.value })
-                        }
-                        required
-                        placeholder="הזן את כתובת האימייל שלך"
-                    />
-                </div>
-
-                <div className="input-container">
-                    <label htmlFor="password">סיסמה</label>
-                    <input
-                        id="password"
-                        type="password"
-                        value={loginRequest.password}
-                        onChange={(e) =>
-                            setLoginRequest({ ...loginRequest, password: e.target.value })
-                        }
-                        required
-                        placeholder="הזן את הסיסמה שלך"
-                    />
-                </div>
-
-                <div className="submit-container">
-                    <button
-                        type="submit"
-                        className="login-button"
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <span className="spinner"></span> מתחבר...
-                            </>
-                        ) : (
-                            'כניסה'
-                        )}
-                    </button>
-                </div>
+        <div className="login-container">
+            <div className="login-card">
+                <h2 className="login-title">Login to System</h2>
 
                 {error && <div className="error-message">{error}</div>}
+                {success && <div className="success-message">{success}</div>}
 
-                <div className="login-footer">
-                    אין לך חשבון? <a href="/register">הירשם עכשיו</a><br />
-                </div>
-            </form>
+                <form onSubmit={handleLogin} className="login-form">
+                    <div className="form-group">
+                        <label htmlFor="email" className="form-label">
+                            Email
+                        </label>
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={form.email}
+                            onChange={handleChange}
+                            placeholder="Enter email"
+                            required
+                            className="form-input"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="password" className="form-label">
+                            Password
+                        </label>
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            placeholder="Enter password"
+                            required
+                            className="form-input"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`login-button ${loading ? "loading" : ""}`}
+                    >
+                        {loading ? "Logging in..." : "Login"}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };

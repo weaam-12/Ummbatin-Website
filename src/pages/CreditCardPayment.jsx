@@ -10,7 +10,7 @@ const CreditCardPayment = () => {
         cvv: "",
         expireMonth: "",
         expireYear: "",
-        amount: "20.00",
+        amount: "20.00",//example
         currency: "USD",
     });
     const [loading, setLoading] = useState(false);
