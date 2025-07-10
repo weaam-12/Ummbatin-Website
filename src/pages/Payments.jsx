@@ -20,7 +20,7 @@ import {
 import './Payment.css';
 
 // دالة محاكاة لجلب بيانات الدفعات من API
-const getUserPayments = async (userId) => {
+const getUserPayments = async () => {
     // هذه مجرد محاكاة - في التطبيق الحقيقي ستكون استدعاء لAPI حقيقي
     return {
         water: {
@@ -171,7 +171,7 @@ const Payments = () => {
                                         {statusLabels[payments.water.status]}
                                     </Badge>
                                 </div>
-                                <p>المبلغ: <strong>{payments.water.amount} ر.س</strong></p>
+                                <p>المبلغ: <strong>{payments.water.amount} شيقل</strong></p>
                                 <p>تاريخ الاستحقاق: <strong>{formatDate(payments.water.dueDate)}</strong></p>
 
                                 <Button
@@ -200,7 +200,7 @@ const Payments = () => {
                                             <ListGroup.Item key={index}>
                                                 <div className="d-flex justify-content-between">
                                                     <span>{formatDate(payment.date)}</span>
-                                                    <span>{payment.amount} ر.س</span>
+                                                    <span>{payment.amount} شيقل </span>
                                                     <Badge bg="success">تم الدفع</Badge>
                                                 </div>
                                             </ListGroup.Item>
@@ -220,7 +220,7 @@ const Payments = () => {
                                         {statusLabels[payments.arnona.status]}
                                     </Badge>
                                 </div>
-                                <p>المبلغ: <strong>{payments.arnona.amount} ر.س</strong></p>
+                                <p>المبلغ: <strong>{payments.arnona.amount} شيقل</strong></p>
                                 <p>تاريخ الاستحقاق: <strong>{formatDate(payments.arnona.dueDate)}</strong></p>
 
                                 <Button
@@ -249,7 +249,7 @@ const Payments = () => {
                                             <ListGroup.Item key={index}>
                                                 <div className="d-flex justify-content-between">
                                                     <span>{formatDate(payment.date)}</span>
-                                                    <span>{payment.amount} ر.س</span>
+                                                    <span>{payment.amount}شيقل</span>
                                                     <Badge bg="success">تم الدفع</Badge>
                                                 </div>
                                             </ListGroup.Item>
@@ -269,7 +269,7 @@ const Payments = () => {
                                         {statusLabels[payments.kindergarten.status]}
                                     </Badge>
                                 </div>
-                                <p>المبلغ: <strong>{payments.kindergarten.amount} ر.س</strong></p>
+                                <p>المبلغ: <strong>{payments.kindergarten.amount}  شيقل </strong></p>
                                 <p>تاريخ الاستحقاق: <strong>{formatDate(payments.kindergarten.dueDate)}</strong></p>
 
                                 <Button
@@ -298,7 +298,7 @@ const Payments = () => {
                                             <ListGroup.Item key={index}>
                                                 <div className="d-flex justify-content-between">
                                                     <span>{formatDate(payment.date)}</span>
-                                                    <span>{payment.amount} ر.س</span>
+                                                    <span>{payment.amount} شيقل </span>
                                                     <Badge bg="success">تم الدفع</Badge>
                                                 </div>
                                             </ListGroup.Item>
