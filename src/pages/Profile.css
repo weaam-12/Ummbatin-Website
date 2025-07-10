@@ -1,0 +1,73 @@
+/* ---------- أساس ---------- */
+.profile-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 24px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', sans-serif;
+    direction: rtl;
+    color: #1e293b;
+}
+
+.profile-container h1 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 24px;
+    color: #0f172a;
+}
+
+/* ---------- הודעת שגיאה ---------- */
+.error-message {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+/* ---------- פרטי פרופיל ---------- */
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.profile-field {
+    background-color: #f1f5f9;
+    padding: 14px 18px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #e2e8f0;
+}
+
+.field-label {
+    font-weight: 600;
+    color: #334155;
+    font-size: 1rem;
+}
+
+.field-value {
+    color: #0f172a;
+    font-size: 1rem;
+}
+
+/* ---------- رد فعل على حجم شاشة קטן ---------- */
+@media (max-width: 480px) {
+    .profile-field {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .field-label,
+    .field-value {
+        font-size: 0.95rem;
+    }
+}

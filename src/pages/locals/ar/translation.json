@@ -11,10 +11,12 @@
   "paymentButton": "ادفع الآن",
   "creditCardPaymentTitle": "دفع ببطاقة الائتمان",
   "loginButton": "تسجيل الدخول",
-
+  "adminDashboard": "لوحة التحكم",
+  "managePayments": "إدارة الدفعات",
+  "manageComplaints": "إدارة الشكاوى",
   "home": "الرئيسية",
   "login": "تسجيل الدخول",
-
+  "garbageService" : "شكاوى للنفايات",
   "ourServices": "خدماتنا",
   "complaints": "شكاوى",
   "payments": "مدفوعات",
@@ -29,5 +31,76 @@
   "noRecords": "لا توجد سجلات خدمة متاحة",
   "user": "المستخدم",
   "date": "التاريخ",
-  "status": "الحالة"
+  "status": "الحالة",
+  "controlPanel": "لوحة التحكم",
+  "generalManagement": "الإدارة العامة",
+  "emergencyManagement": "إدارة الطوارئ",
+  "educationManagement": "إدارة التعليم",
+  "paymentsManagement": "إدارة الدفعات",
+  "complaintsManagement": "إدارة الشكاوى",
+  "adminPanel": "لوحة الأدمن",
+  "profile": "الملف الشخصي",
+  "logout": "تسجيل الخروج",
+
+  "userManagement": "إدارة المستخدمين",
+  "register": "تسجيل مستخدم",
+  "refresh": "تحديث",
+  "searchPlaceholder": "بحث بالبريد أو الاسم...",
+  "allRoles": "كل الأدوار",
+  "admin": "مدير",
+  "resident": "مقيم",
+  "email": "البريد الإلكتروني",
+  "fullName": "الاسم الكامل",
+  "role": "الدور",
+  "registered": "تاريخ التسجيل",
+  "actions": "الإجراءات",
+  "noUsers": "لا يوجد مستخدمين",
+  "viewDetails": "عرض التفاصيل",
+  "changeRoleToAdmin": "تحويل إلى مدير",
+  "changeRoleToUser": "تحويل إلى مستخدم",
+  "delete": "حذف",
+  "close": "إغلاق",
+  "userDetails": "بيانات المستخدم",
+  "noData": "لا توجد بيانات متاحة",
+
+  "garbageComplaint": {
+    "title": "بلاغ عن مشكلة نفايات",
+    "subtitle": "ساعدنا في تحسين الخدمة بالإبلاغ عن أي مشكلة",
+    "description": "تفاصيل المشكلة",
+    "descriptionPlaceholder": "صف المشكلة بدقة...",
+    "type": "نوع المشكلة",
+    "types": {
+      "uncollected": "نفايات لم يتم جمعها",
+      "overflowing": "حاوية ممتلئة",
+      "damagedBin": "حاوية تالفة",
+      "missingBin": "حاوية مفقودة",
+      "illegalDumping": "رمي عشوائي للنفايات"
+    },
+    "location": "موقع المشكلة",
+    "locationPlaceholder": "أدخل الموقع أو اختر من الخريطة",
+    "image": "إرفاق صورة",
+    "chooseImage": "اختر صورة",
+    "removeImage": "إزالة الصورة",
+    "submit": "إرسال البلاغ",
+    "submitting": "جاري الإرسال...",
+    "historyTitle": "البلاغات السابقة",
+    "noComplaints": "لا توجد بلاغات سابقة",
+    "response": "رد البلدية",
+    "complaintImage": "صورة البلاغ",
+    "imagePreview": "معاينة الصورة",
+    "statuses": {
+      "SUBMITTED": "قيد المراجعة",
+      "IN_PROGRESS": "قيد المعالجة",
+      "RESOLVED": "تم الحل",
+      "REJECTED": "مرفوض"
+    },
+    "success": {
+      "submit": "تم إرسال البلاغ بنجاح"
+    },
+    "errors": {
+      "submitFailed": "فشل في إرسال البلاغ",
+      "loadFailed": "فشل في تحميل البلاغات"
+    }
+  }
+
 }

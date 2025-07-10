@@ -2,20 +2,48 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { submitComplaint, getComplaints } from '../api';
-import '../components/styles/Complaints.css';
+import {
+    Card,
+    Button,
+    Modal,
+    Form,
+    Alert,
+    Badge,
+    Table,
+    Spinner,
+    Container
+} from 'react-bootstrap';
+import { FiPlus, FiImage, FiX, FiCheck } from 'react-icons/fi';
+import './Complaints.css';
 
 const Complaints = () => {
-    const { user } = useAuth();
+    const { user, getUserId } = useAuth();
     const navigate = useNavigate();
     const [complaints, setComplaints] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [notification, setNotification] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         type: '',
         description: '',
         location: '',
         image: null
     });
+
+    const statusVariants = {
+        SUBMITTED: 'primary',
+        IN_PROGRESS: 'warning',
+        RESOLVED: 'success',
+        REJECTED: 'danger'
+    };
+
+    const statusLabels = {
+        SUBMITTED: 'Received',
+        IN_PROGRESS: 'In Progress',
+        RESOLVED: 'Resolved',
+        REJECTED: 'Rejected'
+    };
 
     useEffect(() => {
         if (!user) {
@@ -27,175 +55,254 @@ const Complaints = () => {
 
     const loadComplaints = async () => {
         try {
-            const data = await getComplaints(user.id);
-            setComplaints(data);
+            setLoading(true);
+            const userId = getUserId();
+            if (!userId) {
+                throw new Error('User ID not available');
+            }
+            const data = await getComplaints(userId);
+            setComplaints(data || []);
         } catch (error) {
-            console.error('Failed to load complaints:', error);
+            console.error('Error loading complaints:', error);
+            setNotification({
+                type: 'danger',
+                message: 'Failed to load complaints: ' + (error.message || 'Unexpected error')
+            });
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
+        setFormData(prev => ({
+            ...prev,
             [name]: value
-        });
+        }));
     };
 
     const handleFileChange = (e) => {
-        setFormData({
-            ...formData,
+        setFormData(prev => ({
+            ...prev,
             image: e.target.files[0]
-        });
+        }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
         try {
-            const complaintData = new FormData();
-            complaintData.append('type', formData.type);
-            complaintData.append('description', formData.description);
-            complaintData.append('location', formData.location);
-            if (formData.image) {
-                complaintData.append('image', formData.image);
+            const userId = getUserId();
+            if (!userId) {
+                throw new Error('User ID not available');
             }
-            complaintData.append('userId', user.id);
 
-            const response = await submitComplaint(complaintData);
+            const response = await submitComplaint({
+                userId: userId,
+                type: formData.type,
+                description: formData.description,
+                location: formData.location,
+                image: formData.image
+            });
 
-            setComplaints([...complaints, response]);
+            setComplaints(prev => [response, ...prev]);
             setNotification({
                 type: 'success',
-                message: `הדיווח התקבל בהצלחה! מספר פניה: ${response.ticketNumber}`
+                message: `Complaint submitted successfully! Ticket #: ${response.ticketNumber}`
             });
             setShowForm(false);
             setFormData({ type: '', description: '', location: '', image: null });
-
-            setTimeout(() => setNotification(null), 5000);
         } catch (error) {
+            console.error('Error submitting complaint:', error);
             setNotification({
-                type: 'error',
-                message: 'שגיאה בשליחת התלונה: ' + (error.message || 'נסה שוב מאוחר יותר')
+                type: 'danger',
+                message: 'Failed to submit complaint: ' +
+                    (error.response?.data?.message || error.message || 'Please try again later')
             });
-            console.error('Submission error:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '--';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US');
+    };
+
     return (
-        <div className="complaints-container" dir="rtl">
-            <h1>מערכת תלונות</h1>
+        <Container className="user-complaints-container py-4">
+            <Card className="shadow-sm border-0">
+                <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 className="mb-0">My Complaints</h4>
+                    <Button
+                        variant="light"
+                        onClick={() => setShowForm(true)}
+                        disabled={isSubmitting}
+                    >
+                        <FiPlus className="me-1" /> New Complaint
+                    </Button>
+                </Card.Header>
 
-            {notification && (
-                <div className={`notification ${notification.type}`}>
-                    {notification.message}
-                </div>
-            )}
+                <Card.Body>
+                    {notification && (
+                        <Alert variant={notification.type} onClose={() => setNotification(null)} dismissible>
+                            {notification.message}
+                        </Alert>
+                    )}
 
-            <button
-                className="btn-primary"
-                onClick={() => setShowForm(true)}
-            >
-                דווח על בעיה חדשה
-            </button>
+                    {loading ? (
+                        <div className="text-center py-5">
+                            <Spinner animation="border" variant="primary" />
+                            <p className="mt-3">Loading your complaints...</p>
+                        </div>
+                    ) : complaints.length > 0 ? (
+                        <Table striped bordered hover responsive>
+                            <thead className="table-light">
+                            <tr>
+                                <th>Ticket #</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Response</th>
+                                <th>Image</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {complaints.map(complaint => (
+                                <tr key={complaint.complaintId}>
+                                    <td>{complaint.ticketNumber || '--'}</td>
+                                    <td>{complaint.type || '--'}</td>
+                                    <td>{complaint.description || '--'}</td>
+                                    <td>{complaint.location || '--'}</td>
+                                    <td>
+                                        <Badge bg={statusVariants[complaint.status]}>
+                                            {statusLabels[complaint.status] || complaint.status}
+                                        </Badge>
+                                    </td>
+                                    <td>{formatDate(complaint.date)}</td>
+                                    <td>{complaint.response || 'No response yet'}</td>
+                                    <td>
+                                        {complaint.imageUrl && (
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                onClick={() => window.open(complaint.imageUrl, '_blank')}
+                                            >
+                                                <FiImage /> View
+                                            </Button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </Table>
+                    ) : (
+                        <div className="text-center py-5">
+                            <p className="text-muted">No complaints found</p>
+                            <Button variant="primary" onClick={() => setShowForm(true)}>
+                                <FiPlus className="me-1" /> Submit Your First Complaint
+                            </Button>
+                        </div>
+                    )}
+                </Card.Body>
+            </Card>
 
-            {showForm && (
-                <form onSubmit={handleSubmit} className="complaint-form">
-                    <div className="form-group">
-                        <label htmlFor="type">סוג הבעיה:</label>
-                        <select
-                            id="type"
-                            name="type"
-                            value={formData.type}
-                            onChange={handleInputChange}
-                            required
-                        >
-                            <option value="">בחר סוג בעיה</option>
-                            <option value="תשתיות">תשתיות</option>
-                            <option value="ניקיון">ניקיון</option>
-                            <option value="בטיחות">בטיחות</option>
-                        </select>
-                    </div>
+            {/* Complaint Form Modal */}
+            <Modal show={showForm} onHide={() => setShowForm(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>New Complaint</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Complaint Type</Form.Label>
+                            <Form.Select
+                                name="type"
+                                value={formData.type}
+                                onChange={handleInputChange}
+                                required
+                                disabled={isSubmitting}
+                            >
+                                <option value="">Select complaint type</option>
+                                <option value="Infrastructure">Infrastructure</option>
+                                <option value="Cleanliness">Cleanliness</option>
+                                <option value="Safety">Safety</option>
+                                <option value="Other">Other</option>
+                            </Form.Select>
+                        </Form.Group>
 
-                    <div className="form-group">
-                        <label htmlFor="description">תיאור הבעיה:</label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleInputChange}
-                            required
-                            rows="4"
-                        />
-                    </div>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={5}
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                required
+                                disabled={isSubmitting}
+                                placeholder="Please describe the problem in detail"
+                            />
+                        </Form.Group>
 
-                    <div className="form-group">
-                        <label htmlFor="location">מיקום:</label>
-                        <input
-                            type="text"
-                            id="location"
-                            name="location"
-                            value={formData.location}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Location</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="location"
+                                value={formData.location}
+                                onChange={handleInputChange}
+                                required
+                                disabled={isSubmitting}
+                                placeholder="Example: Building A, 2nd floor near elevator"
+                            />
+                        </Form.Group>
 
-                    <div className="form-group">
-                        <label htmlFor="image">העלאת תמונה (אופציונלי):</label>
-                        <input
-                            type="file"
-                            id="image"
-                            name="image"
-                            onChange={handleFileChange}
-                            accept="image/*"
-                        />
-                    </div>
-
-                    <div className="form-actions">
-                        <button
-                            type="button"
-                            className="btn-secondary"
-                            onClick={() => {
-                                setShowForm(false);
-                                setFormData({ type: '', description: '', location: '', image: null });
-                            }}
-                        >
-                            ביטול
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn-primary"
-                            disabled={!formData.type || !formData.description || !formData.location}
-                        >
-                            שלח דיווח
-                        </button>
-                    </div>
-                </form>
-            )}
-
-            <div className="complaints-list">
-                <h2>התלונות שלי</h2>
-                {complaints.length > 0 ? (
-                    <ul>
-                        {complaints.map(complaint => (
-                            <li key={complaint.id}>
-                                <h3>{complaint.type}</h3>
-                                <p>{complaint.description}</p>
-                                <p>מיקום: {complaint.location}</p>
-                                <p>מספר פניה: {complaint.ticketNumber}</p>
-                                <p>סטטוס: {complaint.status}</p>
-                                {complaint.imageUrl && (
-                                    <img src={complaint.imageUrl} alt="תלונה" className="complaint-image" />
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>לא נמצאו תלונות</p>
-                )}
-            </div>
-        </div>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Upload Image (Optional)</Form.Label>
+                            <Form.Control
+                                type="file"
+                                name="image"
+                                onChange={handleFileChange}
+                                accept="image/*"
+                                disabled={isSubmitting}
+                            />
+                            {formData.image && (
+                                <div className="mt-2 small text-muted">
+                                    Selected: {formData.image.name}
+                                </div>
+                            )}
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowForm(false)} disabled={isSubmitting}>
+                        <FiX /> Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        type="submit"
+                        onClick={handleSubmit}
+                        disabled={!formData.type || !formData.description || !formData.location || isSubmitting}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Spinner animation="border" size="sm" className="me-2" />
+                                Submitting...
+                            </>
+                        ) : (
+                            <>
+                                <FiCheck /> Submit Complaint
+                            </>
+                        )}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </Container>
     );
 };
 

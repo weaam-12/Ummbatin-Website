@@ -1,17 +1,32 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    const { user, loading } = useAuth();
+    const { user, loading, isAuthenticated } = useAuth();
 
-    if (loading) return <div>Loading...</div>; // You can use a Spinner component
+    if (loading) {
+        return <LoadingSpinner />;
+    }
 
-    if (!user) return <Navigate to="/login" />;
+    if (!isAuthenticated) {
+        localStorage.setItem('redirectPath', window.location.pathname);
+        return <Navigate to="/login" replace />;
+    }
 
-    // If roles are provided, check user role
-    if (allowedRoles && !allowedRoles.includes(user.role)) {
-        return <Navigate to="/" />; // or a 403 page
+    if (allowedRoles) {
+        const userRole = user?.role?.toUpperCase();
+        const isAllowed = allowedRoles.some(role => role.toUpperCase() === userRole);
+
+        if (!isAllowed) {
+            // إذا كان أدمن يتم توجيهه للوحة التحكم
+            if (userRole === 'ADMIN') {
+                return <Navigate to="/admin" replace />; // تغيير المسار هنا
+            }
+            // إذا كان مستخدم عادي يتم توجيهه للصفحة الرئيسية
+            return <Navigate to="/" replace />;
+        }
     }
 
     return children;

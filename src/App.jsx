@@ -13,11 +13,13 @@ import Complaints from './pages/Complaints';
 import EmergencyPage from "./pages/EmergencyPage";
 import GarbageComplaint from "./pages/GarbageComplaint";
 import Payments from "./pages/Payments";
+import AdminPayments from "./pages/AdminPayments";
+
 import ErrorBoundary from "./pages/ErrorBoundary";
 import Childern from "./pages/Childern";
 import Forms from "./pages/Forms";
 import Profile from "./pages/Profile"; // Added
-
+import AdminComplaints from "./pages/AdminComplaints"
 const App = () => {
     return (
         <AuthProvider>
@@ -29,6 +31,12 @@ const App = () => {
                             <Routes>
                                 {/* Public Routes */}
                                 <Route path="/" element={<Home />} />
+                                <Route path="/Ummbatin-Website" element={<Home />} />
+                                <Route path="/admin/complaints" element={
+                                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                                        <AdminComplaints />
+                                    </ProtectedRoute>
+                                } />
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/register" element={<RegistrationPage />} />
 
@@ -37,10 +45,14 @@ const App = () => {
                                         <Profile />
                                     </ProtectedRoute>
                                 } />
-
+                                <Route path="/payments" element={
+                                    <ProtectedRoute allowedRoles={['RESIDENT', 'USER']}>
+                                        <Payments />
+                                    </ProtectedRoute>
+                                } />
 
                                 <Route path="/complaints" element={
-                                    <ProtectedRoute>
+                                    <ProtectedRoute allowedRoles={['RESIDENT', 'USER']}> {/* أو أي أدوار أخرى للمستخدمين العاديين */}
                                         <Complaints />
                                     </ProtectedRoute>
                                 } />
@@ -57,11 +69,12 @@ const App = () => {
                                     </ProtectedRoute>
                                 } />
 
-                                <Route path="/payments" element={
-                                    <ProtectedRoute>
-                                        <Payments />
+                                <Route path="/admin/payments" element={
+                                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                                        <AdminPayments />
                                     </ProtectedRoute>
                                 } />
+
 
                                 <Route path="/children" element={
                                     <ProtectedRoute>
@@ -74,7 +87,11 @@ const App = () => {
                                         <Forms />
                                     </ProtectedRoute>
                                 } />
-
+                                <Route path="/garbage-complaints" element={
+                                    <ProtectedRoute>
+                                        <GarbageComplaint />
+                                    </ProtectedRoute>
+                                } />
                                 <Route path="/admin" element={
                                     <ProtectedRoute allowedRoles={["ADMIN"]}>
                                         <AdminDashboard />

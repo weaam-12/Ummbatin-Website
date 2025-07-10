@@ -1,7 +1,7 @@
 import React from 'react';
-import { FaAmbulance, FaFireExtinguisher, FaShieldAlt, FaPhoneAlt, FaMapMarkedAlt } from 'react-icons/fa';
+import { FaAmbulance, FaFireExtinguisher, FaShieldAlt } from 'react-icons/fa';
 import { MdLocalPolice } from 'react-icons/md';
-import '../components/styles/EmergencyPage.css';
+import './EmergencyPage.css'; // ربط ملف CSS
 
 const shelters = [
     { id: 1, location: 'רחוב הראשי 1', description: 'מקלט ציבורי ראשי' },
@@ -11,65 +11,56 @@ const shelters = [
 ];
 
 const emergencyLinks = [
-    {
-        icon: <MdLocalPolice size={24} />, label: 'משטרה', url: 'https://www.police.gov.il'
-    },
-    {
-        icon: <FaFireExtinguisher size={24} />, label: 'כבאות והצלה', url: 'https://www.gov.il/he/departments/firefighting_and_rescue_israel/govil-landing-page'
-    },
-    {
-        icon: <FaAmbulance size={24} />, label: 'מד"א', url: 'https://www.mdais.org'
-    },
-    {
-        icon: <FaShieldAlt size={24} />, label: 'פיקוד העורף', url: 'https://www.oref.org.il'
-    },
+    { icon: <MdLocalPolice />, label: 'משטרה', url: 'https://www.police.gov.il' },
+    { icon: <FaFireExtinguisher />, label: 'כבאות והצלה', url: 'https://www.gov.il/he/departments/firefighting_and_rescue_israel/govil-landing-page' },
+    { icon: <FaAmbulance />, label: 'מד"א', url: 'https://www.mdais.org' },
+    { icon: <FaShieldAlt />, label: 'פיקוד העורף', url: 'https://www.oref.org.il' },
 ];
 
 export default function EmergencyPage() {
     return (
-        <div className="flex flex-col md:flex-row gap-6 p-6 bg-gray-50 min-h-screen">
-            {/* Side Menu */}
-            <aside className="md:w-1/4 space-y-6 bg-white p-6 rounded-xl shadow-lg">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">קישורים חשובים</h2>
-                {emergencyLinks.map((link, idx) => (
-                    <a
-                        key={idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 text-blue-600 hover:text-blue-800 transition duration-300 transform hover:scale-105"
-                    >
-                        {link.icon}
-                        <span className="font-medium">{link.label}</span>
-                    </a>
-                ))}
+        <div className="page-container">
+            {/* Sidebar */}
+            <aside className="sidebar">
+                <h2>🚨 קישורים חשובים</h2>
+                <div className="links-list">
+                    {emergencyLinks.map((link, idx) => (
+                        <a
+                            key={idx}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link-item"
+                        >
+                            <span className="icon">{link.icon}</span>
+                            <span className="label">{link.label}</span>
+                        </a>
+                    ))}
+                </div>
             </aside>
 
-            {/* Main Table */}
-            <section className="md:w-3/4 bg-white p-6 rounded-xl shadow-lg">
-                <h1 className="text-3xl font-semibold text-gray-800 mb-6">ריכוז מקלטים בכפר אום בטין</h1>
-                <table className="w-full table-auto border-collapse rounded-lg shadow-md">
-                    <thead className="bg-blue-100 text-right">
+            {/* Main Content */}
+            <main className="main-content">
+                <h1>🏠 רשימת מקלטים בכפר אום בטין</h1>
+                <table className="shelter-table">
+                    <thead>
                     <tr>
-                        <th className="p-4 text-gray-700">#</th>
-                        <th className="p-4 text-gray-700">מיקום</th>
-                        <th className="p-4 text-gray-700">תיאור</th>
+                        <th>#</th>
+                        <th>מיקום</th>
+                        <th>תיאור</th>
                     </tr>
                     </thead>
                     <tbody>
                     {shelters.map((shelter) => (
-                        <tr
-                            key={shelter.id}
-                            className="border-b hover:bg-gray-50 transition duration-200"
-                        >
-                            <td className="p-4 text-center">{shelter.id}</td>
-                            <td className="p-4">{shelter.location}</td>
-                            <td className="p-4">{shelter.description}</td>
+                        <tr key={shelter.id}>
+                            <td>{shelter.id}</td>
+                            <td>{shelter.location}</td>
+                            <td>{shelter.description}</td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
-            </section>
+            </main>
         </div>
     );
 }

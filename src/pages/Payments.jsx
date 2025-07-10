@@ -1,302 +1,316 @@
-import React, { useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import axios from "axios";
-import '../components/styles/Payment.css'; // Adjust path as needed
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../AuthContext';
+import {
+    Card,
+    Tabs,
+    Tab,
+    Button,
+    Alert,
+    Spinner,
+    Container,
+    ListGroup,
+    Badge
+} from 'react-bootstrap';
+import {
+    FiCreditCard,
+    FiCheckCircle,
+    FiClock,
+    FiDollarSign
+} from 'react-icons/fi';
+import './Payment.css';
 
-const stripePromise = loadStripe("pk_test_51R1OZgLRTUhs7L3YQf5hipWLLfM040gykDmcOpBp1cUG92qv5B0SmhKKgrT0UmLKMGtnm0ICgy1MAyiyxdRo6aXr008vtNe4C9");
-
-function CheckoutForm({ formData, setFormData, onPaymentSuccess }) {
-    const stripe = useStripe();
-    const elements = useElements();
-
-    const [processing, setProcessing] = useState(false);
-    const [error, setError] = useState("");
-
-    // Handle CardElement input changes for error display
-    const handleCardChange = (event) => {
-        if (event.error) {
-            setError(event.error.message);
-        } else {
-            setError("");
+// دالة محاكاة لجلب بيانات الدفعات من API
+const getUserPayments = async (userId) => {
+    // هذه مجرد محاكاة - في التطبيق الحقيقي ستكون استدعاء لAPI حقيقي
+    return {
+        water: {
+            status: 'PENDING',
+            amount: 150,
+            dueDate: '2023-12-15',
+            history: [
+                { date: '2023-11-15', amount: 140 },
+                { date: '2023-10-15', amount: 135 }
+            ]
+        },
+        arnona: {
+            status: 'PENDING',
+            amount: 300,
+            dueDate: '2023-12-20',
+            history: [
+                { date: '2023-11-20', amount: 300 },
+                { date: '2023-10-20', amount: 300 }
+            ]
+        },
+        kindergarten: {
+            status: 'PAID',
+            amount: 500,
+            dueDate: '2023-12-05',
+            history: [
+                { date: '2023-11-05', amount: 500 },
+                { date: '2023-10-05', amount: 500 }
+            ]
         }
     };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!stripe || !elements) return;
-
-        setProcessing(true);
-        setError("");
-
-        try {
-            // 1. Create PaymentIntent on backend with amount (converted to cents)
-            const amountCents = Math.round(parseFloat(formData.amount) * 100);
-            const { data: paymentIntent } = await axios.post("/api/payments/", {
-                amount: amountCents,
-            });
-
-            // 2. Confirm Card Payment
-            const cardElement = elements.getElement(CardElement);
-            const result = await stripe.confirmCardPayment(paymentIntent.client_secret, {
-                payment_method: {
-                    card: cardElement,
-                    billing_details: {
-                        name: formData.fullName,
-                        email: formData.email,
-
-                    },
-                },
-            });
-
-            if (result.error) {
-                setError(result.error.message);
-                setProcessing(false);
-            } else if (result.paymentIntent && result.paymentIntent.status === "succeeded") {
-                setProcessing(false);
-                onPaymentSuccess();
-            }
-        } catch (err) {
-            setError("אירעה שגיאה בתשלום. אנא נסה שוב.");
-            setProcessing(false);
-            console.error(err);
-        }
-    };
-
-    return (
-        <>
-            <div className="form-group">
-                <label>סכום (ש"ח)</label>
-                <input
-                    type="number"
-                    name="amount"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    required
-                    placeholder="הזן סכום"
-                />
-            </div>
-
-            <div className="form-group">
-                <label>שם מלא</label>
-                <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    required
-                    placeholder="הזן שם מלא"
-                />
-            </div>
-
-            <div className="form-group">
-                <label>אימייל</label>
-                <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                    placeholder="הזן כתובת אימייל"
-                />
-            </div>
-
-            <div className="form-group">
-                <label>פרטי כרטיס אשראי</label>
-                <div className="card-element-wrapper">
-                    <CardElement options={{ hidePostalCode: true }} onChange={handleCardChange} />
-                </div>
-            </div>
-
-            {error && <div className="payment-error">{error}</div>}
-
-            <button type="submit" disabled={!stripe || processing} className="submit-btn">
-                {processing ? "מעבד..." : `ביצוע תשלום`}
-            </button>
-        </>
-    );
-}
+};
 
 const Payments = () => {
-    const [paymentType, setPaymentType] = useState("receipt");
-    const [formData, setFormData] = useState({
-        amount: "",
-        fullName: "",
-        idNumber: "",
-        serviceType: "water",
-        serviceDetails: "",
-        email: "",
-    });
+    const { user } = useAuth();
+    const [activeTab, setActiveTab] = useState('water');
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
+    const [notification, setNotification] = useState(null);
+    const [payments, setPayments] = useState({
+        water: { status: 'PENDING', amount: 0, dueDate: null, history: [] },
+        arnona: { status: 'PENDING', amount: 0, dueDate: null, history: [] },
+        kindergarten: { status: 'PENDING', amount: 0, dueDate: null, history: [] }
+    });
 
-    const resetForm = () => {
-        setFormData({
-            amount: "",
-            fullName: "",
-            idNumber: "",
-            serviceType: "water",
-            serviceDetails: "",
-            email: "",
-        });
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    const handlePaymentTypeChange = (e) => {
-        setPaymentType(e.target.value);
-        setMessage("");
-        setError("");
-        resetForm();
-    };
-
-    // For receipt payment submission
-    const handleReceiptSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setMessage("");
-        setError("");
-
-        try {
-            const response = await axios.post("http://localhost:8080/api/receipt", formData);
-            if (response.data.status === "success") {
-                setMessage("קבלה נוצרה בהצלחה!");
-                resetForm();
-            } else {
-                setError("הבקשה נכשלה");
+    useEffect(() => {
+        const loadPayments = async () => {
+            try {
+                const data = await getUserPayments(user?.userId);
+                setPayments(data);
+            } catch (error) {
+                console.error('Failed to load payments:', error);
+                setNotification({
+                    type: 'danger',
+                    message: 'فشل في تحميل بيانات الدفعات'
+                });
             }
-        } catch (err) {
-            setError("אירעה שגיאה. נסה שוב מאוחר יותר");
-            console.error(err);
+        };
+
+        if (user) {
+            loadPayments();
+        }
+    }, [user]);
+
+    const statusVariants = {
+        PENDING: 'warning',
+        PAID: 'success',
+        OVERDUE: 'danger'
+    };
+
+    const statusLabels = {
+        PENDING: 'قيد الانتظار',
+        PAID: 'تم الدفع',
+        OVERDUE: 'متأخر'
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '--';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ar-SA');
+    };
+
+    const handlePayment = async (paymentType) => {
+        setLoading(true);
+        try {
+            // محاكاة عملية الدفع
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // تحديث حالة الدفع بعد الدفع الناجح
+            setPayments(prev => ({
+                ...prev,
+                [paymentType]: {
+                    ...prev[paymentType],
+                    status: 'PAID',
+                    history: [
+                        {
+                            date: new Date().toISOString(),
+                            amount: prev[paymentType].amount
+                        },
+                        ...prev[paymentType].history
+                    ]
+                }
+            }));
+
+            setNotification({
+                type: 'success',
+                message: `تم دفع ${paymentType === 'water' ? 'فاتورة المياه' :
+                    paymentType === 'arnona' ? 'الأرنونا' : 'الحضانة'} بنجاح`
+            });
+        } catch (error) {
+            console.error('Payment error:', error);
+            setNotification({
+                type: 'danger',
+                message: 'فشل في عملية الدفع، يرجى المحاولة لاحقاً'
+            });
         } finally {
             setLoading(false);
         }
     };
 
-    const onCardPaymentSuccess = () => {
-        setMessage("התשלום בוצע בהצלחה!");
-        resetForm();
-    };
-
     return (
-        <div className="payment-container" dir="rtl">
-            <div className="payment-card">
-                <div className="payment-header">
-                    <h2>תשלומים</h2>
-                    <p>אנא הזן את פרטי התשלום</p>
-                </div>
+        <Container className="user-payments-container py-4">
+            <Card className="shadow-sm">
+                <Card.Header className="bg-primary text-white">
+                    <h4 className="mb-0">
+                        <FiDollarSign className="me-2" />
+                        الدفعات الشهرية
+                    </h4>
+                </Card.Header>
+                <Card.Body>
+                    {notification && (
+                        <Alert variant={notification.type} onClose={() => setNotification(null)} dismissible>
+                            {notification.message}
+                        </Alert>
+                    )}
 
-                {message && <div className="payment-message success">{message}</div>}
-                {error && <div className="payment-message error">{error}</div>}
+                    <Tabs
+                        activeKey={activeTab}
+                        onSelect={(k) => setActiveTab(k)}
+                        className="mb-4"
+                    >
+                        <Tab eventKey="water" title="فاتورة المياه">
+                            <div className="payment-details mt-3">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h5>
+                                        <FiCreditCard className="me-2" />
+                                        فاتورة المياه الشهرية
+                                    </h5>
+                                    <Badge pill bg={statusVariants[payments.water.status]}>
+                                        {statusLabels[payments.water.status]}
+                                    </Badge>
+                                </div>
+                                <p>المبلغ: <strong>{payments.water.amount} ر.س</strong></p>
+                                <p>تاريخ الاستحقاق: <strong>{formatDate(payments.water.dueDate)}</strong></p>
 
-                <div className="payment-type-selector">
-                    <label>שיטת תשלום:</label>
-                    <div className="radio-group">
-                        <label className="radio-option">
-                            <input
-                                type="radio"
-                                name="paymentType"
-                                value="receipt"
-                                checked={paymentType === "receipt"}
-                                onChange={handlePaymentTypeChange}
-                            />
-                            <span>תשלום בקבלה</span>
-                        </label>
-                        <label className="radio-option">
-                            <input
-                                type="radio"
-                                name="paymentType"
-                                value="card"
-                                checked={paymentType === "card"}
-                                onChange={handlePaymentTypeChange}
-                            />
-                            <span>כרטיס אשראי</span>
-                        </label>
-                    </div>
-                </div>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => handlePayment('water')}
+                                    disabled={loading || payments.water.status === 'PAID'}
+                                    className="mt-3"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <Spinner animation="border" size="sm" className="me-2" />
+                                            جاري المعالجة...
+                                        </>
+                                    ) : (
+                                        'دفع الآن'
+                                    )}
+                                </Button>
 
-                {paymentType === "receipt" ? (
-                    <form onSubmit={handleReceiptSubmit} className="payment-form">
-                        <div className="form-group">
-                            <label>שם מלא</label>
-                            <input
-                                type="text"
-                                name="fullName"
-                                value={formData.fullName}
-                                onChange={handleInputChange}
-                                required
-                                placeholder="הזן שם מלא"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>תעודת זהות</label>
-                            <input
-                                type="text"
-                                name="idNumber"
-                                value={formData.idNumber}
-                                onChange={handleInputChange}
-                                required
-                                placeholder="הזן מספר תעודת זהות"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>סוג שירות</label>
-                            <select
-                                name="serviceType"
-                                value={formData.serviceType}
-                                onChange={handleInputChange}
-                                required
-                            >
-                                <option value="water">מים</option>
-                                <option value="kindergarten">גן ילדים</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>פרטי השירות</label>
-                            <input
-                                type="text"
-                                name="serviceDetails"
-                                value={formData.serviceDetails}
-                                onChange={handleInputChange}
-                                required
-                                placeholder="הזן פרטי שירות"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>אימייל</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                required
-                                placeholder="הזן כתובת אימייל"
-                            />
-                        </div>
-                        <button type="submit" disabled={loading} className="submit-btn">
-                            {loading ? "מעבד..." : "שלח בקשה"}
-                        </button>
-                    </form>
-                ) : (
-                    <Elements stripe={stripePromise}>
-                        <form onSubmit={(e) => e.preventDefault()} className="payment-form">
-                            <CheckoutForm
-                                formData={formData}
-                                setFormData={setFormData}
-                                onPaymentSuccess={onCardPaymentSuccess}
-                            />
-                        </form>
-                    </Elements>
-                )}
-            </div>
-        </div>
+                                <div className="mt-4">
+                                    <h6>
+                                        <FiClock className="me-2" />
+                                        سجل الدفعات السابقة
+                                    </h6>
+                                    <ListGroup>
+                                        {payments.water.history.map((payment, index) => (
+                                            <ListGroup.Item key={index}>
+                                                <div className="d-flex justify-content-between">
+                                                    <span>{formatDate(payment.date)}</span>
+                                                    <span>{payment.amount} ر.س</span>
+                                                    <Badge bg="success">تم الدفع</Badge>
+                                                </div>
+                                            </ListGroup.Item>
+                                        ))}
+                                    </ListGroup>
+                                </div>
+                            </div>
+                        </Tab>
+                        <Tab eventKey="arnona" title="الأرنونا">
+                            <div className="payment-details mt-3">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h5>
+                                        <FiCreditCard className="me-2" />
+                                        ضريبة الأرنونا
+                                    </h5>
+                                    <Badge pill bg={statusVariants[payments.arnona.status]}>
+                                        {statusLabels[payments.arnona.status]}
+                                    </Badge>
+                                </div>
+                                <p>المبلغ: <strong>{payments.arnona.amount} ر.س</strong></p>
+                                <p>تاريخ الاستحقاق: <strong>{formatDate(payments.arnona.dueDate)}</strong></p>
+
+                                <Button
+                                    variant="primary"
+                                    onClick={() => handlePayment('arnona')}
+                                    disabled={loading || payments.arnona.status === 'PAID'}
+                                    className="mt-3"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <Spinner animation="border" size="sm" className="me-2" />
+                                            جاري المعالجة...
+                                        </>
+                                    ) : (
+                                        'دفع الآن'
+                                    )}
+                                </Button>
+
+                                <div className="mt-4">
+                                    <h6>
+                                        <FiClock className="me-2" />
+                                        سجل الدفعات السابقة
+                                    </h6>
+                                    <ListGroup>
+                                        {payments.arnona.history.map((payment, index) => (
+                                            <ListGroup.Item key={index}>
+                                                <div className="d-flex justify-content-between">
+                                                    <span>{formatDate(payment.date)}</span>
+                                                    <span>{payment.amount} ر.س</span>
+                                                    <Badge bg="success">تم الدفع</Badge>
+                                                </div>
+                                            </ListGroup.Item>
+                                        ))}
+                                    </ListGroup>
+                                </div>
+                            </div>
+                        </Tab>
+                        <Tab eventKey="kindergarten" title="الحضانة">
+                            <div className="payment-details mt-3">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h5>
+                                        <FiCreditCard className="me-2" />
+                                        رسوم الحضانة
+                                    </h5>
+                                    <Badge pill bg={statusVariants[payments.kindergarten.status]}>
+                                        {statusLabels[payments.kindergarten.status]}
+                                    </Badge>
+                                </div>
+                                <p>المبلغ: <strong>{payments.kindergarten.amount} ر.س</strong></p>
+                                <p>تاريخ الاستحقاق: <strong>{formatDate(payments.kindergarten.dueDate)}</strong></p>
+
+                                <Button
+                                    variant="primary"
+                                    onClick={() => handlePayment('kindergarten')}
+                                    disabled={loading || payments.kindergarten.status === 'PAID'}
+                                    className="mt-3"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <Spinner animation="border" size="sm" className="me-2" />
+                                            جاري المعالجة...
+                                        </>
+                                    ) : (
+                                        'دفع الآن'
+                                    )}
+                                </Button>
+
+                                <div className="mt-4">
+                                    <h6>
+                                        <FiClock className="me-2" />
+                                        سجل الدفعات السابقة
+                                    </h6>
+                                    <ListGroup>
+                                        {payments.kindergarten.history.map((payment, index) => (
+                                            <ListGroup.Item key={index}>
+                                                <div className="d-flex justify-content-between">
+                                                    <span>{formatDate(payment.date)}</span>
+                                                    <span>{payment.amount} ر.س</span>
+                                                    <Badge bg="success">تم الدفع</Badge>
+                                                </div>
+                                            </ListGroup.Item>
+                                        ))}
+                                    </ListGroup>
+                                </div>
+                            </div>
+                        </Tab>
+                    </Tabs>
+                </Card.Body>
+            </Card>
+        </Container>
     );
 };
 

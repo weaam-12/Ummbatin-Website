@@ -1,0 +1,27 @@
+.admin-payments-container {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.admin-payments-container .table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.admin-payments-container .table td {
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.admin-payments-container .refresh-animation {
+    animation: spin 1s linear infinite;
+}

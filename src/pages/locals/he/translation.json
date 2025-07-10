@@ -11,6 +11,40 @@
   "paymentButton": "שלם עכשיו",
   "creditCardPaymentTitle": "תשלום בכרטיס אשראי",
   "loginButton": "התחבר",
+  "userManagement": "ניהול משתמשים",
+  "register": "הוספת משתמש",
+  "refresh": "רענן",
+  "searchPlaceholder": "חיפוש לפי מייל או שם...",
+  "allRoles": "כל התפקידים",
+  "admin": "מנהל",
+  "resident": "תושב",
+  "role": "תפקיד",
+  "registered": "תאריך הרשמה",
+  "actions": "פעולות",
+  "noUsers": "אין משתמשים",
+  "viewDetails": "הצג פרטים",
+  "changeRoleToAdmin": "שנה למנהל",
+  "changeRoleToUser": "שנה למשתמש",
+  "delete": "מחק",
+  "close": "סגור",
+  "userDetails": "פרטי משתמש",
+  "noData": "אין מידע זמין",
+
+  "adminDashboard": "לוח בקרה",
+  "managePayments": "ניהול תשלומים",
+  "manageComplaints": "ניהול תלונות",
+  "adminPanel": "פאנל ניהול",
+  "profile": "פרופיל אישי",
+  "logout": "התנתקות",
+
+
+  "controlPanel": "לוח בקרה",
+  "generalManagement": "ניהול כללי",
+  "emergencyManagement": "ניהול חירום",
+  "educationManagement": "ניהול חינוך",
+  "paymentsManagement": "ניהול תשלומים",
+  "complaintsManagement": "ניהול תלונות",
+
 
   "home": "ראשי",
   "complaints": "תלונות",
@@ -18,6 +52,7 @@
   "emergency": "חירום",
   "about": "אודות",
   "login": "התחברות",
+  "garbageService" : "שירות אשפה",
 
   "ourServices": "השירותים שלנו",
   "paymentsDescription": "שלם חשבונות באופן מקוון.",
@@ -67,16 +102,47 @@
   "payment": "תשלום",
   "forms": "טפסים",
 
-  "garbageService": "שירותי אשפה",
-  "garbageServiceDescription": "בקש ניקיון אשפה או פח אשפה חדש.",
-  "garbageCleaning": "ניקיון אשפה",
-  "newGarbageBin": "פח אשפה חדש",
-  "enterAddress": "הזן את כתובתך",
-  "uploadImage": "העלה תמונה של המיקום",
-  "addressRequired": "נא להזין כתובת.",
-  "requestSubmitted": "הבקשה שלך התקבלה!",
-  "submitting": "שולח...",
-  "submit": "שלח",
+
+  "garbageComplaint": {
+    "title": "דיווח על בעיית פסולת",
+    "subtitle": "עזרו לנו לשפר את השירות על ידי דיווח על בעיות",
+    "description": "פרטי הבעיה",
+    "descriptionPlaceholder": "תאר את הבעיה בפירוט...",
+    "type": "סוג הבעיה",
+    "types": {
+      "uncollected": "פסולת שלא נאספה",
+      "overflowing": "מיכל מלא",
+      "damagedBin": "מיכל פגום",
+      "missingBin": "מיכל חסר",
+      "illegalDumping": "השלכת פסולת בלתי חוקית"
+    },
+    "location": "מיקום הבעיה",
+    "locationPlaceholder": "הזן מיקום או בחר ממפה",
+    "image": "צירוף תמונה",
+    "chooseImage": "בחר תמונה",
+    "removeImage": "הסר תמונה",
+    "submit": "שלח דיווח",
+    "submitting": "שולח...",
+    "historyTitle": "דיווחים קודמים",
+    "noComplaints": "אין דיווחים קודמים",
+    "response": "תגובת העירייה",
+    "complaintImage": "תמונת הדיווח",
+    "imagePreview": "תצוגה מקדימה",
+    "statuses": {
+      "SUBMITTED": "בבדיקה",
+      "IN_PROGRESS": "בטיפול",
+      "RESOLVED": "נפתר",
+      "REJECTED": "נדחה"
+    },
+    "success": {
+      "submit": "הדיווח נשלח בהצלחה"
+    },
+    "errors": {
+      "submitFailed": "שליחת הדיווח נכשלה",
+      "loadFailed": "טעינת הדיווחים נכשלה"
+    }
+
+},
 
   "paymentFormTitle": "טופס תשלום",
   "paymentFormDescription": "אנא מלא את הפרטים כדי לקבל קבלה על התשלום.",

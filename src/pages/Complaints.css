@@ -1,0 +1,40 @@
+.user-complaints-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.user-complaints-container .card {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.user-complaints-container .table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.user-complaints-container .table td {
+    vertical-align: middle;
+}
+
+.user-complaints-container .badge {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.user-complaints-container .modal-body textarea {
+    min-height: 150px;
+}
+
+.user-complaints-container .btn-light {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.user-complaints-container .btn-light:hover {
+    background-color: #e9ecef;
+}

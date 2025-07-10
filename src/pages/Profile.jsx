@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { fetchUserProfile } from "../api";
 import { useAuth } from "../AuthContext";
-// import '../components/styles/Profile.css';
+import './Profile.css';
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [error, setError] = useState("");
-    const { user, loading } = useAuth();
+    const { user, loading, logout } = useAuth(); // ← أضفنا logout
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -29,7 +29,9 @@ const Profile = () => {
     return (
         <div className="profile-container">
             <h1>User Profile</h1>
+
             {error && <div className="error-message">{error}</div>}
+
             {profile && (
                 <div className="profile-details">
                     <div className="profile-field">
@@ -40,7 +42,17 @@ const Profile = () => {
                         <span className="field-label">Email:</span>
                         <span className="field-value">{profile.email}</span>
                     </div>
-                    {/* Add more profile fields as needed */}
+
+                    {/* ➕ أزرار تحكم */}
+                    <div className="profile-actions">
+                        <button
+                            onClick={logout}
+                            className="logout-button"
+                            style={{ marginTop: "20px", padding: "10px 20px", backgroundColor: "#f44336", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}
+                        >
+                            تسجيل خروج
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

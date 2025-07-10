@@ -1,0 +1,206 @@
+/* تصميم عصري ومتجاوب للوحة التحكم الإدارية */
+.admin-dashboard {
+    --primary-color: #4361ee;
+    --danger-color: #f72585;
+    --success-color: #4cc9f0;
+    --warning-color: #f8961e;
+    --light-bg: #f8f9fa;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --border-radius: 12px;
+}
+
+/* تحسينات للرأس */
+.dashboard-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .dashboard-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* تحسينات للأزرار */
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-outline-secondary {
+    border-radius: var(--border-radius);
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 120px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+}
+
+.btn-primary:hover {
+    background-color: #3a56d4;
+    border-color: #3a56d4;
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+    border: 1px solid #e0e0e0;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--light-bg);
+    border-color: #d0d0d0;
+}
+
+/* تحسينات شريط البحث والفلاتر */
+.search-filter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .search-filter-container {
+        flex-direction: row;
+    }
+}
+
+.search-box {
+    flex: 1;
+    border-radius: var(--border-radius);
+    border: 1px solid #e0e0e0;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.search-box:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.role-filter {
+    width: 100%;
+    border-radius: var(--border-radius);
+}
+
+@media (min-width: 768px) {
+    .role-filter {
+        width: 200px;
+    }
+}
+
+/* تحسينات الجدول */
+.users-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.users-table thead th {
+    background-color: #f5f7fb;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 1rem;
+    text-align: right;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.users-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.users-table tbody tr:hover {
+    background-color: #f8fafd;
+}
+
+.users-table tbody td {
+    padding: 1rem;
+    border-top: 1px solid #f1f3f5;
+    vertical-align: middle;
+}
+
+/* تحسينات البادجات */
+.role-badge {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 50px;
+    text-transform: capitalize;
+}
+
+/* تحسينات القائمة المنسدلة */
+.action-dropdown .dropdown-toggle {
+    color: #6c757d;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.action-dropdown .dropdown-toggle:hover {
+    background-color: #f1f3f5;
+    color: var(--primary-color);
+}
+
+.action-dropdown .dropdown-menu {
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: var(--card-shadow);
+    padding: 0.5rem 0;
+}
+
+.action-dropdown .dropdown-item {
+    padding: 0.5rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.action-dropdown .dropdown-item:hover {
+    background-color: #f5f7fb;
+}
+
+.action-dropdown .dropdown-item.text-danger {
+    color: var(--danger-color);
+}
+
+.action-dropdown .dropdown-item.text-danger:hover {
+    background-color: rgba(248, 37, 133, 0.08);
+}
+
+/* تحسينات للهواتف */
+@media (max-width: 767px) {
+    .users-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .action-buttons {
+        width: 100%;
+    }
+
+    .btn-primary, .btn-outline-secondary {
+        flex: 1;
+        min-width: auto;
+    }
+}

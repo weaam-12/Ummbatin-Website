@@ -1,78 +1,68 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../api.js";
-import '../components/styles/Login.css';
+import './Home.css';
+import bkg from "./bkg.jpg";
 
-const Login = ({ setUser }) => {
-    const [form, setForm] = useState({ email: "", password: "" });
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [loading, setLoading] = useState(false);
+const Home = () => {
     const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
+    const services = [
+        { name: "מים", icon: "💧" },
+        { name: "ארנונה", icon: "🏠" },
+        { name: "שירות אשפה", icon: "🗑️" },
+        { name: "רישום גן", icon: "🧒" },
+        { name: "פעולות", icon: "📝" },
+        { name: "מוקד חירום", icon: "🚨" },
+        { name: "תשלומים מקוונים", icon: "💳" },
+        { name: "קביעת תור", icon: "📅" },
+        { name: "מצב פניות", icon: "📬" },
+        { name: "חדשות ועדכונים", icon: "📰" }
+    ];
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
-        setSuccess("");
-
-        try {
-            const response = await axiosInstance.post(
-                "http://localhost:8080/api/auth/login",
-                form,
-                {
-                    withCredentials: true,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-
-         //Save user data to state
-            setUser(response.data.user);
-
-           //success message
-            setSuccess("התחברת בהצלחה! מעביר אותך לדף הבית...");
-
-            //  Redirect after 2 seconds
-            setTimeout(() => {
-                navigate("/dashboard");
-            }, 2000);
-
-        } catch (err) {
-            setError(err.response?.data?.message || "שגיאה בהתחברות. אנא נסה שוב.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    const activities = [
+        { title: "יום ספורט קהילתי", date: "2025-07-10", duration: 3 },
+        { title: "שוק קיץ", date: "2025-07-15", duration: 4 },
+        { title: "ערב תרבות", date: "2025-07-20", duration: 2 }
+    ];
 
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <h2 className="login-title">התחברות למערכת</h2>
+        <div className="home-container" dir="rtl">
+            <div className="visitor-info-card">
+                <img src={bkg} alt="אום בטין" className="city-image"/>
 
-                {error && (
-                    <div className="error-message">
-                        {error}
-                    </div>
-                )}
-
-                {success && (
-                    <div className="success-message">
-                        {success}
-                    </div>
-                )}
-
-                <form onSubmit={handleLogin} className="login-form">
-
-                </form>
+                <h1 className="city-title">ברוכים הבאים לאום בטין</h1>
+                <p className="city-description">
+                    אום בטין היא יישוב קהילתי מתפתח בנגב, עם שירותים עירוניים מתקדמים, חינוך איכותי, ואירועים תרבותיים לכל המשפחה.
+                </p>
             </div>
+
+            {/* الخدمات */}
+            <section className="services-section">
+                <h2 className="section-title">שירותים לתושבים</h2>
+                <div className="services-grid">
+                    {services.map((service, index) => (
+                        <div key={index} className="service-circle">
+                            <div className="service-icon">{service.icon}</div>
+                            <div className="service-name">{service.name}</div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* الفعاليات */}
+            <section className="activities-section">
+                <h2 className="section-title">הפעילויות הקרובות</h2>
+                <div className="activities-list">
+                    {activities.map((activity, idx) => (
+                        <div key={idx} className="activity-card">
+                            <h3>{activity.title}</h3>
+                            <p><strong>תאריך:</strong> {activity.date}</p>
+                            <p><strong>משך:</strong> {activity.duration} שעות</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
         </div>
     );
 };
 
-export default Login;
+export default Home;

@@ -1,11 +1,11 @@
-// src/components/PayPalPayment.js
 import React, { useEffect } from "react";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 const PayPalPayment = ({ amount }) => {
-    useEffect(() => {
-        if (window.paypal) {
-            window.paypal.Buttons({
-                createOrder: (data, actions) => {
+    return (
+        <PayPalScriptProvider options={{ "client-id": "test" }}>
+            <PayPalButtons
+                createOrder={(data, actions) => {
                     return actions.order.create({
                         purchase_units: [{
                             amount: {
@@ -13,21 +13,19 @@ const PayPalPayment = ({ amount }) => {
                             },
                         }],
                     });
-                },
-                onApprove: async (data, actions) => {
+                }}
+                onApprove={async (data, actions) => {
                     const order = await actions.order.capture();
                     console.log("Payment Approved: ", order);
                     alert("Payment successful!");
-                },
-                onError: (err) => {
+                }}
+                onError={(err) => {
                     console.error("Error with PayPal Payment: ", err);
                     alert("An error occurred with PayPal payment.");
-                },
-            }).render("#paypal-button-container");
-        }
-    }, [amount]);
-
-    return <div id="paypal-button-container"></div>;
+                }}
+            />
+        </PayPalScriptProvider>
+    );
 };
 
 export default PayPalPayment;

@@ -1,0 +1,275 @@
+/* التصميم العام */
+.garbage-complaint {
+    max-width: 750px;
+    margin: 40px auto;
+    padding: 35px;
+    background: #f7f9fb;
+    border-radius: 20px;
+    font-family: 'Tajawal', 'Arial', sans-serif;
+    direction: rtl;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* العنوان */
+.complaint-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.complaint-header h1 {
+    color: #173b6c;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.complaint-header p {
+    color: #6b6b6b;
+    font-size: 15px;
+    margin-top: 8px;
+}
+
+/* نموذج البلاغ */
+.complaint-form {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.form-section {
+    margin-bottom: 25px;
+}
+
+.form-section label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #2d2d2d;
+}
+
+/* حقول الإدخال */
+.form-section textarea,
+.form-section input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d0d6e0;
+    border-radius: 10px;
+    font-size: 15px;
+    background: #fafafa;
+    transition: border 0.2s;
+}
+
+.form-section textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-section textarea:focus,
+.form-section input[type="text"]:focus {
+    border-color: #173b6c;
+    outline: none;
+}
+
+/* خيارات نوع المشكلة */
+.type-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.type-option {
+    display: flex;
+    align-items: center;
+    background: #eef2fa;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: #1a1a1a;
+}
+
+.type-option:hover {
+    background: #dce7f9;
+    border-color: #b6c6e1;
+}
+
+.type-option input {
+    margin-left: 8px;
+}
+
+/* رفع الصور */
+.image-upload {
+    margin-top: 10px;
+}
+
+.upload-btn {
+    display: inline-block;
+    background: #173b6c;
+    color: white;
+    padding: 10px 22px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.image-preview {
+    margin-top: 15px;
+    position: relative;
+    max-width: 200px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.image-preview img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.remove-image {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background: #ff5b5b;
+    color: white;
+    border: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* زر الإرسال */
+.submit-btn {
+    background: #173b6c;
+    color: white;
+    border: none;
+    padding: 14px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.submit-btn:hover {
+    background: #102f5a;
+}
+
+/* سجل البلاغات */
+.complaint-history {
+    margin-top: 50px;
+}
+
+.complaint-history h2 {
+    text-align: center;
+    color: #173b6c;
+    margin-bottom: 25px;
+    font-size: 22px;
+}
+
+.complaint-item {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+.complaint-item .complaint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.complaint-item .status {
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-submitted {
+    background: #f0f4ff;
+    color: #1a3c73;
+}
+.status-in-progress {
+    background: #fff6e0;
+    color: #b38b00;
+}
+.status-resolved {
+    background: #e6f8e7;
+    color: #30854e;
+}
+.status-rejected {
+    background: #ffeaea;
+    color: #cc2e2e;
+}
+
+.complaint-item .ticket,
+.complaint-item .date {
+    font-size: 13px;
+    color: #777;
+}
+
+.complaint-details {
+    padding-top: 10px;
+}
+
+.complaint-details .description {
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.detail-row {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 6px;
+}
+
+.complaint-image img {
+    margin-top: 8px;
+    max-width: 100%;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.response {
+    background: #f9f9f9;
+    border-right: 4px solid #173b6c;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+.response h4 {
+    margin: 0 0 6px;
+    color: #173b6c;
+    font-size: 15px;
+}
+
+/* للجوال */
+@media (max-width: 600px) {
+    .garbage-complaint {
+        padding: 20px;
+    }
+
+    .type-options {
+        flex-direction: column;
+    }
+
+    .complaint-item .complaint-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+}
