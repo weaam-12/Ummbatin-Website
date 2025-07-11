@@ -41,7 +41,7 @@ axiosInstance.interceptors.response.use(
 // Complaint Functions
 export const getComplaints = async (userId, isAdmin = false) => {
     try {
-        const endpoint = isAdmin ? '/complaints/all' : `/complaints/user/${userId}`;
+        const endpoint = isAdmin ? '/complaints/all' : `/complaints/user/${userId}`; // أزل /api من هنا
         const response = await axiosInstance.get(endpoint);
         return response.data;
     } catch (error) {

@@ -408,8 +408,24 @@ const AdminPayments = () => {
                                     فواتير المياه
                                 </Dropdown.Item>
                                 <Dropdown.Item
-                                    onClick={() => setShowAddReadingModal(true)}
-                                    disabled={!selectedUser}
+                                    onClick={() => {
+                                        if (!selectedUser) {
+                                            setNotification({
+                                                type: 'warning',
+                                                message: 'الرجاء اختيار مستخدم أولاً'
+                                            });
+                                            return;
+                                        }
+                                        if (userProperties.length === 0) {
+                                            setNotification({
+                                                type: 'warning',
+                                                message: 'لا توجد عقارات متاحة لهذا المستخدم'
+                                            });
+                                            return;
+                                        }
+                                        setShowAddReadingModal(true);
+                                    }}
+                                    disabled={!selectedUser || userProperties.length === 0}
                                 >
                                     <FiPlus className="me-2" /> إضافة قراءة مياه
                                 </Dropdown.Item>
