@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL|| 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
@@ -34,21 +34,98 @@ axiosInstance.interceptors.response.use(
                 originalError: error
             });
         }
+        if (error.response?.data?.message?.includes("user")) { // تغيير "resident" إلى "user"
+            return Promise.reject({
+                customMessage: "User ID not available - please login again", // تحديث الرسالة
+                isUserError: true // تغيير isResidentError إلى isUserError
+            });
+        }
         return Promise.reject(error);
     }
 );
 
-// Complaint Functions
-export const getComplaints = async (userId, isAdmin = false) => {
-    try {
-        const endpoint = isAdmin ? '/complaints/all' : `/complaints/user/${userId}`; // أزل /api من هنا
-        const response = await axiosInstance.get(endpoint);
-        return response.data;
-    } catch (error) {
-        console.error('Get complaints error:', error);
-        throw error;
-    }
+//===================== USER =====================
+export const getAllUsers = async () => {
+    const response = await axiosInstance.get('/users/all'); // تغيير من '/api/users' إلى '/users'
+    return response.data;
 };
+
+export const fetchUserProfile = async () => {
+    const response = await axiosInstance.get('/users/profile');
+    return {
+        ...response.data,
+        userId: response.data.userId || response.data.id
+    };
+};
+
+//===================== PAYMENTS =====================
+export const getAllPayments = async (month, year, userId = null) => {
+    const params = { month, year };
+    if (userId) params.userId = userId;
+    const response = await axiosInstance.get('/payments/all', { params }); // تغيير من '/api/payments/all' إلى '/payments/all'
+    return response.data;
+};
+
+export const getUserPayments = async (userId) => {
+    const response = await axiosInstance.get(`/payments/user/${userId}`);
+    return response.data;
+};
+
+export const fetchRecentPayments = async (userId) => {
+    const response = await axiosInstance.get(`/payments/user/${userId}/recent`);
+    return response.data;
+};
+
+export const generateWaterBills = async (month, year, rate, userId = null) => {
+    const params = { month, year, rate };
+    if (userId) params.userId = userId;
+    const response = await axiosInstance.post('/payments/generate-water', null, { params });
+    return response.data;
+};
+
+export const generateArnonaBills = async (month, year, userId = null) => {
+    const params = { month, year };
+    if (userId) params.userId = userId;
+    const response = await axiosInstance.post('/payments/generate-arnona', null, { params });
+    return response.data;
+};
+
+export const updatePaymentFee = async (userId, paymentType, newAmount) => {
+    const response = await axiosInstance.put('/payments/update-fee', null, {
+        params: { userId, paymentType, newAmount }
+    });
+    return response.data;
+};
+
+export const updatePaymentStatus = async (paymentId, status) => {
+    const response = await axiosInstance.patch(`/payments/${paymentId}/status`, { status });
+    return response.data;
+};
+
+export const processPayment = async (paymentData) => {
+    const response = await axiosInstance.post('/payments/process', paymentData);
+    return response.data;
+};
+
+//===================== PROPERTIES =====================
+export const getUserProperties = async (userId) => {
+    const response = await axiosInstance.get(`/properties/user/${userId}`);
+    return response.data;
+};
+
+//===================== WATER READING =====================
+export const addWaterReading = async (readingData) => {
+    const response = await axiosInstance.post('/water-readings', readingData);
+    return response.data;
+};
+
+//===================== COMPLAINTS =====================
+export const getComplaints = async (userId, isAdmin = false) => {
+    const endpoint = isAdmin ? '/complaints/all' : `/complaints/resident/${userId}`;
+    const response = await axiosInstance.get(endpoint);
+    return response.data;
+};
+
 export const submitComplaint = async (data) => {
     const formData = new FormData();
     formData.append('userId', data.userId);
@@ -57,79 +134,31 @@ export const submitComplaint = async (data) => {
     formData.append('location', data.location);
     if (data.image) formData.append('image', data.image);
 
-    try {
-        const response = await axiosInstance.post('/complaints', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Submit complaint error:', error);
-        throw error;
-    }
+    const response = await axiosInstance.post('/complaints', formData);
+    return response.data;
 };
 
 export const updateComplaintStatus = async (complaintId, status) => {
-    try {
-        const response = await axiosInstance.patch(`/complaints/${complaintId}/status`, { status });
-        return response.data;
-    } catch (error) {
-        console.error('Update status error:', error);
-        throw error;
-    }
+    const response = await axiosInstance.patch(`/complaints/${complaintId}/status`, { status });
+    return response.data;
 };
 
 export const deleteComplaint = async (complaintId) => {
-    try {
-        await axiosInstance.delete(`/complaints/${complaintId}`);
-        return true;
-    } catch (error) {
-        console.error('Delete complaint error:', error);
-        throw error;
-    }
+    await axiosInstance.delete(`/complaints/${complaintId}`);
+    return true;
 };
 
 export const respondToComplaint = async (complaintId, response) => {
-    try {
-        const res = await axiosInstance.post(`/complaints/${complaintId}/response`, { response });
-        return res.data;
-    } catch (error) {
-        console.error('Respond to complaint error:', error);
-        throw error;
-    }
+    const res = await axiosInstance.post(`/complaints/${complaintId}/response`, { response });
+    return res.data;
 };
 
-axiosInstance.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            // Clear invalid token
-            localStorage.removeItem('token');
-
-            // Return custom error structure
-            return Promise.reject({
-                customMessage: "Session expired. Please login again.",
-                isAuthError: true,
-                originalError: error
-            });
-        }
-
-        // Handle missing resident ID specifically
-        if (error.response?.data?.message?.includes("resident")) {
-            return Promise.reject({
-                customMessage: "Resident ID not available - please login again",
-                isResidentError: true
-            });
-        }
-
-        return Promise.reject(error);
-    }
-);
 export const fetchComplaintHistory = async (userId) => {
     const response = await axiosInstance.get(`/complaints?residentId=${userId}`);
     return response.data;
 };
 
-// Service Functions
+//===================== SERVICE =====================
 export const submitServiceRequest = async (serviceData) => {
     const formData = new FormData();
     Object.entries(serviceData).forEach(([key, value]) => formData.append(key, value));
@@ -142,212 +171,69 @@ export const fetchServiceHistory = async () => {
     return response.data;
 };
 
-// User Functions
-// in api.js
-export const fetchUserProfile = async () => {
-    const response = await axiosInstance.get('/users/profile');
-    // تأكد أن الخادم يعيد userId وليس فقط id
-    return {
-        ...response.data,
-        userId: response.data.userId || response.data.id
-    };
-};
-
-
+//===================== NOTIFICATIONS =====================
 export const fetchUserNotifications = async () => {
-    const response = await axiosInstance.get('/notifications/me')
-
+    const response = await axiosInstance.get('/notifications/me');
     return response.data;
 };
 
-export const fetchRecentPayments = async (userId) => {
-    const response = await axiosInstance.get(`/user/${userId}/payments/recent`);
-    return response.data;
-};
-
-// Community Functions
+//===================== ANNOUNCEMENTS =====================
 export const fetchAnnouncements = async () => {
     const response = await axiosInstance.get('/announcements');
     return response.data;
 };
 
+//===================== KINDERGARTENS =====================
 export const fetchKindergartens = async () => {
-    try {
-        const response = await axiosInstance.get('/kindergartens');
-        return response.data;
-    } catch (error) {
-        console.error('Fetch kindergartens error:', error);
-        throw error;
-    }
+    const response = await axiosInstance.get('/kindergartens');
+    return response.data;
 };
 
 export const fetchKindergartenById = async (kindergartenId) => {
-    try {
-        const response = await axiosInstance.get(`/kindergartens/${kindergartenId}`);
-        return response.data;
-    } catch (error) {
-        console.error('Fetch kindergarten by ID error:', error);
-        throw error;
-    }
+    const response = await axiosInstance.get(`/kindergartens/${kindergartenId}`);
+    return response.data;
 };
 
 export const createKindergarten = async (kindergartenData) => {
-    try {
-        const response = await axiosInstance.post('/kindergartens', kindergartenData);
-        return response.data;
-    } catch (error) {
-        console.error('Create kindergarten error:', error);
-        throw error;
-    }
+    const response = await axiosInstance.post('/kindergartens', kindergartenData);
+    return response.data;
 };
 
 export const updateKindergarten = async (kindergartenId, kindergartenData) => {
-    try {
-        const response = await axiosInstance.put(`/kindergartens/${kindergartenId}`, kindergartenData);
-        return response.data;
-    } catch (error) {
-        console.error('Update kindergarten error:', error);
-        throw error;
-    }
+    const response = await axiosInstance.put(`/kindergartens/${kindergartenId}`, kindergartenData);
+    return response.data;
 };
 
 export const deleteKindergarten = async (kindergartenId) => {
-    try {
-        const response = await axiosInstance.delete(`/kindergartens/${kindergartenId}`);
-        return response.data;
-    } catch (error) {
-        console.error('Delete kindergarten error:', error);
-        throw error;
-    }
+    const response = await axiosInstance.delete(`/kindergartens/${kindergartenId}`);
+    return response.data;
 };
 
 export const searchKindergartensByLocation = async (location) => {
-    try {
-        const response = await axiosInstance.get(`/kindergartens/search?location=${encodeURIComponent(location)}`);
-        return response.data;
-    } catch (error) {
-        console.error('Search kindergartens by location error:', error);
-        throw error;
-    }
+    const response = await axiosInstance.get(`/kindergartens/search?location=${encodeURIComponent(location)}`);
+    return response.data;
 };
 
 export const getKindergartenCapacity = async (kindergartenId) => {
-    try {
-        const response = await axiosInstance.get(`/kindergartens/${kindergartenId}/capacity`);
-        return response.data;
-    } catch (error) {
-        console.error('Get kindergarten capacity error:', error);
-        throw error;
-    }
+    const response = await axiosInstance.get(`/kindergartens/${kindergartenId}/capacity`);
+    return response.data;
+};
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+export const getAllEvents = async () => {
+    const response = await axiosInstance.get('/events');
+    return response.data;
 };
 
-export const getUserPayments = async (userId) => {
-    try {
-        const response = await axiosInstance.get(`/payments/user/${userId}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error getting user payments:', error);
-        throw error;
-    }
+export const addNewEvent = async (formData) => {
+    const response = await axiosInstance.post('/events', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
 };
 
-export const getAllPayments = async () => {
-    try {
-        const response = await axiosInstance.get('/payments/all');
-        return response.data;
-    } catch (error) {
-        console.error('Error getting all payments:', error);
-        throw error;
-    }
-};
-
-
-export const processPayment = async (paymentData) => {
-    try {
-        const response = await axiosInstance.post('/payments/process', paymentData);
-        return response.data;
-    } catch (error) {
-        console.error('Error processing payment:', error);
-        throw error;
-    }
-};
-
-export const generateWaterBills = async (month, year, rate, userId = null) => {
-    try {
-        const params = { month, year, rate };
-        if (userId) params.userId = userId;
-
-        const response = await axiosInstance.post('/payments/generate-water', null, { params });
-        return response.data;
-    } catch (error) {
-        console.error('Error generating water bills:', error);
-        throw error;
-    }
-};
-
-export const generateArnonaBills = async (month, year, userId = null) => {
-    try {
-        const params = { month, year };
-        if (userId) params.userId = userId;
-
-        const response = await axiosInstance.post('/payments/generate-arnona', null, { params });
-        return response.data;
-    } catch (error) {
-        console.error('Error generating arnona bills:', error);
-        throw error;
-    }
-};
-
-export const updatePaymentFee = async (userId, paymentType, newAmount) => {
-    try {
-        const response = await axiosInstance.put('/payments/update-fee', null, {
-            params: { userId, paymentType, newAmount }
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error updating payment fee:', error);
-        throw error;
-    }
-};
-
-export const updatePaymentStatus = async (paymentId, status) => {
-    try {
-        const response = await axiosInstance.patch(`/payments/${paymentId}/status`, { status });
-        return response.data;
-    } catch (error) {
-        console.error('Error updating payment status:', error);
-        throw error;
-    }
-};
-
-// User and Property Functions
-export const getUsers = async () => {
-    try {
-        const response = await axiosInstance.get('/api/users');
-        return response.data;
-    } catch (error) {
-        console.error('Error getting users:', error);
-        throw error;
-    }
-};
-
-export const getUserProperties = async (userId) => {
-    try {
-        const response = await axiosInstance.get(`/api/properties/user/${userId}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error getting user properties:', error);
-        throw error;
-    }
-};
-
-export const addWaterReading = async (readingData) => {
-    try {
-        const response = await axiosInstance.post('/api/water-readings', readingData);
-        return response.data;
-    } catch (error) {
-        console.error('Error adding water reading:', error);
-        throw error;
-    }
+// الأخبار
+export const getAllNews = async () => {
+    const response = await axiosInstance.get('/news');
+    return response.data;
 };
 export default axiosInstance;

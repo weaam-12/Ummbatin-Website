@@ -14,7 +14,13 @@ import './pages/AdminComplaints.css';
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
-        <PayPalScriptProvider options={{ "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID }}>
+        <PayPalScriptProvider
+            options={{
+                "client-id": import.meta.env.REACT_APP_PAYPAL_CLIENT_ID || "test", // Fallback to test
+                "currency": "USD",
+                "intent": "capture"
+            }}
+        >
             <AuthProvider>
                 <App />
             </AuthProvider>
