@@ -33,7 +33,7 @@ const Login = () => {
         setError("");
 
         try {
-            const response = await axios.post('https://backend-wtgq.onrender.com//api/auth/login', {
+            const response = await axios.post('https://backend-wtgq.onrender.com/api/auth/login', {
                 email: form.email,
                 password: form.password
             }, {
