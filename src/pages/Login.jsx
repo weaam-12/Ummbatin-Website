@@ -39,7 +39,8 @@ const Login = () => {
             }, {
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                withCredentials: true // أضف هذا السطر
             });
 
             if (response.data.token) {
