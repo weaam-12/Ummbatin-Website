@@ -30,7 +30,7 @@
   "userDetails": "פרטי משתמש",
   "noData": "אין מידע זמין",
 
-  "adminDashboard": "לוח בקרה",
+  "adminDashboard": "ניהול משתמשים",
   "managePayments": "ניהול תשלומים",
   "manageComplaints": "ניהול תלונות",
   "adminPanel": "פאנל ניהול",
@@ -38,8 +38,8 @@
   "logout": "התנתקות",
 
 
-  "controlPanel": "לוח בקרה",
-  "generalManagement": "ניהול כללי",
+  "controlPanel": "ניהול משתמשים",
+  "generalManagement": "לוח בקרה",
   "emergencyManagement": "ניהול חירום",
   "educationManagement": "ניהול חינוך",
   "paymentsManagement": "ניהול תשלומים",

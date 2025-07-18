@@ -9,7 +9,8 @@ import {
     Form,
     Modal,
     Alert,
-    Spinner
+    Spinner,
+    Badge
 } from 'react-bootstrap';
 import {
     FiUsers,
@@ -17,17 +18,16 @@ import {
     FiCalendar,
     FiPlus,
     FiAlertTriangle,
-    FiActivity,
-    FiRefreshCw
+    FiActivity
 } from 'react-icons/fi';
 import {
     generateWaterBills,
     generateArnonaBills,
     getAllUsers,
-    getAllPayments,
     getAllEvents,
     addNewEvent,
-    getAllNews
+    getAllNews,
+    getMonthlyBills
 } from '../api';
 import './AdminGenral.css';
 
@@ -35,7 +35,7 @@ const AdminGenral = () => {
     // States
     const [activeTab, setActiveTab] = useState('dashboard');
     const [users, setUsers] = useState([]);
-    const [payments, setPayments] = useState([]);
+    const [bills, setBills] = useState([]);
     const [events, setEvents] = useState([]);
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -51,25 +51,20 @@ const AdminGenral = () => {
         description: '',
         image: null
     });
-    const [newNews, setNewNews] = useState({
-        title: '',
-        content: '',
-        emergency: false
-    });
 
     // Load data
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const [usersRes, paymentsRes, eventsRes, newsRes] = await Promise.all([
+                const [usersRes, billsRes, eventsRes, newsRes] = await Promise.all([
                     getAllUsers(),
-                    getAllPayments(),
+                    getMonthlyBills(),
                     getAllEvents(),
                     getAllNews()
                 ]);
                 setUsers(usersRes);
-                setPayments(paymentsRes);
+                setBills(billsRes);
                 setEvents(eventsRes);
                 setNews(newsRes);
             } catch (error) {
@@ -87,6 +82,8 @@ const AdminGenral = () => {
         try {
             setLoading(true);
             await generateWaterBills(new Date().getMonth() + 1, new Date().getFullYear(), waterRate);
+            const updatedBills = await getMonthlyBills();
+            setBills(updatedBills);
             setNotification({ type: 'success', message: 'تم توليد فواتير المياه بنجاح' });
             setShowWaterModal(false);
         } catch (error) {
@@ -100,6 +97,8 @@ const AdminGenral = () => {
         try {
             setLoading(true);
             await generateArnonaBills(new Date().getMonth() + 1, new Date().getFullYear());
+            const updatedBills = await getMonthlyBills();
+            setBills(updatedBills);
             setNotification({ type: 'success', message: 'تم توليد فواتير الأرنونا بنجاح' });
             setShowArnonaModal(false);
         } catch (error) {
@@ -161,10 +160,10 @@ const AdminGenral = () => {
                             <FiUsers className="me-2" /> نظرة عامة
                         </li>
                         <li
-                            className={activeTab === 'payments' ? 'active' : ''}
-                            onClick={() => setActiveTab('payments')}
+                            className={activeTab === 'bills' ? 'active' : ''}
+                            onClick={() => setActiveTab('bills')}
                         >
-                            <FiDollarSign className="me-2" /> إدارة المدفوعات
+                            <FiDollarSign className="me-2" /> إدارة الفواتير
                         </li>
                         <li
                             className={activeTab === 'events' ? 'active' : ''}
@@ -213,11 +212,9 @@ const AdminGenral = () => {
                                         <Card.Body>
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <h6>المدفوعات هذا الشهر</h6>
+                                                    <h6>فواتير المياه هذا الشهر</h6>
                                                     <h3>
-                                                        {payments.filter(p =>
-                                                            new Date(p.date).getMonth() === new Date().getMonth()
-                                                        ).length}
+                                                        {bills.filter(b => b.waterAmount > 0).length}
                                                     </h3>
                                                 </div>
                                                 <FiDollarSign size={30} className="text-success" />
@@ -231,14 +228,12 @@ const AdminGenral = () => {
                                         <Card.Body>
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <h6>الفعاليات القادمة</h6>
+                                                    <h6>فواتير الأرنونا هذا الشهر</h6>
                                                     <h3>
-                                                        {events.filter(e =>
-                                                            new Date(e.date) > new Date()
-                                                        ).length}
+                                                        {bills.filter(b => b.arnonaAmount > 0).length}
                                                     </h3>
                                                 </div>
-                                                <FiCalendar size={30} className="text-warning" />
+                                                <FiDollarSign size={30} className="text-warning" />
                                             </div>
                                         </Card.Body>
                                     </Card>
@@ -257,7 +252,7 @@ const AdminGenral = () => {
                                                 className="w-100 mb-3"
                                                 onClick={() => setShowWaterModal(true)}
                                             >
-                                                <FiPlus className="me-2" /> إضافة فواتير المياه
+                                                <FiPlus className="me-2" /> توليد فواتير المياه
                                             </Button>
 
                                             <Button
@@ -265,7 +260,7 @@ const AdminGenral = () => {
                                                 className="w-100 mb-3"
                                                 onClick={() => setShowArnonaModal(true)}
                                             >
-                                                <FiPlus className="me-2" /> إضافة فواتير الأرنونا
+                                                <FiPlus className="me-2" /> توليد فواتير الأرنونا
                                             </Button>
 
                                             <Button
@@ -307,58 +302,54 @@ const AdminGenral = () => {
                         </div>
                     )}
 
-                    {!loading && activeTab === 'payments' && (
-                        <div className="payments-section">
+                    {!loading && activeTab === 'bills' && (
+                        <div className="bills-section">
                             <div className="d-flex justify-content-between align-items-center mb-4">
-                                <h3>إدارة المدفوعات</h3>
+                                <h3>إدارة الفواتير الشهرية</h3>
                                 <div>
                                     <Button
                                         variant="primary"
                                         className="me-2"
                                         onClick={() => setShowWaterModal(true)}
                                     >
-                                        <FiPlus className="me-1" /> فواتير المياه
+                                        <FiPlus className="me-1" /> توليد فواتير المياه
                                     </Button>
                                     <Button
                                         variant="success"
                                         onClick={() => setShowArnonaModal(true)}
                                     >
-                                        <FiPlus className="me-1" /> فواتير الأرنونا
+                                        <FiPlus className="me-1" /> توليد فواتير الأرنونا
                                     </Button>
                                 </div>
                             </div>
 
                             <Card>
                                 <Card.Header>
-                                    <h5>آخر المدفوعات</h5>
+                                    <h5>الفواتير الشهرية للمواطنين</h5>
                                 </Card.Header>
                                 <Card.Body>
                                     <Table striped hover responsive>
                                         <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>المستخدم</th>
-                                            <th>النوع</th>
-                                            <th>المبلغ</th>
-                                            <th>التاريخ</th>
+                                            <th>اسم المواطن</th>
+                                            <th>فواتير المياه (شيكل)</th>
+                                            <th>فواتير الأرنونا (شيكل)</th>
+                                            <th>الشهر</th>
                                             <th>الحالة</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {payments.slice(0, 10).map(payment => (
-                                            <tr key={payment.id}>
-                                                <td>{payment.id}</td>
-                                                <td>{payment.user?.fullName || '--'}</td>
-                                                <td>{payment.type === 'WATER' ? 'مياه' : 'أرنونا'}</td>
-                                                <td>{payment.amount} شيكل</td>
-                                                <td>{formatDate(payment.date)}</td>
+                                        {bills.map((bill, index) => (
+                                            <tr key={bill.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{bill.user?.fullName || '--'}</td>
+                                                <td>{bill.waterAmount || '--'}</td>
+                                                <td>{bill.arnonaAmount || '--'}</td>
+                                                <td>{`${bill.month}/${bill.year}`}</td>
                                                 <td>
-                                                    <Badge bg={
-                                                        payment.status === 'PAID' ? 'success' :
-                                                            payment.status === 'PENDING' ? 'warning' : 'danger'
-                                                    }>
-                                                        {payment.status === 'PAID' ? 'تم الدفع' :
-                                                            payment.status === 'PENDING' ? 'قيد الانتظار' : 'ملغية'}
+                                                    <Badge bg={bill.status === 'PAID' ? 'success' : 'warning'}>
+                                                        {bill.status === 'PAID' ? 'تم الدفع' : 'قيد الانتظار'}
                                                     </Badge>
                                                 </td>
                                             </tr>
@@ -549,7 +540,7 @@ const AdminGenral = () => {
                         />
                     </Form.Group>
                     <Alert variant="info">
-                        سيتم توليد فواتير المياه لجميع المستخدمين المسجلين
+                        سيتم توليد فواتير المياه لجميع المواطنين المسجلين
                     </Alert>
                 </Modal.Body>
                 <Modal.Footer>
@@ -573,7 +564,7 @@ const AdminGenral = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <Alert variant="info">
-                        سيتم توليد فواتير الأرنونا لجميع المستخدمين المسجلين
+                        سيتم توليد فواتير الأرنونا لجميع المواطنين المسجلين
                     </Alert>
                 </Modal.Body>
                 <Modal.Footer>
