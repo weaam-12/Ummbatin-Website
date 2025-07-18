@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import '../components/styles/Login.css';
+import axios from "axios";
 
 const Login = () => {
     const [form, setForm] = useState({ email: "", password: "" });
@@ -32,9 +33,24 @@ const Login = () => {
         setError("");
 
         try {
-            await login(form);
+            const response = await axios.post(`${import.meta.env.API_BASE_URL}/api/auth/login`, {
+                email: form.email,
+                password: form.password
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+                // استدعاء وظيفة login من السياق إذا كنت بحاجة لذلك
+                await login(form);
+                setSuccess("تم تسجيل الدخول بنجاح!");
+            }
         } catch (err) {
-            setError(err.response?.data?.message || "שגיאה בהתחברות. נסה שוב.");
+            setError(err.response?.data?.message ||
+                "خطأ في تسجيل الدخول. يرجى التحقق من البيانات والمحاولة مرة أخرى.");
         } finally {
             setLoading(false);
         }
