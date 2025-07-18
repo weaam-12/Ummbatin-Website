@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import '../components/styles/Login.css';
-import axios from "axios";
+import { axiosInstance } from '../api';
 
 const Login = () => {
     const [form, setForm] = useState({ email: "", password: "" });
@@ -33,7 +33,7 @@ const Login = () => {
         setError("");
 
         try {
-            const response = await axios.post(`${import.meta.env.API_BASE_URL}/api/auth/login`, {
+            const response = await axiosInstance.post('/api/auth/login', {
                 email: form.email,
                 password: form.password
             }, {
