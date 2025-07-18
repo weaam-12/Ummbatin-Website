@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import '../components/styles/Login.css';
-import { axiosInstance } from '../api';
+import axios from 'axios'; // استبدل هذا السطر
 
 const Login = () => {
     const [form, setForm] = useState({ email: "", password: "" });
@@ -33,7 +33,7 @@ const Login = () => {
         setError("");
 
         try {
-            const response = await axiosInstance.post('/api/auth/login', {
+            const response = await axios.post('https://backend-wtgg.onrender.com/api/auth/login', {
                 email: form.email,
                 password: form.password
             }, {
@@ -44,7 +44,6 @@ const Login = () => {
 
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
-                // استدعاء وظيفة login من السياق إذا كنت بحاجة لذلك
                 await login(form);
                 setSuccess("تم تسجيل الدخول بنجاح!");
             }
