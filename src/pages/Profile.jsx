@@ -14,8 +14,8 @@ const Profile = () => {
                 const data = await fetchUserProfile();
                 setProfile(data);
             } catch (err) {
-                setError("Failed to load profile. Please try again.");
-                console.error("Profile error:", err);
+                console.error("Profile error details:", err);
+                setError(err.response?.data?.message || "Failed to load profile");
             }
         };
 
