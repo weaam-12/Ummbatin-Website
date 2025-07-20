@@ -52,7 +52,7 @@ export const getAllUsers = async () => {
 };
 
 export const fetchUserProfile = async () => {
-    const response = await axiosInstance.get('/users/profile');
+    const response = await axiosInstance.get('/api/users/profile');
     return {
         ...response.data,
         userId: response.data.userId || response.data.id

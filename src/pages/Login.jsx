@@ -33,28 +33,25 @@ const Login = () => {
         setError("");
 
         try {
-            const response =
-                await axios.post('https://backend-wtgq.onrender.com/api/auth/login', {
-                    email: form.email,
-                    password: form.password
-                }, {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true
-                });
+            const response = await axios.post('https://backend-wtgq.onrender.com/api/auth/login', {
+                email: form.email,
+                password: form.password
+            }, {
+                headers: { 'Content-Type': 'application/json' },
+                withCredentials: true
+            });
 
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
-                await login(form);
+                await login(response.data.user); // أرسل بيانات المستخدم من الاستجابة
                 setSuccess("تم تسجيل الدخول بنجاح!");
             }
         } catch (err) {
-            setError(err.response?.data?.message ||
-                "خطأ في تسجيل الدخول. يرجى التحقق من البيانات والمحاولة مرة أخرى.");
+            setError(err.response?.data?.message || "خطأ في تسجيل الدخول");
         } finally {
             setLoading(false);
         }
     };
-
 
     // ⏳ تحميل من الكونتكست أو من هذا الكمبوننت
     if (authLoading) {
