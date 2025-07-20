@@ -33,15 +33,14 @@ const Login = () => {
         setError("");
 
         try {
-            const response = await axios.post('https://backend-wtgq.onrender.com/api/auth/login', {
-                email: form.email,
-                password: form.password
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                withCredentials: true // أضف هذا السطر
-            });
+            const response =
+                await axios.post('https://backend-wtgq.onrender.com/api/auth/login', {
+                    email: form.email,
+                    password: form.password
+                }, {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true
+                });
 
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
