@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUserProfile = useCallback(async () => {
         try {
-            const response = await axiosInstance.get("/users/profile");
+            const response = await axiosInstance.get("/api/users/profile");
             console.log("Profile API Response:", response.data);
 
             return {
