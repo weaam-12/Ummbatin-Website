@@ -53,7 +53,7 @@ function AdminDashboard() {
         try {
             setLoading(true);
             setError(null);
-            const response = await axiosInstance.get("/users/all");
+            const response = await axiosInstance.get("api/users/all");
             setUsers(response.data || []);
         } catch (err) {
             console.error("Failed to fetch users", err);
