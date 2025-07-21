@@ -14,7 +14,7 @@ import EmergencyPage from "./pages/EmergencyPage";
 import GarbageComplaint from "./pages/GarbageComplaint";
 import Payments from "./pages/Payments";
 import AdminPayments from "./pages/AdminPayments";
-import AdminGenral from "./pages/AdminGenral.jsx";
+import AdminGeneral from "./pages/AdminGeneral.jsx";
 import ErrorBoundary from "./pages/ErrorBoundary";
 import Childern from "./pages/Childern";
 import Forms from "./pages/Forms";
@@ -77,7 +77,7 @@ const App = () => {
 
                                 <Route path="/admin/general" element={
                                     <ProtectedRoute allowedRoles={['ADMIN']}>
-                                        <AdminGenral />
+                                        <AdminGeneral />
                                     </ProtectedRoute>
                                 } />
                                 <Route path="/children" element={

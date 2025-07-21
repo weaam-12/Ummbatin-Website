@@ -31,7 +31,7 @@ import {
 } from '../api';
 import './AdminGenral.css';
 
-const AdminGenral = () => {
+const AdminGeneral = () => {
     // States
     const [activeTab, setActiveTab] = useState('dashboard');
     const [users, setUsers] = useState([]);
@@ -59,14 +59,14 @@ const AdminGenral = () => {
             try {
                 const [usersRes, billsRes, eventsRes, newsRes] = await Promise.all([
                     getAllUsers(),
-                    getMonthlyBills(),
-                    getAllEvents(),
-                    getAllNews()
+                    getMonthlyBills().catch(() => []),
+                    getAllEvents().catch(() => []),
+                    getAllNews().catch(() => [])
                 ]);
-                setUsers(usersRes);
-                setBills(billsRes);
-                setEvents(eventsRes);
-                setNews(newsRes);
+                setUsers(usersRes || []);
+                setBills(billsRes || []);
+                setEvents(eventsRes || []);
+                setNews(newsRes || []);
             } catch (error) {
                 setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
             } finally {
@@ -79,6 +79,11 @@ const AdminGenral = () => {
 
     // Handlers
     const handleGenerateWaterBills = async () => {
+        if (!waterRate || isNaN(waterRate)) {
+            setNotification({ type: 'danger', message: 'الرجاء إدخال سعر صحيح للمياه' });
+            return;
+        }
+
         try {
             setLoading(true);
             await generateWaterBills(new Date().getMonth() + 1, new Date().getFullYear(), waterRate);
@@ -86,8 +91,10 @@ const AdminGenral = () => {
             setBills(updatedBills);
             setNotification({ type: 'success', message: 'تم توليد فواتير المياه بنجاح' });
             setShowWaterModal(false);
+            setWaterRate(0);
         } catch (error) {
-            setNotification({ type: 'danger', message: error.message || 'فشل في توليد الفواتير' });
+            const errorMsg = error.response?.data?.message || error.message || 'فشل في توليد الفواتير';
+            setNotification({ type: 'danger', message: errorMsg });
         } finally {
             setLoading(false);
         }
@@ -102,13 +109,19 @@ const AdminGenral = () => {
             setNotification({ type: 'success', message: 'تم توليد فواتير الأرنونا بنجاح' });
             setShowArnonaModal(false);
         } catch (error) {
-            setNotification({ type: 'danger', message: error.message || 'فشل في توليد الفواتير' });
+            const errorMsg = error.response?.data?.message || error.message || 'فشل في توليد الفواتير';
+            setNotification({ type: 'danger', message: errorMsg });
         } finally {
             setLoading(false);
         }
     };
 
     const handleAddEvent = async () => {
+        if (!newEvent.title || !newEvent.date) {
+            setNotification({ type: 'danger', message: 'الرجاء إدخال عنوان الفعالية وتاريخها' });
+            return;
+        }
+
         try {
             setLoading(true);
             const formData = new FormData();
@@ -121,8 +134,10 @@ const AdminGenral = () => {
             setEvents([...events, event]);
             setNewEvent({ title: '', date: '', description: '', image: null });
             setNotification({ type: 'success', message: 'تمت إضافة الفعالية بنجاح' });
+            setActiveTab('events');
         } catch (error) {
-            setNotification({ type: 'danger', message: error.message || 'فشل في إضافة الفعالية' });
+            const errorMsg = error.response?.data?.message || error.message || 'فشل في إضافة الفعالية';
+            setNotification({ type: 'danger', message: errorMsg });
         } finally {
             setLoading(false);
         }
@@ -214,7 +229,7 @@ const AdminGenral = () => {
                                                 <div>
                                                     <h6>فواتير المياه هذا الشهر</h6>
                                                     <h3>
-                                                        {bills.filter(b => b.waterAmount > 0).length}
+                                                        {bills.filter(b => b.paymentType === 'WATER').length}
                                                     </h3>
                                                 </div>
                                                 <FiDollarSign size={30} className="text-success" />
@@ -230,7 +245,7 @@ const AdminGenral = () => {
                                                 <div>
                                                     <h6>فواتير الأرنونا هذا الشهر</h6>
                                                     <h3>
-                                                        {bills.filter(b => b.arnonaAmount > 0).length}
+                                                        {bills.filter(b => b.paymentType === 'ARNONA').length}
                                                     </h3>
                                                 </div>
                                                 <FiDollarSign size={30} className="text-warning" />
@@ -266,7 +281,7 @@ const AdminGenral = () => {
                                             <Button
                                                 variant="info"
                                                 className="w-100"
-                                                onClick={() => setActiveTab('events')}
+                                                onClick={() => setActiveTab('add-event')}
                                             >
                                                 <FiActivity className="me-2" /> إضافة فعالية جديدة
                                             </Button>
@@ -280,15 +295,19 @@ const AdminGenral = () => {
                                             <h5>آخر الأخبار</h5>
                                         </Card.Header>
                                         <Card.Body>
-                                            {news.slice(0, 3).map(item => (
-                                                <div key={item.id} className="news-item mb-3">
-                                                    <h6>{item.title}</h6>
-                                                    <p className="text-muted small">{item.content.substring(0, 50)}...</p>
-                                                    {item.emergency && (
-                                                        <Badge bg="danger">طوارئ</Badge>
-                                                    )}
-                                                </div>
-                                            ))}
+                                            {news.length > 0 ? (
+                                                news.slice(0, 3).map(item => (
+                                                    <div key={item.id} className="news-item mb-3">
+                                                        <h6>{item.title}</h6>
+                                                        <p className="text-muted small">{item.content.substring(0, 50)}...</p>
+                                                        {item.isEmergency && (
+                                                            <Badge bg="danger">طوارئ</Badge>
+                                                        )}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-muted text-center">لا توجد أخبار متاحة</p>
+                                            )}
                                             <Button
                                                 variant="link"
                                                 onClick={() => setActiveTab('news')}
@@ -328,34 +347,38 @@ const AdminGenral = () => {
                                     <h5>الفواتير الشهرية للمواطنين</h5>
                                 </Card.Header>
                                 <Card.Body>
-                                    <Table striped hover responsive>
-                                        <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>اسم المواطن</th>
-                                            <th>فواتير المياه (شيكل)</th>
-                                            <th>فواتير الأرنونا (شيكل)</th>
-                                            <th>الشهر</th>
-                                            <th>الحالة</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {bills.map((bill, index) => (
-                                            <tr key={bill.id}>
-                                                <td>{index + 1}</td>
-                                                <td>{bill.user?.fullName || '--'}</td>
-                                                <td>{bill.waterAmount || '--'}</td>
-                                                <td>{bill.arnonaAmount || '--'}</td>
-                                                <td>{`${bill.month}/${bill.year}`}</td>
-                                                <td>
-                                                    <Badge bg={bill.status === 'PAID' ? 'success' : 'warning'}>
-                                                        {bill.status === 'PAID' ? 'تم الدفع' : 'قيد الانتظار'}
-                                                    </Badge>
-                                                </td>
+                                    {bills.length > 0 ? (
+                                        <Table striped hover responsive>
+                                            <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>اسم المواطن</th>
+                                                <th>نوع الفاتورة</th>
+                                                <th>المبلغ (شيكل)</th>
+                                                <th>الشهر</th>
+                                                <th>الحالة</th>
                                             </tr>
-                                        ))}
-                                        </tbody>
-                                    </Table>
+                                            </thead>
+                                            <tbody>
+                                            {bills.map((bill, index) => (
+                                                <tr key={bill.paymentId || index}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{bill.userName || '--'}</td>
+                                                    <td>{bill.paymentType === 'WATER' ? 'مياه' : 'أرنونا'}</td>
+                                                    <td>{bill.amount || '--'}</td>
+                                                    <td>{bill.month ? `${bill.month}/${bill.year}` : '--'}</td>
+                                                    <td>
+                                                        <Badge bg={bill.status === 'PAID' ? 'success' : 'warning'}>
+                                                            {bill.status === 'PAID' ? 'تم الدفع' : 'قيد الانتظار'}
+                                                        </Badge>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </Table>
+                                    ) : (
+                                        <Alert variant="info">لا توجد فواتير متاحة</Alert>
+                                    )}
                                 </Card.Body>
                             </Card>
                         </div>
@@ -373,31 +396,35 @@ const AdminGenral = () => {
                                 </Button>
                             </div>
 
-                            <Row>
-                                {events.map(event => (
-                                    <Col md={4} key={event.id} className="mb-4">
-                                        <Card className="h-100">
-                                            {event.image && (
-                                                <Card.Img variant="top" src={event.image} />
-                                            )}
-                                            <Card.Body>
-                                                <Card.Title>{event.title}</Card.Title>
-                                                <Card.Subtitle className="mb-2 text-muted">
-                                                    {formatDate(event.date)}
-                                                </Card.Subtitle>
-                                                <Card.Text>
-                                                    {event.description.substring(0, 100)}...
-                                                </Card.Text>
-                                            </Card.Body>
-                                            <Card.Footer>
-                                                <Button variant="outline-primary" size="sm">
-                                                    التفاصيل
-                                                </Button>
-                                            </Card.Footer>
-                                        </Card>
-                                    </Col>
-                                ))}
-                            </Row>
+                            {events.length > 0 ? (
+                                <Row>
+                                    {events.map(event => (
+                                        <Col md={4} key={event.id} className="mb-4">
+                                            <Card className="h-100">
+                                                {event.image && (
+                                                    <Card.Img variant="top" src={event.image} />
+                                                )}
+                                                <Card.Body>
+                                                    <Card.Title>{event.title}</Card.Title>
+                                                    <Card.Subtitle className="mb-2 text-muted">
+                                                        {formatDate(event.date)}
+                                                    </Card.Subtitle>
+                                                    <Card.Text>
+                                                        {event.description.substring(0, 100)}...
+                                                    </Card.Text>
+                                                </Card.Body>
+                                                <Card.Footer>
+                                                    <Button variant="outline-primary" size="sm">
+                                                        التفاصيل
+                                                    </Button>
+                                                </Card.Footer>
+                                            </Card>
+                                        </Col>
+                                    ))}
+                                </Row>
+                            ) : (
+                                <Alert variant="info">لا توجد فعاليات متاحة</Alert>
+                            )}
                         </div>
                     )}
 
@@ -413,6 +440,7 @@ const AdminGenral = () => {
                                             type="text"
                                             value={newEvent.title}
                                             onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                                            required
                                         />
                                     </Form.Group>
 
@@ -422,6 +450,7 @@ const AdminGenral = () => {
                                             type="date"
                                             value={newEvent.date}
                                             onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                                            required
                                         />
                                     </Form.Group>
 
@@ -439,6 +468,7 @@ const AdminGenral = () => {
                                         <Form.Label>صورة الفعالية</Form.Label>
                                         <Form.Control
                                             type="file"
+                                            accept="image/*"
                                             onChange={(e) => setNewEvent({...newEvent, image: e.target.files[0]})}
                                         />
                                     </Form.Group>
@@ -456,7 +486,11 @@ const AdminGenral = () => {
                                             onClick={handleAddEvent}
                                             disabled={!newEvent.title || !newEvent.date}
                                         >
-                                            حفظ الفعالية
+                                            {loading ? (
+                                                <Spinner animation="border" size="sm" />
+                                            ) : (
+                                                'حفظ الفعالية'
+                                            )}
                                         </Button>
                                     </div>
                                 </Card.Body>
@@ -484,40 +518,44 @@ const AdminGenral = () => {
                                     </div>
                                 </Card.Header>
                                 <Card.Body>
-                                    <Table striped hover responsive>
-                                        <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>العنوان</th>
-                                            <th>المحتوى</th>
-                                            <th>النوع</th>
-                                            <th>التاريخ</th>
-                                            <th>إجراءات</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {news.map(item => (
-                                            <tr key={item.id}>
-                                                <td>{item.id}</td>
-                                                <td>{item.title}</td>
-                                                <td>{item.content.substring(0, 50)}...</td>
-                                                <td>
-                                                    {item.emergency ? (
-                                                        <Badge bg="danger">طوارئ</Badge>
-                                                    ) : (
-                                                        <Badge bg="info">خبر</Badge>
-                                                    )}
-                                                </td>
-                                                <td>{formatDate(item.createdAt)}</td>
-                                                <td>
-                                                    <Button variant="outline-primary" size="sm">
-                                                        تعديل
-                                                    </Button>
-                                                </td>
+                                    {news.length > 0 ? (
+                                        <Table striped hover responsive>
+                                            <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>العنوان</th>
+                                                <th>المحتوى</th>
+                                                <th>النوع</th>
+                                                <th>التاريخ</th>
+                                                <th>إجراءات</th>
                                             </tr>
-                                        ))}
-                                        </tbody>
-                                    </Table>
+                                            </thead>
+                                            <tbody>
+                                            {news.map(item => (
+                                                <tr key={item.id}>
+                                                    <td>{item.id}</td>
+                                                    <td>{item.title}</td>
+                                                    <td>{item.content.substring(0, 50)}...</td>
+                                                    <td>
+                                                        {item.isEmergency ? (
+                                                            <Badge bg="danger">طوارئ</Badge>
+                                                        ) : (
+                                                            <Badge bg="info">خبر</Badge>
+                                                        )}
+                                                    </td>
+                                                    <td>{formatDate(item.createdAt)}</td>
+                                                    <td>
+                                                        <Button variant="outline-primary" size="sm">
+                                                            تعديل
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </Table>
+                                    ) : (
+                                        <Alert variant="info">لا توجد أخبار متاحة</Alert>
+                                    )}
                                 </Card.Body>
                             </Card>
                         </div>
@@ -537,6 +575,9 @@ const AdminGenral = () => {
                             type="number"
                             value={waterRate}
                             onChange={(e) => setWaterRate(parseFloat(e.target.value))}
+                            min="0"
+                            step="0.1"
+                            required
                         />
                     </Form.Group>
                     <Alert variant="info">
@@ -584,4 +625,4 @@ const AdminGenral = () => {
     );
 };
 
-export default AdminGenral;
+export default AdminGeneral;
