@@ -232,8 +232,23 @@ export const addNewEvent = async (formData) => {
     return response.data;
 };
 
-export const getMonthlyBills = async () => {
-    const response = await axiosInstance.get('api/bills/monthly');
+// الأخبارMonthlyPayments
+export const getMonthlyPayments = async () => {
+    const response = await axiosInstance.get('api/payments/monthly');
+    return response.data;
+};
+
+export const generateWaterPayments = async (month, year, rate, userId = null) => {
+    const params = { month, year, rate };
+    if (userId) params.userId = userId;
+    const response = await axiosInstance.post('api/payments/generate-water', null, { params });
+    return response.data;
+};
+
+export const generateArnonaPayments = async (month, year, userId = null) => {
+    const params = { month, year };
+    if (userId) params.userId = userId;
+    const response = await axiosInstance.post('api/payments/generate-arnona', null, { params });
     return response.data;
 };
 // الأخبار
