@@ -251,6 +251,18 @@ export const generateArnonaPayments = async (month, year, userId = null) => {
     const response = await axiosInstance.post('api/payments/generate-arnona', null, { params });
     return response.data;
 };
+
+export const getCurrentMonthPayments = async () => {
+    const response = await axiosInstance.get('api/payments/current-month');
+    return response.data;
+};
+
+export const getUsersWithPayments = async (month, year) => {
+    const response = await axiosInstance.get('api/payments/users-with-payments', {
+        params: { month, year }
+    });
+    return response.data;
+};
 // الأخبار
 export const getAllNews = async () => {
     const response = await axiosInstance.get('api/news');
