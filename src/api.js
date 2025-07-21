@@ -47,7 +47,7 @@ axiosInstance.interceptors.response.use(
 
 //===================== USER =====================
 export const getAllUsers = async () => {
-    const response = await axiosInstance.get('/users/all'); // تغيير من '/api/users' إلى '/users'
+    const response = await axiosInstance.get('api/users/all'); // تغيير من '/api/users' إلى '/users'
     return response.data;
 };
 
@@ -63,66 +63,66 @@ export const fetchUserProfile = async () => {
 export const getAllPayments = async (month, year, userId = null) => {
     const params = { month, year };
     if (userId) params.userId = userId;
-    const response = await axiosInstance.get('/payments/all', { params }); // تغيير من '/api/payments/all' إلى '/payments/all'
+    const response = await axiosInstance.get('api/payments/all', { params }); // تغيير من '/api/payments/all' إلى '/payments/all'
     return response.data;
 };
 
 export const getUserPayments = async (userId) => {
-    const response = await axiosInstance.get(`/payments/user/${userId}`);
+    const response = await axiosInstance.get(`api/payments/user/${userId}`);
     return response.data;
 };
 
 export const fetchRecentPayments = async (userId) => {
-    const response = await axiosInstance.get(`/payments/user/${userId}/recent`);
+    const response = await axiosInstance.get(`api/payments/user/${userId}/recent`);
     return response.data;
 };
 
 export const generateWaterBills = async (month, year, rate, userId = null) => {
     const params = { month, year, rate };
     if (userId) params.userId = userId;
-    const response = await axiosInstance.post('/payments/generate-water', null, { params });
+    const response = await axiosInstance.post('api/payments/generate-water', null, { params });
     return response.data;
 };
 
 export const generateArnonaBills = async (month, year, userId = null) => {
     const params = { month, year };
     if (userId) params.userId = userId;
-    const response = await axiosInstance.post('/payments/generate-arnona', null, { params });
+    const response = await axiosInstance.post('api/payments/generate-arnona', null, { params });
     return response.data;
 };
 
 export const updatePaymentFee = async (userId, paymentType, newAmount) => {
-    const response = await axiosInstance.put('/payments/update-fee', null, {
+    const response = await axiosInstance.put('api/payments/update-fee', null, {
         params: { userId, paymentType, newAmount }
     });
     return response.data;
 };
 
 export const updatePaymentStatus = async (paymentId, status) => {
-    const response = await axiosInstance.patch(`/payments/${paymentId}/status`, { status });
+    const response = await axiosInstance.patch(`api/payments/${paymentId}/status`, { status });
     return response.data;
 };
 
 export const processPayment = async (paymentData) => {
-    const response = await axiosInstance.post('/payments/process', paymentData);
+    const response = await axiosInstance.post('api/payments/process', paymentData);
     return response.data;
 };
 
 //===================== PROPERTIES =====================
 export const getUserProperties = async (userId) => {
-    const response = await axiosInstance.get(`/properties/user/${userId}`);
+    const response = await axiosInstance.get(`api/properties/user/${userId}`);
     return response.data;
 };
 
 //===================== WATER READING =====================
 export const addWaterReading = async (readingData) => {
-    const response = await axiosInstance.post('/water-readings', readingData);
+    const response = await axiosInstance.post('api/water-readings', readingData);
     return response.data;
 };
 
 //===================== COMPLAINTS =====================
 export const getComplaints = async (userId, isAdmin = false) => {
-    const endpoint = isAdmin ? '/complaints/all' : `/complaints/resident/${userId}`;
+    const endpoint = isAdmin ? 'api/complaints/all' : `api/complaints/resident/${userId}`;
     const response = await axiosInstance.get(endpoint);
     return response.data;
 };
@@ -135,27 +135,27 @@ export const submitComplaint = async (data) => {
     formData.append('location', data.location);
     if (data.image) formData.append('image', data.image);
 
-    const response = await axiosInstance.post('/complaints', formData);
+    const response = await axiosInstance.post('api/complaints', formData);
     return response.data;
 };
 
 export const updateComplaintStatus = async (complaintId, status) => {
-    const response = await axiosInstance.patch(`/complaints/${complaintId}/status`, { status });
+    const response = await axiosInstance.patch(`api/complaints/${complaintId}/status`, { status });
     return response.data;
 };
 
 export const deleteComplaint = async (complaintId) => {
-    await axiosInstance.delete(`/complaints/${complaintId}`);
+    await axiosInstance.delete(`api/complaints/${complaintId}`);
     return true;
 };
 
 export const respondToComplaint = async (complaintId, response) => {
-    const res = await axiosInstance.post(`/complaints/${complaintId}/response`, { response });
+    const res = await axiosInstance.post(`api/complaints/${complaintId}/response`, { response });
     return res.data;
 };
 
 export const fetchComplaintHistory = async (userId) => {
-    const response = await axiosInstance.get(`/complaints?residentId=${userId}`);
+    const response = await axiosInstance.get(`api/complaints?residentId=${userId}`);
     return response.data;
 };
 
@@ -163,82 +163,82 @@ export const fetchComplaintHistory = async (userId) => {
 export const submitServiceRequest = async (serviceData) => {
     const formData = new FormData();
     Object.entries(serviceData).forEach(([key, value]) => formData.append(key, value));
-    const response = await axiosInstance.post('/garbage-service', formData);
+    const response = await axiosInstance.post('api/garbage-service', formData);
     return response.data;
 };
 
 export const fetchServiceHistory = async () => {
-    const response = await axiosInstance.get('/garbage-service/history');
+    const response = await axiosInstance.get('api/garbage-service/history');
     return response.data;
 };
 
 //===================== NOTIFICATIONS =====================
 export const fetchUserNotifications = async () => {
-    const response = await axiosInstance.get('/notifications/me');
+    const response = await axiosInstance.get('api/notifications/me');
     return response.data;
 };
 
 //===================== ANNOUNCEMENTS =====================
 export const fetchAnnouncements = async () => {
-    const response = await axiosInstance.get('/announcements');
+    const response = await axiosInstance.get('api/announcements');
     return response.data;
 };
 
 //===================== KINDERGARTENS =====================
 export const fetchKindergartens = async () => {
-    const response = await axiosInstance.get('/kindergartens');
+    const response = await axiosInstance.get('api/kindergartens');
     return response.data;
 };
 
 export const fetchKindergartenById = async (kindergartenId) => {
-    const response = await axiosInstance.get(`/kindergartens/${kindergartenId}`);
+    const response = await axiosInstance.get(`api/kindergartens/${kindergartenId}`);
     return response.data;
 };
 
 export const createKindergarten = async (kindergartenData) => {
-    const response = await axiosInstance.post('/kindergartens', kindergartenData);
+    const response = await axiosInstance.post('api/kindergartens', kindergartenData);
     return response.data;
 };
 
 export const updateKindergarten = async (kindergartenId, kindergartenData) => {
-    const response = await axiosInstance.put(`/kindergartens/${kindergartenId}`, kindergartenData);
+    const response = await axiosInstance.put(`api/kindergartens/${kindergartenId}`, kindergartenData);
     return response.data;
 };
 
 export const deleteKindergarten = async (kindergartenId) => {
-    const response = await axiosInstance.delete(`/kindergartens/${kindergartenId}`);
+    const response = await axiosInstance.delete(`api/kindergartens/${kindergartenId}`);
     return response.data;
 };
 
 export const searchKindergartensByLocation = async (location) => {
-    const response = await axiosInstance.get(`/kindergartens/search?location=${encodeURIComponent(location)}`);
+    const response = await axiosInstance.get(`api/kindergartens/search?location=${encodeURIComponent(location)}`);
     return response.data;
 };
 
 export const getKindergartenCapacity = async (kindergartenId) => {
-    const response = await axiosInstance.get(`/kindergartens/${kindergartenId}/capacity`);
+    const response = await axiosInstance.get(`api/kindergartens/${kindergartenId}/capacity`);
     return response.data;
 };
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 export const getAllEvents = async () => {
-    const response = await axiosInstance.get('/events');
+    const response = await axiosInstance.get('api/events');
     return response.data;
 };
 
 export const addNewEvent = async (formData) => {
-    const response = await axiosInstance.post('/events', formData, {
+    const response = await axiosInstance.post('api/events', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
 };
 
 export const getMonthlyBills = async () => {
-    const response = await axiosInstance.get('/bills/monthly');
+    const response = await axiosInstance.get('api/bills/monthly');
     return response.data;
 };
 // الأخبار
 export const getAllNews = async () => {
-    const response = await axiosInstance.get('/news');
+    const response = await axiosInstance.get('api/news');
     return response.data;
 };
 export default axiosInstance;
