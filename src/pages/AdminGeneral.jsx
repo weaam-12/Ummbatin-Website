@@ -27,7 +27,8 @@ import {
     getAllEvents,
     addNewEvent,
     getAllNews,
-    getMonthlyPayments
+    getCurrentMonthPayments,
+    getUsersWithPayments
 } from '../api';
 import './AdminGeneral.css';
 
@@ -40,6 +41,8 @@ const AdminGeneral = () => {
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
+    const [usersWithPayments, setUsersWithPayments] = useState([]);
+    const [showGenerateModal, setShowGenerateModal] = useState(false);
 
     // Form states
     const [waterRate, setWaterRate] = useState(0);
@@ -57,14 +60,12 @@ const AdminGeneral = () => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const [usersRes, paymentsRes, eventsRes, newsRes] = await Promise.all([
+                const [usersRes, eventsRes, newsRes] = await Promise.all([
                     getAllUsers(),
-                    getMonthlyPayments().catch(() => []),
                     getAllEvents().catch(() => []),
                     getAllNews().catch(() => [])
                 ]);
                 setUsers(usersRes || []);
-                setPayments(paymentsRes || []);
                 setEvents(eventsRes || []);
                 setNews(newsRes || []);
             } catch (error) {
@@ -77,6 +78,28 @@ const AdminGeneral = () => {
         loadData();
     }, []);
 
+    useEffect(() => {
+        if (activeTab === 'payments') {
+            loadCurrentMonthPayments();
+        }
+    }, [activeTab]);
+
+    const loadCurrentMonthPayments = async () => {
+        setLoading(true);
+        try {
+            const currentDate = new Date();
+            const payments = await getCurrentMonthPayments();
+            const users = await getUsersWithPayments(currentDate.getMonth() + 1, currentDate.getFullYear());
+
+            setPayments(payments);
+            setUsersWithPayments(users);
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في تحميل الدفعات' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Handlers
     const handleGenerateWaterPayments = async () => {
         if (!waterRate || isNaN(waterRate)) {
@@ -87,8 +110,7 @@ const AdminGeneral = () => {
         try {
             setLoading(true);
             await generateWaterPayments(new Date().getMonth() + 1, new Date().getFullYear(), waterRate);
-            const updatedPayments = await getMonthlyPayments();
-            setPayments(updatedPayments);
+            await loadCurrentMonthPayments();
             setNotification({ type: 'success', message: 'تم توليد دفعات المياه بنجاح' });
             setShowWaterModal(false);
             setWaterRate(0);
@@ -104,8 +126,7 @@ const AdminGeneral = () => {
         try {
             setLoading(true);
             await generateArnonaPayments(new Date().getMonth() + 1, new Date().getFullYear());
-            const updatedPayments = await getMonthlyPayments();
-            setPayments(updatedPayments);
+            await loadCurrentMonthPayments();
             setNotification({ type: 'success', message: 'تم توليد دفعات الأرنونا بنجاح' });
             setShowArnonaModal(false);
         } catch (error) {
@@ -143,6 +164,52 @@ const AdminGeneral = () => {
         }
     };
 
+    const handleAmountChange = (userId, type, value) => {
+        setUsersWithPayments(prev => prev.map(user => {
+            if (user.userId === userId) {
+                return {
+                    ...user,
+                    [`${type.toLowerCase()}Amount`]: value ? parseFloat(value) : null
+                };
+            }
+            return user;
+        }));
+    };
+
+    const handleSavePayments = async () => {
+        try {
+            setLoading(true);
+            const currentDate = new Date();
+
+            for (const user of usersWithPayments) {
+                if (user.waterAmount) {
+                    await generateWaterPayments(
+                        currentDate.getMonth() + 1,
+                        currentDate.getFullYear(),
+                        user.waterAmount,
+                        user.userId
+                    );
+                }
+
+                if (user.arnonaAmount) {
+                    await generateArnonaPayments(
+                        currentDate.getMonth() + 1,
+                        currentDate.getFullYear(),
+                        user.userId
+                    );
+                }
+            }
+
+            setNotification({ type: 'success', message: 'تم حفظ الفواتير بنجاح' });
+            setShowGenerateModal(false);
+            loadCurrentMonthPayments();
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في حفظ الفواتير' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return '--';
         try {
@@ -155,8 +222,8 @@ const AdminGeneral = () => {
 
     const formatPaymentStatus = (status) => {
         switch(status) {
-            case 'COMPLETED':
-                return { text: 'مكتمل', variant: 'success' };
+            case 'PAID':
+                return { text: 'مدفوع', variant: 'success' };
             case 'PENDING':
                 return { text: 'قيد الانتظار', variant: 'warning' };
             case 'FAILED':
@@ -341,64 +408,95 @@ const AdminGeneral = () => {
                                 <div>
                                     <Button
                                         variant="primary"
-                                        className="me-2"
-                                        onClick={() => setShowWaterModal(true)}
+                                        onClick={() => setShowGenerateModal(true)}
                                     >
-                                        <FiPlus className="me-1" /> توليد دفعات المياه
-                                    </Button>
-                                    <Button
-                                        variant="success"
-                                        onClick={() => setShowArnonaModal(true)}
-                                    >
-                                        <FiPlus className="me-1" /> توليد دفعات الأرنونا
+                                        <FiPlus className="me-1" /> توليد/تعديل الفواتير
                                     </Button>
                                 </div>
                             </div>
 
                             <Card>
                                 <Card.Header>
-                                    <h5>الدفعات الشهرية للمواطنين</h5>
+                                    <h5>دفعات الشهر الحالي</h5>
                                 </Card.Header>
                                 <Card.Body>
-                                    {payments.length > 0 ? (
-                                        <Table striped hover responsive>
+                                    <Table striped hover responsive>
+                                        <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>اسم المواطن</th>
+                                            <th>مياه (شيكل)</th>
+                                            <th>أرنونا (شيكل)</th>
+                                            <th>حالة الدفع</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {payments.map((payment, index) => (
+                                            <tr key={payment.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{payment.userName}</td>
+                                                <td>{payment.waterAmount || '--'}</td>
+                                                <td>{payment.arnonaAmount || '--'}</td>
+                                                <td>
+                                                    <Badge bg={payment.status === 'PAID' ? 'success' : 'warning'}>
+                                                        {payment.status === 'PAID' ? 'مدفوع' : 'قيد الانتظار'}
+                                                    </Badge>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </Table>
+                                </Card.Body>
+                            </Card>
+
+                            {/* Modal لتوليد الفواتير */}
+                            <Modal show={showGenerateModal} onHide={() => setShowGenerateModal(false)} size="lg">
+                                <Modal.Header closeButton>
+                                    <Modal.Title>توليد وتعديل الفواتير</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <Form>
+                                        <Table striped bordered>
                                             <thead>
                                             <tr>
-                                                <th>#</th>
                                                 <th>اسم المواطن</th>
-                                                <th>نوع الدفعة</th>
-                                                <th>المبلغ (شيكل)</th>
-                                                <th>تاريخ الإنشاء</th>
-                                                <th>تاريخ الدفع</th>
-                                                <th>الحالة</th>
+                                                <th>مياه (شيكل)</th>
+                                                <th>أرنونا (شيكل)</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {payments.map((payment, index) => {
-                                                const statusInfo = formatPaymentStatus(payment.status);
-                                                return (
-                                                    <tr key={payment.payment_id || index}>
-                                                        <td>{index + 1}</td>
-                                                        <td>{payment.receipt_email || '--'}</td>
-                                                        <td>{payment.type === 'WATER' ? 'مياه' : 'أرنونا'}</td>
-                                                        <td>{payment.amount || '--'}</td>
-                                                        <td>{formatDate(payment.date)}</td>
-                                                        <td>{payment.payment_date ? formatDate(payment.payment_date) : '--'}</td>
-                                                        <td>
-                                                            <Badge bg={statusInfo.variant}>
-                                                                {statusInfo.text}
-                                                            </Badge>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
+                                            {usersWithPayments.map((user) => (
+                                                <tr key={user.userId}>
+                                                    <td>{user.userName}</td>
+                                                    <td>
+                                                        <Form.Control
+                                                            type="number"
+                                                            value={user.waterAmount || ''}
+                                                            onChange={(e) => handleAmountChange(user.userId, 'WATER', e.target.value)}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <Form.Control
+                                                            type="number"
+                                                            value={user.arnonaAmount || ''}
+                                                            onChange={(e) => handleAmountChange(user.userId, 'ARNONA', e.target.value)}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            ))}
                                             </tbody>
                                         </Table>
-                                    ) : (
-                                        <Alert variant="info">لا توجد دفعات متاحة</Alert>
-                                    )}
-                                </Card.Body>
-                            </Card>
+                                    </Form>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={() => setShowGenerateModal(false)}>
+                                        إلغاء
+                                    </Button>
+                                    <Button variant="primary" onClick={handleSavePayments}>
+                                        حفظ التعديلات
+                                    </Button>
+                                </Modal.Footer>
+                            </Modal>
                         </div>
                     )}
 
