@@ -232,21 +232,23 @@
 
 /* الدائرة العائمة */
 .floating-circle {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+    position: fixed; /* عشان تكون عائمة على الشاشة */
+    bottom: -60px; /* تحت الشاشة بمقدار 60px */
+    left: 50%; /* وسط الشاشة أفقياً */
+    transform: translateX(-50%); /* تعويض نصف العرض عشان تكون مركزة بالضبط */
+    width: 120px;  /* حجم الدائرة */
+    height: 120px;
+    border-radius: 50%; /* دائرة كاملة */
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1001;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 1000; /* فوق كل شيء */
 }
 
 .floating-logo {
-    width: 70px;
-    height: 70px;
+    width: 60px; /* حجم الشعار داخل الدائرة */
+    height: 60px;
     object-fit: contain;
 }
 

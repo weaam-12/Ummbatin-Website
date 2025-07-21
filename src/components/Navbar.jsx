@@ -49,11 +49,15 @@ const Navbar = () => {
 
     return (
         <div className="nav-wrapper">
-            <nav className={`navbar ${isRTL ? "rtl" : "ltr"}`} style={{ background: "#ffffff", borderBottom: "1px solid #e0e0e0", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)" }}>
+            <nav className={`navbar ${isRTL ? "rtl" : "ltr"}`} style={{
+                background: "#ffffff",
+                borderBottom: "1px solid #e0e0e0",
+                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)"
+            }}>
                 <div className="navbar-container">
 
-                    <div className="menu-icon" onClick={toggleMenu} style={{ color: "#1c1c1c" }}>
-                        {menuOpen ? <FaTimes /> : <FaBars />}
+                    <div className="menu-icon" onClick={toggleMenu} style={{color: "#1c1c1c"}}>
+                        {menuOpen ? <FaTimes/> : <FaBars/>}
                     </div>
 
                     {/* Navigation Links */}
@@ -82,45 +86,48 @@ const Navbar = () => {
                     {/* Right Side Elements */}
                     <div className="navbar-right">
                         <div className="search-bar">
-                            <FaSearch className="search-icon" style={{ color: "#777" }} />
-                            <input type="text" placeholder={t("search")} style={{ background: "#f7f7f7", color: "#333", border: "none" }} />
+                            <FaSearch className="search-icon" style={{color: "#777"}}/>
+                            <input type="text" placeholder={t("search")}
+                                   style={{background: "#f7f7f7", color: "#333", border: "none"}}/>
                         </div>
                         <div className="language-selector">
-                            <button onClick={() => changeLanguage("he")} style={{ color: "#1c1c1c" }}>HE</button>
-                            <span style={{ color: "#1c1c1c" }}>|</span>
-                            <button onClick={() => changeLanguage("ar")} style={{ color: "#1c1c1c" }}>AR</button>
+                            <button onClick={() => changeLanguage("he")} style={{color: "#1c1c1c"}}>HE</button>
+                            <span style={{color: "#1c1c1c"}}>|</span>
+                            <button onClick={() => changeLanguage("ar")} style={{color: "#1c1c1c"}}>AR</button>
                         </div>
                         <div className="profile-menu">
                             {user ? (
                                 <Dropdown>
                                     <Dropdown.Toggle variant="link" id="dropdown-profile" className="p-0">
                                         <span className="me-2">{user.fullName || user.email}</span>
-                                        <FaUserCircle size={24} style={{ color: "#1c1c1c" }} />
+                                        <FaUserCircle size={24} style={{color: "#1c1c1c"}}/>
                                     </Dropdown.Toggle>
                                     <Dropdown.Menu>
                                         <Dropdown.Item onClick={() => navigate("/profile")}>
-                                            <FaUserCircle className="me-2" /> {t("profile")}
+                                            <FaUserCircle className="me-2"/> {t("profile")}
                                         </Dropdown.Item>
                                         {isAdmin() && (
                                             <Dropdown.Item onClick={() => navigate("/admin")}>
-                                                <FaUserShield className="me-2" /> {t("adminPanel")}
+                                                <FaUserShield className="me-2"/> {t("adminPanel")}
                                             </Dropdown.Item>
                                         )}
                                         <Dropdown.Item onClick={logout} className="text-danger">
-                                            <FaTimes className="me-2" /> {t("logout")}
+                                            <FaTimes className="me-2"/> {t("logout")}
                                         </Dropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
                             ) : (
-                                <FaUserCircle size={24} onClick={() => navigate("/login")} style={{ color: "#1c1c1c" }} />
+                                <FaUserCircle size={24} onClick={() => navigate("/login")} style={{color: "#1c1c1c"}}/>
                             )}
                         </div>
                     </div>
                 </div>
 
-                {/* Floating Circle in Center Bottom */}
-                <div className="floating-circle" style={{ bottom: "-60px", background: "#fff", border: "2px solid #e0e0e0" }}>
-                    <img src={logo} alt="Floating Logo" className="floating-logo" />
+                <div
+                    className="floating-circle"
+                    style={{background: "#fff", border: "2px solid #e0e0e0"}}
+                >
+                    <img src={logo} alt="Floating Logo" className="floating-logo"/>
                 </div>
             </nav>
         </div>
