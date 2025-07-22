@@ -257,6 +257,11 @@ export const getCurrentMonthPayments = async () => {
     return response.data;
 };
 
+export const generateCustomWaterPayments = async (paymentRequests) => {
+    const response = await axiosInstance.post('api/payments/generate-custom-water', paymentRequests);
+    return response.data;
+};
+
 export const getUsersWithPayments = async (month, year) => {
     const response = await axiosInstance.get('api/payments/users-with-payments', {
         params: { month, year }

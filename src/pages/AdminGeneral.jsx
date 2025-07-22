@@ -21,7 +21,6 @@ import {
     FiActivity
 } from 'react-icons/fi';
 import {
-    generateWaterPayments,
     generateArnonaPayments,
     getAllUsers,
     getAllEvents,
@@ -43,6 +42,7 @@ const AdminGeneral = () => {
     const [notification, setNotification] = useState(null);
     const [usersWithPayments, setUsersWithPayments] = useState([]);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
+    const [waterReadings, setWaterReadings] = useState([]);
 
     // Form states
     const [waterRate, setWaterRate] = useState(0);
@@ -84,6 +84,7 @@ const AdminGeneral = () => {
         }
     }, [activeTab]);
 
+
     const loadCurrentMonthPayments = async () => {
         setLoading(true);
         try {
@@ -91,8 +92,18 @@ const AdminGeneral = () => {
             const payments = await getCurrentMonthPayments();
             const users = await getUsersWithPayments(currentDate.getMonth() + 1, currentDate.getFullYear());
 
+            // إضافة معلومات العقار لكل مستخدم
+            const usersWithProperties = await Promise.all(users.map(async user => {
+                const properties = await getUserProperties(user.userId);
+                return {
+                    ...user,
+                    propertyId: properties[0]?.propertyId,
+                    propertyAddress: properties[0]?.address
+                };
+            }));
+
             setPayments(payments);
-            setUsersWithPayments(users);
+            setUsersWithPayments(usersWithProperties);
         } catch (error) {
             setNotification({ type: 'danger', message: 'فشل في تحميل الدفعات' });
         } finally {
@@ -109,7 +120,17 @@ const AdminGeneral = () => {
 
         try {
             setLoading(true);
-            await generateWaterPayments(new Date().getMonth() + 1, new Date().getFullYear(), waterRate);
+
+            // تحضير بيانات الدفعات لكل مستخدم
+            const paymentRequests = usersWithPayments.map(user => ({
+                userId: user.userId,
+                propertyId: user.propertyId,
+                amount: user.waterAmount || 0,
+                currentReading: user.currentWaterReading || 0,
+                manual: false // أو true إذا كانت قراءة يدوية
+            }));
+
+            await axiosInstance.post('api/payments/generate-custom-water', paymentRequests);
             await loadCurrentMonthPayments();
             setNotification({ type: 'success', message: 'تم توليد دفعات المياه بنجاح' });
             setShowWaterModal(false);
@@ -125,7 +146,20 @@ const AdminGeneral = () => {
     const handleGenerateArnonaPayments = async () => {
         try {
             setLoading(true);
-            await generateArnonaPayments(new Date().getMonth() + 1, new Date().getFullYear());
+
+            // الحصول على معرفات المستخدمين الذين لديهم مبالغ أرنونا
+            const userIds = usersWithPayments
+                .filter(user => user.arnonaAmount)
+                .map(user => user.userId)
+                .join(',');
+
+            // استدعاء API مع معرفات المستخدمين
+            await generateArnonaPayments(
+                new Date().getMonth() + 1,
+                new Date().getFullYear(),
+                userIds || null
+            );
+
             await loadCurrentMonthPayments();
             setNotification({ type: 'success', message: 'تم توليد دفعات الأرنونا بنجاح' });
             setShowArnonaModal(false);
@@ -167,10 +201,18 @@ const AdminGeneral = () => {
     const handleAmountChange = (userId, type, value) => {
         setUsersWithPayments(prev => prev.map(user => {
             if (user.userId === userId) {
-                return {
-                    ...user,
-                    [`${type.toLowerCase()}Amount`]: value ? parseFloat(value) : null
-                };
+                if (type === 'CURRENT_WATER_READING') {
+                    return {
+                        ...user,
+                        currentWaterReading: value ? parseFloat(value) : null,
+                        waterAmount: value ? parseFloat(value) * waterRate : null
+                    };
+                } else {
+                    return {
+                        ...user,
+                        [`${type.toLowerCase()}Amount`]: value ? parseFloat(value) : null
+                    };
+                }
             }
             return user;
         }));
@@ -181,30 +223,47 @@ const AdminGeneral = () => {
             setLoading(true);
             const currentDate = new Date();
 
-            for (const user of usersWithPayments) {
-                if (user.waterAmount) {
-                    await generateWaterPayments(
-                        currentDate.getMonth() + 1,
-                        currentDate.getFullYear(),
-                        user.waterAmount,
-                        user.userId
-                    );
-                }
+            // تحضير بيانات دفعات المياه
+            const waterPaymentRequests = usersWithPayments
+                .filter(user => user.waterAmount)
+                .map(user => ({
+                    userId: user.userId,
+                    propertyId: user.propertyId,
+                    amount: user.waterAmount,
+                    currentReading: user.currentWaterReading,
+                    manual: false
+                }));
 
-                if (user.arnonaAmount) {
-                    await generateArnonaPayments(
-                        currentDate.getMonth() + 1,
-                        currentDate.getFullYear(),
-                        user.userId
-                    );
-                }
+            // تحضير بيانات دفعات الأرنونا
+            const arnonaPaymentRequests = usersWithPayments
+                .filter(user => user.arnonaAmount)
+                .map(user => ({
+                    userId: user.userId,
+                    propertyId: user.propertyId,
+                    amount: user.arnonaAmount
+                }));
+
+            // إرسال دفعات المياه
+            if (waterPaymentRequests.length > 0) {
+                await axiosInstance.post('api/payments/generate-custom-water', waterPaymentRequests);
+            }
+
+            // إرسال دفعات الأرنونا
+            if (arnonaPaymentRequests.length > 0) {
+                await axiosInstance.post('api/payments/generate-arnona', null, {
+                    params: {
+                        month: currentDate.getMonth() + 1,
+                        year: currentDate.getFullYear(),
+                        userIds: arnonaPaymentRequests.map(req => req.userId).join(',')
+                    }
+                });
             }
 
             setNotification({ type: 'success', message: 'تم حفظ الفواتير بنجاح' });
             setShowGenerateModal(false);
             loadCurrentMonthPayments();
         } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في حفظ الفواتير' });
+            setNotification({ type: 'danger', message: 'فشل في حفظ الفواتير: ' + error.message });
         } finally {
             setLoading(false);
         }
@@ -460,14 +519,24 @@ const AdminGeneral = () => {
                                             <thead>
                                             <tr>
                                                 <th>اسم المواطن</th>
-                                                <th>مياه (شيكل)</th>
-                                                <th>أرنونا (شيكل)</th>
+                                                <th>رقم العقار</th>
+                                                <th>قراءة المياه الحالية</th>
+                                                <th>مبلغ المياه (شيكل)</th>
+                                                <th>مبلغ الأرنونا (شيكل)</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {usersWithPayments.map((user) => (
                                                 <tr key={user.userId}>
                                                     <td>{user.userName}</td>
+                                                    <td>{user.propertyId || '--'}</td>
+                                                    <td>
+                                                        <Form.Control
+                                                            type="number"
+                                                            value={user.currentWaterReading || ''}
+                                                            onChange={(e) => handleAmountChange(user.userId, 'CURRENT_WATER_READING', e.target.value)}
+                                                        />
+                                                    </td>
                                                     <td>
                                                         <Form.Control
                                                             type="number"
