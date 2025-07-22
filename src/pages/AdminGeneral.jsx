@@ -162,6 +162,8 @@ const AdminGeneral = () => {
                 setEvents(eventsRes || []);
                 setNews(newsRes || []);
             } catch (error) {
+                console.error("Profile error details:", error);
+
                 setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
             } finally {
                 setLoading(false);
@@ -202,6 +204,7 @@ const AdminGeneral = () => {
             setPayments(payments);
             setUsersWithPayments(usersWithProperties);
         } catch (error) {
+            console.error("Profile error details:", error);
             setNotification({ type: 'danger', message: 'فشل في تحميل الدفعات' });
         } finally {
             setLoading(false);
