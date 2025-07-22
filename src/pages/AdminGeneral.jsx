@@ -42,7 +42,6 @@ const AdminGeneral = () => {
     const [notification, setNotification] = useState(null);
     const [usersWithPayments, setUsersWithPayments] = useState([]);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
-    const [waterReadings, setWaterReadings] = useState([]);
 
     // Form states
     const [waterRate, setWaterRate] = useState(0);
@@ -404,9 +403,9 @@ const AdminGeneral = () => {
                                             <Button
                                                 variant="primary"
                                                 className="w-100 mb-3"
-                                                onClick={() => setShowWaterModal(true)}
+                                                onClick={() => setShowGenerateModal(true)}
                                             >
-                                                <FiPlus className="me-2" /> توليد دفعات المياه
+                                                <FiPlus className="me-2" />توليد وتعديل الفواتير
                                             </Button>
 
                                             <Button
@@ -414,7 +413,7 @@ const AdminGeneral = () => {
                                                 className="w-100 mb-3"
                                                 onClick={() => setShowArnonaModal(true)}
                                             >
-                                                <FiPlus className="me-2" /> توليد دفعات الأرنونا
+                                                <FiPlus className="me-2" /> أضافه اخبار جديدة
                                             </Button>
 
                                             <Button
