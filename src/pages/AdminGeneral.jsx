@@ -20,16 +20,18 @@ import {
     FiAlertTriangle,
     FiActivity
 } from 'react-icons/fi';
-import {
-    generateArnonaPayments,
-    getAllUsers,
-    getAllEvents,
-    addNewEvent,
-    getAllNews,
-    getCurrentMonthPayments,
-    getUsersWithPayments
-} from '../api';
+import axios from 'axios';
 import './AdminGeneral.css';
+
+// إنشاء axios instance مخصصة
+const axiosInstance = axios.create({
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+});
 
 const AdminGeneral = () => {
     // States
@@ -42,8 +44,6 @@ const AdminGeneral = () => {
     const [notification, setNotification] = useState(null);
     const [usersWithPayments, setUsersWithPayments] = useState([]);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
-
-    // Form states
     const [waterRate, setWaterRate] = useState(0);
     const [showWaterModal, setShowWaterModal] = useState(false);
     const [showArnonaModal, setShowArnonaModal] = useState(false);
@@ -54,7 +54,101 @@ const AdminGeneral = () => {
         image: null
     });
 
-    // Load data
+    // دالة لجلب خصائص المستخدم
+    const getUserProperties = async (userId) => {
+        try {
+            const response = await axiosInstance.get(`/properties/user/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Failed to fetch user properties:', error);
+            return [];
+        }
+    };
+
+    // دالة لجلب جميع المستخدمين
+    const getAllUsers = async () => {
+        try {
+            const response = await axiosInstance.get('/users');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    // دالة لجلب الفعاليات
+    const getAllEvents = async () => {
+        try {
+            const response = await axiosInstance.get('/events');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    // دالة لجلب الأخبار
+    const getAllNews = async () => {
+        try {
+            const response = await axiosInstance.get('/news');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    // دالة لجلب دفعات الشهر الحالي
+    const getCurrentMonthPayments = async () => {
+        try {
+            const currentDate = new Date();
+            const response = await axiosInstance.get('/payments/current-month', {
+                params: {
+                    month: currentDate.getMonth() + 1,
+                    year: currentDate.getFullYear()
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    // دالة لجلب المستخدمين مع دفعاتهم
+    const getUsersWithPayments = async (month, year) => {
+        try {
+            const response = await axiosInstance.get('/payments/users-with-payments', {
+                params: { month, year }
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    // دالة لإضافة فعالية جديدة
+    const addNewEvent = async (formData) => {
+        try {
+            const response = await axiosInstance.post('/events', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    // دالة لتوليد دفعات الأرنونا
+    const generateArnonaPayments = async (month, year, userIds) => {
+        try {
+            await axiosInstance.post('/payments/generate-arnona', null, {
+                params: { month, year, userIds }
+            });
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    // تحميل البيانات الأولية
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
@@ -77,29 +171,33 @@ const AdminGeneral = () => {
         loadData();
     }, []);
 
+    // تحميل الدفعات عند تغيير التبويب
     useEffect(() => {
         if (activeTab === 'payments') {
             loadCurrentMonthPayments();
         }
     }, [activeTab]);
 
-
     const loadCurrentMonthPayments = async () => {
         setLoading(true);
         try {
             const currentDate = new Date();
             const payments = await getCurrentMonthPayments();
-            const users = await getUsersWithPayments(currentDate.getMonth() + 1, currentDate.getFullYear());
+            const users = await getUsersWithPayments(
+                currentDate.getMonth() + 1,
+                currentDate.getFullYear()
+            );
 
-            // إضافة معلومات العقار لكل مستخدم
-            const usersWithProperties = await Promise.all(users.map(async user => {
-                const properties = await getUserProperties(user.userId);
-                return {
-                    ...user,
-                    propertyId: properties[0]?.propertyId,
-                    propertyAddress: properties[0]?.address
-                };
-            }));
+            const usersWithProperties = await Promise.all(
+                users.map(async (user) => {
+                    const properties = await getUserProperties(user.userId);
+                    return {
+                        ...user,
+                        propertyId: properties[0]?.propertyId,
+                        propertyAddress: properties[0]?.address
+                    };
+                })
+            );
 
             setPayments(payments);
             setUsersWithPayments(usersWithProperties);
@@ -110,7 +208,7 @@ const AdminGeneral = () => {
         }
     };
 
-    // Handlers
+    // معالجة توليد دفعات المياه
     const handleGenerateWaterPayments = async () => {
         if (!waterRate || isNaN(waterRate)) {
             setNotification({ type: 'danger', message: 'الرجاء إدخال سعر صحيح للمياه' });
@@ -120,16 +218,15 @@ const AdminGeneral = () => {
         try {
             setLoading(true);
 
-            // تحضير بيانات الدفعات لكل مستخدم
-            const paymentRequests = usersWithPayments.map(user => ({
+            const paymentRequests = usersWithPayments.map((user) => ({
                 userId: user.userId,
                 propertyId: user.propertyId,
                 amount: user.waterAmount || 0,
                 currentReading: user.currentWaterReading || 0,
-                manual: false // أو true إذا كانت قراءة يدوية
+                manual: false
             }));
 
-            await axiosInstance.post('api/payments/generate-custom-water', paymentRequests);
+            await axiosInstance.post('/payments/generate-custom-water', paymentRequests);
             await loadCurrentMonthPayments();
             setNotification({ type: 'success', message: 'تم توليد دفعات المياه بنجاح' });
             setShowWaterModal(false);
@@ -142,17 +239,16 @@ const AdminGeneral = () => {
         }
     };
 
+    // معالجة توليد دفعات الأرنونا
     const handleGenerateArnonaPayments = async () => {
         try {
             setLoading(true);
 
-            // الحصول على معرفات المستخدمين الذين لديهم مبالغ أرنونا
             const userIds = usersWithPayments
-                .filter(user => user.arnonaAmount)
-                .map(user => user.userId)
+                .filter((user) => user.arnonaAmount)
+                .map((user) => user.userId)
                 .join(',');
 
-            // استدعاء API مع معرفات المستخدمين
             await generateArnonaPayments(
                 new Date().getMonth() + 1,
                 new Date().getFullYear(),
@@ -170,6 +266,7 @@ const AdminGeneral = () => {
         }
     };
 
+    // معالجة إضافة فعالية جديدة
     const handleAddEvent = async () => {
         if (!newEvent.title || !newEvent.date) {
             setNotification({ type: 'danger', message: 'الرجاء إدخال عنوان الفعالية وتاريخها' });
@@ -197,35 +294,38 @@ const AdminGeneral = () => {
         }
     };
 
+    // معالجة تغيير المبالغ
     const handleAmountChange = (userId, type, value) => {
-        setUsersWithPayments(prev => prev.map(user => {
-            if (user.userId === userId) {
-                if (type === 'CURRENT_WATER_READING') {
-                    return {
-                        ...user,
-                        currentWaterReading: value ? parseFloat(value) : null,
-                        waterAmount: value ? parseFloat(value) * waterRate : null
-                    };
-                } else {
-                    return {
-                        ...user,
-                        [`${type.toLowerCase()}Amount`]: value ? parseFloat(value) : null
-                    };
+        setUsersWithPayments((prev) =>
+            prev.map((user) => {
+                if (user.userId === userId) {
+                    if (type === 'CURRENT_WATER_READING') {
+                        return {
+                            ...user,
+                            currentWaterReading: value ? parseFloat(value) : null,
+                            waterAmount: value ? parseFloat(value) * waterRate : null
+                        };
+                    } else {
+                        return {
+                            ...user,
+                            [`${type.toLowerCase()}Amount`]: value ? parseFloat(value) : null
+                        };
+                    }
                 }
-            }
-            return user;
-        }));
+                return user;
+            })
+        );
     };
 
+    // معالجة حفظ الدفعات
     const handleSavePayments = async () => {
         try {
             setLoading(true);
             const currentDate = new Date();
 
-            // تحضير بيانات دفعات المياه
             const waterPaymentRequests = usersWithPayments
-                .filter(user => user.waterAmount)
-                .map(user => ({
+                .filter((user) => user.waterAmount)
+                .map((user) => ({
                     userId: user.userId,
                     propertyId: user.propertyId,
                     amount: user.waterAmount,
@@ -233,29 +333,30 @@ const AdminGeneral = () => {
                     manual: false
                 }));
 
-            // تحضير بيانات دفعات الأرنونا
             const arnonaPaymentRequests = usersWithPayments
-                .filter(user => user.arnonaAmount)
-                .map(user => ({
+                .filter((user) => user.arnonaAmount)
+                .map((user) => ({
                     userId: user.userId,
                     propertyId: user.propertyId,
                     amount: user.arnonaAmount
                 }));
 
-            // إرسال دفعات المياه
             if (waterPaymentRequests.length > 0) {
-                await axiosInstance.post('api/payments/generate-custom-water', waterPaymentRequests);
+                await axiosInstance.post('/payments/generate-custom-water', waterPaymentRequests);
             }
 
-            // إرسال دفعات الأرنونا
             if (arnonaPaymentRequests.length > 0) {
-                await axiosInstance.post('api/payments/generate-arnona', null, {
-                    params: {
-                        month: currentDate.getMonth() + 1,
-                        year: currentDate.getFullYear(),
-                        userIds: arnonaPaymentRequests.map(req => req.userId).join(',')
+                await axiosInstance.post(
+                    '/payments/generate-arnona',
+                    null,
+                    {
+                        params: {
+                            month: currentDate.getMonth() + 1,
+                            year: currentDate.getFullYear(),
+                            userIds: arnonaPaymentRequests.map((req) => req.userId).join(',')
+                        }
                     }
-                });
+                );
             }
 
             setNotification({ type: 'success', message: 'تم حفظ الفواتير بنجاح' });
@@ -268,6 +369,7 @@ const AdminGeneral = () => {
         }
     };
 
+    // تنسيق التاريخ
     const formatDate = (dateString) => {
         if (!dateString) return '--';
         try {
@@ -278,8 +380,9 @@ const AdminGeneral = () => {
         }
     };
 
+    // تنسيق حالة الدفع
     const formatPaymentStatus = (status) => {
-        switch(status) {
+        switch (status) {
             case 'PAID':
                 return { text: 'مدفوع', variant: 'success' };
             case 'PENDING':
@@ -367,7 +470,7 @@ const AdminGeneral = () => {
                                                 <div>
                                                     <h6>دفعات المياه هذا الشهر</h6>
                                                     <h3>
-                                                        {payments.filter(p => p.type === 'WATER').length}
+                                                        {payments.filter((p) => p.type === 'WATER').length}
                                                     </h3>
                                                 </div>
                                                 <FiDollarSign size={30} className="text-success" />
@@ -383,7 +486,7 @@ const AdminGeneral = () => {
                                                 <div>
                                                     <h6>دفعات الأرنونا هذا الشهر</h6>
                                                     <h3>
-                                                        {payments.filter(p => p.type === 'ARNONA').length}
+                                                        {payments.filter((p) => p.type === 'ARNONA').length}
                                                     </h3>
                                                 </div>
                                                 <FiDollarSign size={30} className="text-warning" />
@@ -411,17 +514,17 @@ const AdminGeneral = () => {
                                             <Button
                                                 variant="success"
                                                 className="w-100 mb-3"
-                                                onClick={() => setShowArnonaModal(true)}
+                                                onClick={() => setShowWaterModal(true)}
                                             >
-                                                <FiPlus className="me-2" /> أضافه اخبار جديدة
+                                                <FiPlus className="me-2" /> توليد دفعات المياه
                                             </Button>
 
                                             <Button
                                                 variant="info"
                                                 className="w-100"
-                                                onClick={() => setActiveTab('add-event')}
+                                                onClick={() => setShowArnonaModal(true)}
                                             >
-                                                <FiActivity className="me-2" /> إضافة فعالية جديدة
+                                                <FiActivity className="me-2" /> توليد دفعات الأرنونا
                                             </Button>
                                         </Card.Body>
                                     </Card>
@@ -434,13 +537,11 @@ const AdminGeneral = () => {
                                         </Card.Header>
                                         <Card.Body>
                                             {news.length > 0 ? (
-                                                news.slice(0, 3).map(item => (
+                                                news.slice(0, 3).map((item) => (
                                                     <div key={item.id} className="news-item mb-3">
                                                         <h6>{item.title}</h6>
                                                         <p className="text-muted small">{item.content.substring(0, 50)}...</p>
-                                                        {item.isEmergency && (
-                                                            <Badge bg="danger">طوارئ</Badge>
-                                                        )}
+                                                        {item.isEmergency && <Badge bg="danger">طوارئ</Badge>}
                                                     </div>
                                                 ))
                                             ) : (
@@ -483,8 +584,8 @@ const AdminGeneral = () => {
                                         <tr>
                                             <th>#</th>
                                             <th>اسم المواطن</th>
-                                            <th>مياه (شيكل)</th>
-                                            <th>أرنونا (شيكل)</th>
+                                            <th>نوع الدفعة</th>
+                                            <th>المبلغ (شيكل)</th>
                                             <th>حالة الدفع</th>
                                         </tr>
                                         </thead>
@@ -492,12 +593,12 @@ const AdminGeneral = () => {
                                         {payments.map((payment, index) => (
                                             <tr key={payment.id}>
                                                 <td>{index + 1}</td>
-                                                <td>{payment.userName}</td>
-                                                <td>{payment.waterAmount || '--'}</td>
-                                                <td>{payment.arnonaAmount || '--'}</td>
+                                                <td>{payment.user?.fullName || '--'}</td>
+                                                <td>{payment.type === 'WATER' ? 'مياه' : 'أرنونا'}</td>
+                                                <td>{payment.amount || '--'}</td>
                                                 <td>
-                                                    <Badge bg={payment.status === 'PAID' ? 'success' : 'warning'}>
-                                                        {payment.status === 'PAID' ? 'مدفوع' : 'قيد الانتظار'}
+                                                    <Badge bg={formatPaymentStatus(payment.status).variant}>
+                                                        {formatPaymentStatus(payment.status).text}
                                                     </Badge>
                                                 </td>
                                             </tr>
@@ -514,6 +615,16 @@ const AdminGeneral = () => {
                                 </Modal.Header>
                                 <Modal.Body>
                                     <Form>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>سعر المتر المكعب للمياه (شيكل)</Form.Label>
+                                            <Form.Control
+                                                type="number"
+                                                value={waterRate}
+                                                onChange={(e) => setWaterRate(parseFloat(e.target.value))}
+                                                min="0"
+                                                step="0.1"
+                                            />
+                                        </Form.Group>
                                         <Table striped bordered>
                                             <thead>
                                             <tr>
@@ -533,21 +644,31 @@ const AdminGeneral = () => {
                                                         <Form.Control
                                                             type="number"
                                                             value={user.currentWaterReading || ''}
-                                                            onChange={(e) => handleAmountChange(user.userId, 'CURRENT_WATER_READING', e.target.value)}
+                                                            onChange={(e) =>
+                                                                handleAmountChange(
+                                                                    user.userId,
+                                                                    'CURRENT_WATER_READING',
+                                                                    e.target.value
+                                                                )
+                                                            }
                                                         />
                                                     </td>
                                                     <td>
                                                         <Form.Control
                                                             type="number"
                                                             value={user.waterAmount || ''}
-                                                            onChange={(e) => handleAmountChange(user.userId, 'WATER', e.target.value)}
+                                                            onChange={(e) =>
+                                                                handleAmountChange(user.userId, 'WATER', e.target.value)
+                                                            }
                                                         />
                                                     </td>
                                                     <td>
                                                         <Form.Control
                                                             type="number"
                                                             value={user.arnonaAmount || ''}
-                                                            onChange={(e) => handleAmountChange(user.userId, 'ARNONA', e.target.value)}
+                                                            onChange={(e) =>
+                                                                handleAmountChange(user.userId, 'ARNONA', e.target.value)
+                                                            }
                                                         />
                                                     </td>
                                                 </tr>
@@ -582,20 +703,21 @@ const AdminGeneral = () => {
 
                             {events.length > 0 ? (
                                 <Row>
-                                    {events.map(event => (
+                                    {events.map((event) => (
                                         <Col md={4} key={event.id} className="mb-4">
                                             <Card className="h-100">
                                                 {event.image && (
-                                                    <Card.Img variant="top" src={event.image} />
+                                                    <Card.Img
+                                                        variant="top"
+                                                        src={`${process.env.REACT_APP_API_URL}/${event.image}`}
+                                                    />
                                                 )}
                                                 <Card.Body>
                                                     <Card.Title>{event.title}</Card.Title>
                                                     <Card.Subtitle className="mb-2 text-muted">
                                                         {formatDate(event.date)}
                                                     </Card.Subtitle>
-                                                    <Card.Text>
-                                                        {event.description.substring(0, 100)}...
-                                                    </Card.Text>
+                                                    <Card.Text>{event.description.substring(0, 100)}...</Card.Text>
                                                 </Card.Body>
                                                 <Card.Footer>
                                                     <Button variant="outline-primary" size="sm">
@@ -623,7 +745,7 @@ const AdminGeneral = () => {
                                         <Form.Control
                                             type="text"
                                             value={newEvent.title}
-                                            onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                                            onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
                                             required
                                         />
                                     </Form.Group>
@@ -633,7 +755,7 @@ const AdminGeneral = () => {
                                         <Form.Control
                                             type="date"
                                             value={newEvent.date}
-                                            onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                                            onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
                                             required
                                         />
                                     </Form.Group>
@@ -644,7 +766,9 @@ const AdminGeneral = () => {
                                             as="textarea"
                                             rows={3}
                                             value={newEvent.description}
-                                            onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                                            onChange={(e) =>
+                                                setNewEvent({ ...newEvent, description: e.target.value })
+                                            }
                                         />
                                     </Form.Group>
 
@@ -653,7 +777,9 @@ const AdminGeneral = () => {
                                         <Form.Control
                                             type="file"
                                             accept="image/*"
-                                            onChange={(e) => setNewEvent({...newEvent, image: e.target.files[0]})}
+                                            onChange={(e) =>
+                                                setNewEvent({ ...newEvent, image: e.target.files[0] })
+                                            }
                                         />
                                     </Form.Group>
 
@@ -670,11 +796,7 @@ const AdminGeneral = () => {
                                             onClick={handleAddEvent}
                                             disabled={!newEvent.title || !newEvent.date}
                                         >
-                                            {loading ? (
-                                                <Spinner animation="border" size="sm" />
-                                            ) : (
-                                                'حفظ الفعالية'
-                                            )}
+                                            {loading ? <Spinner animation="border" size="sm" /> : 'حفظ الفعالية'}
                                         </Button>
                                     </div>
                                 </Card.Body>
@@ -715,7 +837,7 @@ const AdminGeneral = () => {
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {news.map(item => (
+                                            {news.map((item) => (
                                                 <tr key={item.id}>
                                                     <td>{item.id}</td>
                                                     <td>{item.title}</td>
@@ -773,11 +895,7 @@ const AdminGeneral = () => {
                         إلغاء
                     </Button>
                     <Button variant="primary" onClick={handleGenerateWaterPayments}>
-                        {loading ? (
-                            <Spinner animation="border" size="sm" />
-                        ) : (
-                            'توليد الدفعات'
-                        )}
+                        {loading ? <Spinner animation="border" size="sm" /> : 'توليد الدفعات'}
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -797,11 +915,7 @@ const AdminGeneral = () => {
                         إلغاء
                     </Button>
                     <Button variant="primary" onClick={handleGenerateArnonaPayments}>
-                        {loading ? (
-                            <Spinner animation="border" size="sm" />
-                        ) : (
-                            'توليد الدفعات'
-                        )}
+                        {loading ? <Spinner animation="border" size="sm" /> : 'توليد الدفعات'}
                     </Button>
                 </Modal.Footer>
             </Modal>
