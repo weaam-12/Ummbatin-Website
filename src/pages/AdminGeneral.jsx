@@ -22,16 +22,8 @@ import {
 } from 'react-icons/fi';
 import axios from 'axios';
 import './AdminGeneral.css';
+import { axiosInstance } from './api';
 
-// إنشاء axios instance مخصصة
-const axiosInstance = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
-    timeout: 10000,
-    headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-    }
-});
 
 const AdminGeneral = () => {
     // States
@@ -68,7 +60,7 @@ const AdminGeneral = () => {
     // دالة لجلب جميع المستخدمين
     const getAllUsers = async () => {
         try {
-            const response = await axiosInstance.get('/users');
+            const response = await axiosInstance.get('api/users/all');
             return response.data;
         } catch (error) {
             throw error;
