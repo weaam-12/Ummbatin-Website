@@ -225,7 +225,11 @@ const AdminGeneral = () => {
             setNotification({ type: 'success', message: 'تم توليد دفعات المياه بنجاح' });
             setShowWaterModal(false);
             setWaterRate(0);
+            console.log("رد الخادم:", response.data);
+
         } catch (error) {
+            console.error("تفاصيل الخطأ الكاملة:", error);
+            console.error("رد الخادم عند الخطأ:", error.response);
             const errorMsg = error.response?.data?.message || error.message || 'فشل في توليد الدفعات';
             setNotification({ type: 'danger', message: errorMsg });
         } finally {
