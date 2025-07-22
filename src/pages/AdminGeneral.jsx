@@ -20,9 +20,8 @@ import {
     FiAlertTriangle,
     FiActivity
 } from 'react-icons/fi';
-import axios from 'axios';
 import './AdminGeneral.css';
-import { axiosInstance } from './api';
+import { axiosInstance } from '../api.js';
 
 
 const AdminGeneral = () => {
