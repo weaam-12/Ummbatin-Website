@@ -48,7 +48,7 @@ const AdminGeneral = () => {
     // دالة لجلب خصائص المستخدم
     const getUserProperties = async (userId) => {
         try {
-            const response = await axiosInstance.get(`/properties/user/${userId}`);
+            const response = await axiosInstance.get(`api/properties/user/${userId}`);
             return response.data;
         } catch (error) {
             console.error('Failed to fetch user properties:', error);
@@ -69,7 +69,7 @@ const AdminGeneral = () => {
     // دالة لجلب الفعاليات
     const getAllEvents = async () => {
         try {
-            const response = await axiosInstance.get('/events');
+            const response = await axiosInstance.get('api/events');
             return response.data;
         } catch (error) {
             throw error;
@@ -79,7 +79,7 @@ const AdminGeneral = () => {
     // دالة لجلب الأخبار
     const getAllNews = async () => {
         try {
-            const response = await axiosInstance.get('/news');
+            const response = await axiosInstance.get('api/news');
             return response.data;
         } catch (error) {
             throw error;
@@ -90,7 +90,7 @@ const AdminGeneral = () => {
     const getCurrentMonthPayments = async () => {
         try {
             const currentDate = new Date();
-            const response = await axiosInstance.get('/payments/current-month', {
+            const response = await axiosInstance.get('api/payments/current-month', {
                 params: {
                     month: currentDate.getMonth() + 1,
                     year: currentDate.getFullYear()
@@ -105,7 +105,7 @@ const AdminGeneral = () => {
     // دالة لجلب المستخدمين مع دفعاتهم
     const getUsersWithPayments = async (month, year) => {
         try {
-            const response = await axiosInstance.get('/payments/users-with-payments', {
+            const response = await axiosInstance.get('api/payments/users-with-payments', {
                 params: { month, year }
             });
             return response.data;
@@ -117,7 +117,7 @@ const AdminGeneral = () => {
     // دالة لإضافة فعالية جديدة
     const addNewEvent = async (formData) => {
         try {
-            const response = await axiosInstance.post('/events', formData, {
+            const response = await axiosInstance.post('api/events', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -131,7 +131,7 @@ const AdminGeneral = () => {
     // دالة لتوليد دفعات الأرنونا
     const generateArnonaPayments = async (month, year, userIds) => {
         try {
-            await axiosInstance.post('/payments/generate-arnona', null, {
+            await axiosInstance.post('api/payments/generate-arnona', null, {
                 params: { month, year, userIds }
             });
         } catch (error) {
@@ -220,7 +220,7 @@ const AdminGeneral = () => {
                 manual: false
             }));
 
-            await axiosInstance.post('/payments/generate-custom-water', paymentRequests);
+            await axiosInstance.post('api/payments/generate-custom-water', paymentRequests);
             await loadCurrentMonthPayments();
             setNotification({ type: 'success', message: 'تم توليد دفعات المياه بنجاح' });
             setShowWaterModal(false);
@@ -336,12 +336,12 @@ const AdminGeneral = () => {
                 }));
 
             if (waterPaymentRequests.length > 0) {
-                await axiosInstance.post('/payments/generate-custom-water', waterPaymentRequests);
+                await axiosInstance.post('api/payments/generate-custom-water', waterPaymentRequests);
             }
 
             if (arnonaPaymentRequests.length > 0) {
                 await axiosInstance.post(
-                    '/payments/generate-arnona',
+                    'api/payments/generate-arnona',
                     null,
                     {
                         params: {
