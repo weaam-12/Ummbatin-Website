@@ -285,37 +285,29 @@ const AdminGeneral = () => {
                             ? 'سيتم توليد فواتير الأرنونا لجميع المستخدمين بناءً على مساحة العقار وعدد الوحدات السكنية'
                             : 'سيتم توليد فواتير المياه لجميع المستخدمين'}
                     </p>
-                    <Table striped bordered hover responsive>
+                    <Table striped bordered hover>
                         <thead>
                         <tr>
                             <th>#</th>
                             <th>اسم المستخدم</th>
                             <th>عنوان العقار</th>
                             <th>عدد الوحدات</th>
-                            <th>مساحة العقار (م²)</th>
+                            <th>مساحة العقار</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {users.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="text-center">
-                                    لا توجد بيانات
-                                </td>
-                            </tr>
-                        ) : (
-                            users.map((u, idx) => {
-                                const p = u.properties?.[0];
-                                return p ? (
-                                    <tr key={u.userId}>
-                                        <td>{idx + 1}</td>
-                                        <td>{u.fullName}</td>
-                                        <td>{p.address || '--'}</td>
-                                        <td>{p.numberOfUnits}</td>
-                                        <td>{p.area} م²</td>
-                                    </tr>
-                                ) : null;
-                            })
-                        )}
+                        {users.map((user, index) => {
+                            const prop = user.properties?.[0];
+                            return (
+                                <tr key={user.userId}>
+                                    <td>{index + 1}</td>
+                                    <td>{user.fullName}</td>
+                                    <td>{prop?.address || '--'}</td>
+                                    <td>{prop?.numberOfUnits || '--'}</td>
+                                    <td>{prop?.area ? `${prop.area} م²` : '--'}</td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
                     </Table>
 
