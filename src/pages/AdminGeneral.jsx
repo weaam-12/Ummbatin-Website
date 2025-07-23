@@ -58,6 +58,7 @@ const AdminGeneral = () => {
                 setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
             } finally {
                 setLoading(false);
+                console.log("Loading state after operation:", loading);
             }
         };
 
@@ -91,6 +92,7 @@ const AdminGeneral = () => {
             });
         } finally {
             setLoading(false);
+            console.log("Loading state after operation:", loading);
         }
     };
     // إنشاء فاتورة أرنونا
@@ -119,6 +121,7 @@ const AdminGeneral = () => {
             });
         } finally {
             setLoading(false);
+            console.log("Loading state after operation:", loading);
         }
     };
 
@@ -137,6 +140,7 @@ const AdminGeneral = () => {
             setNotification({ type: 'danger', message: 'فشل في تحديث البيانات' });
         } finally {
             setLoading(false);
+            console.log("Loading state after operation:", loading);
         }
     };
 
