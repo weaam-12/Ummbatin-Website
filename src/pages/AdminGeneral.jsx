@@ -82,17 +82,26 @@ const AdminGeneral = () => {
                 params = { month, year, rate: 10 };
             }
 
-            const res = await axiosInstance.post(endpoint, null, { params });
-            console.log("✅ Response from backend:", res.data); // تأكد من الرسالة
+            await axiosInstance.post(endpoint, null, { params });
 
-            setNotification({ type: 'success', message: res.data.message || `تم توليد فواتير ${currentBillType === 'ARNONA' ? 'الأرنونا' : 'المياه'} بنجاح` });
-
+            // ✅ تحديث الجدول فورًا
             const updatedPayments = await fetchPayments();
             setPayments(updatedPayments);
+
+            setNotification({
+                type: 'success',
+                message: `تم توليد فواتير ${
+                    currentBillType === 'ARNONA' ? 'الأرنونا' : 'المياه'
+                } بنجاح`
+            });
+
             setShowBillsModal(false);
         } catch (error) {
-            console.error("❌ Error generating bills:", error.response?.data || error.message);
-            setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في توليد الفواتير' });
+            console.error('Error generating bills:', error);
+            setNotification({
+                type: 'danger',
+                message: error.response?.data?.message || 'فشل في توليد الفواتير'
+            });
         } finally {
             setLoading(false);
         }
