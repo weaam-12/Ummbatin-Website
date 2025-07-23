@@ -297,17 +297,21 @@ const AdminGeneral = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {users.map((user, index) => (
-                            <tr key={user.userId}>
-                                <td>{index + 1}</td>
-                                <td>{user.fullName}</td>
-                                <td>{user.property?.address || '--'}</td>
-                                <td>{user.property?.numberOfUnits || '--'}</td>
-                                <td>{user.property?.area ? `${user.property.area} م²` : '--'}</td>
-                            </tr>
-                        ))}
+                        {users.map((user, index) => {
+                            const prop = user.properties?.[0];
+                            return (
+                                <tr key={user.userId}>
+                                    <td>{index + 1}</td>
+                                    <td>{user.fullName}</td>
+                                    <td>{prop?.address || '--'}</td>
+                                    <td>{prop?.numberOfUnits || '--'}</td>
+                                    <td>{prop?.area ? `${prop.area} م²` : '--'}</td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
                     </Table>
+
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowBillsModal(false)}>
