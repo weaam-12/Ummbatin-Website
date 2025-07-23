@@ -12,11 +12,10 @@ const AdminGeneral = () => {
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
 
-    // States for water and arnona bills
-    const [waterBills, setWaterBills] = useState([]);
-    const [arnonaBills, setArnonaBills] = useState([]);
-    const [showSubmitModal, setShowSubmitModal] = useState(false);
+    // States for bills
+    const [showBillsModal, setShowBillsModal] = useState(false);
     const [currentBillType, setCurrentBillType] = useState('');
+    const [billsData, setBillsData] = useState([]);
 
     // Fetch all users
     const getAllUsers = async () => {
@@ -56,21 +55,13 @@ const AdminGeneral = () => {
                 setUsers(usersRes || []);
                 setPayments(paymentsRes || []);
 
-                // Initialize water and arnona bills
-                const initialWaterBills = usersRes.map(user => ({
+                // Initialize bills data
+                const initialBills = usersRes.map(user => ({
                     userId: user.userId,
                     fullName: user.fullName,
                     amount: ''
                 }));
-
-                const initialArnonaBills = usersRes.map(user => ({
-                    userId: user.userId,
-                    fullName: user.fullName,
-                    amount: ''
-                }));
-
-                setWaterBills(initialWaterBills);
-                setArnonaBills(initialArnonaBills);
+                setBillsData(initialBills);
             } catch (error) {
                 setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
             } finally {
@@ -81,54 +72,50 @@ const AdminGeneral = () => {
         loadData();
     }, []);
 
-    // Handle amount change for water bills
-    const handleWaterAmountChange = (userId, amount) => {
-        setWaterBills(prevBills =>
+    // Handle bill amount change
+    const handleBillAmountChange = (userId, amount) => {
+        setBillsData(prevBills =>
             prevBills.map(bill =>
                 bill.userId === userId ? { ...bill, amount } : bill
             )
         );
     };
 
-    // Handle amount change for arnona bills
-    const handleArnonaAmountChange = (userId, amount) => {
-        setArnonaBills(prevBills =>
-            prevBills.map(bill =>
-                bill.userId === userId ? { ...bill, amount } : bill
-            )
-        );
-    };
-
-    // Submit bills
+    // Prepare and submit bills
     const handleSubmitBills = async () => {
-        const billsToSubmit = currentBillType === 'WATER' ? waterBills : arnonaBills;
-        const apiEndpoint = currentBillType === 'WATER' ? 'api/payments/create-water' : 'api/payments/create-arnona';
-
         try {
             setLoading(true);
 
-            // Filter out bills with empty amounts
-            const validBills = billsToSubmit.filter(bill => bill.amount && bill.amount > 0);
+            // Prepare bills data for submission
+            const billsToSubmit = billsData
+                .filter(bill => bill.amount && bill.amount > 0)
+                .map(bill => ({
+                    userId: bill.userId,
+                    amount: parseFloat(bill.amount)
+                }));
 
-            if (validBills.length === 0) {
+            if (billsToSubmit.length === 0) {
                 setNotification({ type: 'danger', message: 'الرجاء إدخال مبالغ للفواتير' });
                 return;
             }
 
-            // Submit each bill
-            for (const bill of validBills) {
-                await axiosInstance.post(apiEndpoint, null, {
-                    params: {
-                        userId: bill.userId,
-                        amount: bill.amount
-                    }
-                });
-            }
+            // Use the appropriate endpoint based on bill type
+            const endpoint = currentBillType === 'WATER'
+                ? 'api/payments/generate-custom-water'
+                : 'api/payments/generate-arnona';
 
-            setNotification({ type: 'success', message: `تم إنشاء فواتير ${currentBillType === 'WATER' ? 'المياه' : 'الأرنونا'} بنجاح` });
-            setShowSubmitModal(false);
+            // Submit bills
+            const response = await axiosInstance.post(endpoint, billsToSubmit);
+
+            setNotification({
+                type: 'success',
+                message: `تم إنشاء ${billsToSubmit.length} فاتورة ${currentBillType === 'WATER' ? 'مياه' : 'أرنونا'} بنجاح`
+            });
+
+            setShowBillsModal(false);
             loadData();
         } catch (error) {
+            console.error('Error submitting bills:', error);
             setNotification({
                 type: 'danger',
                 message: error.response?.data?.message || 'فشل في إنشاء الفواتير'
@@ -163,6 +150,17 @@ const AdminGeneral = () => {
             case 'FAILED': return { text: 'فشل', variant: 'danger' };
             default: return { text: status, variant: 'secondary' };
         }
+    };
+
+    // Open bills modal and initialize data
+    const openBillsModal = (type) => {
+        setCurrentBillType(type);
+        setBillsData(users.map(user => ({
+            userId: user.userId,
+            fullName: user.fullName,
+            amount: ''
+        })));
+        setShowBillsModal(true);
     };
 
     return (
@@ -255,20 +253,14 @@ const AdminGeneral = () => {
                                             <Button
                                                 variant="success"
                                                 className="w-100 mb-3"
-                                                onClick={() => {
-                                                    setCurrentBillType('WATER');
-                                                    setShowSubmitModal(true);
-                                                }}
+                                                onClick={() => openBillsModal('WATER')}
                                             >
                                                 <FiPlus className="me-2" /> فواتير المياه
                                             </Button>
                                             <Button
                                                 variant="info"
                                                 className="w-100"
-                                                onClick={() => {
-                                                    setCurrentBillType('ARNONA');
-                                                    setShowSubmitModal(true);
-                                                }}
+                                                onClick={() => openBillsModal('ARNONA')}
                                             >
                                                 <FiPlus className="me-2" /> فواتير الأرنونا
                                             </Button>
@@ -321,10 +313,10 @@ const AdminGeneral = () => {
                 </Col>
             </Row>
 
-            {/* Bills Submission Modal */}
+            {/* Bills Modal */}
             <Modal
-                show={showSubmitModal}
-                onHide={() => setShowSubmitModal(false)}
+                show={showBillsModal}
+                onHide={() => setShowBillsModal(false)}
                 size="lg"
                 fullscreen="md-down"
             >
@@ -343,7 +335,7 @@ const AdminGeneral = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {(currentBillType === 'WATER' ? waterBills : arnonaBills).map((bill, index) => (
+                        {billsData.map((bill, index) => (
                             <tr key={bill.userId}>
                                 <td>{index + 1}</td>
                                 <td>{bill.fullName}</td>
@@ -351,14 +343,11 @@ const AdminGeneral = () => {
                                     <Form.Control
                                         type="number"
                                         value={bill.amount}
-                                        onChange={(e) =>
-                                            currentBillType === 'WATER'
-                                                ? handleWaterAmountChange(bill.userId, e.target.value)
-                                                : handleArnonaAmountChange(bill.userId, e.target.value)
-                                        }
-                                        min="0"
+                                        onChange={(e) => handleBillAmountChange(bill.userId, e.target.value)}
+                                        min="1"
                                         step="0.1"
                                         placeholder="أدخل المبلغ"
+                                        className="text-left"
                                     />
                                 </td>
                             </tr>
@@ -367,7 +356,7 @@ const AdminGeneral = () => {
                     </Table>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowSubmitModal(false)}>
+                    <Button variant="secondary" onClick={() => setShowBillsModal(false)}>
                         إلغاء
                     </Button>
                     <Button
@@ -375,7 +364,7 @@ const AdminGeneral = () => {
                         onClick={handleSubmitBills}
                         disabled={loading}
                     >
-                        {loading ? <Spinner size="sm" /> : 'إنشاء الفواتير'}
+                        {loading ? <Spinner size="sm" /> : 'حفظ الفواتير'}
                     </Button>
                 </Modal.Footer>
             </Modal>
