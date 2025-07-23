@@ -4,7 +4,7 @@ import {
     Alert, Spinner, Badge, Form
 } from 'react-bootstrap';
 import {
-    FiUsers, FiDollarSign, FiPlus, FiDroplet, FiHome
+    FiUsers, FiDollarSign, FiPlus, FiDroplet, FiHome, FiFileText
 } from 'react-icons/fi';
 import {
     axiosInstance,
@@ -73,11 +73,11 @@ const AdminGeneral = () => {
     const handleAddWaterReading = async () => {
         try {
             setLoading(true);
-            await addWaterReading(
-                waterForm.propertyId,
-                waterForm.amount,
-                waterForm.date
-            );
+            await addWaterReading({
+                propertyId: waterForm.propertyId,
+                amount: waterForm.amount,
+                date: waterForm.date
+            });
             await fetchData();
             setShowWaterModal(false);
             setNotification({ type: 'success', message: 'تمت إضافة قراءة المياه بنجاح' });

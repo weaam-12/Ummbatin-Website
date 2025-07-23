@@ -273,4 +273,9 @@ export const getAllNews = async () => {
     const response = await axiosInstance.get('api/news');
     return response.data;
 };
+
+export const getWaterReadings = async () => {
+    const response = await axiosInstance.get('api/water-readings');
+    return response.data;
+};
 export default axiosInstance;
