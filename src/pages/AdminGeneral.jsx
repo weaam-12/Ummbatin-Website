@@ -335,7 +335,7 @@ const AdminGeneral = () => {
                     <Button
                         variant="primary"
                         onClick={handleCreateWaterPayment}
-                        disabled={!selectedUser || !waterAmount}
+                        disabled={!selectedUser || !waterAmount || loading }
                     >
                         {loading ? <Spinner size="sm" /> : 'إنشاء الفاتورة'}
                     </Button>
@@ -384,7 +384,7 @@ const AdminGeneral = () => {
                     <Button
                         variant="primary"
                         onClick={handleCreateArnonaPayment}
-                        disabled={!selectedUser || !arnonaAmount}
+                        disabled={!selectedUser || !arnonaAmount|| loading}
                     >
                         {loading ? <Spinner size="sm" /> : 'إنشاء الفاتورة'}
                     </Button>
