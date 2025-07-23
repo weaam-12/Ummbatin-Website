@@ -5,7 +5,7 @@ import {
     createKindergarten,
     deleteKindergarten,
     getAllUsers,           // returns minimal {userId, name}
-} from './api';           // your existing api.js
+} from '../api';           // your existing api.js
 
 // helper to call endpoints you still need to add
 import { axiosInstance } from '../api.js';
