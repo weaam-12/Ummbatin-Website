@@ -179,15 +179,11 @@ const AdminGeneral = () => {
                     <ul className="sidebar-menu">
                         <li className={activeTab === 'dashboard' ? 'active' : ''}
                             onClick={() => setActiveTab('dashboard')}>
-                            <FiUsers className="me-2"/> نظرة عااامة
+                            <FiUsers className="me-2" /> نظرة عااامة
                         </li>
                         <li className={activeTab === 'payments' ? 'active' : ''}
                             onClick={() => setActiveTab('payments')}>
-                            <FiDollarSign className="me-2"/> إدارة الدفعات
-                        </li>
-                        <li className={activeTab === 'events' ? 'active' : ''}
-                            onClick={() => setActiveTab('events')}>
-                            <FiCalendar className="me-2"/> إدارة الفعاليات
+                            <FiDollarSign className="me-2" /> إدارة الدفعات
                         </li>
 
                     </ul>
@@ -329,95 +325,7 @@ const AdminGeneral = () => {
                     )}
                 </Col>
             </Row>
-            {activeTab === 'events' && (
-                <div className="events-section">
-                    <h3 className="mb-4">إدارة الفعاليات</h3>
-                    <Button variant="primary" onClick={() => setShowEventModal(true)}>
-                        <FiPlus className="me-2" /> إضافة فعالية جديدة
-                    </Button>
 
-                    <Row className="mt-4">
-                        {events.map(event => (
-                            <Col md={4} key={event.id} className="mb-4">
-                                <Card>
-                                    {event.imageUrl && (
-                                        <Card.Img variant="top" src={event.imageUrl} />
-                                    )}
-                                    <Card.Body>
-                                        <Card.Title>{event.title}</Card.Title>
-                                        <Card.Text>{event.description}</Card.Text>
-                                        <div className="d-flex justify-content-between">
-                                            <small className="text-muted">{event.location}</small>
-                                            <small className="text-muted">
-                                                {new Date(event.date).toLocaleDateString()}
-                                            </small>
-                                        </div>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-                </div>
-            )}
-
-            // مودال إضافة فعالية
-            <Modal show={showEventModal} onHide={() => setShowEventModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>إضافة فعالية جديدة</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3">
-                            <Form.Label>عنوان الفعالية</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newEvent.title}
-                                onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>الوصف</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                rows={3}
-                                value={newEvent.description}
-                                onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>المكان</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newEvent.location}
-                                onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>التاريخ</Form.Label>
-                            <Form.Control
-                                type="date"
-                                value={newEvent.date}
-                                onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>صورة الفعالية</Form.Label>
-                            <Form.Control
-                                type="file"
-                                onChange={(e) => setNewEvent({...newEvent, image: e.target.files[0]})}
-                            />
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowEventModal(false)}>
-                        إلغاء
-                    </Button>
-                    <Button variant="primary" onClick={handleAddEvent}>
-                        {loading ? 'جاري الحفظ...' : 'حفظ الفعالية'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
             {/* Bills Generation Modal */}
             <Modal show={showBillsModal} onHide={() => setShowBillsModal(false)} size="lg">
             <Modal.Header closeButton>
