@@ -11,13 +11,10 @@ const AdminGeneral = () => {
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
-
-    // States for bills
     const [showBillsModal, setShowBillsModal] = useState(false);
     const [currentBillType, setCurrentBillType] = useState('');
-    const [billsData, setBillsData] = useState([]);
 
-    // Fetch all users
+    // Fetch all users with their properties
     const getAllUsers = async () => {
         try {
             const response = await axiosInstance.get('api/users/all');
@@ -34,7 +31,7 @@ const AdminGeneral = () => {
             const response = await axiosInstance.get('api/payments/current-month', {
                 params: {
                     month: currentDate.getMonth() + 1,
-                    year: currentDate.getFullYear()
+                    year: currentDate.getYear() + 1900
                 }
             });
             return response.data;
@@ -54,14 +51,6 @@ const AdminGeneral = () => {
                 ]);
                 setUsers(usersRes || []);
                 setPayments(paymentsRes || []);
-
-                // Initialize bills data
-                const initialBills = usersRes.map(user => ({
-                    userId: user.userId,
-                    fullName: user.fullName,
-                    amount: ''
-                }));
-                setBillsData(initialBills);
             } catch (error) {
                 setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
             } finally {
@@ -72,71 +61,45 @@ const AdminGeneral = () => {
         loadData();
     }, []);
 
-    // Handle bill amount change
-    const handleBillAmountChange = (userId, amount) => {
-        setBillsData(prevBills =>
-            prevBills.map(bill =>
-                bill.userId === userId ? { ...bill, amount } : bill
-            )
-        );
-    };
-
-    // Prepare and submit bills
-    const handleSubmitBills = async () => {
+    // Handle generate bills
+    const handleGenerateBills = async () => {
         try {
             setLoading(true);
+            const currentDate = new Date();
+            const month = currentDate.getMonth() + 1;
+            const year = currentDate.getFullYear();
 
-            // Prepare bills data for submission
-            const billsToSubmit = billsData
-                .filter(bill => bill.amount && bill.amount > 0)
-                .map(bill => ({
-                    userId: bill.userId,
-                    amount: parseFloat(bill.amount)
-                }));
-
-            if (billsToSubmit.length === 0) {
-                setNotification({ type: 'danger', message: 'الرجاء إدخال مبالغ للفواتير' });
-                return;
+            let response;
+            if (currentBillType === 'WATER') {
+                response = await axiosInstance.post('api/payments/generate-custom-water',
+                    users.map(user => ({
+                        userId: user.userId,
+                        propertyId: user.properties?.[0]?.propertyId,
+                        amount: 100 // يمكن تغيير هذا الرقم حسب احتياجك
+                    }))
+                );
+            } else {
+                // للأرنونا نستخدم generate-arnona بدون الحاجة لبيانات إضافية
+                response = await axiosInstance.post('api/payments/generate-arnona', null, {
+                    params: { month, year }
+                });
             }
-
-            // Use the appropriate endpoint based on bill type
-            const endpoint = currentBillType === 'WATER'
-                ? 'api/payments/generate-custom-water'
-                : 'api/payments/generate-arnona';
-
-            // Submit bills
-            const response = await axiosInstance.post(endpoint, billsToSubmit);
 
             setNotification({
                 type: 'success',
-                message: `تم إنشاء ${billsToSubmit.length} فاتورة ${currentBillType === 'WATER' ? 'مياه' : 'أرنونا'} بنجاح`
+                message: `تم إنشاء فواتير ${currentBillType === 'WATER' ? 'المياه' : 'الأرنونا'} بنجاح`
             });
 
             setShowBillsModal(false);
-            loadData();
+            // Refresh data
+            const paymentsRes = await getCurrentMonthPayments();
+            setPayments(paymentsRes || []);
         } catch (error) {
-            console.error('Error submitting bills:', error);
+            console.error('Error generating bills:', error);
             setNotification({
                 type: 'danger',
                 message: error.response?.data?.message || 'فشل في إنشاء الفواتير'
             });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Reload data
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            const [usersRes, paymentsRes] = await Promise.all([
-                getAllUsers(),
-                getCurrentMonthPayments()
-            ]);
-            setUsers(usersRes);
-            setPayments(paymentsRes);
-        } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في تحديث البيانات' });
         } finally {
             setLoading(false);
         }
@@ -152,14 +115,9 @@ const AdminGeneral = () => {
         }
     };
 
-    // Open bills modal and initialize data
+    // Open bills modal
     const openBillsModal = (type) => {
         setCurrentBillType(type);
-        setBillsData(users.map(user => ({
-            userId: user.userId,
-            fullName: user.fullName,
-            amount: ''
-        })));
         setShowBillsModal(true);
     };
 
@@ -255,14 +213,14 @@ const AdminGeneral = () => {
                                                 className="w-100 mb-3"
                                                 onClick={() => openBillsModal('WATER')}
                                             >
-                                                <FiPlus className="me-2" /> فواتير المياه
+                                                <FiPlus className="me-2" /> توليد فواتير المياه
                                             </Button>
                                             <Button
                                                 variant="info"
                                                 className="w-100"
                                                 onClick={() => openBillsModal('ARNONA')}
                                             >
-                                                <FiPlus className="me-2" /> فواتير الأرنونا
+                                                <FiPlus className="me-2" /> توليد فواتير الأرنونا
                                             </Button>
                                         </Card.Body>
                                     </Card>
@@ -288,6 +246,7 @@ const AdminGeneral = () => {
                                             <th>نوع الدفعة</th>
                                             <th>المبلغ (شيكل)</th>
                                             <th>حالة الدفع</th>
+                                            <th>العقار</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -301,6 +260,9 @@ const AdminGeneral = () => {
                                                     <Badge bg={formatPaymentStatus(payment.status).variant}>
                                                         {formatPaymentStatus(payment.status).text}
                                                     </Badge>
+                                                </td>
+                                                <td>
+                                                    {payment.property?.address || '--'}
                                                 </td>
                                             </tr>
                                         ))}
@@ -322,34 +284,31 @@ const AdminGeneral = () => {
             >
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        {currentBillType === 'WATER' ? 'فواتير المياه' : 'فواتير الأرنونا'}
+                        {currentBillType === 'WATER' ? 'توليد فواتير المياه' : 'توليد فواتير الأرنونا'}
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                <Modal.Body>
+                    <p className="text-center">
+                        {currentBillType === 'WATER'
+                            ? 'سيتم إنشاء فواتير المياه لجميع المستخدمين'
+                            : 'سيتم إنشاء فواتير الأرنونا لجميع المستخدمين بناءً على مساحة العقار وعدد الوحدات السكنية'}
+                    </p>
                     <Table striped bordered hover responsive>
                         <thead>
                         <tr>
                             <th>#</th>
                             <th>اسم المستخدم</th>
-                            <th>المبلغ (شيكل)</th>
+                            <th>العقار</th>
+                            <th>عدد الوحدات</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {billsData.map((bill, index) => (
-                            <tr key={bill.userId}>
+                        {users.map((user, index) => (
+                            <tr key={user.userId}>
                                 <td>{index + 1}</td>
-                                <td>{bill.fullName}</td>
-                                <td>
-                                    <Form.Control
-                                        type="number"
-                                        value={bill.amount}
-                                        onChange={(e) => handleBillAmountChange(bill.userId, e.target.value)}
-                                        min="1"
-                                        step="0.1"
-                                        placeholder="أدخل المبلغ"
-                                        className="text-left"
-                                    />
-                                </td>
+                                <td>{user.fullName}</td>
+                                <td>{user.properties?.[0]?.address || '--'}</td>
+                                <td>{user.properties?.[0]?.numberOfUnits || '--'}</td>
                             </tr>
                         ))}
                         </tbody>
@@ -361,10 +320,17 @@ const AdminGeneral = () => {
                     </Button>
                     <Button
                         variant="primary"
-                        onClick={handleSubmitBills}
+                        onClick={handleGenerateBills}
                         disabled={loading}
                     >
-                        {loading ? <Spinner size="sm" /> : 'حفظ الفواتير'}
+                        {loading ? (
+                            <>
+                                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                                <span className="ms-2">جاري التوليد...</span>
+                            </>
+                        ) : (
+                            'توليد الفواتير'
+                        )}
                     </Button>
                 </Modal.Footer>
             </Modal>
