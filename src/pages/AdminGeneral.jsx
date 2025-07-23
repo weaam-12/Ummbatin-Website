@@ -305,19 +305,15 @@ const AdminGeneral = () => {
                                 </td>
                             </tr>
                         ) : (
-                            users.filter(u => u.properties && u.properties.length > 0)
-                                .map((u, idx) => {
-                                    const p = u.properties[0];
-                                    return (
-                                        <tr key={u.userId}>
-                                            <td>{idx + 1}</td>
-                                            <td>{u.fullName}</td>
-                                            <td>{p.address}</td>
-                                            <td>{p.numberOfUnits}</td>
-                                            <td>{p.area} م²</td>
-                                        </tr>
-                                    );
-                                })
+                            users.filter(u => u.property).map((u, idx) => (
+                                    <tr key={u.userId}>
+                                        <td>{idx + 1}</td>
+                                        <td>{u.fullName}</td>
+                                        <td>{u.property.address}</td>
+                                        <td>{u.property.numberOfUnits}</td>
+                                        <td>{u.property.area} م²</td>
+                                    </tr>
+                                ))
                         )}
                         </tbody>
                     </Table>
