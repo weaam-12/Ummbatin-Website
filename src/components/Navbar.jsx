@@ -41,7 +41,6 @@ const Navbar = () => {
     const adminLinks = [
         { path: "/admin", icon: <FaChartLine />, text: t("controlPanel") },
         { path: "/admin/general", icon: <FaCog />, text: t("generalManagement") },
-        { path: "/admin/emergency", icon: <FaBell />, text: t("emergencyManagement") },
         { path: "/admin/education", icon: <FaGraduationCap />, text: t("educationManagement") },
         { path: "/admin/payments", icon: <FaMoneyBillWave />, text: t("paymentsManagement") },
         { path: "/admin/complaints", icon: <FaExclamationCircle />, text: t("complaintsManagement") }
