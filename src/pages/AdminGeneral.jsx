@@ -285,8 +285,7 @@ const AdminGeneral = () => {
                             ? 'سيتم توليد فواتير الأرنونا لجميع المستخدمين بناءً على مساحة العقار وعدد الوحدات السكنية'
                             : 'سيتم توليد فواتير المياه لجميع المستخدمين'}
                     </p>
-
-                    <Table striped bordered hover>
+                    <Table striped bordered hover responsive>
                         <thead>
                         <tr>
                             <th>#</th>
@@ -297,20 +296,26 @@ const AdminGeneral = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {users
-                            .filter(u => u.property)                     // فقط من لديه عقار
-                            .map((u, idx) => {
-                                const p = u.property;
-                                return (
+                        {users.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="text-center">
+                                    لا توجد بيانات
+                                </td>
+                            </tr>
+                        ) : (
+                            users.map((u, idx) => {
+                                const p = u.properties?.[0];
+                                return p ? (
                                     <tr key={u.userId}>
                                         <td>{idx + 1}</td>
                                         <td>{u.fullName}</td>
                                         <td>{p.address || '--'}</td>
-                                        <td>{p.numberOfUnits || '--'}</td>
-                                        <td>{p.area ? `${p.area} م²` : '--'}</td>
+                                        <td>{p.numberOfUnits}</td>
+                                        <td>{p.area} م²</td>
                                     </tr>
-                                );
-                            })}
+                                ) : null;
+                            })
+                        )}
                         </tbody>
                     </Table>
 
