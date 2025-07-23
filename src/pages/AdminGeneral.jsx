@@ -297,18 +297,20 @@ const AdminGeneral = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {users.map((user, index) => {
-                            const prop = user.properties?.[0];
-                            return (
-                                <tr key={user.userId}>
-                                    <td>{index + 1}</td>
-                                    <td>{user.fullName}</td>
-                                    <td>{prop?.address || '--'}</td>
-                                    <td>{prop?.numberOfUnits || '--'}</td>
-                                    <td>{prop?.area ? `${prop.area} م²` : '--'}</td>
-                                </tr>
-                            );
-                        })}
+                        {users
+                            .filter(user => user.properties && user.properties.length > 0)
+                            .map((user, index) => {
+                                const prop = user.properties[0];
+                                return (
+                                    <tr key={user.userId}>
+                                        <td>{index + 1}</td>
+                                        <td>{user.fullName}</td>
+                                        <td>{prop.address || '--'}</td>
+                                        <td>{prop.numberOfUnits || '--'}</td>
+                                        <td>{prop.area ? `${prop.area} م²` : '--'}</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </Table>
 
