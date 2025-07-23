@@ -129,7 +129,7 @@ const AdminGeneral = () => {
                     <ul className="sidebar-menu">
                         <li className={activeTab === 'dashboard' ? 'active' : ''}
                             onClick={() => setActiveTab('dashboard')}>
-                            <FiUsers className="me-2" /> نظرة عامة
+                            <FiUsers className="me-2" /> نظرة عااامة
                         </li>
                         <li className={activeTab === 'payments' ? 'active' : ''}
                             onClick={() => setActiveTab('payments')}>
