@@ -13,11 +13,19 @@ const AdminGeneral = () => {
     const [notification, setNotification] = useState(null);
     const [showWaterModal, setShowWaterModal] = useState(false);
     const [showArnonaModal, setShowArnonaModal] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [waterAmount, setWaterAmount] = useState('');
-    const [arnonaAmount, setArnonaAmount] = useState('');
 
-    // دالة لجلب جميع المستخدمين
+    // Separate states for water and arnona
+    const [waterData, setWaterData] = useState({
+        selectedUser: null,
+        amount: ''
+    });
+
+    const [arnonaData, setArnonaData] = useState({
+        selectedUser: null,
+        amount: ''
+    });
+
+    // Fetch all users
     const getAllUsers = async () => {
         try {
             const response = await axiosInstance.get('api/users/all');
@@ -27,7 +35,7 @@ const AdminGeneral = () => {
         }
     };
 
-    // دالة لجلب دفعات الشهر الحالي
+    // Fetch current month payments
     const getCurrentMonthPayments = async () => {
         try {
             const currentDate = new Date();
@@ -43,7 +51,7 @@ const AdminGeneral = () => {
         }
     };
 
-    // تحميل البيانات الأولية
+    // Load initial data
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
@@ -58,61 +66,30 @@ const AdminGeneral = () => {
                 setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
             } finally {
                 setLoading(false);
-                console.log("Loading state after operation:", loading);
             }
         };
 
         loadData();
     }, []);
 
+    // Handle water payment creation
     const handleCreateWaterPayment = async () => {
-        if (!selectedUser || !waterAmount) {
+        if (!waterData.selectedUser || !waterData.amount) {
             setNotification({ type: 'danger', message: 'الرجاء اختيار مستخدم وإدخال المبلغ' });
             return;
         }
 
         try {
             setLoading(true);
-            const response = await axiosInstance.post('api/payments/create-water', null, {
+            await axiosInstance.post('api/payments/create-water', null, {
                 params: {
-                    userId: selectedUser.userId,
-                    amount: waterAmount
+                    userId: waterData.selectedUser.userId,
+                    amount: waterData.amount
                 }
             });
-            console.log('API Response:', response.data); // تسجيل الاستجابة
             setNotification({ type: 'success', message: 'تم إنشاء فاتورة المياه بنجاح' });
             setShowWaterModal(false);
-            setWaterAmount('');
-            await loadData(); // انتظار اكتمال تحميل البيانات
-        } catch (error) {
-            console.error('API Error:', error); // تسجيل الخطأ
-            setNotification({
-                type: 'danger',
-                message: error.response?.data?.message || 'فشل في إنشاء الفاتورة'
-            });
-        } finally {
-            setLoading(false);
-            console.log("Loading state after operation:", loading);
-        }
-    };
-    // إنشاء فاتورة أرنونا
-    const handleCreateArnonaPayment = async () => {
-        if (!selectedUser || !arnonaAmount) {
-            setNotification({ type: 'danger', message: 'الرجاء اختيار مستخدم وإدخال المبلغ' });
-            return;
-        }
-
-        try {
-            setLoading(true);
-            await axiosInstance.post('api/payments/create-arnona', null, {
-                params: {
-                    userId: selectedUser.userId,
-                    amount: arnonaAmount
-                }
-            });
-            setNotification({ type: 'success', message: 'تم إنشاء فاتورة الأرنونا بنجاح' });
-            setShowArnonaModal(false);
-            setArnonaAmount('');
+            setWaterData({ selectedUser: null, amount: '' });
             loadData();
         } catch (error) {
             setNotification({
@@ -121,12 +98,39 @@ const AdminGeneral = () => {
             });
         } finally {
             setLoading(false);
-            console.log("Loading state after operation:", loading);
         }
     };
 
-    // إعادة تحميل البيانات
+    // Handle arnona payment creation
+    const handleCreateArnonaPayment = async () => {
+        if (!arnonaData.selectedUser || !arnonaData.amount) {
+            setNotification({ type: 'danger', message: 'الرجاء اختيار مستخدم وإدخال المبلغ' });
+            return;
+        }
 
+        try {
+            setLoading(true);
+            await axiosInstance.post('api/payments/create-arnona', null, {
+                params: {
+                    userId: arnonaData.selectedUser.userId,
+                    amount: arnonaData.amount
+                }
+            });
+            setNotification({ type: 'success', message: 'تم إنشاء فاتورة الأرنونا بنجاح' });
+            setShowArnonaModal(false);
+            setArnonaData({ selectedUser: null, amount: '' });
+            loadData();
+        } catch (error) {
+            setNotification({
+                type: 'danger',
+                message: error.response?.data?.message || 'فشل في إنشاء الفاتورة'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Reload data
     const loadData = async () => {
         setLoading(true);
         try {
@@ -140,12 +144,10 @@ const AdminGeneral = () => {
             setNotification({ type: 'danger', message: 'فشل في تحديث البيانات' });
         } finally {
             setLoading(false);
-            console.log("Loading state after operation:", loading);
         }
     };
 
-
-    // تنسيق حالة الدفع
+    // Format payment status
     const formatPaymentStatus = (status) => {
         switch (status) {
             case 'PAID': return { text: 'مدفوع', variant: 'success' };
@@ -242,10 +244,18 @@ const AdminGeneral = () => {
                                             <h5>إجراءات سريعة</h5>
                                         </Card.Header>
                                         <Card.Body>
-                                            <Button variant="success" className="w-100 mb-3" onClick={() => setShowWaterModal(true)}>
+                                            <Button
+                                                variant="success"
+                                                className="w-100 mb-3"
+                                                onClick={() => setShowWaterModal(true)}
+                                            >
                                                 <FiPlus className="me-2" /> فاتورة مياه
                                             </Button>
-                                            <Button variant="info" className="w-100" onClick={() => setShowArnonaModal(true)}>
+                                            <Button
+                                                variant="info"
+                                                className="w-100"
+                                                onClick={() => setShowArnonaModal(true)}
+                                            >
                                                 <FiPlus className="me-2" /> فاتورة أرنونا
                                             </Button>
                                         </Card.Body>
@@ -306,11 +316,11 @@ const AdminGeneral = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>اختر المستخدم</Form.Label>
                         <Form.Select
-                            value={selectedUser?.userId || ''}
+                            value={waterData.selectedUser?.userId || ''}
                             onChange={(e) => {
                                 const userId = e.target.value;
                                 const user = users.find(u => u.userId == userId);
-                                setSelectedUser(user);
+                                setWaterData({...waterData, selectedUser: user});
                             }}
                         >
                             <option value="">اختر مستخدم</option>
@@ -325,10 +335,11 @@ const AdminGeneral = () => {
                         <Form.Label>مبلغ فاتورة المياه (شيكل)</Form.Label>
                         <Form.Control
                             type="number"
-                            value={waterAmount}
-                            onChange={(e) => setWaterAmount(e.target.value)}
-                            min="0"
+                            value={waterData.amount}
+                            onChange={(e) => setWaterData({...waterData, amount: e.target.value})}
+                            min="1"
                             step="0.1"
+                            placeholder="أدخل المبلغ"
                         />
                     </Form.Group>
                 </Modal.Body>
@@ -339,7 +350,7 @@ const AdminGeneral = () => {
                     <Button
                         variant="primary"
                         onClick={handleCreateWaterPayment}
-                        disabled={!selectedUser || !waterAmount || loading }
+                        disabled={!waterData.selectedUser || !waterData.amount || loading}
                     >
                         {loading ? <Spinner size="sm" /> : 'إنشاء الفاتورة'}
                     </Button>
@@ -355,11 +366,11 @@ const AdminGeneral = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>اختر المستخدم</Form.Label>
                         <Form.Select
-                            value={selectedUser?.userId || ''}
+                            value={arnonaData.selectedUser?.userId || ''}
                             onChange={(e) => {
                                 const userId = e.target.value;
                                 const user = users.find(u => u.userId == userId);
-                                setSelectedUser(user);
+                                setArnonaData({...arnonaData, selectedUser: user});
                             }}
                         >
                             <option value="">اختر مستخدم</option>
@@ -374,10 +385,11 @@ const AdminGeneral = () => {
                         <Form.Label>مبلغ فاتورة الأرنونا (شيكل)</Form.Label>
                         <Form.Control
                             type="number"
-                            value={arnonaAmount}
-                            onChange={(e) => setArnonaAmount(e.target.value)}
-                            min="0"
+                            value={arnonaData.amount}
+                            onChange={(e) => setArnonaData({...arnonaData, amount: e.target.value})}
+                            min="1"
                             step="0.1"
+                            placeholder="أدخل المبلغ"
                         />
                     </Form.Group>
                 </Modal.Body>
@@ -388,7 +400,7 @@ const AdminGeneral = () => {
                     <Button
                         variant="primary"
                         onClick={handleCreateArnonaPayment}
-                        disabled={!selectedUser || !arnonaAmount|| loading}
+                        disabled={!arnonaData.selectedUser || !arnonaData.amount || loading}
                     >
                         {loading ? <Spinner size="sm" /> : 'إنشاء الفاتورة'}
                     </Button>
