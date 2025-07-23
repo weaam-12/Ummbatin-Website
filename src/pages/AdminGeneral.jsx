@@ -1,153 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Table, Form, Modal, Alert, Spinner, Badge } from 'react-bootstrap';
-import { FiUsers, FiDollarSign, FiCalendar, FiPlus, FiAlertTriangle, FiActivity } from 'react-icons/fi';
-import './AdminGeneral.css';
-import { axiosInstance } from '../api.js';
+import {
+    Container, Row, Col, Card, Button, Table, Form, Alert, Spinner, Badge
+} from 'react-bootstrap';
+import { FiUsers, FiDollarSign } from 'react-icons/fi';
+import { axiosInstance } from '../api';
 
 const AdminGeneral = () => {
-    // States
     const [activeTab, setActiveTab] = useState('dashboard');
     const [users, setUsers] = useState([]);
     const [payments, setPayments] = useState([]);
+    const [bulkPayments, setBulkPayments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
-    const [showWaterModal, setShowWaterModal] = useState(false);
-    const [showArnonaModal, setShowArnonaModal] = useState(false);
 
-    // Separate states for water and arnona
-    const [waterData, setWaterData] = useState({
-        selectedUser: null,
-        amount: ''
-    });
-
-    const [arnonaData, setArnonaData] = useState({
-        selectedUser: null,
-        amount: ''
-    });
-
-    // Fetch all users
     const getAllUsers = async () => {
-        try {
-            const response = await axiosInstance.get('api/users/all');
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const response = await axiosInstance.get('api/users/all');
+        return response.data;
     };
 
-    // Fetch current month payments
     const getCurrentMonthPayments = async () => {
-        try {
-            const currentDate = new Date();
-            const response = await axiosInstance.get('api/payments/current-month', {
-                params: {
-                    month: currentDate.getMonth() + 1,
-                    year: currentDate.getFullYear()
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const now = new Date();
+        const response = await axiosInstance.get('api/payments/current-month', {
+            params: {
+                month: now.getMonth() + 1,
+                year: now.getFullYear(),
+            },
+        });
+        return response.data;
     };
 
-    // Load initial data
-    useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            try {
-                const [usersRes, paymentsRes] = await Promise.all([
-                    getAllUsers(),
-                    getCurrentMonthPayments().catch(() => [])
-                ]);
-                setUsers(usersRes || []);
-                setPayments(paymentsRes || []);
-            } catch (error) {
-                setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadData();
-    }, []);
-
-    // Handle water payment creation
-    const handleCreateWaterPayment = async () => {
-        if (!waterData.selectedUser || !waterData.amount) {
-            setNotification({ type: 'danger', message: 'الرجاء اختيار مستخدم وإدخال المبلغ' });
-            return;
-        }
-
-        try {
-            setLoading(true);
-            await axiosInstance.post('api/payments/create-water', null, {
-                params: {
-                    userId: waterData.selectedUser.userId,
-                    amount: waterData.amount
-                }
-            });
-            setNotification({ type: 'success', message: 'تم إنشاء فاتورة المياه بنجاح' });
-            setShowWaterModal(false);
-            setWaterData({ selectedUser: null, amount: '' });
-            loadData();
-        } catch (error) {
-            setNotification({
-                type: 'danger',
-                message: error.response?.data?.message || 'فشل في إنشاء الفاتورة'
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Handle arnona payment creation
-    const handleCreateArnonaPayment = async () => {
-        if (!arnonaData.selectedUser || !arnonaData.amount) {
-            setNotification({ type: 'danger', message: 'الرجاء اختيار مستخدم وإدخال المبلغ' });
-            return;
-        }
-
-        try {
-            setLoading(true);
-            await axiosInstance.post('api/payments/create-arnona', null, {
-                params: {
-                    userId: arnonaData.selectedUser.userId,
-                    amount: arnonaData.amount
-                }
-            });
-            setNotification({ type: 'success', message: 'تم إنشاء فاتورة الأرنونا بنجاح' });
-            setShowArnonaModal(false);
-            setArnonaData({ selectedUser: null, amount: '' });
-            loadData();
-        } catch (error) {
-            setNotification({
-                type: 'danger',
-                message: error.response?.data?.message || 'فشل في إنشاء الفاتورة'
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Reload data
     const loadData = async () => {
         setLoading(true);
         try {
             const [usersRes, paymentsRes] = await Promise.all([
                 getAllUsers(),
-                getCurrentMonthPayments()
+                getCurrentMonthPayments().catch(() => []),
             ]);
             setUsers(usersRes);
             setPayments(paymentsRes);
-        } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في تحديث البيانات' });
+
+            const initialized = usersRes.map(user => ({
+                userId: user.userId,
+                fullName: user.fullName,
+                waterAmount: '',
+                arnonaAmount: '',
+            }));
+            setBulkPayments(initialized);
+        } catch {
+            setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
         } finally {
             setLoading(false);
         }
     };
 
-    // Format payment status
+    useEffect(() => {
+        loadData();
+    }, []);
+
     const formatPaymentStatus = (status) => {
         switch (status) {
             case 'PAID': return { text: 'مدفوع', variant: 'success' };
@@ -157,8 +66,36 @@ const AdminGeneral = () => {
         }
     };
 
+    const handleSubmitUserPayment = async (row) => {
+        setLoading(true);
+        try {
+            if (row.waterAmount) {
+                await axiosInstance.post('api/payments/create-water', null, {
+                    params: {
+                        userId: row.userId,
+                        amount: row.waterAmount,
+                    },
+                });
+            }
+            if (row.arnonaAmount) {
+                await axiosInstance.post('api/payments/create-arnona', null, {
+                    params: {
+                        userId: row.userId,
+                        amount: row.arnonaAmount,
+                    },
+                });
+            }
+            setNotification({ type: 'success', message: `تم حفظ دفعات ${row.fullName}` });
+            loadData();
+        } catch (error) {
+            setNotification({ type: 'danger', message: error.response?.data?.message || `فشل في حفظ دفعات ${row.fullName}` });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <Container fluid className="admin-dashboard">
+        <Container fluid>
             {notification && (
                 <Alert variant={notification.type} onClose={() => setNotification(null)} dismissible>
                     {notification.message}
@@ -166,10 +103,9 @@ const AdminGeneral = () => {
             )}
 
             <Row>
-                {/* Sidebar */}
                 <Col md={3} className="sidebar">
                     <div className="sidebar-header">
-                        <h4>لوحة تحكم الإدمن</h4>
+                        <h4>لوحة التحكم</h4>
                     </div>
                     <ul className="sidebar-menu">
                         <li className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
@@ -181,119 +117,36 @@ const AdminGeneral = () => {
                     </ul>
                 </Col>
 
-                {/* Main Content */}
                 <Col md={9} className="main-content">
-                    {loading && (
+                    {loading ? (
                         <div className="text-center py-5">
-                            <Spinner animation="border" variant="primary" />
+                            <Spinner animation="border" />
                         </div>
-                    )}
-
-                    {!loading && activeTab === 'dashboard' && (
-                        <div className="dashboard-overview">
-                            <h3 className="mb-4">نظرة عامة</h3>
-
-                            <Row className="mb-4">
-                                <Col md={4}>
-                                    <Card className="stat-card">
-                                        <Card.Body>
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h6>عدد المستخدمين</h6>
-                                                    <h3>{users.length}</h3>
-                                                </div>
-                                                <FiUsers size={30} className="text-primary" />
-                                            </div>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-
-                                <Col md={4}>
-                                    <Card className="stat-card">
-                                        <Card.Body>
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h6>دفعات المياه</h6>
-                                                    <h3>{payments.filter(p => p.type === 'WATER').length}</h3>
-                                                </div>
-                                                <FiDollarSign size={30} className="text-success" />
-                                            </div>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-
-                                <Col md={4}>
-                                    <Card className="stat-card">
-                                        <Card.Body>
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h6>دفعات الأرنونا</h6>
-                                                    <h3>{payments.filter(p => p.type === 'ARNONA').length}</h3>
-                                                </div>
-                                                <FiDollarSign size={30} className="text-warning" />
-                                            </div>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            </Row>
-
-                            <Row>
-                                <Col md={6}>
-                                    <Card className="mb-4">
-                                        <Card.Header>
-                                            <h5>إجراءات سريعة</h5>
-                                        </Card.Header>
-                                        <Card.Body>
-                                            <Button
-                                                variant="success"
-                                                className="w-100 mb-3"
-                                                onClick={() => setShowWaterModal(true)}
-                                            >
-                                                <FiPlus className="me-2" /> فاتورة مياه
-                                            </Button>
-                                            <Button
-                                                variant="info"
-                                                className="w-100"
-                                                onClick={() => setShowArnonaModal(true)}
-                                            >
-                                                <FiPlus className="me-2" /> فاتورة أرنونا
-                                            </Button>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            </Row>
-                        </div>
-                    )}
-
-                    {!loading && activeTab === 'payments' && (
-                        <div className="payments-section">
-                            <h3 className="mb-4">إدارة الدفعات الشهرية</h3>
-
-                            <Card>
-                                <Card.Header>
-                                    <h5>دفعات الشهر الحالي</h5>
-                                </Card.Header>
+                    ) : activeTab === 'payments' ? (
+                        <>
+                            <h3 className="mb-4">دفعات الشهر الحالي</h3>
+                            <Card className="mb-4">
                                 <Card.Body>
                                     <Table striped hover responsive>
                                         <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>اسم المواطن</th>
-                                            <th>نوع الدفعة</th>
-                                            <th>المبلغ (شيكل)</th>
-                                            <th>حالة الدفع</th>
+                                            <th>الاسم</th>
+                                            <th>النوع</th>
+                                            <th>المبلغ</th>
+                                            <th>الحالة</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {payments.map((payment, index) => (
-                                            <tr key={payment.paymentId}>
-                                                <td>{index + 1}</td>
-                                                <td>{payment.user?.fullName || '--'}</td>
-                                                <td>{payment.type === 'WATER' ? 'مياه' : 'أرنونا'}</td>
-                                                <td>{payment.amount || '--'}</td>
+                                        {payments.map((p, i) => (
+                                            <tr key={p.paymentId}>
+                                                <td>{i + 1}</td>
+                                                <td>{p.user?.fullName}</td>
+                                                <td>{p.type === 'WATER' ? 'مياه' : 'أرنونا'}</td>
+                                                <td>{p.amount}</td>
                                                 <td>
-                                                    <Badge bg={formatPaymentStatus(payment.status).variant}>
-                                                        {formatPaymentStatus(payment.status).text}
+                                                    <Badge bg={formatPaymentStatus(p.status).variant}>
+                                                        {formatPaymentStatus(p.status).text}
                                                     </Badge>
                                                 </td>
                                             </tr>
@@ -302,110 +155,98 @@ const AdminGeneral = () => {
                                     </Table>
                                 </Card.Body>
                             </Card>
-                        </div>
+
+                            <Card>
+                                <Card.Header>
+                                    <h5>إدخال دفعات جديدة</h5>
+                                </Card.Header>
+                                <Card.Body>
+                                    <Table responsive>
+                                        <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>الاسم</th>
+                                            <th>مياه (₪)</th>
+                                            <th>أرنونا (₪)</th>
+                                            <th>إجراء</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {bulkPayments.map((row, idx) => (
+                                            <tr key={row.userId}>
+                                                <td>{idx + 1}</td>
+                                                <td>{row.fullName}</td>
+                                                <td>
+                                                    <Form.Control
+                                                        type="number"
+                                                        min="0"
+                                                        value={row.waterAmount}
+                                                        onChange={(e) => {
+                                                            const updated = [...bulkPayments];
+                                                            updated[idx].waterAmount = e.target.value;
+                                                            setBulkPayments(updated);
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <Form.Control
+                                                        type="number"
+                                                        min="0"
+                                                        value={row.arnonaAmount}
+                                                        onChange={(e) => {
+                                                            const updated = [...bulkPayments];
+                                                            updated[idx].arnonaAmount = e.target.value;
+                                                            setBulkPayments(updated);
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <Button
+                                                        variant="primary"
+                                                        size="sm"
+                                                        onClick={() => handleSubmitUserPayment(row)}
+                                                    >
+                                                        حفظ
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </Table>
+                                </Card.Body>
+                            </Card>
+                        </>
+                    ) : (
+                        <>
+                            <h3 className="mb-4">نظرة عامة</h3>
+                            <Row>
+                                <Col md={6}>
+                                    <Card className="stat-card">
+                                        <Card.Body className="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6>عدد المستخدمين</h6>
+                                                <h3>{users.length}</h3>
+                                            </div>
+                                            <FiUsers size={30} />
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col md={6}>
+                                    <Card className="stat-card">
+                                        <Card.Body className="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6>عدد الدفعات</h6>
+                                                <h3>{payments.length}</h3>
+                                            </div>
+                                            <FiDollarSign size={30} />
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            </Row>
+                        </>
                     )}
                 </Col>
             </Row>
-
-            {/* Water Payment Modal */}
-            <Modal show={showWaterModal} onHide={() => setShowWaterModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>فاتورة مياه جديدة</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group className="mb-3">
-                        <Form.Label>اختر المستخدم</Form.Label>
-                        <Form.Select
-                            value={waterData.selectedUser?.userId || ''}
-                            onChange={(e) => {
-                                const userId = e.target.value;
-                                const user = users.find(u => u.userId == userId);
-                                setWaterData({...waterData, selectedUser: user});
-                            }}
-                        >
-                            <option value="">اختر مستخدم</option>
-                            {users.map(user => (
-                                <option key={user.userId} value={user.userId}>
-                                    {user.fullName}
-                                </option>
-                            ))}
-                        </Form.Select>
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>مبلغ فاتورة المياه (شيكل)</Form.Label>
-                        <Form.Control
-                            type="number"
-                            value={waterData.amount}
-                            onChange={(e) => setWaterData({...waterData, amount: e.target.value})}
-                            min="1"
-                            step="0.1"
-                            placeholder="أدخل المبلغ"
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowWaterModal(false)}>
-                        إلغاء
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={handleCreateWaterPayment}
-                        disabled={!waterData.selectedUser || !waterData.amount || loading}
-                    >
-                        {loading ? <Spinner size="sm" /> : 'إنشاء الفاتورة'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Arnona Payment Modal */}
-            <Modal show={showArnonaModal} onHide={() => setShowArnonaModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>فاتورة أرنونا جديدة</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group className="mb-3">
-                        <Form.Label>اختر المستخدم</Form.Label>
-                        <Form.Select
-                            value={arnonaData.selectedUser?.userId || ''}
-                            onChange={(e) => {
-                                const userId = e.target.value;
-                                const user = users.find(u => u.userId == userId);
-                                setArnonaData({...arnonaData, selectedUser: user});
-                            }}
-                        >
-                            <option value="">اختر مستخدم</option>
-                            {users.map(user => (
-                                <option key={user.userId} value={user.userId}>
-                                    {user.fullName}
-                                </option>
-                            ))}
-                        </Form.Select>
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>مبلغ فاتورة الأرنونا (شيكل)</Form.Label>
-                        <Form.Control
-                            type="number"
-                            value={arnonaData.amount}
-                            onChange={(e) => setArnonaData({...arnonaData, amount: e.target.value})}
-                            min="1"
-                            step="0.1"
-                            placeholder="أدخل المبلغ"
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowArnonaModal(false)}>
-                        إلغاء
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={handleCreateArnonaPayment}
-                        disabled={!arnonaData.selectedUser || !arnonaData.amount || loading}
-                    >
-                        {loading ? <Spinner size="sm" /> : 'إنشاء الفاتورة'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
         </Container>
     );
 };
