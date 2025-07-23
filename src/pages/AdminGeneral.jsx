@@ -18,10 +18,10 @@ const AdminGeneral = () => {
         try {
             const response = await axiosInstance.get('api/users/all');
             return response.data
-                .filter(user => user.properties && user.properties.length > 0) // تأكد أن لديه عقار
-                .map(user => ({
-                    ...user,
-                    property: user.properties[0] // خذ أول عقار فقط
+                .filter(u => u.properties && u.properties.length) // يملك عقار
+                .map(u => ({
+                    ...u,
+                    property: u.properties[0] // حفظه في خاصية property
                 }));
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -53,9 +53,11 @@ const AdminGeneral = () => {
             try {
                 const [usersRes, paymentsRes] = await Promise.all([
                     fetchUsersWithProperties(),
-                    fetchPayments().catch(() => []) // Continue if payments fail
+
+                fetchPayments().catch(() => []) // Continue if payments fail
                 ]);
                 setUsers(usersRes);
+                console.log('Users with property:', usersRes);
                 setPayments(paymentsRes);
             } catch (error) {
                 setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
@@ -306,14 +308,14 @@ const AdminGeneral = () => {
                             </tr>
                         ) : (
                             users.filter(u => u.property).map((u, idx) => (
-                                    <tr key={u.userId}>
-                                        <td>{idx + 1}</td>
-                                        <td>{u.fullName}</td>
-                                        <td>{u.property.address}</td>
-                                        <td>{u.property.numberOfUnits}</td>
-                                        <td>{u.property.area} م²</td>
-                                    </tr>
-                                ))
+                                <tr key={u.userId}>
+                                    <td>{idx + 1}</td>
+                                    <td>{u.fullName}</td>
+                                    <td>{u.property.address}</td>
+                                    <td>{u.property.numberOfUnits}</td>
+                                    <td>{u.property.area} م²</td>
+                                </tr>
+                            ))
                         )}
                         </tbody>
                     </Table>
