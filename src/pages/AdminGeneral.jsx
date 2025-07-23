@@ -5,7 +5,7 @@ import {
 } from 'react-bootstrap';
 import {
     FiUsers, FiDollarSign, FiPlus, FiCalendar,
-    FiHome, FiFileText,FiDroplet
+    FiHome, FiFileText,FiDroplet,FiMapPin
 } from 'react-icons/fi';
 import './AdminGeneral.css';
 import { axiosInstance } from '../api.js';
