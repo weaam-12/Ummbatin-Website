@@ -8,7 +8,10 @@ import {
     updateKindergarten,
 } from '../api';
 import './AdminKinder.css';
-
+import {
+    FiUsers, FiDollarSign, FiPlus,
+    FiHome, FiFileText
+} from 'react-icons/fi';
 export default function AdminKinder() {
     /* ---------- state ---------- */
     const [kindergartens, setKindergartens] = useState([]);
