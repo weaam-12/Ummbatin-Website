@@ -20,6 +20,7 @@ import Childern from "./pages/Childern";
 import Forms from "./pages/Forms";
 import Profile from "./pages/Profile"; // Added
 import AdminComplaints from "./pages/AdminComplaints"
+import AdminKinder from "./pages/AdminKinder";
 const App = () => {
     return (
         <AuthProvider>
@@ -37,6 +38,12 @@ const App = () => {
                                         <AdminComplaints />
                                     </ProtectedRoute>
                                 } />
+                                <Route path="/admin/education" element={
+                                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                                        <AdminKinder />
+                                    </ProtectedRoute>
+                                } />
+
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/register" element={<RegistrationPage />} />
 
