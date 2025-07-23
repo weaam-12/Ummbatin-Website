@@ -4,108 +4,125 @@ import {
     Alert, Spinner, Badge, Form
 } from 'react-bootstrap';
 import {
-    FiUsers, FiDollarSign, FiPlus, FiDroplet, FiHome, FiFileText
+    FiUsers, FiDollarSign, FiPlus, FiCalendar,
+    FiHome, FiFileText,FiDroplet
 } from 'react-icons/fi';
-import {
-    axiosInstance,
-    getWaterReadings,
-    addWaterReading,
-    addArnonaPayment
-} from '../api.js';
 import './AdminGeneral.css';
+import { axiosInstance } from '../api.js';
 
 const AdminGeneral = () => {
-    // States الأساسية
+    // States العامة
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
 
-    // States للبيانات
+    // States للمستخدمين والفواتير
     const [users, setUsers] = useState([]);
     const [payments, setPayments] = useState([]);
-    const [properties, setProperties] = useState([]);
-    const [waterReadings, setWaterReadings] = useState([]);
-
-    // States للنماذج
-    const [showWaterModal, setShowWaterModal] = useState(false);
-    const [showArnonaModal, setShowArnonaModal] = useState(false);
     const [showBillsModal, setShowBillsModal] = useState(false);
+    const [currentBillType, setCurrentBillType] = useState('');
 
-    const [waterForm, setWaterForm] = useState({
-        propertyId: '',
-        amount: '',
-        date: new Date().toISOString().split('T')[0]
+    // States للفعاليات
+    const [events, setEvents] = useState([]);
+    const [showEventModal, setShowEventModal] = useState(false);
+    const [newEvent, setNewEvent] = useState({
+        title: '',
+        description: '',
+        location: '',
+        image: null,
+        date: ''
     });
 
-    const [arnonaForm, setArnonaForm] = useState({
-        userId: '',
-        amount: '',
-        year: new Date().getFullYear()
-    });
-
-    // دوال جلب البيانات
-    const fetchData = async () => {
-        setLoading(true);
+    // ===================== دوال جلب البيانات =====================
+    const fetchUsersWithProperties = async () => {
         try {
-            const [usersRes, paymentsRes, propertiesRes, readingsRes] = await Promise.all([
-                axiosInstance.get('api/users/all'),
-                axiosInstance.get('api/payments/current-month'),
-                axiosInstance.get('api/properties/all'),
-                getWaterReadings()
-            ]);
-
-            setUsers(usersRes.data);
-            setPayments(paymentsRes.data);
-            setProperties(propertiesRes.data);
-            setWaterReadings(readingsRes);
+            const response = await axiosInstance.get('api/users/all');
+            return response.data
+                .filter(u => u.properties?.length > 0)
+                .map(u => ({ ...u, property: u.properties[0] }));
         } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
-        } finally {
-            setLoading(false);
+            console.error('Error fetching users:', error);
+            throw error;
         }
     };
 
+    const fetchPayments = async () => {
+        try {
+            const currentDate = new Date();
+            const response = await axiosInstance.get('api/payments/current-month', {
+                params: {
+                    month: currentDate.getMonth() + 1,
+                    year: currentDate.getFullYear()
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching payments:', error);
+            throw error;
+        }
+    };
+
+    const fetchEvents = async () => {
+        try {
+            const response = await axiosInstance.get('api/events');
+            setEvents(response.data);
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    };
+
+    // تحميل البيانات الأولية
     useEffect(() => {
-        fetchData();
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                const [usersRes, paymentsRes] = await Promise.all([
+                    fetchUsersWithProperties(),
+                    fetchPayments().catch(() => [])
+                ]);
+                setUsers(usersRes);
+                setPayments(paymentsRes);
+                await fetchEvents();
+            } catch (error) {
+                setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
     }, []);
 
-    // دوال الإضافة
-    const handleAddWaterReading = async () => {
+    // ===================== إدارة الفعاليات =====================
+    const handleAddEvent = async () => {
         try {
             setLoading(true);
-            await addWaterReading({
-                propertyId: waterForm.propertyId,
-                amount: waterForm.amount,
-                date: waterForm.date
+            const formData = new FormData();
+            formData.append('title', newEvent.title);
+            formData.append('description', newEvent.description);
+            formData.append('location', newEvent.location);
+            formData.append('date', newEvent.date);
+            if (newEvent.image) formData.append('image', newEvent.image);
+
+            await axiosInstance.post('api/events', formData);
+            await fetchEvents();
+            setShowEventModal(false);
+            setNewEvent({
+                title: '',
+                description: '',
+                location: '',
+                image: null,
+                date: ''
             });
-            await fetchData();
-            setShowWaterModal(false);
-            setNotification({ type: 'success', message: 'تمت إضافة قراءة المياه بنجاح' });
+            setNotification({ type: 'success', message: 'تمت إضافة الفعالية بنجاح' });
         } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في إضافة القراءة' });
+            setNotification({ type: 'danger', message: 'فشل في إضافة الفعالية' });
         } finally {
             setLoading(false);
         }
     };
 
-    const handleAddArnona = async () => {
-        try {
-            setLoading(true);
-            await addArnonaPayment(
-                arnonaForm.userId,
-                arnonaForm.amount,
-                arnonaForm.year
-            );
-            await fetchData();
-            setShowArnonaModal(false);
-            setNotification({ type: 'success', message: 'تمت إضافة الأرنونا بنجاح' });
-        } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في إضافة الأرنونا' });
-        } finally {
-            setLoading(false);
-        }
-    };
-    // ===================== توليد الفواتير =====================
+    // ===================== إدارة الفواتير =====================
     const handleGenerateBills = async () => {
         try {
             setLoading(true);
@@ -122,12 +139,14 @@ const AdminGeneral = () => {
                 : { month, year, rate: 10 };
 
             await axiosInstance.post(endpoint, null, { params });
-            await fetchAllData();
-            setShowBillsModal(false);
+            const updatedPayments = await fetchPayments();
+            setPayments(updatedPayments);
+
             setNotification({
                 type: 'success',
                 message: `تم توليد فواتير ${currentBillType === 'ARNONA' ? 'الأرنونا' : 'المياه'} بنجاح`
             });
+            setShowBillsModal(false);
         } catch (error) {
             setNotification({
                 type: 'danger',
@@ -165,17 +184,13 @@ const AdminGeneral = () => {
                             onClick={() => setActiveTab('dashboard')}>
                             <FiHome className="me-2" /> لوحة التحكم
                         </li>
-                        <li className={activeTab === 'water' ? 'active' : ''}
-                            onClick={() => setActiveTab('water')}>
-                            <FiDroplet className="me-2" /> قراءات المياه
-                        </li>
-                        <li className={activeTab === 'arnona' ? 'active' : ''}
-                            onClick={() => setActiveTab('arnona')}>
-                            <FiFileText className="me-2" /> إدارة الأرنونا
-                        </li>
                         <li className={activeTab === 'payments' ? 'active' : ''}
                             onClick={() => setActiveTab('payments')}>
-                            <FiDollarSign className="me-2" /> الفواتير
+                            <FiDollarSign className="me-2" /> إدارة الفواتير
+                        </li>
+                        <li className={activeTab === 'events' ? 'active' : ''}
+                            onClick={() => setActiveTab('events')}>
+                            <FiCalendar className="me-2" /> إدارة الفعاليات
                         </li>
                     </ul>
                 </Col>
@@ -210,10 +225,12 @@ const AdminGeneral = () => {
                                                 <Card.Body>
                                                     <div className="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <h6>قراءات المياه</h6>
-                                                            <h3>{waterReadings.length}</h3>
+                                                            <h6>فواتير المياه</h6>
+                                                            <h3>
+                                                                {payments.filter(p => p.paymentType === 'WATER').length}
+                                                            </h3>
                                                         </div>
-                                                        <FiDroplet size={30} className="text-info" />
+                                                        <FiDroplet size={30} className="text-success" />
                                                     </div>
                                                 </Card.Body>
                                             </Card>
@@ -223,10 +240,12 @@ const AdminGeneral = () => {
                                                 <Card.Body>
                                                     <div className="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <h6>الفواتير</h6>
-                                                            <h3>{payments.length}</h3>
+                                                            <h6>فواتير الأرنونا</h6>
+                                                            <h3>
+                                                                {payments.filter(p => p.paymentType === 'ARNONA').length}
+                                                            </h3>
                                                         </div>
-                                                        <FiDollarSign size={30} className="text-success" />
+                                                        <FiFileText size={30} className="text-warning" />
                                                     </div>
                                                 </Card.Body>
                                             </Card>
@@ -240,18 +259,35 @@ const AdminGeneral = () => {
                                                     <h5>إجراءات سريعة</h5>
                                                 </Card.Header>
                                                 <Card.Body>
-                                                    <Button variant="info" className="w-100 mb-3"
-                                                            onClick={() => setShowWaterModal(true)}>
-                                                        <FiPlus className="me-2" /> إضافة قراءة مياه
-                                                    </Button>
-                                                    <Button variant="warning" className="w-100 mb-3"
-                                                            onClick={() => setShowArnonaModal(true)}>
-                                                        <FiPlus className="me-2" /> إضافة أرنونا
-                                                    </Button>
-                                                    <Button variant="success" className="w-100"
+                                                    <Button variant="success" className="w-100 mb-3"
                                                             onClick={() => { setCurrentBillType('WATER'); setShowBillsModal(true); }}>
-                                                        <FiPlus className="me-2" /> توليد فواتير
+                                                        <FiPlus className="me-2" /> توليد فواتير المياه
                                                     </Button>
+                                                    <Button variant="info" className="w-100 mb-3"
+                                                            onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }}>
+                                                        <FiPlus className="me-2" /> توليد فواتير الأرنونا
+                                                    </Button>
+                                                    <Button variant="primary" className="w-100"
+                                                            onClick={() => setShowEventModal(true)}>
+                                                        <FiPlus className="me-2" /> إضافة فعالية جديدة
+                                                    </Button>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                        <Col md={6}>
+                                            <Card>
+                                                <Card.Header>
+                                                    <h5>آخر الفعاليات</h5>
+                                                </Card.Header>
+                                                <Card.Body>
+                                                    {events.slice(0, 3).map(event => (
+                                                        <div key={event.id} className="mb-3">
+                                                            <h6>{event.title}</h6>
+                                                            <small className="text-muted">
+                                                                {new Date(event.date).toLocaleDateString()} - {event.location}
+                                                            </small>
+                                                        </div>
+                                                    ))}
                                                 </Card.Body>
                                             </Card>
                                         </Col>
@@ -259,127 +295,77 @@ const AdminGeneral = () => {
                                 </div>
                             )}
 
-                            {/* إدارة قراءات المياه */}
-                            {activeTab === 'water' && (
-                                <div className="water-section">
-                                    <div className="d-flex justify-content-between align-items-center mb-4">
-                                        <h3>إدارة قراءات المياه</h3>
-                                        <Button variant="primary" onClick={() => setShowWaterModal(true)}>
-                                            <FiPlus className="me-2" /> إضافة قراءة جديدة
-                                        </Button>
-                                    </div>
-                                    <Table striped bordered hover>
-                                        <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>العقار</th>
-                                            <th>الكمية (م³)</th>
-                                            <th>التاريخ</th>
-                                            <th>المستخدم</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {waterReadings.map((reading, index) => {
-                                            const property = properties.find(p => p.propertyId === reading.propertyId);
-                                            const user = users.find(u => u.userId === property?.userId);
-
-                                            return (
-                                                <tr key={reading.id}>
-                                                    <td>{index + 1}</td>
-                                                    <td>{property?.address || '--'}</td>
-                                                    <td>{reading.amount}</td>
-                                                    <td>{new Date(reading.date).toLocaleDateString()}</td>
-                                                    <td>{user?.fullName || '--'}</td>
-                                                </tr>
-                                            );
-                                        })}
-                                        </tbody>
-                                    </Table>
-                                </div>
-                            )}
-
-                            {/* إدارة الأرنونا */}
-                            {activeTab === 'arnona' && (
-                                <div className="arnona-section">
-                                    <div className="d-flex justify-content-between align-items-center mb-4">
-                                        <h3>إدارة الأرنونا</h3>
-                                        <Button variant="primary" onClick={() => setShowArnonaModal(true)}>
-                                            <FiPlus className="me-2" /> إضافة أرنونا جديدة
-                                        </Button>
-                                    </div>
-                                    <Table striped bordered hover>
-                                        <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>اسم المستخدم</th>
-                                            <th>المبلغ</th>
-                                            <th>السنة</th>
-                                            <th>حالة الدفع</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {payments
-                                            .filter(p => p.paymentType === 'ARNONA')
-                                            .map((payment, index) => {
-                                                const user = users.find(u => u.userId === payment.userId);
-                                                return (
-                                                    <tr key={payment.paymentId}>
-                                                        <td>{index + 1}</td>
-                                                        <td>{user?.fullName || '--'}</td>
-                                                        <td>{payment.amount} شيكل</td>
-                                                        <td>{new Date(payment.createdAt).getFullYear()}</td>
-                                                        <td>
-                                                            <Badge bg={formatPaymentStatus(payment.status).variant}>
-                                                                {formatPaymentStatus(payment.status).text}
-                                                            </Badge>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </Table>
-                                </div>
-                            )}
-
                             {/* إدارة الفواتير */}
                             {activeTab === 'payments' && (
                                 <div className="payments-section">
-                                    <h3 className="mb-4">إدارة الفواتير</h3>
-                                    <Tabs defaultActiveKey="all" className="mb-3">
-                                        <Tab eventKey="all" title="جميع الفواتير">
-                                            <Table striped bordered hover className="mt-3">
-                                                <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>نوع الفاتورة</th>
-                                                    <th>المستخدم</th>
-                                                    <th>المبلغ</th>
-                                                    <th>الحالة</th>
-                                                    <th>التاريخ</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {payments.map((payment, index) => {
-                                                    const user = users.find(u => u.userId === payment.userId);
-                                                    return (
-                                                        <tr key={payment.paymentId}>
-                                                            <td>{index + 1}</td>
-                                                            <td>{payment.paymentType === 'WATER' ? 'مياه' : 'أرنونا'}</td>
-                                                            <td>{user?.fullName || '--'}</td>
-                                                            <td>{payment.amount} شيكل</td>
-                                                            <td>
-                                                                <Badge bg={formatPaymentStatus(payment.status).variant}>
-                                                                    {formatPaymentStatus(payment.status).text}
-                                                                </Badge>
-                                                            </td>
-                                                            <td>{new Date(payment.createdAt).toLocaleDateString()}</td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                                </tbody>
-                                            </Table>
-                                        </Tab>
-                                    </Tabs>
+                                    <h3 className="mb-4">إدارة الفواتير الشهرية</h3>
+                                    <Table striped bordered hover>
+                                        <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>اسم المواطن</th>
+                                            <th>نوع الفاتورة</th>
+                                            <th>المبلغ (شيكل)</th>
+                                            <th>حالة الدفع</th>
+                                            <th>عنوان العقار</th>
+                                            <th>عدد الوحدات</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {payments.map((payment, index) => (
+                                            <tr key={payment.paymentId}>
+                                                <td>{index + 1}</td>
+                                                <td>{payment.userName || '--'}</td>
+                                                <td>{payment.paymentType === 'WATER' ? 'مياه' : 'أرنونا'}</td>
+                                                <td>{payment.amount || '--'}</td>
+                                                <td>
+                                                    <Badge bg={formatPaymentStatus(payment.status).variant}>
+                                                        {formatPaymentStatus(payment.status).text}
+                                                    </Badge>
+                                                </td>
+                                                <td>{payment.propertyAddress || '--'}</td>
+                                                <td>{payment.propertyUnits || '--'}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            )}
+
+                            {/* إدارة الفعاليات */}
+                            {activeTab === 'events' && (
+                                <div className="events-section">
+                                    <div className="d-flex justify-content-between align-items-center mb-4">
+                                        <h3>إدارة الفعاليات</h3>
+                                        <Button variant="primary" onClick={() => setShowEventModal(true)}>
+                                            <FiPlus className="me-2" /> إضافة فعالية جديدة
+                                        </Button>
+                                    </div>
+                                    <Row>
+                                        {events.map(event => (
+                                            <Col md={4} key={event.id} className="mb-4">
+                                                <Card>
+                                                    {event.imageUrl && (
+                                                        <Card.Img variant="top" src={event.imageUrl} style={{ height: '200px', objectFit: 'cover' }} />
+                                                    )}
+                                                    <Card.Body>
+                                                        <Card.Title>{event.title}</Card.Title>
+                                                        <Card.Text>{event.description}</Card.Text>
+                                                        <div className="d-flex justify-content-between">
+                                                            <small className="text-muted">
+                                                                <FiCalendar className="me-1" />
+                                                                {new Date(event.date).toLocaleDateString()}
+                                                            </small>
+                                                            <small className="text-muted">
+                                                                <FiHome className="me-1" />
+                                                                {event.location}
+                                                            </small>
+                                                        </div>
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                        ))}
+                                    </Row>
                                 </div>
                             )}
                         </>
@@ -387,105 +373,67 @@ const AdminGeneral = () => {
                 </Col>
             </Row>
 
-            {/* مودال إضافة قراءة مياه */}
-            <Modal show={showWaterModal} onHide={() => setShowWaterModal(false)}>
+            {/* مودال إضافة فعالية جديدة */}
+            <Modal show={showEventModal} onHide={() => setShowEventModal(false)} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>إضافة قراءة مياه جديدة</Modal.Title>
+                    <Modal.Title>إضافة فعالية جديدة</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>اختر العقار</Form.Label>
-                            <Form.Select
-                                value={newReading.propertyId}
-                                onChange={(e) => setNewReading({...newReading, propertyId: e.target.value})}
-                            >
-                                <option value="">اختر العقار</option>
-                                {properties.map(property => {
-                                    const owner = users.find(u => u.userId === property.userId);
-                                    return (
-                                        <option key={property.propertyId} value={property.propertyId}>
-                                            {property.address} (المالك: {owner?.fullName || 'غير معروف'})
-                                        </option>
-                                    );
-                                })}
-                            </Form.Select>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>كمية الاستهلاك (م³)</Form.Label>
+                            <Form.Label>عنوان الفعالية</Form.Label>
                             <Form.Control
-                                type="number"
-                                step="0.01"
-                                value={newReading.amount}
-                                onChange={(e) => setNewReading({...newReading, amount: e.target.value})}
+                                type="text"
+                                value={newEvent.title}
+                                onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>تاريخ القراءة</Form.Label>
+                            <Form.Label>وصف الفعالية</Form.Label>
                             <Form.Control
-                                type="date"
-                                value={newReading.date}
-                                onChange={(e) => setNewReading({...newReading, date: e.target.value})}
+                                as="textarea"
+                                rows={3}
+                                value={newEvent.description}
+                                onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>المكان</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={newEvent.location}
+                                        onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>التاريخ</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={newEvent.date}
+                                        onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Form.Group className="mb-3">
+                            <Form.Label>صورة الفعالية</Form.Label>
+                            <Form.Control
+                                type="file"
+                                onChange={(e) => setNewEvent({...newEvent, image: e.target.files[0]})}
                             />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowWaterModal(false)}>
+                    <Button variant="secondary" onClick={() => setShowEventModal(false)}>
                         إلغاء
                     </Button>
-                    <Button variant="primary" onClick={handleAddWaterReading} disabled={loading}>
-                        {loading ? 'جاري الحفظ...' : 'حفظ القراءة'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* مودال إضافة الأرنونا */}
-            <Modal show={showArnonaModal} onHide={() => setShowArnonaModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>إضافة أرنونا للمستخدم</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3">
-                            <Form.Label>اختر المستخدم</Form.Label>
-                            <Form.Select
-                                value={arnonaData.userId}
-                                onChange={(e) => setArnonaData({...arnonaData, userId: e.target.value})}
-                            >
-                                <option value="">اختر المستخدم</option>
-                                {users.map(user => (
-                                    <option key={user.userId} value={user.userId}>
-                                        {user.fullName} - {user.email}
-                                    </option>
-                                ))}
-                            </Form.Select>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>المبلغ (شيكل)</Form.Label>
-                            <Form.Control
-                                type="number"
-                                step="0.01"
-                                value={arnonaData.amount}
-                                onChange={(e) => setArnonaData({...arnonaData, amount: e.target.value})}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>السنة</Form.Label>
-                            <Form.Control
-                                type="number"
-                                value={arnonaData.year}
-                                onChange={(e) => setArnonaData({...arnonaData, year: e.target.value})}
-                            />
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowArnonaModal(false)}>
-                        إلغاء
-                    </Button>
-                    <Button variant="primary" onClick={handleAddArnona} disabled={loading}>
-                        {loading ? 'جاري الحفظ...' : 'حفظ الأرنونا'}
+                    <Button variant="primary" onClick={handleAddEvent} disabled={loading}>
+                        {loading ? 'جاري الحفظ...' : 'حفظ الفعالية'}
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -500,59 +448,36 @@ const AdminGeneral = () => {
                 <Modal.Body>
                     <p className="text-center mb-4">
                         {currentBillType === 'ARNONA'
-                            ? 'سيتم توليد فواتير الأرنونا لجميع المستخدمين'
-                            : 'سيتم توليد فواتير المياه لجميع العقارات'}
+                            ? 'سيتم توليد فواتير الأرنونا لجميع العقارات بناءً على المساحة وعدد الوحدات'
+                            : 'سيتم توليد فواتير المياه لجميع العقارات بناءً على قراءات المياه'}
                     </p>
                     <Table striped bordered hover>
                         <thead>
                         <tr>
                             <th>#</th>
                             <th>اسم المستخدم</th>
-                            {currentBillType === 'WATER' && <th>عنوان العقار</th>}
-                            <th>{currentBillType === 'WATER' ? 'آخر قراءة' : 'المبلغ'}</th>
+                            <th>عنوان العقار</th>
+                            <th>عدد الوحدات</th>
+                            <th>مساحة العقار</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {currentBillType === 'WATER' ? (
-                            properties.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="text-center text-danger">
-                                        لا يوجد عقارات مسجلة
-                                    </td>
-                                </tr>
-                            ) : (
-                                properties.map((property, idx) => {
-                                    const owner = users.find(u => u.userId === property.userId);
-                                    const lastReading = waterReadings
-                                        .filter(r => r.propertyId === property.propertyId)
-                                        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-
-                                    return (
-                                        <tr key={property.propertyId}>
-                                            <td>{idx + 1}</td>
-                                            <td>{owner?.fullName || '--'}</td>
-                                            <td>{property.address}</td>
-                                            <td>{lastReading ? `${lastReading.amount} م³` : '--'}</td>
-                                        </tr>
-                                    );
-                                })
-                            )
+                        {users.filter(u => u.properties && u.properties.length > 0).length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="text-center text-danger">
+                                    لا يوجد مستخدمين لديهم عقارات حالياً
+                                </td>
+                            </tr>
                         ) : (
-                            users.length === 0 ? (
-                                <tr>
-                                    <td colSpan={3} className="text-center text-danger">
-                                        لا يوجد مستخدمين مسجلين
-                                    </td>
+                            users.filter(u => u.property).map((u, idx) => (
+                                <tr key={u.userId}>
+                                    <td>{idx + 1}</td>
+                                    <td>{u.fullName}</td>
+                                    <td>{u.property.address}</td>
+                                    <td>{u.property.numberOfUnits}</td>
+                                    <td>{u.property.area} م²</td>
                                 </tr>
-                            ) : (
-                                users.map((user, idx) => (
-                                    <tr key={user.userId}>
-                                        <td>{idx + 1}</td>
-                                        <td>{user.fullName}</td>
-                                        <td>حسب المساحة والوحدات</td>
-                                    </tr>
-                                ))
-                            )
+                            ))
                         )}
                         </tbody>
                     </Table>
