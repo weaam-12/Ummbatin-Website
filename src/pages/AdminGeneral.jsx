@@ -296,18 +296,27 @@ const AdminGeneral = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {users.map((user, index) => {
-                            const prop = user.properties?.[0];
-                            return (
-                                <tr key={user.userId}>
-                                    <td>{index + 1}</td>
-                                    <td>{user.fullName}</td>
-                                    <td>{prop?.address || '--'}</td>
-                                    <td>{prop?.numberOfUnits || '--'}</td>
-                                    <td>{prop?.area ? `${prop.area} م²` : '--'}</td>
-                                </tr>
-                            );
-                        })}
+                        {users.filter(u => u.properties && u.properties.length > 0).length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="text-center text-danger">
+                                    لا يوجد مستخدمين لديهم عقارات حالياً
+                                </td>
+                            </tr>
+                        ) : (
+                            users.filter(u => u.properties && u.properties.length > 0)
+                                .map((u, idx) => {
+                                    const p = u.properties[0];
+                                    return (
+                                        <tr key={u.userId}>
+                                            <td>{idx + 1}</td>
+                                            <td>{u.fullName}</td>
+                                            <td>{p.address}</td>
+                                            <td>{p.numberOfUnits}</td>
+                                            <td>{p.area} م²</td>
+                                        </tr>
+                                    );
+                                })
+                        )}
                         </tbody>
                     </Table>
 
