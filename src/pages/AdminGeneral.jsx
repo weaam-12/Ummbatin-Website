@@ -340,26 +340,23 @@ const AdminGeneral = () => {
                                                     <h5>إجراءات سريعة</h5>
                                                 </Card.Header>
                                                 <Card.Body>
-                                                    <Button variant="success" className="w-100 mb-3"
-                                                            onClick={() => { setCurrentBillType('WATER'); setShowBillsModal(true); }}>
-                                                        <FiPlus className="me-2" /> توليد فواتير المياه
-                                                    </Button>
-                                                    <Button variant="info" className="w-100 mb-3"
-                                                            onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }}>
-                                                        <FiPlus className="me-2" /> توليد فواتير الأرنونا
-                                                    </Button>
-                                                    <Button variant="primary" className="w-100"
-                                                            onClick={() => setShowEventModal(true)}>
-                                                        <FiPlus className="me-2" /> إضافة فعالية جديدة
-                                                    </Button>
-                                                    <Button variant="warning" className="w-100"
-                                                            onClick={() => setShowAddPropertyModal(true)}>
-                                                        <FiMapPin className="me-2" /> إضافة عقار جديد
-                                                    </Button>
-                                                    <Button variant="info" className="w-100 mb-3"
-                                                            onClick={() => setShowWaterReadingModal(true)}>
-                                                        <FiActivity className="me-2" /> إضافة قراءات المياه
-                                                    </Button>
+                                                    <div className="d-grid gap-3">
+                                                        <Button variant="success" onClick={() => { setCurrentBillType('WATER'); setShowBillsModal(true); }}>
+                                                            <FiPlus className="me-2" /> توليد فواتير المياه
+                                                        </Button>
+                                                        <Button variant="info" onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }}>
+                                                            <FiPlus className="me-2" /> توليد فواتير الأرنونا
+                                                        </Button>
+                                                        <Button variant="primary" onClick={() => setShowEventModal(true)}>
+                                                            <FiPlus className="me-2" /> إضافة فعالية جديدة
+                                                        </Button>
+                                                        <Button variant="warning" onClick={() => setShowAddPropertyModal(true)}>
+                                                            <FiMapPin className="me-2" /> إضافة عقار جديد
+                                                        </Button>
+                                                        <Button variant="info" onClick={() => setShowWaterReadingModal(true)}>
+                                                            <FiActivity className="me-2" /> إضافة قراءات المياه
+                                                        </Button>
+                                                    </div>
                                                 </Card.Body>
                                             </Card>
                                         </Col>
