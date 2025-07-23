@@ -176,9 +176,8 @@ const AdminGeneral = () => {
                                                 <div>
                                                     <h6>دفعات المياه المكتملة</h6>
                                                     <h3>
-                                                        {payments?.filter(p =>
-                                                            p.paymentType === 'WATER' && p.status === 'PAID'
-                                                        ).length || 0}
+                                                        {payments?.filter(p => p.paymentType === 'WATER').length || 0}
+
                                                     </h3>
                                                 </div>
                                                 <FiDollarSign size={30} className="text-success" />
@@ -194,9 +193,8 @@ const AdminGeneral = () => {
                                                 <div>
                                                     <h6>دفعات الأرنونا المكتملة</h6>
                                                     <h3>
-                                                        {payments?.filter(p =>
-                                                            p.paymentType === 'ARNONA' && p.status === 'PAID'
-                                                        ).length || 0}
+                                                        {payments?.filter(p => p.paymentType === 'ARNONA').length || 0}
+
                                                     </h3>
                                                 </div>
                                                 <FiDollarSign size={30} className="text-warning" />
