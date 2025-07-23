@@ -6,78 +6,93 @@ import { axiosInstance } from '../api.js';
 
 const AdminGeneral = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
-    const [usersWithProperties, setUsersWithProperties] = useState([]);
+    const [users, setUsers] = useState([]);
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
     const [showBillsModal, setShowBillsModal] = useState(false);
     const [currentBillType, setCurrentBillType] = useState('');
 
-    // Fetch users with their properties and payments
-    const fetchData = async () => {
-        setLoading(true);
+    // Fetch users with their properties
+    const fetchUsersWithProperties = async () => {
         try {
-            const currentDate = new Date();
-            const [usersRes, paymentsRes] = await Promise.all([
-                axiosInstance.get('api/users/all'),
-                axiosInstance.get('api/payments/current-month', {
-                    params: {
-                        month: currentDate.getMonth() + 1,
-                        year: currentDate.getFullYear()
-                    }
-                })
-            ]);
-
-            // Get users with their first property
-            const usersWithProps = usersRes.data.map(user => ({
+            const response = await axiosInstance.get('api/users/all');
+            return response.data.map(user => ({
                 ...user,
                 property: user.properties?.[0] || null
             }));
-
-            setUsersWithProperties(usersWithProps);
-            setPayments(paymentsRes.data || []);
         } catch (error) {
-            console.error('Error fetching data:', error);
-            setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
-        } finally {
-            setLoading(false);
+            console.error('Error fetching users:', error);
+            throw error;
         }
     };
 
+    // Fetch payments with property details
+    const fetchPayments = async () => {
+        try {
+            const currentDate = new Date();
+            const response = await axiosInstance.get('api/payments/current-month', {
+                params: {
+                    month: currentDate.getMonth() + 1,
+                    year: currentDate.getFullYear()
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching payments:', error);
+            throw error;
+        }
+    };
+
+    // Load initial data
     useEffect(() => {
-        fetchData();
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                const [usersRes, paymentsRes] = await Promise.all([
+                    fetchUsersWithProperties(),
+                    fetchPayments().catch(() => []) // Continue if payments fail
+                ]);
+                setUsers(usersRes);
+                setPayments(paymentsRes);
+            } catch (error) {
+                setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
     }, []);
 
+    // Handle generate bills
     const handleGenerateBills = async () => {
         try {
             setLoading(true);
             const currentDate = new Date();
+            const month = currentDate.getMonth() + 1;
+            const year = currentDate.getFullYear();
 
+            let endpoint, params;
             if (currentBillType === 'ARNONA') {
-                await axiosInstance.post('api/payments/generate-arnona', null, {
-                    params: {
-                        month: currentDate.getMonth() + 1,
-                        year: currentDate.getFullYear()
-                    }
-                });
+                endpoint = 'api/payments/generate-arnona';
+                params = { month, year };
             } else {
-                await axiosInstance.post('api/payments/generate-water', null, {
-                    params: {
-                        month: currentDate.getMonth() + 1,
-                        year: currentDate.getFullYear(),
-                        rate: 10 // يمكن تغيير سعر المياه حسب الحاجة
-                    }
-                });
+                endpoint = 'api/payments/generate-water';
+                params = { month, year, rate: 10 }; // Default water rate
             }
+
+            await axiosInstance.post(endpoint, null, { params });
 
             setNotification({
                 type: 'success',
                 message: `تم توليد فواتير ${currentBillType === 'ARNONA' ? 'الأرنونا' : 'المياه'} بنجاح`
             });
 
+            // Refresh payments data
+            const updatedPayments = await fetchPayments();
+            setPayments(updatedPayments);
             setShowBillsModal(false);
-            // Refresh data after generation
-            await fetchData();
         } catch (error) {
             console.error('Error generating bills:', error);
             setNotification({
@@ -139,7 +154,7 @@ const AdminGeneral = () => {
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <h6>عدد المستخدمين</h6>
-                                                    <h3>{usersWithProperties.length}</h3>
+                                                    <h3>{users.length}</h3>
                                                 </div>
                                                 <FiUsers size={30} className="text-primary" />
                                             </div>
@@ -225,7 +240,7 @@ const AdminGeneral = () => {
                                             <th>نوع الدفعة</th>
                                             <th>المبلغ (شيكل)</th>
                                             <th>حالة الدفع</th>
-                                            <th>العقار</th>
+                                            <th>عنوان العقار</th>
                                             <th>عدد الوحدات</th>
                                         </tr>
                                         </thead>
@@ -279,7 +294,7 @@ const AdminGeneral = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {usersWithProperties.map((user, index) => (
+                        {users.map((user, index) => (
                             <tr key={user.userId}>
                                 <td>{index + 1}</td>
                                 <td>{user.fullName}</td>
