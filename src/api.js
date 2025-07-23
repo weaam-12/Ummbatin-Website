@@ -278,4 +278,9 @@ export const getWaterReadings = async () => {
     const response = await axiosInstance.get('api/water-readings');
     return response.data;
 };
+export const addNewProperty = async (propertyData) => {
+    const response = await axiosInstance.post('api/properties', propertyData);
+    return response.data;
+};
+
 export default axiosInstance;

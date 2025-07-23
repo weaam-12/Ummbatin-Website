@@ -32,6 +32,42 @@ const AdminGeneral = () => {
         image: null,
         date: ''
     });
+    const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
+    const [newProperty, setNewProperty] = useState({
+        userId: '',
+        address: '',
+        area: '',
+        numberOfUnits: 1
+    });
+
+    const handleAddProperty = async () => {
+        try {
+            setLoading(true);
+            await addNewProperty({
+                user_id: newProperty.userId,
+                address: newProperty.address,
+                area: parseFloat(newProperty.area),
+                number_of_units: parseInt(newProperty.numberOfUnits)
+            });
+
+            // تحديث قائمة المستخدمين
+            const updatedUsers = await fetchUsersWithProperties();
+            setUsers(updatedUsers);
+
+            setShowAddPropertyModal(false);
+            setNewProperty({
+                userId: '',
+                address: '',
+                area: '',
+                numberOfUnits: 1
+            });
+            setNotification({ type: 'success', message: 'تمت إضافة العقار بنجاح' });
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في إضافة العقار: ' + (error.response?.data?.message || error.message) });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // ===================== دوال جلب البيانات =====================
     const fetchUsersWithProperties = async () => {
@@ -271,6 +307,10 @@ const AdminGeneral = () => {
                                                             onClick={() => setShowEventModal(true)}>
                                                         <FiPlus className="me-2" /> إضافة فعالية جديدة
                                                     </Button>
+                                                    <Button variant="warning" className="w-100"
+                                                            onClick={() => setShowAddPropertyModal(true)}>
+                                                        <FiMapPin className="me-2" /> إضافة عقار جديد
+                                                    </Button>
                                                 </Card.Body>
                                             </Card>
                                         </Col>
@@ -294,7 +334,69 @@ const AdminGeneral = () => {
                                     </Row>
                                 </div>
                             )}
-
+                            {/* مودال إضافة عقار جديد */}
+                            <Modal show={showAddPropertyModal} onHide={() => setShowAddPropertyModal(false)}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>إضافة عقار جديد</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <Form>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>رقم المستخدم (ID)</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                value={newProperty.userId}
+                                                onChange={(e) => setNewProperty({...newProperty, userId: e.target.value})}
+                                                placeholder="أدخل رقم المستخدم"
+                                            />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>عنوان العقار</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                value={newProperty.address}
+                                                onChange={(e) => setNewProperty({...newProperty, address: e.target.value})}
+                                                placeholder="أدخل عنوان العقار"
+                                            />
+                                        </Form.Group>
+                                        <Row>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label>مساحة العقار (م²)</Form.Label>
+                                                    <Form.Control
+                                                        type="number"
+                                                        value={newProperty.area}
+                                                        onChange={(e) => setNewProperty({...newProperty, area: e.target.value})}
+                                                        placeholder="أدخل المساحة"
+                                                        min="0"
+                                                        step="0.01"
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label>عدد الوحدات</Form.Label>
+                                                    <Form.Control
+                                                        type="number"
+                                                        value={newProperty.numberOfUnits}
+                                                        onChange={(e) => setNewProperty({...newProperty, numberOfUnits: e.target.value})}
+                                                        placeholder="أدخل عدد الوحدات"
+                                                        min="1"
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
+                                    </Form>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={() => setShowAddPropertyModal(false)}>
+                                        إلغاء
+                                    </Button>
+                                    <Button variant="primary" onClick={handleAddProperty} disabled={loading}>
+                                        {loading ? 'جاري الحفظ...' : 'حفظ العقار'}
+                                    </Button>
+                                </Modal.Footer>
+                            </Modal>
                             {/* إدارة الفواتير */}
                             {activeTab === 'payments' && (
                                 <div className="payments-section">
