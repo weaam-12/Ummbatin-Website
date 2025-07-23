@@ -17,10 +17,12 @@ const AdminGeneral = () => {
     const fetchUsersWithProperties = async () => {
         try {
             const response = await axiosInstance.get('api/users/all');
-            return response.data.map(user => ({
-                ...user,
-                property: user.properties?.[0] || null
-            }));
+            return response.data
+                .filter(user => user.properties && user.properties.length > 0) // تأكد أن لديه عقار
+                .map(user => ({
+                    ...user,
+                    property: user.properties[0] // خذ أول عقار فقط
+                }));
         } catch (error) {
             console.error('Error fetching users:', error);
             throw error;
