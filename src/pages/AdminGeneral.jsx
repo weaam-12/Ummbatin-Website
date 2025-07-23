@@ -1,62 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import {
     Container, Row, Col, Card, Button, Table, Modal,
-    Alert, Spinner, Badge, Form, Tab, Tabs
+    Alert, Spinner, Badge, Form
 } from 'react-bootstrap';
 import {
-    FiUsers, FiDollarSign, FiPlus, FiCalendar,
-    FiDroplet, FiHome, FiFileText
+    FiUsers, FiDollarSign, FiPlus, FiDroplet, FiHome
 } from 'react-icons/fi';
+import {
+    axiosInstance,
+    getWaterReadings,
+    addWaterReading,
+    addArnonaPayment
+} from '../api.js';
 import './AdminGeneral.css';
-import { axiosInstance } from '../api.js';
 
 const AdminGeneral = () => {
-    // States العامة
+    // States الأساسية
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
 
-    // States للمستخدمين والعقارات
+    // States للبيانات
     const [users, setUsers] = useState([]);
+    const [payments, setPayments] = useState([]);
     const [properties, setProperties] = useState([]);
-
-    // States لقراءات المياه
     const [waterReadings, setWaterReadings] = useState([]);
+
+    // States للنماذج
     const [showWaterModal, setShowWaterModal] = useState(false);
-    const [newReading, setNewReading] = useState({
+    const [showArnonaModal, setShowArnonaModal] = useState(false);
+    const [showBillsModal, setShowBillsModal] = useState(false);
+
+    const [waterForm, setWaterForm] = useState({
         propertyId: '',
         amount: '',
         date: new Date().toISOString().split('T')[0]
     });
 
-    // States للأرنونا
-    const [showArnonaModal, setShowArnonaModal] = useState(false);
-    const [arnonaData, setArnonaData] = useState({
+    const [arnonaForm, setArnonaForm] = useState({
         userId: '',
         amount: '',
         year: new Date().getFullYear()
     });
 
-    // States للفواتير
-    const [payments, setPayments] = useState([]);
-    const [showBillsModal, setShowBillsModal] = useState(false);
-    const [currentBillType, setCurrentBillType] = useState('');
-
-    // ===================== دوال جلب البيانات =====================
-    const fetchAllData = async () => {
+    // دوال جلب البيانات
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const [usersRes, propertiesRes, readingsRes, paymentsRes] = await Promise.all([
-                axiosInstance.get('api/users/all').then(res => res.data),
-                axiosInstance.get('api/properties/all').then(res => res.data),
-                axiosInstance.get('api/water-readings').then(res => res.data),
-                axiosInstance.get('api/payments/current-month').then(res => res.data)
+            const [usersRes, paymentsRes, propertiesRes, readingsRes] = await Promise.all([
+                axiosInstance.get('api/users/all'),
+                axiosInstance.get('api/payments/current-month'),
+                axiosInstance.get('api/properties/all'),
+                getWaterReadings()
             ]);
 
-            setUsers(usersRes);
-            setProperties(propertiesRes);
+            setUsers(usersRes.data);
+            setPayments(paymentsRes.data);
+            setProperties(propertiesRes.data);
             setWaterReadings(readingsRes);
-            setPayments(paymentsRes);
         } catch (error) {
             setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
         } finally {
@@ -65,47 +66,45 @@ const AdminGeneral = () => {
     };
 
     useEffect(() => {
-        fetchAllData();
+        fetchData();
     }, []);
 
-    // ===================== إدارة قراءات المياه =====================
+    // دوال الإضافة
     const handleAddWaterReading = async () => {
         try {
             setLoading(true);
-            await axiosInstance.post('api/water-readings', {
-                propertyId: parseInt(newReading.propertyId),
-                amount: parseFloat(newReading.amount),
-                date: newReading.date
-            });
-            await fetchAllData();
+            await addWaterReading(
+                waterForm.propertyId,
+                waterForm.amount,
+                waterForm.date
+            );
+            await fetchData();
             setShowWaterModal(false);
             setNotification({ type: 'success', message: 'تمت إضافة قراءة المياه بنجاح' });
         } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في إضافة قراءة المياه' });
+            setNotification({ type: 'danger', message: 'فشل في إضافة القراءة' });
         } finally {
             setLoading(false);
         }
     };
 
-    // ===================== إضافة الأرنونا للمستخدم =====================
     const handleAddArnona = async () => {
         try {
             setLoading(true);
-            await axiosInstance.post('api/payments/add-arnona', {
-                userId: parseInt(arnonaData.userId),
-                amount: parseFloat(arnonaData.amount),
-                year: arnonaData.year
-            });
-            await fetchAllData();
+            await addArnonaPayment(
+                arnonaForm.userId,
+                arnonaForm.amount,
+                arnonaForm.year
+            );
+            await fetchData();
             setShowArnonaModal(false);
-            setNotification({ type: 'success', message: 'تمت إضافة الأرنونا للمستخدم بنجاح' });
+            setNotification({ type: 'success', message: 'تمت إضافة الأرنونا بنجاح' });
         } catch (error) {
             setNotification({ type: 'danger', message: 'فشل في إضافة الأرنونا' });
         } finally {
             setLoading(false);
         }
     };
-
     // ===================== توليد الفواتير =====================
     const handleGenerateBills = async () => {
         try {
