@@ -242,16 +242,16 @@ const AdminGeneral = () => {
                                         {payments.map((payment, index) => (
                                             <tr key={payment.paymentId}>
                                                 <td>{index + 1}</td>
-                                                <td>{payment.user?.fullName || '--'}</td>
-                                                <td>{payment.type === 'WATER' ? 'مياه' : 'أرنونا'}</td>
+                                                <td>{payment.userName || '--'}</td>
+                                                <td>{payment.paymentType === 'WATER' ? 'مياه' : 'أرنونا'}</td>
                                                 <td>{payment.amount || '--'}</td>
                                                 <td>
                                                     <Badge bg={formatPaymentStatus(payment.status).variant}>
                                                         {formatPaymentStatus(payment.status).text}
                                                     </Badge>
                                                 </td>
-                                                <td>{payment.property?.address || '--'}</td>
-                                                <td>{payment.property?.numberOfUnits || '--'}</td>
+                                                <td>{payment.propertyAddress || '--'}</td>
+                                                <td>{payment.propertyUnits || '--'}</td>
                                             </tr>
                                         ))}
                                         </tbody>
@@ -265,7 +265,7 @@ const AdminGeneral = () => {
 
             {/* Bills Generation Modal */}
             <Modal show={showBillsModal} onHide={() => setShowBillsModal(false)} size="lg">
-                <Modal.Header closeButton>
+            <Modal.Header closeButton>
                     <Modal.Title>
                         {currentBillType === 'ARNONA' ? 'توليد فواتير الأرنونا' : 'توليد فواتير المياه'}
                     </Modal.Title>
