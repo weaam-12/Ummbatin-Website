@@ -115,10 +115,7 @@ export const getUserProperties = async (userId) => {
 };
 
 //===================== WATER READING =====================
-export const addWaterReading = async (readingData) => {
-    const response = await axiosInstance.post('api/water-readings', readingData);
-    return response.data;
-};
+
 
 //===================== COMPLAINTS =====================
 export const getComplaints = async (userId, isAdmin = false) => {
@@ -282,5 +279,16 @@ export const addNewProperty = async (propertyData) => {
     const response = await axiosInstance.post('api/properties', propertyData);
     return response.data;
 };
+export const addWaterReading = async (propertyId, amount) => {
+    const response = await axiosInstance.post('api/water-readings', {
+        property_id: propertyId,
+        amount: amount
+    });
+    return response.data;
+};
 
+export const getPropertiesByUserId = async (userId) => {
+    const response = await axiosInstance.get(`api/properties/user/${userId}`);
+    return response.data;
+};
 export default axiosInstance;

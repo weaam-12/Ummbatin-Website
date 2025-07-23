@@ -5,7 +5,7 @@ import {
 } from 'react-bootstrap';
 import {
     FiUsers, FiDollarSign, FiPlus, FiCalendar,
-    FiHome, FiFileText,FiDroplet,FiMapPin
+    FiHome, FiFileText,FiDroplet,FiMapPin,FiActivity
 } from 'react-icons/fi';
 import './AdminGeneral.css';
 import { axiosInstance } from '../api.js';
@@ -39,7 +39,52 @@ const AdminGeneral = () => {
         area: '',
         numberOfUnits: 1
     });
+    const [showWaterReadingModal, setShowWaterReadingModal] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState('');
+    const [userProperties, setUserProperties] = useState([]);
+    const [waterReadings, setWaterReadings] = useState({});
 
+    // دالة لجلب عقارات المستخدم
+    const fetchUserProperties = async (userId) => {
+        try {
+            const properties = await getPropertiesByUserId(userId);
+            setUserProperties(properties);
+
+            // تهيئة قراءات المياه لكل عقار
+            const readings = {};
+            properties.forEach(property => {
+                readings[property.property_id] = '';
+            });
+            setWaterReadings(readings);
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في جلب عقارات المستخدم' });
+        }
+    };
+
+    // دالة إضافة قراءات المياه
+    const handleAddWaterReadings = async () => {
+        try {
+            setLoading(true);
+
+            // إرسال قراءات المياه لكل عقار
+            for (const propertyId in waterReadings) {
+                if (waterReadings[propertyId]) {
+                    await addWaterReading(propertyId, parseFloat(waterReadings[propertyId]));
+                }
+            }
+
+            setShowWaterReadingModal(false);
+            setSelectedUserId('');
+            setUserProperties([]);
+            setWaterReadings({});
+
+            setNotification({ type: 'success', message: 'تمت إضافة قراءات المياه بنجاح' });
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في إضافة قراءات المياه: ' + (error.response?.data?.message || error.message) });
+        } finally {
+            setLoading(false);
+        }
+    };
     const handleAddProperty = async () => {
         try {
             setLoading(true);
@@ -311,6 +356,10 @@ const AdminGeneral = () => {
                                                             onClick={() => setShowAddPropertyModal(true)}>
                                                         <FiMapPin className="me-2" /> إضافة عقار جديد
                                                     </Button>
+                                                    <Button variant="info" className="w-100 mb-3"
+                                                            onClick={() => setShowWaterReadingModal(true)}>
+                                                        <FiActivity className="me-2" /> إضافة قراءات المياه
+                                                    </Button>
                                                 </Card.Body>
                                             </Card>
                                         </Col>
@@ -474,6 +523,81 @@ const AdminGeneral = () => {
                     )}
                 </Col>
             </Row>
+            <Modal show={showWaterReadingModal} onHide={() => setShowWaterReadingModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>إضافة قراءات المياه</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>رقم المستخدم (ID)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={selectedUserId}
+                                onChange={(e) => {
+                                    setSelectedUserId(e.target.value);
+                                    if (e.target.value) {
+                                        fetchUserProperties(e.target.value);
+                                    } else {
+                                        setUserProperties([]);
+                                        setWaterReadings({});
+                                    }
+                                }}
+                                placeholder="أدخل رقم المستخدم"
+                            />
+                        </Form.Group>
+
+                        {userProperties.length > 0 && (
+                            <Table striped bordered hover>
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>عنوان العقار</th>
+                                    <th>مساحة العقار</th>
+                                    <th>عدد الوحدات</th>
+                                    <th>قراءة المياه (م³)</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {userProperties.map((property, index) => (
+                                    <tr key={property.property_id}>
+                                        <td>{index + 1}</td>
+                                        <td>{property.address}</td>
+                                        <td>{property.area} م²</td>
+                                        <td>{property.number_of_units}</td>
+                                        <td>
+                                            <Form.Control
+                                                type="number"
+                                                value={waterReadings[property.property_id] || ''}
+                                                onChange={(e) => setWaterReadings({
+                                                    ...waterReadings,
+                                                    [property.property_id]: e.target.value
+                                                })}
+                                                placeholder="أدخل القراءة"
+                                                min="0"
+                                                step="0.1"
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </Table>
+                        )}
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowWaterReadingModal(false)}>
+                        إلغاء
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={handleAddWaterReadings}
+                        disabled={loading || userProperties.length === 0}
+                    >
+                        {loading ? 'جاري الحفظ...' : 'حفظ القراءات'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
             {/* مودال إضافة فعالية جديدة */}
             <Modal show={showEventModal} onHide={() => setShowEventModal(false)} size="lg">
