@@ -174,8 +174,12 @@ const AdminGeneral = () => {
                                         <Card.Body>
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <h6>دفعات المياه</h6>
-                                                    <h3>{payments.filter(p => p.type === 'WATER').length}</h3>
+                                                    <h6>دفعات المياه المكتملة</h6>
+                                                    <h3>
+                                                        {payments?.filter(p =>
+                                                            p.paymentType === 'WATER' && p.status === 'PAID'
+                                                        ).length || 0}
+                                                    </h3>
                                                 </div>
                                                 <FiDollarSign size={30} className="text-success" />
                                             </div>
@@ -188,8 +192,12 @@ const AdminGeneral = () => {
                                         <Card.Body>
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <h6>دفعات الأرنونا</h6>
-                                                    <h3>{payments.filter(p => p.type === 'ARNONA').length}</h3>
+                                                    <h6>دفعات الأرنونا المكتملة</h6>
+                                                    <h3>
+                                                        {payments?.filter(p =>
+                                                            p.paymentType === 'ARNONA' && p.status === 'PAID'
+                                                        ).length || 0}
+                                                    </h3>
                                                 </div>
                                                 <FiDollarSign size={30} className="text-warning" />
                                             </div>
