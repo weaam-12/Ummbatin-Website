@@ -293,21 +293,21 @@ const AdminGeneral = () => {
                             <th>اسم المستخدم</th>
                             <th>عنوان العقار</th>
                             <th>عدد الوحدات</th>
-                            <th>مساحة العقار</th>
+                            <th>مساحة العقار (م²)</th>
                         </tr>
                         </thead>
                         <tbody>
                         {users
-                            .filter(user => user.properties && user.properties.length > 0)
-                            .map((user, index) => {
-                                const prop = user.properties[0];
+                            .filter(u => u.property)                     // فقط من لديه عقار
+                            .map((u, idx) => {
+                                const p = u.property;
                                 return (
-                                    <tr key={user.userId}>
-                                        <td>{index + 1}</td>
-                                        <td>{user.fullName}</td>
-                                        <td>{prop.address || '--'}</td>
-                                        <td>{prop.numberOfUnits || '--'}</td>
-                                        <td>{prop.area ? `${prop.area} م²` : '--'}</td>
+                                    <tr key={u.userId}>
+                                        <td>{idx + 1}</td>
+                                        <td>{u.fullName}</td>
+                                        <td>{p.address || '--'}</td>
+                                        <td>{p.numberOfUnits || '--'}</td>
+                                        <td>{p.area ? `${p.area} م²` : '--'}</td>
                                     </tr>
                                 );
                             })}
