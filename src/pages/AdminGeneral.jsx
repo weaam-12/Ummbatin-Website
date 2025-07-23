@@ -64,7 +64,6 @@ const AdminGeneral = () => {
         loadData();
     }, []);
 
-    // إنشاء فاتورة مياه
     const handleCreateWaterPayment = async () => {
         if (!selectedUser || !waterAmount) {
             setNotification({ type: 'danger', message: 'الرجاء اختيار مستخدم وإدخال المبلغ' });
@@ -73,17 +72,19 @@ const AdminGeneral = () => {
 
         try {
             setLoading(true);
-            await axiosInstance.post('api/payments/create-water', null, {
+            const response = await axiosInstance.post('api/payments/create-water', null, {
                 params: {
                     userId: selectedUser.userId,
                     amount: waterAmount
                 }
             });
+            console.log('API Response:', response.data); // تسجيل الاستجابة
             setNotification({ type: 'success', message: 'تم إنشاء فاتورة المياه بنجاح' });
             setShowWaterModal(false);
             setWaterAmount('');
-            loadData();
+            await loadData(); // انتظار اكتمال تحميل البيانات
         } catch (error) {
+            console.error('API Error:', error); // تسجيل الخطأ
             setNotification({
                 type: 'danger',
                 message: error.response?.data?.message || 'فشل في إنشاء الفاتورة'
@@ -92,7 +93,6 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
-
     // إنشاء فاتورة أرنونا
     const handleCreateArnonaPayment = async () => {
         if (!selectedUser || !arnonaAmount) {
@@ -123,6 +123,7 @@ const AdminGeneral = () => {
     };
 
     // إعادة تحميل البيانات
+
     const loadData = async () => {
         setLoading(true);
         try {
@@ -138,6 +139,7 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
+
 
     // تنسيق حالة الدفع
     const formatPaymentStatus = (status) => {
