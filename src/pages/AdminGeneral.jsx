@@ -18,11 +18,8 @@ const AdminGeneral = () => {
         try {
             const response = await axiosInstance.get('api/users/all');
             return response.data
-                .filter(u => u.properties && u.properties.length) // يملك عقار
-                .map(u => ({
-                    ...u,
-                    property: u.properties[0] // حفظه في خاصية property
-                }));
+                .filter(u => u.properties?.length)   // تأكد أن فيه عقار
+                .map(u => ({ ...u, property: u.properties[0] }));
         } catch (error) {
             console.error('Error fetching users:', error);
             throw error;
