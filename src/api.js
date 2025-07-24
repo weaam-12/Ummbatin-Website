@@ -124,16 +124,16 @@ export const getComplaints = async (userId, isAdmin = false) => {
     return response.data;
 };
 
-export const submitComplaint = async (data) => {
+export const submitComplaint = async ({ userId, type, description, location, image }) => {
     const formData = new FormData();
-    formData.append('userId', data.userId);
-    formData.append('type', data.type);
-    formData.append('description', data.description);
-    formData.append('location', data.location);
-    if (data.image) formData.append('image', data.image);
+    formData.append('data', new Blob([JSON.stringify({ userId, type, description, location })], {
+        type: 'application/json'
+    }));
+    if (image) formData.append('image', image);
 
-    const response = await axiosInstance.post('api/complaints', formData);
-    return response.data;
+    const response = await axiosInstance.post('api/complaints', formData, {
+        headers: { 'Content-Type': undefined } });
+        return response.data;
 };
 
 export const updateComplaintStatus = async (complaintId, status) => {
