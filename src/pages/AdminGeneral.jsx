@@ -88,11 +88,11 @@ const AdminGeneral = () => {
     const handleAddProperty = async () => {
         try {
             setLoading(true);
-            await addNewProperty({
-                user_id: newProperty.userId,
+            await axiosInstance.post('/api/properties', {
                 address: newProperty.address,
                 area: parseFloat(newProperty.area),
-                number_of_units: parseInt(newProperty.numberOfUnits)
+                numberOfUnits: parseInt(newProperty.numberOfUnits),
+                user: { userId: newProperty.userId }   // or only userId, depending on how your JSON deserializer is set up
             });
 
             // تحديث قائمة المستخدمين
