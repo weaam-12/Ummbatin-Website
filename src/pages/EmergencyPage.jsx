@@ -1,26 +1,43 @@
 import React from 'react';
-import { FaAmbulance, FaFireExtinguisher, FaShieldAlt } from 'react-icons/fa';
+import { FaAmbulance, FaFireExtinguisher, FaShieldAlt, FaPhoneAlt, FaEnvelope, FaMapMarkedAlt } from 'react-icons/fa';
 import { MdLocalPolice } from 'react-icons/md';
-import './EmergencyPage.css'; // تأكد إنه مربوط بملف CSS المعدل
-
-const shelters = [
-    { id: 1, location: 'רחוב הראשי 1', description: 'מקלט ציבורי ראשי' },
-    { id: 2, location: 'רחוב השלום 5', description: 'מקלט שכונתי' },
-    { id: 3, location: 'שכונת אלחאדר 8', description: 'מקלט בית ספר' },
-    { id: 4, location: 'רחוב אלנור 3', description: 'מקלט משותף' },
-];
+import './EmergencyPage.css';
 
 const emergencyLinks = [
-    { icon: <MdLocalPolice />, label: 'משטרה', url: 'https://www.police.gov.il' },
-    { icon: <FaFireExtinguisher />, label: 'כבאות והצלה', url: 'https://www.gov.il/he/departments/firefighting_and_rescue_israel/govil-landing-page' },
-    { icon: <FaAmbulance />, label: 'מד"א', url: 'https://www.mdais.org' },
-    { icon: <FaShieldAlt />, label: 'פיקוד העורף', url: 'https://www.oref.org.il' },
+    {
+        type: 'police',
+        label: 'משטרה',
+        phone: '100',
+        email: 'contact@police.gov.il',
+        url: 'https://www.police.gov.il',
+        icon: <MdLocalPolice />
+    },
+    {
+        type: 'fire',
+        label: 'כבאות והצלה',
+        phone: '102',
+        url: 'https://www.gov.il/he/departments/firefighting_and_rescue_israel/govil-landing-page',
+        icon: <FaFireExtinguisher />
+    },
+    {
+        type: 'ambulance',
+        label: 'מד"א',
+        phone: '101',
+        url: 'https://www.mdais.org',
+        icon: <FaAmbulance />
+    },
+    {
+        type: 'homefront',
+        label: 'פיקוד העורף',
+        phone: '104',
+        url: 'https://www.oref.org.il',
+        icon: <FaShieldAlt />
+    }
 ];
 
 export default function EmergencyPage() {
     return (
         <div className="page-container">
-            {/* Sidebar */}
             <aside className="sidebar">
                 <h2>🚨 קישורים חשובים</h2>
                 <div className="links-list">
@@ -30,23 +47,32 @@ export default function EmergencyPage() {
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link-item"
+                            className={`link-item ${link.type}`}
                         >
-                            <span className="icon">{link.icon}</span>
-                            <span className="label">{link.label}</span>
+                            <div className="link-icon">{link.icon}</div>
+                            <div className="link-info">
+                                <span className="label">{link.label}</span>
+                                {link.phone && (
+                                    <span className="sub">
+                    <FaPhoneAlt className="sub-icon" /> {link.phone}
+                  </span>
+                                )}
+                                {link.email && (
+                                    <span className="sub">
+                    <FaEnvelope className="sub-icon" /> {link.email}
+                  </span>
+                                )}
+                            </div>
                         </a>
                     ))}
                 </div>
             </aside>
 
-            {/* Main Content */}
             <main className="main-content">
                 <h1>🏠 רשימת מקלטים בכפר אום בטין</h1>
-
                 <p className="description">
-                    ניתן לעיין ברשימת המיקומים של המקלטים הציבוריים ולוודא שאתם יודעים היכן הקרוב אליכם. בטחון האזרחים בראש סדר העדיפויות שלנו.
+                    ניתן לעיין ברשימת המיקומים של המקלטים הציבוריים ולוודא שאתם יודעים היכן הקרוב אליכם.
                 </p>
-
                 <table className="shelter-table">
                     <thead>
                     <tr>
@@ -56,13 +82,18 @@ export default function EmergencyPage() {
                     </tr>
                     </thead>
                     <tbody>
-                    {shelters.map((shelter) => (
-                        <tr key={shelter.id}>
-                            <td>{shelter.id}</td>
-                            <td>{shelter.location}</td>
-                            <td>{shelter.description}</td>
-                        </tr>
-                    ))}
+                    <tr>
+                        <td>1</td><td>רחוב הראשי 1</td><td>מקלט ציבורי ראשי</td>
+                    </tr>
+                    <tr>
+                        <td>2</td><td>רחוב השלום 5</td><td>מקלט שכונתי</td>
+                    </tr>
+                    <tr>
+                        <td>3</td><td>שכונת אלחאדר 8</td><td>מקלט בית ספר</td>
+                    </tr>
+                    <tr>
+                        <td>4</td><td>רחוב אלנור 3</td><td>מקלט משותף</td>
+                    </tr>
                     </tbody>
                 </table>
             </main>

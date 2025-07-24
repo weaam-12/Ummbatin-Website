@@ -8,8 +8,8 @@ body {
 .page-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
     padding: 20px;
+    gap: 20px;
 }
 
 @media (min-width: 768px) {
@@ -19,11 +19,11 @@ body {
 }
 
 .sidebar {
+    flex: 1;
     background-color: #ffffff;
     border: 1px solid #cce0f7;
     border-radius: 12px;
     padding: 20px;
-    flex: 1;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
@@ -36,31 +36,53 @@ body {
 .links-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .link-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     background-color: #e6f0ff;
-    padding: 10px 12px;
+    padding: 12px;
     border-radius: 8px;
     text-decoration: none;
     color: #002d5f;
-    transition: background-color 0.3s ease;
+    border-left: 4px solid transparent;
+    transition: background-color 0.3s ease, border-left 0.3s ease;
 }
 
 .link-item:hover {
     background-color: #cce0ff;
+    border-left: 4px solid #004080;
 }
 
-.icon {
-    font-size: 20px;
+.link-icon {
+    font-size: 1.5rem;
+    color: #004080;
 }
 
-.label {
-    font-weight: 500;
+.link-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.link-info .label {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.sub {
+    font-size: 0.85rem;
+    color: #004080;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.sub-icon {
+    font-size: 0.9rem;
 }
 
 .main-content {
@@ -85,6 +107,7 @@ body {
     padding: 12px;
     border-radius: 8px;
     margin-bottom: 16px;
+    color: #002d5f;
 }
 
 .shelter-table {
@@ -102,7 +125,6 @@ body {
 .shelter-table th {
     background-color: #d9e9ff;
     color: #002d5f;
-    text-align: right;
 }
 
 .shelter-table tr:nth-child(even) {

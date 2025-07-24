@@ -40,7 +40,7 @@ import {
 const CheckoutForm = ({ amount, currency = 'ils', onSuccess }) => {
     const stripe = useStripe();
     const elements = useElements();
-    const [loading, setLoading] = useState(true);   // بدل false
+    const [loading, setLoading] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
