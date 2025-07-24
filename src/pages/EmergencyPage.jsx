@@ -51,7 +51,7 @@ export default function EmergencyPage() {
                     <tr>
                         <th className="p-2 border">#</th>
                         <th className="p-2 border">מיקום</th>
-                        <th className="p-2 border">תיאור</th>
+                        <th className="p-2 border">תיאורا</th>
                     </tr>
                     </thead>
                     <tbody>
