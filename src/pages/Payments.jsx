@@ -38,6 +38,11 @@ const Payments = () => {
         const load = async () => {
             try {
                 const data = await getUserPayments(user?.userId);
+                console.log('🧾 Raw API response:', data);
+                console.log('🔑 Keys received:', Object.keys(data));
+                Object.values(data).forEach((v, i) =>
+                    console.log(`📦 Item ${i} :`, v)
+                );
                 setPayments(data || {});
             } catch {
                 setNotification({ type: 'danger', message: 'فشل تحميل البيانات' });
