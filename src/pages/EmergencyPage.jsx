@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaAmbulance, FaFireExtinguisher, FaShieldAlt } from 'react-icons/fa';
 import { MdLocalPolice } from 'react-icons/md';
+import './EmergencyPage.css'; // تأكد إنه مربوط بملف CSS المعدل
 
 const shelters = [
     { id: 1, location: 'רחוב הראשי 1', description: 'מקלט ציבורי ראשי' },
@@ -18,48 +19,48 @@ const emergencyLinks = [
 
 export default function EmergencyPage() {
     return (
-        <div className="min-h-screen bg-white text-blue-900 grid grid-cols-1 md:grid-cols-4">
+        <div className="page-container">
             {/* Sidebar */}
-            <aside className="bg-blue-100 p-4 md:col-span-1 shadow-lg">
-                <h2 className="text-xl font-bold mb-4">🚨 קישורים חשובים</h2>
-                <div className="space-y-3">
+            <aside className="sidebar">
+                <h2>🚨 קישורים חשובים</h2>
+                <div className="links-list">
                     {emergencyLinks.map((link, idx) => (
                         <a
                             key={idx}
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center space-x-2 bg-white p-2 rounded-lg hover:bg-blue-200 transition"
+                            className="link-item"
                         >
-                            <span className="text-2xl">{link.icon}</span>
-                            <span>{link.label}</span>
+                            <span className="icon">{link.icon}</span>
+                            <span className="label">{link.label}</span>
                         </a>
                     ))}
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="p-6 md:col-span-3">
-                <h1 className="text-2xl font-bold mb-6">🏠 רשימת מקלטים בכפר אום בטין</h1>
+            <main className="main-content">
+                <h1>🏠 רשימת מקלטים בכפר אום בטין</h1>
 
-                <p className="mb-4 text-blue-800 bg-blue-50 p-3 rounded">
-                    ניתן לעיין ברשימת המיקומים של המיקלטים הציבוריים ולוודא שאתם יודעים היכן הקרוב אליכם. בטחון האזרחים בראש סדר העדיפויות שלנו.
+                <p className="description">
+                    ניתן לעיין ברשימת המיקומים של המקלטים הציבוריים ולוודא שאתם יודעים היכן הקרוב אליכם. בטחון האזרחים בראש סדר העדיפויות שלנו.
                 </p>
 
-                <table className="w-full border border-blue-300 shadow-md">
-                    <thead className="bg-blue-200 text-blue-900">
+                <table className="shelter-table">
+                    <thead>
                     <tr>
-                        <th className="p-2 border">#</th>
-                        <th className="p-2 border">מיקום</th>
-                        <th className="p-2 border">תיאורا</th>
+                        <th>#</th>
+                        <th>מיקום</th>
+                        <th>תיאור</th>
                     </tr>
                     </thead>
                     <tbody>
                     {shelters.map((shelter) => (
-                        <tr key={shelter.id} className="even:bg-blue-50">
-                            <td className="p-2 border text-center">{shelter.id}</td>
-                            <td className="p-2 border">{shelter.location}</td>
-                            <td className="p-2 border">{shelter.description}</td>
+                        <tr key={shelter.id}>
+                            <td>{shelter.id}</td>
+                            <td>{shelter.location}</td>
+                            <td>{shelter.description}</td>
                         </tr>
                     ))}
                     </tbody>

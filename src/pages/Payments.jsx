@@ -40,7 +40,7 @@ import {
 const CheckoutForm = ({ amount, currency = 'ils', onSuccess }) => {
     const stripe = useStripe();
     const elements = useElements();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);   // بدل false
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -86,7 +86,6 @@ const CheckoutForm = ({ amount, currency = 'ils', onSuccess }) => {
 const Payments = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('water');
-    const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
     const [payments, setPayments] = useState({
         water: { status: 'PENDING', amount: 0, dueDate: null, history: [] },
@@ -114,6 +113,8 @@ const Payments = () => {
                 setPayments(data);
             } catch {
                 setNotification({ type: 'danger', message: 'فشل تحميل البيانات' });
+            } finally {
+                setLoading(false); // <== مهم
             }
         };
         if (user) load();
