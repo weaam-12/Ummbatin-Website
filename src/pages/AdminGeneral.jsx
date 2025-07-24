@@ -92,7 +92,7 @@ const AdminGeneral = () => {
                 address: newProperty.address,
                 area: parseFloat(newProperty.area),
                 numberOfUnits: parseInt(newProperty.numberOfUnits),
-                user: { userId: newProperty.userId }   // or only userId, depending on how your JSON deserializer is set up
+                userId: newProperty.userId
             });
 
             // تحديث قائمة المستخدمين
