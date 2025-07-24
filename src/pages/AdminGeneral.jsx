@@ -179,22 +179,28 @@ const AdminGeneral = () => {
         try {
             setLoading(true);
             const formData = new FormData();
-            formData.append('title', newEvent.title);
-            formData.append('description', newEvent.description);
-            formData.append('location', newEvent.location);
-            formData.append('date', newEvent.date);
+
+            // JSON payload
+            const eventObj = {
+                title: newEvent.title,
+                description: newEvent.description,
+                location: newEvent.location,
+                startDate: newEvent.date,     // LocalDateTime
+                endDate: newEvent.date,       // نفس اليوم أو اترك endDate فارغ
+                active: true
+            };
+            formData.append('event', new Blob([JSON.stringify(eventObj)], { type: 'application/json' }));
+
+            // الصورة (اختياري)
             if (newEvent.image) formData.append('image', newEvent.image);
 
-            await axiosInstance.post('api/events', formData);
+            await axiosInstance.post('api/events', formData, {
+                headers: { 'Content-Type': undefined }
+            });
+
             await fetchEvents();
             setShowEventModal(false);
-            setNewEvent({
-                title: '',
-                description: '',
-                location: '',
-                image: null,
-                date: ''
-            });
+            setNewEvent({ title: '', description: '', location: '', image: null, date: '' });
             setNotification({ type: 'success', message: 'تمت إضافة الفعالية بنجاح' });
         } catch (error) {
             setNotification({ type: 'danger', message: 'فشل في إضافة الفعالية' });
