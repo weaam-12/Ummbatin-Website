@@ -67,10 +67,8 @@ export const getAllPayments = async (month, year, userId = null) => {
     return response.data;
 };
 
-export const getUserPayments = async (userId) => {
-    const response = await axiosInstance.get(`api/payments/user/${userId}`);
-    return response.data;
-};
+export const getUserPayments = (userId) =>
+    axiosInstance.get(`/api/payments/user/${userId}`).then(r => r.data);
 
 export const fetchRecentPayments = async (userId) => {
     const response = await axiosInstance.get(`api/payments/user/${userId}/recent`);
