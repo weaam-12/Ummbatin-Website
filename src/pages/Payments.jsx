@@ -43,7 +43,16 @@ const Payments = () => {
                 Object.values(data).forEach((v, i) =>
                     console.log(`📦 Item ${i} :`, v)
                 );
-                setPayments(data || {});
+                const map = data.reduce((acc, item) => {
+                    const key = item.paymentType.toLowerCase();
+                    acc[key] = acc[key] || { status: 'PENDING', amount: 0, dueDate: null, history: [] };
+                    acc[key].amount += item.amount;
+                    acc[key].status = item.status;
+                    acc[key].dueDate = item.date; // يمكنك تعديله لاحقًا
+                    acc[key].history.unshift({ date: item.date, amount: item.amount });
+                    return acc;
+                }, {});
+                setPayments(map);
             } catch {
                 setNotification({ type: 'danger', message: 'فشل تحميل البيانات' });
             } finally {
