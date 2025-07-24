@@ -178,20 +178,25 @@ const AdminGeneral = () => {
     const handleAddEvent = async () => {
         try {
             setLoading(true);
-            const formData = new FormData();
 
-            // JSON payload
+            // 1. إنشاء كائن JSON بالأسماء الصحيحة
             const eventObj = {
                 title: newEvent.title,
                 description: newEvent.description,
                 location: newEvent.location,
-                startDate: newEvent.date,     // LocalDateTime
-                endDate: newEvent.date,       // نفس اليوم أو اترك endDate فارغ
+                startDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
+                endDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
                 active: true
             };
-            formData.append('event', new Blob([JSON.stringify(eventObj)], { type: 'application/json' }));
 
-            // الصورة (اختياري)
+            // 2. إضافة الحقل بالاسم "event"
+            const formData = new FormData();
+            formData.append(
+                'event',
+                new Blob([JSON.stringify(eventObj)], { type: 'application/json' })
+            );
+
+            // 3. إضافة الصورة إن وُجدت
             if (newEvent.image) formData.append('image', newEvent.image);
 
             await axiosInstance.post('api/events', formData, {
@@ -203,7 +208,8 @@ const AdminGeneral = () => {
             setNewEvent({ title: '', description: '', location: '', image: null, date: '' });
             setNotification({ type: 'success', message: 'تمت إضافة الفعالية بنجاح' });
         } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في إضافة الفعالية' });
+            console.error(error);
+            setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في إضافة الفعالية' });
         } finally {
             setLoading(false);
         }
