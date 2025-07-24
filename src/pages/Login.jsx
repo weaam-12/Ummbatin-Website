@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import '../components/styles/Login.css';
-import axios from 'axios';
 
 const Login = () => {
     const [form, setForm] = useState({ email: "", password: "" });
@@ -32,38 +31,11 @@ const Login = () => {
         setSuccess("");
 
         try {
-            const response = await axios.post(
-                'https://backend-wtgq.onrender.com/api/auth/login',
-                {
-                    email: form.email,
-                    password: form.password
-                },
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true
-                }
-            );
-
-            if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
-
-                try {
-                    await login(response.data.user); // ✅ تغليف داخلي لتفادي أي انهيار
-                    setSuccess("تم تسجيل الدخول بنجاح!");
-                } catch (authErr) {
-                    console.error("Login context error:", authErr);
-                    setError("حدث خطأ في تسجيل الدخول (الكونتكست).");
-                    return;
-                }
-            } else {
-                setError("فشل تسجيل الدخول: لم يتم استقبال التوكن.");
-            }
+            await login(form);
+            setSuccess("تم تسجيل الدخول بنجاح!");
+            navigate('/profile');
         } catch (err) {
-            console.error("Login error:", err);
-            const msg =
-                err.response?.data?.message ||
-                (typeof err.response?.data === "string" ? err.response.data : null) ||
-                "حدث خطأ أثناء تسجيل الدخول.";
+            const msg = err.response?.data?.message || err.message || "حدث خطأ أثناء تسجيل الدخول.";
             setError(msg);
         } finally {
             setLoading(false);
@@ -77,7 +49,7 @@ const Login = () => {
     return (
         <div className="login-container">
             <div className="login-card">
-                <h2 className="login-title">الرجاء تسجيل الدخول</h2>
+                <h2 className="login-title">تسجيل الدخول</h2>
 
                 {error && <div className="error-message">{error}</div>}
                 {success && <div className="success-message">{success}</div>}
@@ -91,7 +63,7 @@ const Login = () => {
                             name="email"
                             value={form.email}
                             onChange={handleChange}
-                            placeholder="أدخل البريد"
+                            placeholder="أدخل البريد الإلكتروني"
                             required
                             className="form-input"
                         />
