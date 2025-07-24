@@ -1,11 +1,10 @@
 import React from 'react';
-import { FaAmbulance, FaFireExtinguisher, FaShieldAlt, FaPhoneAlt, FaEnvelope, FaMapMarkedAlt } from 'react-icons/fa';
+import { FaAmbulance, FaFireExtinguisher, FaShieldAlt, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
 import { MdLocalPolice } from 'react-icons/md';
 import './EmergencyPage.css';
 
 const emergencyLinks = [
     {
-        type: 'police',
         label: 'משטרה',
         phone: '100',
         email: 'contact@police.gov.il',
@@ -13,21 +12,18 @@ const emergencyLinks = [
         icon: <MdLocalPolice />
     },
     {
-        type: 'fire',
         label: 'כבאות והצלה',
         phone: '102',
         url: 'https://www.gov.il/he/departments/firefighting_and_rescue_israel/govil-landing-page',
         icon: <FaFireExtinguisher />
     },
     {
-        type: 'ambulance',
         label: 'מד"א',
         phone: '101',
         url: 'https://www.mdais.org',
         icon: <FaAmbulance />
     },
     {
-        type: 'homefront',
         label: 'פיקוד העורף',
         phone: '104',
         url: 'https://www.oref.org.il',
@@ -37,37 +33,32 @@ const emergencyLinks = [
 
 export default function EmergencyPage() {
     return (
-        <div className="page-container">
-            <aside className="sidebar">
-                <h2>🚨 קישורים חשובים</h2>
-                <div className="links-list">
-                    {emergencyLinks.map((link, idx) => (
-                        <a
-                            key={idx}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`link-item ${link.type}`}
-                        >
-                            <div className="link-icon">{link.icon}</div>
-                            <div className="link-info">
-                                <span className="label">{link.label}</span>
-                                {link.phone && (
-                                    <span className="sub">
-                    <FaPhoneAlt className="sub-icon" /> {link.phone}
-                  </span>
-                                )}
-                                {link.email && (
-                                    <span className="sub">
-                    <FaEnvelope className="sub-icon" /> {link.email}
-                  </span>
-                                )}
-                            </div>
-                        </a>
-                    ))}
-                </div>
-            </aside>
+        <div className="page-wrapper">
+            {/* Top horizontal emergency links */}
+            <nav className="emergency-bar">
+                {emergencyLinks.map((link, idx) => (
+                    <a
+                        key={idx}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="emergency-link"
+                    >
+                        <span className="icon">{link.icon}</span>
+                        <span className="label">{link.label}</span>
+                        <span className="phone">
+              <FaPhoneAlt className="phone-icon" /> {link.phone}
+            </span>
+                        {link.email && (
+                            <span className="email">
+                <FaEnvelope className="email-icon" /> {link.email}
+              </span>
+                        )}
+                    </a>
+                ))}
+            </nav>
 
+            {/* Main content */}
             <main className="main-content">
                 <h1>🏠 רשימת מקלטים בכפר אום בטין</h1>
                 <p className="description">

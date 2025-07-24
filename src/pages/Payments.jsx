@@ -1,3 +1,4 @@
+// Payments.jsx – انسخه كاملاً
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../AuthContext';
 import { loadStripe } from '@stripe/stripe-js';
@@ -6,65 +7,42 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 import {
-    Card,
-    Tabs,
-    Tab,
-    Button,
-    Alert,
-    Spinner,
-    Container,
-    ListGroup,
-    Badge,
-    Row,
-    Col
+    Card, Tabs, Tab, Button, Alert, Spinner, Container, ListGroup, Badge, Row, Col
 } from 'react-bootstrap';
 import {
-    FiCreditCard,
-    FiCheckCircle,
-    FiClock,
-    FiDollarSign,
-    FiDownload
+    FiCreditCard, FiCheckCircle, FiClock, FiDollarSign, FiDownload
 } from 'react-icons/fi';
 import './Payment.css';
 
-// مفتاح Stripe العام (ضعه في .env)
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
 
-// دالة استدعاء API حقيقية (من ملف api.js)
 import {
     getUserPayments as fetchUserPaymentsAPI,
-    processPayment   as processPaymentAPI
+    processPayment as processPaymentAPI
 } from '../api';
 
-// -------------- مكوّن الدفع الفرعي --------------
+// ---------- مكوّن الدفع ----------
 const CheckoutForm = ({ amount, currency = 'ils', onSuccess }) => {
     const stripe = useStripe();
     const elements = useElements();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!stripe || !elements) return;
-
         setLoading(true);
         try {
-            // 1) اطلب clientSecret من الـ backend
             const { clientSecret } = await processPaymentAPI({
-                amount: Math.round(amount * 100), // بالقروش
+                amount: Math.round(amount * 100),
                 currency,
-                paymentType: 'WATER' // أو ARNONA / KINDERGARTEN
+                paymentType: 'WATER'
             });
-
-            // 2) تأكيد الدفع
-            const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: { card: elements.getElement(CardElement) }
-            });
-
+            const { paymentIntent, error } = await stripe.confirmCardPayment(
+                clientSecret,
+                { payment_method: { card: elements.getElement(CardElement) } }
+            );
             if (error) throw error;
-
-            if (paymentIntent.status === 'succeeded') {
-                onSuccess(paymentIntent);
-            }
+            if (paymentIntent.status === 'succeeded') onSuccess(paymentIntent);
         } catch (err) {
             alert('فشل الدفع: ' + err.message);
         } finally {
@@ -76,16 +54,17 @@ const CheckoutForm = ({ amount, currency = 'ils', onSuccess }) => {
         <form onSubmit={handleSubmit}>
             <CardElement options={{ hidePostalCode: true }} />
             <Button type="submit" disabled={!stripe || loading} className="mt-2 w-100">
-                {loading ? <Spinner size="sm" /> : 'دفع الآن'}
+                {loading ? <Spinner size="sm" animation="border" /> : 'دفع الآن'}
             </Button>
         </form>
     );
 };
 
-// -------------- المكوّن الرئيسي --------------
+// ---------- المكوّن الرئيسي ----------
 const Payments = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('water');
+    const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
     const [payments, setPayments] = useState({
         water: { status: 'PENDING', amount: 0, dueDate: null, history: [] },
@@ -93,48 +72,45 @@ const Payments = () => {
         kindergarten: { status: 'PENDING', amount: 0, dueDate: null, history: [] }
     });
     const [debt, setDebt] = useState(0);
-
-    // Ref للطباعة
     const printRef = useRef();
 
-    // حساب الدين التراكمي
     useEffect(() => {
-        const totalDebt = Object.values(payments).reduce((sum, p) => {
-            return p.status === 'PENDING' ? sum + p.amount : sum;
-        }, 0);
+        const totalDebt = Object.values(payments).reduce(
+            (sum, p) => (p?.status === 'PENDING' ? sum + p.amount : sum), 0
+        );
         setDebt(totalDebt);
     }, [payments]);
 
-    // جلب البيانات
     useEffect(() => {
         const load = async () => {
             try {
                 const data = await fetchUserPaymentsAPI(user?.userId);
-                setPayments(data);
+                setPayments(data || {});
             } catch {
                 setNotification({ type: 'danger', message: 'فشل تحميل البيانات' });
             } finally {
-                setLoading(false); // <== مهم
+                setLoading(false);
             }
         };
         if (user) load();
     }, [user]);
 
-    // عند نجاح الدفع
     const onPaymentSuccess = (paymentIntent) => {
-        const type = activeTab;
+        const key = activeTab;
         setPayments(prev => ({
             ...prev,
-            [type]: {
-                ...prev[type],
+            [key]: {
+                ...prev[key],
                 status: 'PAID',
-                history: [{ date: new Date().toISOString(), amount: prev[type].amount }, ...prev[type].history]
+                history: [
+                    { date: new Date().toISOString(), amount: prev[key]?.amount || 0 },
+                    ...(prev[key]?.history || [])
+                ]
             }
         }));
-        setNotification({ type: 'success', message: `تم دفع ${type} بنجاح` });
+        setNotification({ type: 'success', message: `تم دفع ${key} بنجاح` });
     };
 
-    // تصدير PDF
     const handleDownloadPDF = () => {
         html2canvas(printRef.current, { scale: 2 }).then(canvas => {
             const img = canvas.toDataURL('image/png');
@@ -148,20 +124,20 @@ const Payments = () => {
 
     const statusVariants = { PENDING: 'warning', PAID: 'success', OVERDUE: 'danger' };
     const statusLabels   = { PENDING: 'قيد الانتظار', PAID: 'تم الدفع', OVERDUE: 'متأخر' };
-
-    const formatDate = (d) => d ? new Date(d).toLocaleDateString('ar-SA') : '--';
+    const formatDate = d => d ? new Date(d).toLocaleDateString('ar-SA') : '--';
 
     const renderTab = (key, title) => {
         const item = payments[key];
+        if (!item) return null;
         return (
             <Tab eventKey={key} title={title}>
                 <div ref={printRef} className="payment-details mt-3 p-3">
                     <Row className="align-items-center mb-3">
-                        <Col>
-                            <h5><FiCreditCard className="me-2" />{title}</h5>
-                        </Col>
+                        <Col><h5><FiCreditCard className="me-2" />{title}</h5></Col>
                         <Col xs="auto">
-                            <Badge pill bg={statusVariants[item.status]}>{statusLabels[item.status]}</Badge>
+                            <Badge pill bg={statusVariants[item.status] || 'secondary'}>
+                                {statusLabels[item.status] || 'غير معروف'}
+                            </Badge>
                         </Col>
                     </Row>
 
@@ -184,7 +160,7 @@ const Payments = () => {
                     <div className="mt-4">
                         <h6><FiClock className="me-2" />سجل الدفعات السابقة</h6>
                         <ListGroup>
-                            {item.history.map((p, i) => (
+                            {(item.history || []).map((p, i) => (
                                 <ListGroup.Item key={i}>
                                     <div className="d-flex justify-content-between">
                                         <span>{formatDate(p.date)}</span>
@@ -218,11 +194,18 @@ const Payments = () => {
                         <span>الدين التراكمي: <strong className="text-danger">{debt} شيقل</strong></span>
                     </div>
 
-                    <Tabs activeKey={activeTab} onSelect={k => setActiveTab(k)} className="mb-4">
-                        {renderTab('water', 'فاتورة المياه')}
-                        {renderTab('arnona', 'الأرنونا')}
-                        {renderTab('kindergarten', 'الحضانة')}
-                    </Tabs>
+                    {loading ? (
+                        <div className="text-center py-5">
+                            <Spinner animation="border" role="status" />
+                            <p className="mt-2">جاري التحميل...</p>
+                        </div>
+                    ) : (
+                        <Tabs activeKey={activeTab} onSelect={k => setActiveTab(k)} className="mb-4">
+                            {renderTab('water', 'فاتورة المياه')}
+                            {renderTab('arnona', 'الأرنونا')}
+                            {renderTab('kindergarten', 'الحضانة')}
+                        </Tabs>
+                    )}
                 </Card.Body>
             </Card>
         </Container>

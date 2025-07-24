@@ -5,88 +5,67 @@ body {
     color: #002d5f;
 }
 
-.page-container {
+.page-wrapper {
     display: flex;
     flex-direction: column;
     padding: 20px;
     gap: 20px;
 }
 
-@media (min-width: 768px) {
-    .page-container {
-        flex-direction: row;
-    }
-}
-
-.sidebar {
-    flex: 1;
-    background-color: #ffffff;
-    border: 1px solid #cce0f7;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-.sidebar h2 {
-    font-size: 18px;
-    margin-bottom: 12px;
-    color: #004080;
-}
-
-.links-list {
+/* الشريط العلوي */
+.emergency-bar {
     display: flex;
-    flex-direction: column;
+    justify-content: space-around;
+    background-color: #004080;
+    padding: 12px 20px;
+    border-radius: 10px;
+    flex-wrap: wrap;
     gap: 12px;
 }
 
-.link-item {
+.emergency-link {
     display: flex;
     align-items: center;
-    gap: 12px;
-    background-color: #e6f0ff;
-    padding: 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #002d5f;
-    border-left: 4px solid transparent;
-    transition: background-color 0.3s ease, border-left 0.3s ease;
-}
-
-.link-item:hover {
+    gap: 10px;
     background-color: #cce0ff;
-    border-left: 4px solid #004080;
-}
-
-.link-icon {
-    font-size: 1.5rem;
+    padding: 8px 14px;
+    border-radius: 8px;
     color: #004080;
-}
-
-.link-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.link-info .label {
+    text-decoration: none;
     font-weight: 600;
-    font-size: 1rem;
+    min-width: 180px;
+    transition: background-color 0.3s ease;
 }
 
-.sub {
-    font-size: 0.85rem;
-    color: #004080;
+.emergency-link:hover {
+    background-color: #99c2ff;
+}
+
+.emergency-link .icon {
+    font-size: 1.4rem;
+}
+
+.emergency-link .label {
+    flex-shrink: 0;
+}
+
+.emergency-link .phone,
+.emergency-link .email {
+    font-weight: 500;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-top: 4px;
+    color: #002d5f;
 }
 
-.sub-icon {
-    font-size: 0.9rem;
+.phone-icon,
+.email-icon {
+    font-size: 1rem;
 }
 
+/* المحتوى الرئيسي */
 .main-content {
-    flex: 2;
     background-color: #ffffff;
     border: 1px solid #cce0f7;
     border-radius: 12px;
@@ -133,4 +112,16 @@ body {
 
 .shelter-table tr:hover {
     background-color: #e6f0ff;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .emergency-bar {
+        justify-content: center;
+    }
+
+    .emergency-link {
+        min-width: 140px;
+        font-size: 0.9rem;
+    }
 }
