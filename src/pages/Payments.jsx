@@ -14,7 +14,7 @@ import {
 } from 'react-icons/fi';
 import './Payment.css';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK || '');
 import { getUserPayments as fetchUserPaymentsAPI, processPayment as processPaymentAPI } from '../api';
 
 // ---------- مكوّن الدفع ----------
