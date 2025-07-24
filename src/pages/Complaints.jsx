@@ -88,41 +88,17 @@ const Complaints = () => {
         }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
+    export const submitComplaint = async ({ userId, type, description, location, image }) => {
+        const formData = new FormData();
+        formData.append('data', new Blob([JSON.stringify({ userId, type, description, location })], {
+            type: 'application/json'
+        }));
+        if (image) formData.append('image', image);
 
-        try {
-            const userId = getUserId();
-            if (!userId) {
-                throw new Error('User ID not available');
-            }
-
-            const response = await submitComplaint({
-                userId: userId,
-                type: formData.type,
-                description: formData.description,
-                location: formData.location,
-                image: formData.image
-            });
-
-            setComplaints(prev => [response, ...prev]);
-            setNotification({
-                type: 'success',
-                message: `Complaint submitted successfully! Ticket #: ${response.ticketNumber}`
-            });
-            setShowForm(false);
-            setFormData({ type: '', description: '', location: '', image: null });
-        } catch (error) {
-            console.error('Error submitting complaint:', error);
-            setNotification({
-                type: 'danger',
-                message: 'Failed to submit complaint: ' +
-                    (error.response?.data?.message || error.message || 'Please try again later')
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
+        const { data } = await axios.post(`${BASE_URL}/api/complaints`, formData, {
+            headers: { 'Content-Type': undefined } // يترك المتصفح يحدد الحدود
+        });
+        return data;
     };
 
     const formatDate = (dateString) => {
