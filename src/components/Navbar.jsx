@@ -121,13 +121,6 @@ const Navbar = () => {
                         </div>
                     </div>
                 </div>
-
-                <div
-                    className="floating-circle"
-                    style={{background: "#fff", border: "2px solid #e0e0e0"}}
-                >
-                    <img src={logo} alt="Floating Logo" className="floating-logo"/>
-                </div>
             </nav>
         </div>
     );

@@ -1,4 +1,4 @@
-// Payments.jsx – انسخه كاملاً
+// Payments.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../AuthContext';
 import { loadStripe } from '@stripe/stripe-js';
@@ -15,14 +15,10 @@ import {
 import './Payment.css';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
-
-import {
-    getUserPayments as fetchUserPaymentsAPI,
-    processPayment as processPaymentAPI
-} from '../api';
+import { getUserPayments as fetchUserPaymentsAPI, processPayment as processPaymentAPI } from '../api';
 
 // ---------- مكوّن الدفع ----------
-const CheckoutForm = ({ amount, currency = 'ils', onSuccess }) => {
+const CheckoutForm = ({ amount, onSuccess }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [loading, setLoading] = useState(false);
@@ -34,13 +30,12 @@ const CheckoutForm = ({ amount, currency = 'ils', onSuccess }) => {
         try {
             const { clientSecret } = await processPaymentAPI({
                 amount: Math.round(amount * 100),
-                currency,
+                currency: 'ils',
                 paymentType: 'WATER'
             });
-            const { paymentIntent, error } = await stripe.confirmCardPayment(
-                clientSecret,
-                { payment_method: { card: elements.getElement(CardElement) } }
-            );
+            const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: { card: elements.getElement(CardElement) }
+            });
             if (error) throw error;
             if (paymentIntent.status === 'succeeded') onSuccess(paymentIntent);
         } catch (err) {
@@ -53,7 +48,7 @@ const CheckoutForm = ({ amount, currency = 'ils', onSuccess }) => {
     return (
         <form onSubmit={handleSubmit}>
             <CardElement options={{ hidePostalCode: true }} />
-            <Button type="submit" disabled={!stripe || loading} className="mt-2 w-100">
+            <Button type="submit" disabled={!stripe || loading} variant="primary" className="mt-3 w-100">
                 {loading ? <Spinner size="sm" animation="border" /> : 'دفع الآن'}
             </Button>
         </form>
