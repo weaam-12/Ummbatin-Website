@@ -5,7 +5,8 @@ import {
 } from 'react-bootstrap';
 import {
     FiUsers, FiDollarSign, FiPlus, FiCalendar,
-    FiHome, FiFileText,FiDroplet,FiMapPin,FiActivity
+    FiHome, FiFileText, FiDroplet, FiMapPin, FiActivity,
+    FiEye, FiTrash2, FiEdit
 } from 'react-icons/fi';
 import './AdminGeneral.css';
 import { axiosInstance } from '../api.js';
@@ -32,6 +33,7 @@ const AdminGeneral = () => {
         image: null,
         date: ''
     });
+
     const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
     const [newProperty, setNewProperty] = useState({
         userId: '',
@@ -39,6 +41,7 @@ const AdminGeneral = () => {
         area: '',
         numberOfUnits: 1
     });
+
     const [showWaterReadingModal, setShowWaterReadingModal] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
     const [userProperties, setUserProperties] = useState([]);
@@ -85,6 +88,7 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
+
     const handleAddProperty = async () => {
         try {
             setLoading(true);
@@ -260,7 +264,7 @@ const AdminGeneral = () => {
     };
 
     return (
-        <Container fluid className="admin-dashboard">
+        <div className="admin-dashboard">
             {notification && (
                 <Alert variant={notification.type} onClose={() => setNotification(null)} dismissible>
                     {notification.message}
@@ -275,15 +279,15 @@ const AdminGeneral = () => {
                     <ul className="sidebar-menu">
                         <li className={activeTab === 'dashboard' ? 'active' : ''}
                             onClick={() => setActiveTab('dashboard')}>
-                            <FiHome className="me-2" /> لوحة التحكم
+                            <FiHome /> لوحة التحكم
                         </li>
                         <li className={activeTab === 'payments' ? 'active' : ''}
                             onClick={() => setActiveTab('payments')}>
-                            <FiDollarSign className="me-2" /> إدارة الفواتير
+                            <FiDollarSign /> إدارة الفواتير
                         </li>
                         <li className={activeTab === 'events' ? 'active' : ''}
                             onClick={() => setActiveTab('events')}>
-                            <FiCalendar className="me-2" /> إدارة الفعاليات
+                            <FiCalendar /> إدارة الفعاليات
                         </li>
                     </ul>
                 </Col>
@@ -292,13 +296,14 @@ const AdminGeneral = () => {
                     {loading ? (
                         <div className="text-center py-5">
                             <Spinner animation="border" variant="primary" />
+                            <p className="mt-3">جاري التحميل...</p>
                         </div>
                     ) : (
                         <>
                             {/* لوحة التحكم */}
                             {activeTab === 'dashboard' && (
                                 <div className="dashboard-overview">
-                                    <h3 className="mb-4">نظرة عامة</h3>
+                                    <h3>نظرة عامة</h3>
                                     <Row className="mb-4">
                                         <Col md={4}>
                                             <Card className="stat-card">
@@ -351,24 +356,22 @@ const AdminGeneral = () => {
                                                 <Card.Header>
                                                     <h5>إجراءات سريعة</h5>
                                                 </Card.Header>
-                                                <Card.Body>
-                                                    <div className="d-grid gap-3">
-                                                        <Button variant="success" onClick={() => { setCurrentBillType('WATER'); setShowBillsModal(true); }}>
-                                                            <FiPlus className="me-2" /> توليد فواتير المياه
-                                                        </Button>
-                                                        <Button variant="info" onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }}>
-                                                            <FiPlus className="me-2" /> توليد فواتير الأرنونا
-                                                        </Button>
-                                                        <Button variant="primary" onClick={() => setShowEventModal(true)}>
-                                                            <FiPlus className="me-2" /> إضافة فعالية جديدة
-                                                        </Button>
-                                                        <Button variant="warning" onClick={() => setShowAddPropertyModal(true)}>
-                                                            <FiMapPin className="me-2" /> إضافة عقار جديد
-                                                        </Button>
-                                                        <Button variant="info" onClick={() => setShowWaterReadingModal(true)}>
-                                                            <FiActivity className="me-2" /> إضافة قراءات المياه
-                                                        </Button>
-                                                    </div>
+                                                <Card.Body className="quick-actions">
+                                                    <Button variant="success" onClick={() => { setCurrentBillType('WATER'); setShowBillsModal(true); }}>
+                                                        <FiPlus /> توليد فواتير المياه
+                                                    </Button>
+                                                    <Button variant="info" onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }}>
+                                                        <FiPlus /> توليد فواتير الأرنونا
+                                                    </Button>
+                                                    <Button variant="primary" onClick={() => setShowEventModal(true)}>
+                                                        <FiPlus /> إضافة فعالية جديدة
+                                                    </Button>
+                                                    <Button variant="warning" onClick={() => setShowAddPropertyModal(true)}>
+                                                        <FiMapPin /> إضافة عقار جديد
+                                                    </Button>
+                                                    <Button variant="info" onClick={() => setShowWaterReadingModal(true)}>
+                                                        <FiActivity /> إضافة قراءات المياه
+                                                    </Button>
                                                 </Card.Body>
                                             </Card>
                                         </Col>
@@ -392,6 +395,7 @@ const AdminGeneral = () => {
                                     </Row>
                                 </div>
                             )}
+
                             {/* مودال إضافة عقار جديد */}
                             <Modal show={showAddPropertyModal} onHide={() => setShowAddPropertyModal(false)}>
                                 <Modal.Header closeButton>
@@ -455,10 +459,11 @@ const AdminGeneral = () => {
                                     </Button>
                                 </Modal.Footer>
                             </Modal>
+
                             {/* إدارة الفواتير */}
                             {activeTab === 'payments' && (
                                 <div className="payments-section">
-                                    <h3 className="mb-4">إدارة الفواتير الشهرية</h3>
+                                    <h3>إدارة الفواتير الشهرية</h3>
                                     <Table striped bordered hover>
                                         <thead>
                                         <tr>
@@ -498,27 +503,25 @@ const AdminGeneral = () => {
                                     <div className="d-flex justify-content-between align-items-center mb-4">
                                         <h3>إدارة الفعاليات</h3>
                                         <Button variant="primary" onClick={() => setShowEventModal(true)}>
-                                            <FiPlus className="me-2" /> إضافة فعالية جديدة
+                                            <FiPlus /> إضافة فعالية جديدة
                                         </Button>
                                     </div>
                                     <Row>
                                         {events.map(event => (
                                             <Col md={4} key={event.id} className="mb-4">
-                                                <Card>
+                                                <Card className="event-card">
                                                     {event.imageUrl && (
-                                                        <Card.Img variant="top" src={event.imageUrl} style={{ height: '200px', objectFit: 'cover' }} />
+                                                        <Card.Img variant="top" src={event.imageUrl} />
                                                     )}
                                                     <Card.Body>
                                                         <Card.Title>{event.title}</Card.Title>
                                                         <Card.Text>{event.description}</Card.Text>
                                                         <div className="d-flex justify-content-between">
                                                             <small className="text-muted">
-                                                                <FiCalendar className="me-1" />
-                                                                {new Date(event.date).toLocaleDateString()}
+                                                                <FiCalendar /> {new Date(event.date).toLocaleDateString()}
                                                             </small>
                                                             <small className="text-muted">
-                                                                <FiHome className="me-1" />
-                                                                {event.location}
+                                                                <FiHome /> {event.location}
                                                             </small>
                                                         </div>
                                                     </Card.Body>
@@ -532,6 +535,8 @@ const AdminGeneral = () => {
                     )}
                 </Col>
             </Row>
+
+            {/* مودال إضافة قراءات المياه */}
             <Modal show={showWaterReadingModal} onHide={() => setShowWaterReadingModal(false)} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>إضافة قراءات المياه</Modal.Title>
@@ -735,7 +740,7 @@ const AdminGeneral = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </Container>
+        </div>
     );
 };
 
