@@ -11,7 +11,11 @@ import {
     FiMoreVertical,
     FiEye,
     FiX,
-    FiCheck
+    FiCheck,
+    FiUser,
+    FiShield,
+    FiHome,
+    FiCheckCircle
 } from "react-icons/fi";
 import "./AdminDashboard.css";
 
@@ -144,11 +148,11 @@ function AdminDashboard() {
     if (loading) {
         return (
             <div className="admin-dashboard">
-                <div className="text-center" style={{ padding: "3rem 0" }}>
-                    <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">جاري التحميل...</span>
+                <div className="loading-container">
+                    <div className="spinner">
+                        <FiRefreshCw className="spinner-icon" />
                     </div>
-                    <p className="mt-3">{t("loading") || "جاري التحميل..."}</p>
+                    <p>{t("loading") || "جاري التحميل..."}</p>
                 </div>
             </div>
         );
@@ -157,12 +161,9 @@ function AdminDashboard() {
     if (error) {
         return (
             <div className="admin-dashboard">
-                <div className="alert alert-danger">
+                <div className="error-alert">
                     {error}
-                    <button
-                        className="btn btn-link p-0 me-2"
-                        onClick={fetchUsers}
-                    >
+                    <button className="retry-btn" onClick={fetchUsers}>
                         <FiRefreshCw /> {t("retry") || "إعادة المحاولة"}
                     </button>
                 </div>
@@ -170,121 +171,178 @@ function AdminDashboard() {
         );
     }
 
+    // حساب الإحصائيات
+    const stats = {
+        totalUsers: users.length,
+        totalAdmins: users.filter(u => getRoleName(u?.role) === 'ADMIN').length,
+        totalResidents: users.filter(u => getRoleName(u?.role) === 'RESIDENT').length,
+        activeUsers: users.filter(u => u.isActive).length
+    };
+
     return (
         <div className="admin-dashboard">
-            <div className="dashboard-header">
-                <h1 className="dashboard-title">
-                    {t("userManagement") || "إدارة المستخدمين"}
-                </h1>
-                <div className="action-buttons">
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleRegisterUser}
-                    >
-                        <FiUserPlus /> {t("register") || "تسجيل مستخدم"}
-                    </button>
-                    <button
-                        className="btn btn-secondary"
-                        onClick={fetchUsers}
-                    >
-                        <FiRefreshCw /> {t("refresh") || "تحديث"}
-                    </button>
+            <div className="dashboard-card">
+                {/* Header */}
+                <div className="dashboard-header">
+                    <h1 className="dashboard-title">
+                        <FiUser /> {t("userManagement") || "إدارة المستخدمين"}
+                    </h1>
+                    <div className="action-buttons">
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleRegisterUser}
+                        >
+                            <FiUserPlus /> {t("register") || "تسجيل مستخدم"}
+                        </button>
+                        <button
+                            className="btn btn-secondary"
+                            onClick={fetchUsers}
+                        >
+                            <FiRefreshCw /> {t("refresh") || "تحديث"}
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div className="search-filter-container">
-                <input
-                    type="text"
-                    className="search-box"
-                    placeholder={t("searchPlaceholder") || "بحث..."}
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-                <select
-                    className="role-filter"
-                    value={filterRole}
-                    onChange={(e) => setFilterRole(e.target.value)}
-                >
-                    <option value="ALL">{t("allRoles") || "جميع الصلاحيات"}</option>
-                    <option value="ADMIN">{t("admin") || "مدير"}</option>
-                    <option value="USER">{t("user") || "مستخدم"}</option>
-                    <option value="RESIDENT">{t("resident") || "مقيم"}</option>
-                </select>
-            </div>
+                {/* Statistics */}
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <FiUser />
+                        </div>
+                        <div className="stat-info">
+                            <h3>إجمالي المستخدمين</h3>
+                            <p>{stats.totalUsers}</p>
+                        </div>
+                    </div>
 
-            {filteredUsers.length === 0 ? (
-                <div className="alert alert-info">
-                    {t("noResults") || "لا توجد نتائج"}
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <FiShield />
+                        </div>
+                        <div className="stat-info">
+                            <h3>عدد المديرين</h3>
+                            <p>{stats.totalAdmins}</p>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <FiHome />
+                        </div>
+                        <div className="stat-info">
+                            <h3>عدد المقيمين</h3>
+                            <p>{stats.totalResidents}</p>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <FiCheckCircle />
+                        </div>
+                        <div className="stat-info">
+                            <h3>المستخدمين النشطين</h3>
+                            <p>{stats.activeUsers}</p>
+                        </div>
+                    </div>
                 </div>
-            ) : (
-                <div className="table-responsive">
-                    <table className="users-table">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>{t("email") || "البريد الإلكتروني"}</th>
-                            <th>{t("name") || "الاسم"}</th>
-                            <th>{t("role") || "الصلاحية"}</th>
-                            <th>{t("registered") || "تاريخ التسجيل"}</th>
-                            <th>{t("actions") || "إجراءات"}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {filteredUsers.map((user, index) => (
-                            <tr key={user.userId}>
-                                <td>{index + 1}</td>
-                                <td>{user.email || "--"}</td>
-                                <td>{user.fullName || "--"}</td>
-                                <td>
-                                        <span className={`role-badge badge-${getRoleVariant(user?.role)}`}>
-                                            {t(getRoleName(user?.role).toLowerCase())}
-                                        </span>
-                                </td>
-                                <td>{formatDate(user?.createdAt)}</td>
-                                <td>
-                                    <div className="action-dropdown">
-                                        <button
-                                            className="dropdown-toggle"
-                                            onClick={() => toggleDropdown(user.userId)}
-                                        >
-                                            <FiMoreVertical />
-                                        </button>
-                                        <div className={`dropdown-menu ${showDropdownId === user.userId ? 'show' : ''}`}>
-                                            <button
-                                                className="dropdown-item"
-                                                onClick={() => openUserDetails(user)}
-                                            >
-                                                <FiEye /> {t("viewDetails") || "عرض التفاصيل"}
-                                            </button>
-                                            {user.userId !== currentUser?.userId && (
-                                                <>
-                                                    <button
-                                                        className="dropdown-item"
-                                                        onClick={() => changeRole(
-                                                            user.userId,
-                                                            getRoleName(user?.role) === "USER" ? "ADMIN" : "USER"
-                                                        )}
-                                                    >
-                                                        <FiEdit /> {t("changeRoleTo") || "تغيير الصلاحية إلى"} {t(getRoleName(user?.role) === "USER" ? "admin" : "user")}
-                                                    </button>
-                                                    <button
-                                                        className="dropdown-item danger"
-                                                        onClick={() => deleteUser(user.userId)}
-                                                    >
-                                                        <FiTrash2 /> {t("delete") || "حذف"}
-                                                    </button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </td>
+
+                {/* Search and Filter */}
+                <div className="search-filter-container">
+                    <input
+                        type="text"
+                        className="search-box"
+                        placeholder={t("searchPlaceholder") || "بحث..."}
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                    <select
+                        className="role-filter"
+                        value={filterRole}
+                        onChange={(e) => setFilterRole(e.target.value)}
+                    >
+                        <option value="ALL">{t("allRoles") || "جميع الصلاحيات"}</option>
+                        <option value="ADMIN">{t("admin") || "مدير"}</option>
+                        <option value="USER">{t("user") || "مستخدم"}</option>
+                        <option value="RESIDENT">{t("resident") || "مقيم"}</option>
+                    </select>
+                </div>
+
+                {/* Users Table */}
+                <div className="table-container">
+                    {filteredUsers.length === 0 ? (
+                        <div className="no-results">
+                            {t("noResults") || "لا توجد نتائج"}
+                        </div>
+                    ) : (
+                        <table className="users-table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>{t("email") || "البريد الإلكتروني"}</th>
+                                <th>{t("name") || "الاسم"}</th>
+                                <th>{t("role") || "الصلاحية"}</th>
+                                <th>{t("registered") || "تاريخ التسجيل"}</th>
+                                <th>{t("actions") || "إجراءات"}</th>
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {filteredUsers.map((user, index) => (
+                                <tr key={user.userId}>
+                                    <td>{index + 1}</td>
+                                    <td>{user.email || "--"}</td>
+                                    <td>{user.fullName || "--"}</td>
+                                    <td>
+                      <span className={`role-badge badge-${getRoleVariant(user?.role)}`}>
+                        {t(getRoleName(user?.role).toLowerCase())}
+                      </span>
+                                    </td>
+                                    <td>{formatDate(user?.createdAt)}</td>
+                                    <td>
+                                        <div className="action-dropdown">
+                                            <button
+                                                className="dropdown-toggle"
+                                                onClick={() => toggleDropdown(user.userId)}
+                                            >
+                                                <FiMoreVertical />
+                                            </button>
+                                            <div className={`dropdown-menu ${showDropdownId === user.userId ? 'show' : ''}`}>
+                                                <button
+                                                    className="dropdown-item"
+                                                    onClick={() => openUserDetails(user)}
+                                                >
+                                                    <FiEye /> {t("viewDetails") || "عرض التفاصيل"}
+                                                </button>
+                                                {user.userId !== currentUser?.userId && (
+                                                    <>
+                                                        <button
+                                                            className="dropdown-item"
+                                                            onClick={() => changeRole(
+                                                                user.userId,
+                                                                getRoleName(user?.role) === "USER" ? "ADMIN" : "USER"
+                                                            )}
+                                                        >
+                                                            <FiEdit /> {t("changeRoleTo") || "تغيير الصلاحية إلى"} {t(getRoleName(user?.role) === "USER" ? "admin" : "user")}
+                                                        </button>
+                                                        <button
+                                                            className="dropdown-item danger"
+                                                            onClick={() => deleteUser(user.userId)}
+                                                        >
+                                                            <FiTrash2 /> {t("delete") || "حذف"}
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
-            )}
+            </div>
 
+            {/* User Details Modal */}
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">
