@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FiPlus, FiTrash2, FiCheckCircle } from "react-icons/fi";
 
 const steps = ["الحساب", "الزوجة/الزوجات", "الأبناء", "المراجعة"];
-import './Register.css'
+import './Register.module.css'
 export default function Register() {
     const navigate = useNavigate();
 
