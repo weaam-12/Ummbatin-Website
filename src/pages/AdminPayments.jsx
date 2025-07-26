@@ -1,7 +1,7 @@
 // src/pages/AdminPayments.jsx
 import React, { useState, useEffect } from 'react';
 import { FiDollarSign, FiRefreshCw, FiCalendar } from 'react-icons/fi';
-import styles from './AdminPayments.module.css';
+import styles from './AdminPayments.css';
 import { getAllPayments, getAllUsers } from '../api';
 
 const AdminPayments = () => {
