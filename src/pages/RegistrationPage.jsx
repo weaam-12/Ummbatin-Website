@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FiPlus, FiTrash2, FiCheckCircle } from "react-icons/fi";
 
 const steps = ["الحساب", "الزوجة/الزوجات", "الأبناء", "المراجعة"];
-
+import './Register.module.css'
 export default function Register() {
     const navigate = useNavigate();
 
@@ -105,20 +105,20 @@ export default function Register() {
                                             arr[i].name = e.target.value;
                                             setWives(arr);
                                         }}
-                                        className="input flex-1"
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                     />
                                     {wives.length > 1 && (
                                         <button
                                             type="button"
                                             onClick={() => removeWife(i)}
-                                            className="btn-icon bg-red-500 text-white"
+                                            className="p-2 rounded-full text-red-500 hover:bg-red-100"
                                         >
                                             <FiTrash2 />
                                         </button>
                                     )}
                                 </div>
                             ))}
-                            <button type="button" onClick={addWife} className="btn-add">
+                            <button type="button" onClick={addWife} className="text-blue-600 text-sm font-medium flex items-center gap-1 hover:underline">
                                 <FiPlus /> إضافة زوجة
                             </button>
                         </div>
@@ -130,39 +130,21 @@ export default function Register() {
                             <h2 className="text-xl font-bold text-blue-700 mb-4">الأبناء</h2>
                             {children.map((c, i) => (
                                 <div key={i} className="grid grid-cols-1 md:grid-cols-12 gap-2 mb-3">
-                                    <input
-                                        placeholder="اسم الطفل"
-                                        value={c.name}
-                                        onChange={(e) => updateChild(i, "name", e.target.value)}
-                                        className="input md:col-span-4"
-                                    />
-                                    <input
-                                        type="date"
-                                        value={c.birthDate}
-                                        onChange={(e) => updateChild(i, "birthDate", e.target.value)}
-                                        className="input md:col-span-3"
-                                    />
-                                    <select
-                                        value={c.wifeIndex}
-                                        onChange={(e) => updateChild(i, "wifeIndex", +e.target.value)}
-                                        className="input md:col-span-4"
-                                    >
+                                    <input placeholder="اسم الطفل" value={c.name} onChange={(e) => updateChild(i, "name", e.target.value)} className="md:col-span-4 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                                    <input type="date" value={c.birthDate} onChange={(e) => updateChild(i, "birthDate", e.target.value)} className="md:col-span-3 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                                    <select value={c.wifeIndex} onChange={(e) => updateChild(i, "wifeIndex", +e.target.value)} className="md:col-span-4 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                         {wives.map((w, idx) => (
                                             <option key={idx} value={idx}>
                                                 {w.name || `الزوجة ${idx + 1}`}
                                             </option>
                                         ))}
                                     </select>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeChild(i)}
-                                        className="btn-icon bg-red-500 text-white md:col-span-1"
-                                    >
+                                    <button type="button" onClick={() => removeChild(i)} className="md:col-span-1 p-2 rounded-full text-red-500 hover:bg-red-100">
                                         <FiTrash2 />
                                     </button>
                                 </div>
                             ))}
-                            <button type="button" onClick={addChild} className="btn-add">
+                            <button type="button" onClick={addChild} className="text-blue-600 text-sm font-medium flex items-center gap-1 hover:underline">
                                 <FiPlus /> إضافة طفل
                             </button>
                         </div>
@@ -182,16 +164,16 @@ export default function Register() {
                     {/* Navigation */}
                     <div className="flex justify-between items-center pt-4 border-t">
                         {step > 1 && (
-                            <button onClick={() => setStep(step - 1)} className="btn-secondary">
+                            <button onClick={() => setStep(step - 1)} className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition">
                                 السابق
                             </button>
                         )}
                         {step < 4 ? (
-                            <button onClick={() => setStep(step + 1)} className="btn-primary ms-auto">
+                            <button onClick={() => setStep(step + 1)} className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition ms-auto">
                                 التالي
                             </button>
                         ) : (
-                            <button onClick={submit} disabled={loading} className="btn-success ms-auto">
+                            <button onClick={submit} disabled={loading} className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition ms-auto disabled:opacity-50">
                                 {loading ? "جاري التسجيل…" : "تسجيل العائلة"}
                             </button>
                         )}
@@ -201,5 +183,3 @@ export default function Register() {
         </div>
     );
 }
-
-/* ---------- Utility classes (Tailwind already covers these) ---------- */
