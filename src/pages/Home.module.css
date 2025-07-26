@@ -1,0 +1,200 @@
+/* src/pages/Home.module.css */
+
+/* الخلفية العامة */
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    padding: 1rem;
+    font-family: 'Almarai', Arial, sans-serif;
+    direction: rtl;
+}
+
+/* البطاقة الرئيسية */
+.mainCard {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* الصورة الرئيسية */
+.bannerImage {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: block;
+}
+
+/* العناوين */
+.title {
+    font-size: 2rem;
+    color: #0066cc;
+    text-align: center;
+    margin: 1.5rem 0;
+    font-weight: 700;
+}
+
+.description {
+    font-size: 1.1rem;
+    color: #555;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    line-height: 1.6;
+    padding: 0 1rem;
+}
+
+/* قسم الخدمات */
+.section {
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    color: #0066cc;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.servicesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1.5rem;
+    justify-items: center;
+    padding: 0 1rem;
+}
+
+.serviceItem {
+    width: 120px;
+    height: 120px;
+    background: #f5f9ff;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.serviceItem:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    border-color: #0066cc;
+    background: #e6f0ff;
+}
+
+.serviceIcon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.serviceName {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+/* قسم الفعاليات */
+.activitiesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 0 1rem;
+}
+
+.activityCard {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.activityCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-color: #0066cc;
+}
+
+.activityTitle {
+    font-size: 1.2rem;
+    color: #0066cc;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.activityDetail {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.activityDetail strong {
+    color: #333;
+    min-width: 60px;
+    display: inline-block;
+}
+
+/* للجوال */
+@media (max-width: 768px) {
+    .bannerImage {
+        height: 300px;
+    }
+
+    .title {
+        font-size: 1.8rem;
+    }
+
+    .description {
+        font-size: 1rem;
+    }
+
+    .servicesGrid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 1rem;
+    }
+
+    .serviceItem {
+        width: 100px;
+        height: 100px;
+    }
+
+    .serviceIcon {
+        font-size: 1.8rem;
+    }
+
+    .serviceName {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .bannerImage {
+        height: 250px;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .servicesGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .activitiesGrid {
+        grid-template-columns: 1fr;
+    }
+}

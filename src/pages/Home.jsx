@@ -1,66 +1,82 @@
+// src/pages/Home.jsx
+import React from 'react';
 import { useNavigate } from "react-router-dom";
-import './Home.css';
+import styles from './Home.module.css';
 import bkg from "./bkg.jpg";
 
 const Home = () => {
     const navigate = useNavigate();
 
     const services = [
-        { name: "מים", icon: "💧" },
-        { name: "ארנונה", icon: "🏠" },
-        { name: "שירות אשפה", icon: "🗑️" },
-        { name: "רישום גן", icon: "🧒" },
-        { name: "פעולות", icon: "📝" },
-        { name: "מוקד חירום", icon: "🚨" },
-        { name: "תשלומים מקוונים", icon: "💳" },
-        { name: "קביעת תור", icon: "📅" },
-        { name: "מצב פניות", icon: "📬" },
-        { name: "חדשות ועדכונים", icon: "📰" }
+        { name: "المياه", icon: "💧", path: "/water" },
+        { name: "الأرنونا", icon: "🏠", path: "/arnona" },
+        { name: "خدمة النفايات", icon: "🗑️", path: "/waste" },
+        { name: "تسجيل الروضة", icon: "🧒", path: "/kindergarten" },
+        { name: "المعاملات", icon: "📝", path: "/transactions" },
+        { name: "طوارئ", icon: "🚨", path: "/emergency" },
+        { name: "دفع إلكتروني", icon: "💳", path: "/payments" },
+        { name: "حجز موعد", icon: "📅", path: "/appointments" },
+        { name: "متابعة الطلبات", icon: "📬", path: "/requests" },
+        { name: "أخبار وتحديثات", icon: "📰", path: "/news" }
     ];
 
     const activities = [
-        { title: "יום ספורט קהילתי", date: "2025-07-10", duration: 3 },
-        { title: "שוק קיץ", date: "2025-07-15", duration: 4 },
-        { title: "ערב תרבות", date: "2025-07-20", duration: 2 }
+        { title: "يوم رياضي مجتمعي", date: "2025-07-10", duration: 3 },
+        { title: "سوق صيفي", date: "2025-07-15", duration: 4 },
+        { title: "أمسية ثقافية", date: "2025-07-20", duration: 2 }
     ];
 
+    const handleServiceClick = (path) => {
+        navigate(path);
+    };
+
     return (
-        <div className="home-container" dir="rtl">
-            <div className="visitor-info-card">
-                <img src={bkg} alt="אום בטין" className="city-image"/>
+        <div className={styles.container}>
+            <div className={styles.mainCard}>
+                {/* البانر الرئيسي */}
+                <img src={bkg} alt="بلدة أم بطين" className={styles.bannerImage} />
 
-                <h1 className="city-title">ברוכים הבאים לאום בטין</h1>
-                <p className="city-description">
-                    אום בטין היא יישוב קהילתי מתפתח בנגב, עם שירותים עירוניים מתקדמים, חינוך איכותי, ואירועים תרבותיים לכל המשפחה.
+                {/* العنوان والوصف */}
+                <h1 className={styles.title}>مرحباً بكم في بلدية أم بطين</h1>
+                <p className={styles.description}>
+                    أم بطين هي بلدة متطورة في النقب، تقدم خدمات بلدية متكاملة، تعليم ذو جودة عالية، وفعاليات ثقافية واجتماعية لكل أفراد العائلة.
                 </p>
+
+                {/* قسم الخدمات */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>خدمات البلدية</h2>
+                    <div className={styles.servicesGrid}>
+                        {services.map((service, index) => (
+                            <div
+                                key={index}
+                                className={styles.serviceItem}
+                                onClick={() => handleServiceClick(service.path)}
+                            >
+                                <div className={styles.serviceIcon}>{service.icon}</div>
+                                <div className={styles.serviceName}>{service.name}</div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* قسم الفعاليات */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>الفعاليات القادمة</h2>
+                    <div className={styles.activitiesGrid}>
+                        {activities.map((activity, idx) => (
+                            <div key={idx} className={styles.activityCard}>
+                                <h3 className={styles.activityTitle}>{activity.title}</h3>
+                                <p className={styles.activityDetail}>
+                                    <strong>التاريخ:</strong> {activity.date}
+                                </p>
+                                <p className={styles.activityDetail}>
+                                    <strong>المدة:</strong> {activity.duration} ساعات
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
             </div>
-
-            {/* الخدمات */}
-            <section className="services-section">
-                <h2 className="section-title">שירותים לתושבים</h2>
-                <div className="services-grid">
-                    {services.map((service, index) => (
-                        <div key={index} className="service-circle">
-                            <div className="service-icon">{service.icon}</div>
-                            <div className="service-name">{service.name}</div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* الفعاليات */}
-            <section className="activities-section">
-                <h2 className="section-title">הפעילויות הקרובות</h2>
-                <div className="activities-list">
-                    {activities.map((activity, idx) => (
-                        <div key={idx} className="activity-card">
-                            <h3>{activity.title}</h3>
-                            <p><strong>תאריך:</strong> {activity.date}</p>
-                            <p><strong>משך:</strong> {activity.duration} שעות</p>
-                        </div>
-                    ))}
-                </div>
-            </section>
         </div>
     );
 };
