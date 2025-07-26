@@ -1,0 +1,334 @@
+/* src/pages/AdminKinder.module.css */
+
+/* الخلفية العامة */
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    padding: 1rem;
+    font-family: 'Almarai', Arial, sans-serif;
+    direction: rtl;
+}
+
+/* البطاقة الرئيسية */
+.card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* الهيدر */
+.header {
+    background: #0066cc;
+    color: #ffffff;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* الإحصائيات */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.statCard {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.statIcon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #f5f9ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0066cc;
+    font-size: 1.5rem;
+}
+
+.statInfo h3 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.statInfo p {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+}
+
+/* الجداول */
+.tableContainer {
+    overflow-x: auto;
+    padding: 0 1rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.table th {
+    background: #f5f9ff;
+    color: #0066cc;
+    padding: 0.75rem;
+    text-align: right;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.table tr:hover td {
+    background: #f9f9f9;
+}
+
+/* الحالات */
+.badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badgeSuccess {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badgeWarning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badgeDanger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badgeInfo {
+    background: #e2e8f0;
+    color: #333;
+}
+
+/* تفاصيل الحضانة */
+.details {
+    background: white;
+    border-radius: 15px;
+    margin: 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.detailsHeader {
+    padding: 1rem 1.5rem;
+    background: #f5f9ff;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.detailsContent {
+    padding: 1.5rem;
+}
+
+/* النماذج */
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.formGroup input,
+.formGroup select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-family: 'Almarai', Arial, sans-serif;
+    transition: all 0.2s;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+    border-color: #0066cc;
+    box-shadow: 0 0 0 3px rgba(0,102,204,0.2);
+    outline: none;
+}
+
+.formRow {
+    display: flex;
+    gap: 1rem;
+}
+
+/* الأزرار */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: 'Almarai', Arial, sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btnPrimary {
+    background: #0066cc;
+    color: white;
+}
+
+.btnPrimary:hover {
+    background: #004c99;
+}
+
+.btnSecondary {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btnSecondary:hover {
+    background: #bdbdbd;
+}
+
+.btnSuccess {
+    background: #28a745;
+    color: white;
+}
+
+.btnSuccess:hover {
+    background: #218838;
+}
+
+.btnDanger {
+    background: #dc3545;
+    color: white;
+}
+
+.btnDanger:hover {
+    background: #c82333;
+}
+
+.btnSm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+}
+
+/* المودال */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    width: 90%;
+    max-width: 500px;
+    animation: fadeIn 0.3s ease;
+}
+
+.modalHeader {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modalBody {
+    padding: 1.5rem;
+}
+
+.modalFooter {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* للجوال */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .formRow {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .table th, .table td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+    }
+}
