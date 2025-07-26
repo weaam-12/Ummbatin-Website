@@ -1,11 +1,12 @@
 :root {
-    --footer-bg: #121620; /* لون أعمق أنيق */
-    --footer-text: #dcdcdc; /* لون نص هادئ */
-    --footer-link: #66b0ff; /* لون أزرق هادي */
-    --footer-hover: #1a73e8; /* لون أزرق عند المرور */
-    --footer-padding: 30px 50px;
+    --footer-bg: #0066cc; /* أزرق البلدية */
+    --footer-text: #ffffff; /* أبيض للنص */
+    --footer-link: #aad4ff; /* أزرق فاتح للروابط */
+    --footer-hover: #ffffff; /* أبيض عند المرور */
+    --footer-padding: 30px 20px;
     --transition-speed: 0.3s;
-    --font-family: 'Inter', sans-serif;
+    --font-family: 'Almarai', sans-serif;
+    --border-radius: 12px;
 }
 
 /* Footer General Styles */
@@ -15,8 +16,8 @@
     padding: var(--footer-padding);
     text-align: center;
     font-family: var(--font-family);
-    box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.3);
-    border-top: 3px solid var(--footer-link);
+    direction: rtl;
+    border-top: 3px solid #004c99;
 }
 
 .footer-content {
@@ -26,33 +27,34 @@
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 20px;
+    gap: 30px;
 }
 
 .footer-info {
-    flex: 1 1 350px;
+    flex: 1 1 300px;
     text-align: right;
 }
 
 .footer-info address {
     font-style: normal;
-    line-height: 1.6;
+    line-height: 1.8;
     font-size: 0.95rem;
-    margin-top: 8px;
-    color: var(--footer-text);
+    margin-top: 15px;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .footer-info p {
-    margin: 4px 0;
+    margin: 8px 0;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .footer-links {
     flex: 1 1 300px;
     display: flex;
-    gap: 25px;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-end;
 }
 
 .footer-links a {
@@ -61,6 +63,7 @@
     font-size: 1rem;
     font-weight: 600;
     transition: color var(--transition-speed);
+    padding: 5px 0;
 }
 
 .footer-links a:hover {
@@ -68,45 +71,56 @@
     text-decoration: underline;
 }
 
-/* Divider for enhanced structure */
+/* Divider */
 .footer-divider {
     flex-basis: 100%;
-    height: 1px;
-    background-color: rgba(255, 255, 255, 0.12);
-    margin: 20px 0;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.2);
+    margin: 25px 0;
+    border-radius: 2px;
 }
 
 /* Social Media Icons */
 .footer-social {
     display: flex;
-    gap: 25px;
+    gap: 20px;
     justify-content: center;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
 .footer-social a {
     color: var(--footer-text);
     font-size: 1.5rem;
-    transition: color var(--transition-speed);
+    transition: all var(--transition-speed);
+    background: rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .footer-social a:hover {
-    color: var(--footer-hover);
+    color: var(--footer-bg);
+    background: var(--footer-text);
+    transform: translateY(-3px);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
     .footer-content {
         flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .footer-info, .footer-links {
         text-align: center;
         align-items: center;
     }
 
-    .footer-info {
-        text-align: center;
-    }
-
     .footer-links {
-        justify-content: center;
+        margin-top: 15px;
     }
 }

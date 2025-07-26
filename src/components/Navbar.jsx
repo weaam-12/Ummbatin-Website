@@ -1,30 +1,58 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FaBars, FaTimes, FaUserCircle, FaSearch, FaUserShield, FaHome, FaExclamationCircle, FaMoneyBillWave, FaBell, FaTrash, FaGraduationCap, FaCog, FaChartLine } from "react-icons/fa";
+import {
+    FaBars,
+    FaTimes,
+    FaUserCircle,
+    FaSearch,
+    FaUserShield,
+    FaHome,
+    FaExclamationCircle,
+    FaMoneyBillWave,
+    FaBell,
+    FaTrash,
+    FaGraduationCap,
+    FaCog,
+    FaChartLine
+} from "react-icons/fa";
 import logo from "./styles/img.png";
 import { useAuth } from "../AuthContext";
 import "./Navbar.css";
-import { Dropdown } from 'react-bootstrap';
 
 const Navbar = () => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { user, isAdmin, logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
-    const [isRTL, setIsRTL] = useState(i18n.language === "ar");
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
     useEffect(() => {
-        document.body.dir = i18n.language === "ar" ? "rtl" : "rtl";
-        setIsRTL(i18n.language === "ar");
-    }, [i18n.language]);
+        document.body.dir = "rtl";
+    }, []);
 
     const changeLanguage = (lang) => {
         i18n.changeLanguage(lang);
+        setCurrentLanguage(lang);
     };
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
+    };
+
+    const toggleDropdown = () => {
+        setShowDropdown(!showDropdown);
+    };
+
+    const closeDropdown = () => {
+        setShowDropdown(false);
+    };
+
+    const handleLogout = () => {
+        logout();
+        closeDropdown();
+        navigate("/login");
     };
 
     // روابط المستخدم العادي
@@ -47,82 +75,128 @@ const Navbar = () => {
     ];
 
     return (
-        <div className="nav-wrapper">
-            <nav className={`navbar ${isRTL ? "rtl" : "ltr"}`} style={{
-                background: "#ffffff",
-                borderBottom: "1px solid #e0e0e0",
-                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)"
-            }}>
-                <div className="navbar-container">
+        <nav className="navbar">
+            <div className="navbar-container">
+                <div className="brand-container">
+                    <NavLink to="/" className="navbar-brand">
+                        <img src={logo} alt="بلدية أم بطين" />
+                        <span>بلدية أم بطين</span>
+                    </NavLink>
+                </div>
 
-                    <div className="menu-icon" onClick={toggleMenu} style={{color: "#1c1c1c"}}>
-                        {menuOpen ? <FaTimes/> : <FaBars/>}
+                <div className="menu-icon" onClick={toggleMenu}>
+                    {menuOpen ? <FaTimes /> : <FaBars />}
+                </div>
+
+                <ul className={`navbar-links ${menuOpen ? "active" : ""}`}>
+                    {!isAdmin() && userLinks.map((link, index) => (
+                        <li key={index}>
+                            <NavLink
+                                to={link.path}
+                                onClick={toggleMenu}
+                                className={({ isActive }) => isActive ? "active" : ""}
+                            >
+                                {link.icon}
+                                {link.text}
+                            </NavLink>
+                        </li>
+                    ))}
+
+                    {isAdmin() && adminLinks.map((link, index) => (
+                        <li key={index}>
+                            <NavLink
+                                to={link.path}
+                                onClick={toggleMenu}
+                                className={({ isActive }) => isActive ? "active admin-link" : "admin-link"}
+                            >
+                                {link.icon}
+                                {link.text}
+                            </NavLink>
+                        </li>
+                    ))}
+                </ul>
+
+                <div className="navbar-right">
+                    <div className="search-bar">
+                        <FaSearch className="search-icon" />
+                        <input
+                            type="text"
+                            placeholder={t("search")}
+                        />
                     </div>
 
-                    {/* Navigation Links */}
-                    <ul className={`navbar-links ${menuOpen ? "active" : ""}`}>
-                        {/* روابط المستخدم العادي */}
-                        {!isAdmin() && userLinks.map((link, index) => (
-                            <li key={index}>
-                                <NavLink to={link.path} onClick={toggleMenu}>
-                                    <span className="nav-icon">{link.icon}</span>
-                                    {link.text}
-                                </NavLink>
-                            </li>
-                        ))}
+                    <div className="language-selector">
+                        <button
+                            onClick={() => changeLanguage("ar")}
+                            className={currentLanguage === "ar" ? "active" : ""}
+                        >
+                            عربي
+                        </button>
+                        <span>|</span>
+                        <button
+                            onClick={() => changeLanguage("he")}
+                            className={currentLanguage === "he" ? "active" : ""}
+                        >
+                            עברית
+                        </button>
+                    </div>
 
-                        {/* روابط الأدمن فقط */}
-                        {isAdmin() && adminLinks.map((link, index) => (
-                            <li key={index}>
-                                <NavLink to={link.path} onClick={toggleMenu} className="admin-link">
-                                    <span className="nav-icon">{link.icon}</span>
-                                    {link.text}
-                                </NavLink>
-                            </li>
-                        ))}
-                    </ul>
-
-                    {/* Right Side Elements */}
-                    <div className="navbar-right">
-                        <div className="search-bar">
-                            <FaSearch className="search-icon" style={{color: "#777"}}/>
-                            <input type="text" placeholder={t("search")}
-                                   style={{background: "#f7f7f7", color: "#333", border: "none"}}/>
-                        </div>
-                        <div className="language-selector">
-                            <button onClick={() => changeLanguage("he")} style={{color: "#1c1c1c"}}>HE</button>
-                            <span style={{color: "#1c1c1c"}}>|</span>
-                            <button onClick={() => changeLanguage("ar")} style={{color: "#1c1c1c"}}>AR</button>
-                        </div>
-                        <div className="profile-menu">
+                    <div className="profile-menu">
+                        <div className="profile-button" onClick={toggleDropdown}>
+                            <FaUserCircle className="profile-icon" />
                             {user ? (
-                                <Dropdown>
-                                    <Dropdown.Toggle variant="link" id="dropdown-profile" className="p-0">
-                                        <span className="me-2">{user.fullName || user.email}</span>
-                                        <FaUserCircle size={24} style={{color: "#1c1c1c"}}/>
-                                    </Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item onClick={() => navigate("/profile")}>
-                                            <FaUserCircle className="me-2"/> {t("profile")}
-                                        </Dropdown.Item>
-                                        {isAdmin() && (
-                                            <Dropdown.Item onClick={() => navigate("/admin")}>
-                                                <FaUserShield className="me-2"/> {t("adminPanel")}
-                                            </Dropdown.Item>
-                                        )}
-                                        <Dropdown.Item onClick={logout} className="text-danger">
-                                            <FaTimes className="me-2"/> {t("logout")}
-                                        </Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
+                                <span>{user.fullName || user.email}</span>
                             ) : (
-                                <FaUserCircle size={24} onClick={() => navigate("/login")} style={{color: "#1c1c1c"}}/>
+                                <span>{t("login")}</span>
                             )}
                         </div>
+
+                        {showDropdown && (
+                            <div className="dropdown-menu show">
+                                {user ? (
+                                    <>
+                                        <NavLink
+                                            to="/profile"
+                                            className="dropdown-item"
+                                            onClick={closeDropdown}
+                                        >
+                                            <FaUserCircle />
+                                            {t("profile")}
+                                        </NavLink>
+                                        {isAdmin() && (
+                                            <NavLink
+                                                to="/admin"
+                                                className="dropdown-item"
+                                                onClick={closeDropdown}
+                                            >
+                                                <FaUserShield />
+                                                {t("adminPanel")}
+                                            </NavLink>
+                                        )}
+                                        <div
+                                            className="dropdown-item logout"
+                                            onClick={handleLogout}
+                                        >
+                                            <FaTimes />
+                                            {t("logout")}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <NavLink
+                                        to="/login"
+                                        className="dropdown-item"
+                                        onClick={closeDropdown}
+                                    >
+                                        <FaUserCircle />
+                                        {t("login")}
+                                    </NavLink>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
-            </nav>
-        </div>
+            </div>
+        </nav>
     );
 };
 

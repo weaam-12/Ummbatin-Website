@@ -52,7 +52,7 @@ export default function Register() {
             <div className={styles.card}>
                 {/* Header */}
                 <div className={styles.header}>
-                    <h1>تسجيل عائلة جديدة – بلدية أبو ديس</h1>
+                    <h1>تسجيل عائلة جديدة – بلدية أم بطين</h1>
                 </div>
 
                 {/* Progress bar */}

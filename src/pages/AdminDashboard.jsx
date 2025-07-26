@@ -1,317 +1,747 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../AuthContext";
-import axiosInstance from "../api";
-import { useTranslation } from "react-i18next";
-
+import React, { useState, useEffect } from 'react';
 import {
-    Table,
-    Button,
-    Spinner,
-    Alert,
-    Container,
-    Badge,
-    Dropdown,
-    Form,
-    Row,
-    Col,
-    Modal
-} from "react-bootstrap";
-
+    Container, Row, Col, Card, Button, Table, Modal,
+    Alert, Spinner, Badge, Form
+} from 'react-bootstrap';
 import {
-    FiTrash2,
-    FiUserPlus,
-    FiRefreshCw,
-    FiEdit,
-    FiMoreVertical,
-    FiEye
-} from "react-icons/fi";
+    FiUsers, FiDollarSign, FiPlus, FiCalendar,
+    FiHome, FiFileText, FiDroplet, FiMapPin, FiActivity,
+    FiEye, FiTrash2, FiEdit
+} from 'react-icons/fi';
+import './AdminGeneral.css';
+import { axiosInstance } from '../api.js';
 
-function AdminDashboard() {
+const AdminGeneral = () => {
+    // States العامة
+    const [activeTab, setActiveTab] = useState('dashboard');
+    const [loading, setLoading] = useState(false);
+    const [notification, setNotification] = useState(null);
+
+    // States للمستخدمين والفواتير
     const [users, setUsers] = useState([]);
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [search, setSearch] = useState("");
-    const [filterRole, setFilterRole] = useState("ALL");
-    const [showModal, setShowModal] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [payments, setPayments] = useState([]);
+    const [showBillsModal, setShowBillsModal] = useState(false);
+    const [currentBillType, setCurrentBillType] = useState('');
 
-    const { user: currentUser } = useAuth();
-    const navigate = useNavigate();
-    const { t, i18n } = useTranslation();
+    // States للفعاليات
+    const [events, setEvents] = useState([]);
+    const [showEventModal, setShowEventModal] = useState(false);
+    const [newEvent, setNewEvent] = useState({
+        title: '',
+        description: '',
+        location: '',
+        image: null,
+        date: ''
+    });
 
-    useEffect(() => {
-        fetchUsers();
-    }, []);
+    const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
+    const [newProperty, setNewProperty] = useState({
+        userId: '',
+        address: '',
+        area: '',
+        numberOfUnits: 1
+    });
 
-    useEffect(() => {
-        filterAndSearch();
-    }, [users, search, filterRole]);
+    const [showWaterReadingModal, setShowWaterReadingModal] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState('');
+    const [userProperties, setUserProperties] = useState([]);
+    const [waterReadings, setWaterReadings] = useState({});
 
-    const fetchUsers = async () => {
+    // دالة لجلب عقارات المستخدم
+    const fetchUserProperties = async (userId) => {
+        try {
+            const properties = await getPropertiesByUserId(userId);
+            setUserProperties(properties);
+
+            // تهيئة قراءات المياه لكل عقار
+            const readings = {};
+            properties.forEach(property => {
+                readings[property.property_id] = '';
+            });
+            setWaterReadings(readings);
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في جلب عقارات المستخدم' });
+        }
+    };
+
+    // دالة إضافة قراءات المياه
+    const handleAddWaterReadings = async () => {
         try {
             setLoading(true);
-            setError(null);
-            const response = await axiosInstance.get("api/users/all");
-            setUsers(response.data || []);
-        } catch (err) {
-            console.error("Failed to fetch users", err);
-            setError(t("errors.fetchUsers") || "Failed to fetch users");
+
+            // إرسال قراءات المياه لكل عقار
+            for (const propertyId in waterReadings) {
+                if (waterReadings[propertyId]) {
+                    await addWaterReading(propertyId, parseFloat(waterReadings[propertyId]));
+                }
+            }
+
+            setShowWaterReadingModal(false);
+            setSelectedUserId('');
+            setUserProperties([]);
+            setWaterReadings({});
+
+            setNotification({ type: 'success', message: 'تمت إضافة قراءات المياه بنجاح' });
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في إضافة قراءات المياه: ' + (error.response?.data?.message || error.message) });
         } finally {
             setLoading(false);
         }
     };
 
-    const deleteUser = async (id) => {
-        if (!window.confirm(t("confirmDelete") || "Are you sure you want to delete this user?")) return;
+    const handleAddProperty = async () => {
         try {
-            await axiosInstance.delete(`/users/${id}`);
-            setUsers(prev => prev.filter(user => user.userId !== id));
-        } catch (err) {
-            console.error("Delete failed", err);
-            setError(t("errors.deleteUser") || "Failed to delete user");
+            setLoading(true);
+            await axiosInstance.post('/api/properties', {
+                address: newProperty.address,
+                area: parseFloat(newProperty.area),
+                numberOfUnits: parseInt(newProperty.numberOfUnits),
+                userId: newProperty.userId
+            });
+
+            // تحديث قائمة المستخدمين
+            const updatedUsers = await fetchUsersWithProperties();
+            setUsers(updatedUsers);
+
+            setShowAddPropertyModal(false);
+            setNewProperty({
+                userId: '',
+                address: '',
+                area: '',
+                numberOfUnits: 1
+            });
+            setNotification({ type: 'success', message: 'تمت إضافة العقار بنجاح' });
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في إضافة العقار: ' + (error.response?.data?.message || error.message) });
+        } finally {
+            setLoading(false);
         }
     };
 
-    const changeRole = async (id, newRole) => {
+    // ===================== دوال جلب البيانات =====================
+    const fetchUsersWithProperties = async () => {
         try {
-            await axiosInstance.patch(`/users/${id}`, { role: newRole });
-            setUsers(prev =>
-                prev.map(user =>
-                    user.userId === id ? { ...user, role: newRole } : user
-                )
+            const response = await axiosInstance.get('api/users/all');
+            return response.data
+                .filter(u => u.properties?.length > 0)
+                .map(u => ({ ...u, property: u.properties[0] }));
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            throw error;
+        }
+    };
+
+    const fetchPayments = async () => {
+        try {
+            const currentDate = new Date();
+            const response = await axiosInstance.get('api/payments/current-month', {
+                params: {
+                    month: currentDate.getMonth() + 1,
+                    year: currentDate.getFullYear()
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching payments:', error);
+            throw error;
+        }
+    };
+
+    const fetchEvents = async () => {
+        try {
+            const response = await axiosInstance.get('api/events');
+            setEvents(response.data);
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    };
+
+    // تحميل البيانات الأولية
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                const [usersRes, paymentsRes] = await Promise.all([
+                    fetchUsersWithProperties(),
+                    fetchPayments().catch(() => [])
+                ]);
+                setUsers(usersRes);
+                setPayments(paymentsRes);
+                await fetchEvents();
+            } catch (error) {
+                setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+    }, []);
+
+    // ===================== إدارة الفعاليات =====================
+    const handleAddEvent = async () => {
+        try {
+            setLoading(true);
+
+            // 1. إنشاء كائن JSON بالأسماء الصحيحة
+            const eventObj = {
+                title: newEvent.title,
+                description: newEvent.description,
+                location: newEvent.location,
+                startDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
+                endDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
+                active: true
+            };
+
+            // 2. إضافة الحقل بالاسم "event"
+            const formData = new FormData();
+            formData.append(
+                'event',
+                new Blob([JSON.stringify(eventObj)], { type: 'application/json' })
             );
-        } catch (err) {
-            console.error("Role update failed", err);
-            setError(t("errors.updateRole") || "Failed to update role");
+
+            // 3. إضافة الصورة إن وُجدت
+            if (newEvent.image) formData.append('image', newEvent.image);
+
+            await axiosInstance.post('api/events', formData, {
+                headers: { 'Content-Type': undefined }
+            });
+
+            await fetchEvents();
+            setShowEventModal(false);
+            setNewEvent({ title: '', description: '', location: '', image: null, date: '' });
+            setNotification({ type: 'success', message: 'تمت إضافة الفعالية بنجاح' });
+        } catch (error) {
+            console.error(error);
+            setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في إضافة الفعالية' });
+        } finally {
+            setLoading(false);
         }
     };
 
-    const getRoleVariant = (role) => {
-        if (!role) return "secondary";
-
-        const roleName = typeof role === "object" ? role.roleName : role;
-        switch (roleName) {
-            case "ADMIN": return "danger";
-            case "USER": return "primary";
-            case "RESIDENT": return "success";
-            default: return "secondary";
-        }
-    };
-
-    const getRoleName = (role) => {
-        if (!role) return "UNKNOWN";
-        return typeof role === "object" ? role.roleName : role;
-    };
-
-    const formatDate = (dateStr) => {
-        if (!dateStr) return "--";
+    // ===================== إدارة الفواتير =====================
+    const handleGenerateBills = async () => {
         try {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'he-IL');
-        } catch {
-            return "--";
-        }
-    };
+            setLoading(true);
+            const currentDate = new Date();
+            const month = currentDate.getMonth() + 1;
+            const year = currentDate.getFullYear();
 
-    const filterAndSearch = () => {
-        let result = [...users];
+            const endpoint = currentBillType === 'ARNONA'
+                ? 'api/payments/generate-arnona'
+                : 'api/payments/generate-water';
 
-        if (filterRole !== "ALL") {
-            result = result.filter(user => {
-                const roleName = getRoleName(user?.role)?.toUpperCase();
-                return roleName === filterRole;
+            const params = currentBillType === 'ARNONA'
+                ? { month, year }
+                : { month, year, rate: 10 };
+
+            await axiosInstance.post(endpoint, null, { params });
+            const updatedPayments = await fetchPayments();
+            setPayments(updatedPayments);
+
+            setNotification({
+                type: 'success',
+                message: `تم توليد فواتير ${currentBillType === 'ARNONA' ? 'الأرنونا' : 'المياه'} بنجاح`
             });
-        }
-
-        if (search.trim()) {
-            const term = search.trim().toLowerCase();
-            result = result.filter(user => {
-                const email = user?.email?.toLowerCase() || "";
-                const fullName = user?.fullName?.toLowerCase() || "";
-                return email.includes(term) || fullName.includes(term);
+            setShowBillsModal(false);
+        } catch (error) {
+            setNotification({
+                type: 'danger',
+                message: error.response?.data?.message || 'فشل في توليد الفواتير'
             });
+        } finally {
+            setLoading(false);
         }
-
-        setFilteredUsers(result);
     };
 
-    const openUserDetails = (user) => {
-        setSelectedUser(user);
-        setShowModal(true);
+    const formatPaymentStatus = (status) => {
+        switch (status) {
+            case 'PAID': return { text: 'مدفوع', variant: 'success' };
+            case 'PENDING': return { text: 'قيد الانتظار', variant: 'warning' };
+            case 'FAILED': return { text: 'فشل', variant: 'danger' };
+            default: return { text: status, variant: 'secondary' };
+        }
     };
-
-    const handleCloseModal = () => {
-        setSelectedUser(null);
-        setShowModal(false);
-    };
-
-    const handleRegisterUser = () => navigate("/register");
-
-    if (loading) {
-        return (
-            <div className="text-center mt-5">
-                <Spinner animation="border" variant="primary" />
-                <p className="mt-2">{t("loading") || "Loading..."}</p>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <Container className="mt-4">
-                <Alert variant="danger">
-                    {error}
-                    <Button variant="link" onClick={fetchUsers} className="p-0 ms-2">
-                        <FiRefreshCw /> {t("retry") || "Retry"}
-                    </Button>
-                </Alert>
-            </Container>
-        );
-    }
 
     return (
-        <Container className="py-4">
-            <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-                <h4 className="mb-0">{t("userManagement") || "User Management"}</h4>
-                <div className="d-flex flex-wrap gap-2">
-                    <Button
-                        variant="primary"
-                        onClick={handleRegisterUser}
-                        className="px-4 py-2 d-flex align-items-center justify-content-center"
-                        style={{minWidth: '120px'}}
-                    >
-                        <FiUserPlus className="me-2" size={16}/>
-                        <span>{t("register") || "Register"}</span>
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={fetchUsers}
-                        className="px-4 py-2 d-flex align-items-center justify-content-center"
-                        style={{minWidth: '120px'}}
-                    >
-                        <FiRefreshCw className="me-2" size={16}/>
-                        <span>{t("refresh") || "Refresh"}</span>
-                    </Button>
-                </div>
-            </div>
+        <div className="admin-dashboard">
+            {notification && (
+                <Alert variant={notification.type} onClose={() => setNotification(null)} dismissible>
+                    {notification.message}
+                </Alert>
+            )}
 
-            <Row className="mb-3 g-2">
-                <Col xs={12} md={5}>
-                    <Form.Control
-                        type="text"
-                        placeholder={t("searchPlaceholder") || "Search..."}
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+            <Row>
+                <Col md={3} className="sidebar">
+                    <div className="sidebar-header">
+                        <h4>لوحة تحكم الإدمن</h4>
+                    </div>
+                    <ul className="sidebar-menu">
+                        <li className={activeTab === 'dashboard' ? 'active' : ''}
+                            onClick={() => setActiveTab('dashboard')}>
+                            <FiHome /> لوحة التحكم
+                        </li>
+                        <li className={activeTab === 'payments' ? 'active' : ''}
+                            onClick={() => setActiveTab('payments')}>
+                            <FiDollarSign /> إدارة الفواتير
+                        </li>
+                        <li className={activeTab === 'events' ? 'active' : ''}
+                            onClick={() => setActiveTab('events')}>
+                            <FiCalendar /> إدارة الفعاليات
+                        </li>
+                    </ul>
                 </Col>
-                <Col xs={12} md={3}>
-                    <Form.Select
-                        value={filterRole}
-                        onChange={(e) => setFilterRole(e.target.value)}
-                    >
-                        <option value="ALL">{t("allRoles") || "All Roles"}</option>
-                        <option value="ADMIN">{t("admin") || "Admin"}</option>
-                        <option value="USER">{t("user") || "User"}</option>
-                        <option value="RESIDENT">{t("resident") || "Resident"}</option>
-                    </Form.Select>
+
+                <Col md={9} className="main-content">
+                    {loading ? (
+                        <div className="text-center py-5">
+                            <Spinner animation="border" variant="primary" />
+                            <p className="mt-3">جاري التحميل...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* لوحة التحكم */}
+                            {activeTab === 'dashboard' && (
+                                <div className="dashboard-overview">
+                                    <h3>نظرة عامة</h3>
+                                    <Row className="mb-4">
+                                        <Col md={4}>
+                                            <Card className="stat-card">
+                                                <Card.Body>
+                                                    <div className="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h6>عدد المستخدمين</h6>
+                                                            <h3>{users.length}</h3>
+                                                        </div>
+                                                        <FiUsers size={30} className="text-primary" />
+                                                    </div>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                        <Col md={4}>
+                                            <Card className="stat-card">
+                                                <Card.Body>
+                                                    <div className="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h6>فواتير المياه</h6>
+                                                            <h3>
+                                                                {payments.filter(p => p.paymentType === 'WATER').length}
+                                                            </h3>
+                                                        </div>
+                                                        <FiDroplet size={30} className="text-success" />
+                                                    </div>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                        <Col md={4}>
+                                            <Card className="stat-card">
+                                                <Card.Body>
+                                                    <div className="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h6>فواتير الأرنونا</h6>
+                                                            <h3>
+                                                                {payments.filter(p => p.paymentType === 'ARNONA').length}
+                                                            </h3>
+                                                        </div>
+                                                        <FiFileText size={30} className="text-warning" />
+                                                    </div>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    </Row>
+
+                                    <Row>
+                                        <Col md={6}>
+                                            <Card className="mb-4">
+                                                <Card.Header>
+                                                    <h5>إجراءات سريعة</h5>
+                                                </Card.Header>
+                                                <Card.Body className="quick-actions">
+                                                    <Button variant="success" onClick={() => { setCurrentBillType('WATER'); setShowBillsModal(true); }}>
+                                                        <FiPlus /> توليد فواتير المياه
+                                                    </Button>
+                                                    <Button variant="info" onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }}>
+                                                        <FiPlus /> توليد فواتير الأرنونا
+                                                    </Button>
+                                                    <Button variant="primary" onClick={() => setShowEventModal(true)}>
+                                                        <FiPlus /> إضافة فعالية جديدة
+                                                    </Button>
+                                                    <Button variant="warning" onClick={() => setShowAddPropertyModal(true)}>
+                                                        <FiMapPin /> إضافة عقار جديد
+                                                    </Button>
+                                                    <Button variant="info" onClick={() => setShowWaterReadingModal(true)}>
+                                                        <FiActivity /> إضافة قراءات المياه
+                                                    </Button>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                        <Col md={6}>
+                                            <Card>
+                                                <Card.Header>
+                                                    <h5>آخر الفعاليات</h5>
+                                                </Card.Header>
+                                                <Card.Body>
+                                                    {events.slice(0, 3).map(event => (
+                                                        <div key={event.id} className="mb-3">
+                                                            <h6>{event.title}</h6>
+                                                            <small className="text-muted">
+                                                                {new Date(event.date).toLocaleDateString()} - {event.location}
+                                                            </small>
+                                                        </div>
+                                                    ))}
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            )}
+
+                            {/* مودال إضافة عقار جديد */}
+                            <Modal show={showAddPropertyModal} onHide={() => setShowAddPropertyModal(false)}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>إضافة عقار جديد</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <Form>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>رقم المستخدم (ID)</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                value={newProperty.userId}
+                                                onChange={(e) => setNewProperty({...newProperty, userId: e.target.value})}
+                                                placeholder="أدخل رقم المستخدم"
+                                            />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>عنوان العقار</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                value={newProperty.address}
+                                                onChange={(e) => setNewProperty({...newProperty, address: e.target.value})}
+                                                placeholder="أدخل عنوان العقار"
+                                            />
+                                        </Form.Group>
+                                        <Row>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label>مساحة العقار (م²)</Form.Label>
+                                                    <Form.Control
+                                                        type="number"
+                                                        value={newProperty.area}
+                                                        onChange={(e) => setNewProperty({...newProperty, area: e.target.value})}
+                                                        placeholder="أدخل المساحة"
+                                                        min="0"
+                                                        step="0.01"
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label>عدد الوحدات</Form.Label>
+                                                    <Form.Control
+                                                        type="number"
+                                                        value={newProperty.numberOfUnits}
+                                                        onChange={(e) => setNewProperty({...newProperty, numberOfUnits: e.target.value})}
+                                                        placeholder="أدخل عدد الوحدات"
+                                                        min="1"
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
+                                    </Form>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={() => setShowAddPropertyModal(false)}>
+                                        إلغاء
+                                    </Button>
+                                    <Button variant="primary" onClick={handleAddProperty} disabled={loading}>
+                                        {loading ? 'جاري الحفظ...' : 'حفظ العقار'}
+                                    </Button>
+                                </Modal.Footer>
+                            </Modal>
+
+                            {/* إدارة الفواتير */}
+                            {activeTab === 'payments' && (
+                                <div className="payments-section">
+                                    <h3>إدارة الفواتير الشهرية</h3>
+                                    <Table striped bordered hover>
+                                        <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>اسم المواطن</th>
+                                            <th>نوع الفاتورة</th>
+                                            <th>المبلغ (شيكل)</th>
+                                            <th>حالة الدفع</th>
+                                            <th>عنوان العقار</th>
+                                            <th>عدد الوحدات</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {payments.map((payment, index) => (
+                                            <tr key={payment.paymentId}>
+                                                <td>{index + 1}</td>
+                                                <td>{payment.userName || '--'}</td>
+                                                <td>{payment.paymentType === 'WATER' ? 'مياه' : 'أرنونا'}</td>
+                                                <td>{payment.amount || '--'}</td>
+                                                <td>
+                                                    <Badge bg={formatPaymentStatus(payment.status).variant}>
+                                                        {formatPaymentStatus(payment.status).text}
+                                                    </Badge>
+                                                </td>
+                                                <td>{payment.propertyAddress || '--'}</td>
+                                                <td>{payment.propertyUnits || '--'}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            )}
+
+                            {/* إدارة الفعاليات */}
+                            {activeTab === 'events' && (
+                                <div className="events-section">
+                                    <div className="d-flex justify-content-between align-items-center mb-4">
+                                        <h3>إدارة الفعاليات</h3>
+                                        <Button variant="primary" onClick={() => setShowEventModal(true)}>
+                                            <FiPlus /> إضافة فعالية جديدة
+                                        </Button>
+                                    </div>
+                                    <Row>
+                                        {events.map(event => (
+                                            <Col md={4} key={event.id} className="mb-4">
+                                                <Card className="event-card">
+                                                    {event.imageUrl && (
+                                                        <Card.Img variant="top" src={event.imageUrl} />
+                                                    )}
+                                                    <Card.Body>
+                                                        <Card.Title>{event.title}</Card.Title>
+                                                        <Card.Text>{event.description}</Card.Text>
+                                                        <div className="d-flex justify-content-between">
+                                                            <small className="text-muted">
+                                                                <FiCalendar /> {new Date(event.date).toLocaleDateString()}
+                                                            </small>
+                                                            <small className="text-muted">
+                                                                <FiHome /> {event.location}
+                                                            </small>
+                                                        </div>
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                        ))}
+                                    </Row>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </Col>
             </Row>
 
-            {filteredUsers.length === 0 ? (
-                <Alert variant="info">{t("noResults") || "No results found"}</Alert>
-            ) : (
-                <Table responsive striped hover>
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>{t("email") || "Email"}</th>
-                        <th>{t("name") || "Name"}</th>
-                        <th>{t("role") || "Role"}</th>
-                        <th>{t("registered") || "Registered"}</th>
-                        <th>{t("actions") || "Actions"}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {filteredUsers.map((user, index) => (
-                        <tr key={user.userId}>
-                            <td>{index + 1}</td>
-                            <td>{user.email || "--"}</td>
-                            <td>{user.fullName || "--"}</td>
-                            <td>
-                                <Badge bg={getRoleVariant(user?.role)}>
-                                    {t(getRoleName(user?.role).toLowerCase())}
-                                </Badge>
-                            </td>
-                            <td>{formatDate(user?.createdAt)}</td>
-                            <td>
-                                <Dropdown>
-                                    <Dropdown.Toggle
-                                        variant="link"
-                                        id={`dropdown-actions-${user.userId}`}
-                                        className="p-0"
-                                    >
-                                        <FiMoreVertical />
-                                    </Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item onClick={() => openUserDetails(user)}>
-                                            <FiEye className="me-2" />
-                                            {t("viewDetails") || "View Details"}
-                                        </Dropdown.Item>
-                                        {user.userId !== currentUser?.userId && (
-                                            <>
-                                                <Dropdown.Item
-                                                    onClick={() => changeRole(
-                                                        user.userId,
-                                                        getRoleName(user?.role) === "USER" ? "ADMIN" : "USER"
-                                                    )}
-                                                >
-                                                    <FiEdit className="me-2" />
-                                                    {t("changeRoleTo") || "Change role to"} {t(getRoleName(user?.role) === "USER" ? "admin" : "user")}
-                                                </Dropdown.Item>
-                                                <Dropdown.Item
-                                                    onClick={() => deleteUser(user.userId)}
-                                                    className="text-danger"
-                                                >
-                                                    <FiTrash2 className="me-2" />
-                                                    {t("delete") || "Delete"}
-                                                </Dropdown.Item>
-                                            </>
-                                        )}
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </Table>
-            )}
-
-            <Modal show={showModal} onHide={handleCloseModal} centered>
+            {/* مودال إضافة قراءات المياه */}
+            <Modal show={showWaterReadingModal} onHide={() => setShowWaterReadingModal(false)} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>{t("userDetails") || "User Details"}</Modal.Title>
+                    <Modal.Title>إضافة قراءات المياه</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {selectedUser ? (
-                        <>
-                            <p><strong>{t("email") || "Email"}:</strong> {selectedUser.email || "--"}</p>
-                            <p><strong>{t("name") || "Name"}:</strong> {selectedUser.fullName || "--"}</p>
-                            <p><strong>{t("role") || "Role"}:</strong> {t(getRoleName(selectedUser?.role).toLowerCase())}</p>
-                            <p><strong>{t("registered") || "Registered"}:</strong> {formatDate(selectedUser?.createdAt)}</p>
-                        </>
-                    ) : (
-                        <p>{t("noData") || "No data available"}</p>
-                    )}
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>رقم المستخدم (ID)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={selectedUserId}
+                                onChange={(e) => {
+                                    setSelectedUserId(e.target.value);
+                                    if (e.target.value) {
+                                        fetchUserProperties(e.target.value);
+                                    } else {
+                                        setUserProperties([]);
+                                        setWaterReadings({});
+                                    }
+                                }}
+                                placeholder="أدخل رقم المستخدم"
+                            />
+                        </Form.Group>
+
+                        {userProperties.length > 0 && (
+                            <Table striped bordered hover>
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>عنوان العقار</th>
+                                    <th>مساحة العقار</th>
+                                    <th>عدد الوحدات</th>
+                                    <th>قراءة المياه (م³)</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {userProperties.map((property, index) => (
+                                    <tr key={property.property_id}>
+                                        <td>{index + 1}</td>
+                                        <td>{property.address}</td>
+                                        <td>{property.area} م²</td>
+                                        <td>{property.number_of_units}</td>
+                                        <td>
+                                            <Form.Control
+                                                type="number"
+                                                value={waterReadings[property.property_id] || ''}
+                                                onChange={(e) => setWaterReadings({
+                                                    ...waterReadings,
+                                                    [property.property_id]: e.target.value
+                                                })}
+                                                placeholder="أدخل القراءة"
+                                                min="0"
+                                                step="0.1"
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </Table>
+                        )}
+                    </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModal}>
-                        {t("close") || "Close"}
+                    <Button variant="secondary" onClick={() => setShowWaterReadingModal(false)}>
+                        إلغاء
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={handleAddWaterReadings}
+                        disabled={loading || userProperties.length === 0}
+                    >
+                        {loading ? 'جاري الحفظ...' : 'حفظ القراءات'}
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </Container>
-    );
-}
 
-export default AdminDashboard;
+            {/* مودال إضافة فعالية جديدة */}
+            <Modal show={showEventModal} onHide={() => setShowEventModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>إضافة فعالية جديدة</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>عنوان الفعالية</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newEvent.title}
+                                onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>وصف الفعالية</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={newEvent.description}
+                                onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>المكان</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={newEvent.location}
+                                        onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>التاريخ</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={newEvent.date}
+                                        onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Form.Group className="mb-3">
+                            <Form.Label>صورة الفعالية</Form.Label>
+                            <Form.Control
+                                type="file"
+                                onChange={(e) => setNewEvent({...newEvent, image: e.target.files[0]})}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowEventModal(false)}>
+                        إلغاء
+                    </Button>
+                    <Button variant="primary" onClick={handleAddEvent} disabled={loading}>
+                        {loading ? 'جاري الحفظ...' : 'حفظ الفعالية'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* مودال توليد الفواتير */}
+            <Modal show={showBillsModal} onHide={() => setShowBillsModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        {currentBillType === 'ARNONA' ? 'توليد فواتير الأرنونا' : 'توليد فواتير المياه'}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="text-center mb-4">
+                        {currentBillType === 'ARNONA'
+                            ? 'سيتم توليد فواتير الأرنونا لجميع العقارات بناءً على المساحة وعدد الوحدات'
+                            : 'سيتم توليد فواتير المياه لجميع العقارات بناءً على قراءات المياه'}
+                    </p>
+                    <Table striped bordered hover>
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>اسم المستخدم</th>
+                            <th>عنوان العقار</th>
+                            <th>عدد الوحدات</th>
+                            <th>مساحة العقار</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {users.filter(u => u.properties && u.properties.length > 0).length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="text-center text-danger">
+                                    لا يوجد مستخدمين لديهم عقارات حالياً
+                                </td>
+                            </tr>
+                        ) : (
+                            users.filter(u => u.property).map((u, idx) => (
+                                <tr key={u.userId}>
+                                    <td>{idx + 1}</td>
+                                    <td>{u.fullName}</td>
+                                    <td>{u.property.address}</td>
+                                    <td>{u.property.numberOfUnits}</td>
+                                    <td>{u.property.area} م²</td>
+                                </tr>
+                            ))
+                        )}
+                        </tbody>
+                    </Table>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowBillsModal(false)}>
+                        إلغاء
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={handleGenerateBills}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <>
+                                <Spinner as="span" animation="border" size="sm" />
+                                <span className="ms-2">جاري التوليد...</span>
+                            </>
+                        ) : 'توليد الفواتير'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </div>
+    );
+};
+
+export default AdminGeneral;
