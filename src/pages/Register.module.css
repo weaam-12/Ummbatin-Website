@@ -20,6 +20,7 @@
     width: 100%;
     max-width: 600px;
     overflow: hidden;
+    margin: 1rem;
 }
 
 /* الهيدر */
@@ -38,6 +39,7 @@
     justify-content: space-around;
     background: #f5f9ff;
     padding: 0.75rem 1rem;
+    gap: 0.5rem;
 }
 
 .step {
@@ -46,6 +48,7 @@
     align-items: center;
     font-size: 0.75rem;
     color: #666;
+    flex: 1;
 }
 
 .stepNumber {
@@ -66,9 +69,22 @@
     color: #ffffff;
 }
 
+.active {
+    color: #0066cc;
+    font-weight: bold;
+}
+
 /* المساحة الداخلية */
 .body {
     padding: 1.5rem;
+}
+
+.sectionTitle {
+    color: #0066cc;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
 /* الحقول */
@@ -80,11 +96,25 @@
     font-size: 1rem;
     outline: none;
     transition: border-color 0.2s;
+    margin-bottom: 0.5rem;
+    font-family: 'Almarai', Arial, sans-serif;
 }
 
 .input:focus {
     border-color: #0066cc;
     box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+}
+
+.inputGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 480px) {
+    .inputGrid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 /* الأزرار */
@@ -96,6 +126,11 @@
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.2s;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Almarai', Arial, sans-serif;
+    width: 100%;
+    margin-top: 1rem;
 }
 
 .btnPrimary:hover {
@@ -110,6 +145,11 @@
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.2s;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Almarai', Arial, sans-serif;
+    width: 100%;
+    margin-top: 1rem;
 }
 
 .btnSecondary:hover {
@@ -124,6 +164,11 @@
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.2s;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Almarai', Arial, sans-serif;
+    width: 100%;
+    margin-top: 1rem;
 }
 
 .btnSuccess:hover {
@@ -140,6 +185,14 @@
     background: none;
     border: none;
     cursor: pointer;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.btnAdd:hover {
+    background: rgba(0, 102, 204, 0.1);
 }
 
 .btnIcon {
@@ -147,9 +200,13 @@
     border: none;
     color: #d32f2f;
     cursor: pointer;
-    padding: 0.25rem;
+    padding: 0.5rem;
     border-radius: 50%;
     transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
 }
 
 .btnIcon:hover {
@@ -159,8 +216,51 @@
 /* شبكة الأبناء */
 .childGrid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
+    grid-template-columns: 1fr;
     gap: 0.5rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+@media (min-width: 640px) {
+    .childGrid {
+        grid-template-columns: 2fr 1.5fr 1.5fr auto;
+    }
+}
+
+/* صف الزوجة */
+.wifeRow {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.wifeRow .input {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* قسم المراجعة */
+.reviewSection {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.reviewSection p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.reviewSection strong {
+    color: #0066cc;
+}
+
+.successIcon {
+    color: #008a2a;
+    font-size: 3rem;
+    margin: 0 auto 1rem;
+    display: block;
 }
 
 /* رسائل الخطأ */
@@ -170,11 +270,20 @@
     padding: 0.75rem;
     border-radius: 10px;
     margin-bottom: 1rem;
+    text-align: center;
 }
 
-/* التفاعل مع الشاشات الصغيرة */
-@media (max-width: 640px) {
-    .childGrid {
-        grid-template-columns: 1fr;
-    }
+/* التنقل */
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.navigation button {
+    flex: 1;
+    min-width: 120px;
 }
