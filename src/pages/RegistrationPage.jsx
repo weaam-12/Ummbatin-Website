@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
-import "./RegistrationPage.css";
+import "./Register.module.css";
 
 const RegistrationPage = () => {
     const [step, setStep] = useState(1);
