@@ -1,27 +1,248 @@
-.admin-payments-container {
-    max-width: 1800px;
-    margin: 0 auto;
-    padding: 2rem;
+/* src/pages/AdminPayments.module.css */
+
+/* الخلفية العامة */
+.bgContainer {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 1rem;
+    font-family: 'Almarai', Arial, sans-serif;
+    direction: rtl;
 }
 
-.admin-payments-container .table th {
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
-    color: #6c757d;
+/* البطاقة الرئيسية */
+.card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 1400px;
+    overflow: hidden;
+    margin: 1rem;
+}
+
+/* الهيدر */
+.header {
+    background: #0066cc;
+    color: #ffffff;
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* الفلاتر */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f5f9ff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.filterGroup {
+    flex: 1;
+    min-width: 150px;
+}
+
+.filterSelect {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    outline: none;
+    font-family: 'Almarai', Arial, sans-serif;
+    background: white;
+}
+
+.filterSelect:focus {
+    border-color: #0066cc;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+}
+
+/* الجدول */
+.tableContainer {
+    overflow-x: auto;
+    padding: 0 1rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.table th {
+    background: #f5f9ff;
+    color: #0066cc;
+    padding: 0.75rem;
+    text-align: right;
+    font-weight: 700;
     white-space: nowrap;
 }
 
-.admin-payments-container .table td {
+.table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
     vertical-align: middle;
 }
 
+.table tr:hover td {
+    background: #f9f9f9;
+}
+
+/* الحالات */
+.badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badgePending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badgePaid {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badgeOverdue {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* التنقل */
+.navigation {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* الرسائل */
+.alert {
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    margin: 1rem;
+    font-size: 0.9rem;
+}
+
+.alertSuccess {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alertDanger {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* الأزرار */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: 'Almarai', Arial, sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btnPrimary {
+    background: #0066cc;
+    color: white;
+}
+
+.btnPrimary:hover {
+    background: #004c99;
+}
+
+.btnLight {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btnLight:hover {
+    background: #e0e0e0;
+}
+
+/* التحميل */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1rem;
+}
+
+.spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid rgba(0, 102, 204, 0.3);
+    border-radius: 50%;
+    border-top-color: #0066cc;
+    animation: spin 1s linear infinite;
+}
+
 @keyframes spin {
-    from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
-.admin-payments-container .refresh-animation {
-    animation: spin 1s linear infinite;
+/* للجوال */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters {
+        flex-direction: column;
+    }
+
+    .filterGroup {
+        min-width: 100%;
+    }
+
+    .table th, .table td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .table {
+        font-size: 0.75rem;
+    }
+
+    .badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+    }
 }

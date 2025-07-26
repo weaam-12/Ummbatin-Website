@@ -1,24 +1,8 @@
+// src/pages/AdminPayments.jsx
 import React, { useState, useEffect } from 'react';
-import {
-    Card,
-    Table,
-    Badge,
-    Button,
-    Form,
-    Alert,
-    Spinner,
-    Container
-} from 'react-bootstrap';
-import {
-    FiDollarSign,
-    FiCalendar,
-    FiRefreshCw
-} from 'react-icons/fi';
-import './AdminPayments.css';
-import {
-    getAllPayments,
-    getAllUsers
-} from '../api';
+import { FiDollarSign, FiRefreshCw, FiCalendar } from 'react-icons/fi';
+import styles from './AdminPayments.module.css';
+import { getAllPayments, getAllUsers } from '../api';
 
 const AdminPayments = () => {
     const [payments, setPayments] = useState([]);
@@ -40,11 +24,11 @@ const AdminPayments = () => {
     };
 
     const statusVariants = {
-        PENDING: 'warning',
-        PAID: 'success',
-        COMPLETED: 'success',
-        OVERDUE: 'danger',
-        ALL: 'secondary'
+        PENDING: 'badgePending',
+        PAID: 'badgePaid',
+        COMPLETED: 'badgePaid',
+        OVERDUE: 'badgeOverdue',
+        ALL: ''
     };
 
     const statusLabels = {
@@ -57,23 +41,18 @@ const AdminPayments = () => {
 
     const formatDate = (dateValue) => {
         if (!dateValue) return '--';
-
         try {
-            // إذا كانت القيمة كائن تاريخ
             if (typeof dateValue === 'object' && dateValue !== null) {
                 if (dateValue.toLocaleDateString) {
                     return dateValue.toLocaleDateString('ar-SA');
                 }
                 return '--';
             }
-
-            // إذا كانت سلسلة نصية
             const dateStr = String(dateValue).endsWith('Z') ? dateValue : dateValue + 'Z';
             const date = new Date(dateStr);
             return isNaN(date.getTime()) ? '--' : date.toLocaleDateString('ar-SA');
         } catch (e) {
-            console.error('Error fetching users:', e);
-
+            console.error('Error formatting date:', e);
             return '--';
         }
     };
@@ -91,7 +70,6 @@ const AdminPayments = () => {
                 });
             }
         };
-
         fetchUsers();
     }, []);
 
@@ -102,12 +80,10 @@ const AdminPayments = () => {
                 const data = await getAllPayments(month, year, selectedUser);
                 const enhanced = data.map((p) => ({
                     ...p,
-                    // توحيد أسماء الحقول
                     paymentId: p.payment_id || p.paymentId,
                     userId: p.user_id || p.userId,
                     paymentType: p.type || p.paymentType,
                     paymentDate: p.payment_date || p.paymentDate,
-                    // البحث عن اسم المستخدم إذا لم يكن موجوداً
                     fullName: p.fullName || users.find(u => u.user_id === (p.user_id || p.userId))?.fullName || 'غير معروف'
                 }));
                 setPayments(enhanced);
@@ -120,7 +96,6 @@ const AdminPayments = () => {
                 setLoading(false);
             }
         };
-
         loadPayments();
     }, [month, year, selectedUser, users]);
 
@@ -132,150 +107,162 @@ const AdminPayments = () => {
         if (statusFilter !== 'ALL') {
             result = result.filter(p => p.status === statusFilter);
         }
-        console.log('Payment data:', filteredPayments);
-
         setFilteredPayments(result);
     }, [payments, paymentTypeFilter, statusFilter]);
 
+    const handleRefresh = () => {
+        window.location.reload();
+    };
+
     return (
-        <Container className="admin-payments-container py-4">
-            <Card className="shadow-sm">
-                <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center py-3">
-                    <div className="d-flex align-items-center">
-                        <FiDollarSign className="me-2" size={20} />
-                        <h5 className="mb-0 fw-bold">عرض الدفعات</h5>
+        <div className={styles.bgContainer}>
+            <div className={styles.card}>
+                {/* Header */}
+                <div className={styles.header}>
+                    <div className={styles.headerTitle}>
+                        <FiDollarSign />
+                        <h1>إدارة المدفوعات - بلدية أم بطين</h1>
                     </div>
-                    <div className="d-flex align-items-center gap-2">
-                        <Form.Select
-                            size="sm"
+
+                    <button
+                        onClick={handleRefresh}
+                        disabled={loading}
+                        className={`${styles.btn} ${styles.btnLight}`}
+                    >
+                        <FiRefreshCw className={loading ? styles.spinner : ''} />
+                        تحديث البيانات
+                    </button>
+                </div>
+
+                {/* Filters */}
+                <div className={styles.filters}>
+                    <div className={styles.filterGroup}>
+                        <select
                             value={selectedUser || ''}
                             onChange={(e) => setSelectedUser(e.target.value || null)}
+                            className={styles.filterSelect}
                         >
-                            <option value="">اختر مستخدم</option>
+                            <option value="">جميع المستخدمين</option>
                             {users.map(user => (
                                 <option key={`user-${user.user_id}`} value={user.user_id}>
                                     {user.fullName}
                                 </option>
                             ))}
-                        </Form.Select>
+                        </select>
+                    </div>
 
-                        <Form.Select
-                            size="sm"
+                    <div className={styles.filterGroup}>
+                        <select
                             value={month}
                             onChange={(e) => setMonth(parseInt(e.target.value))}
+                            className={styles.filterSelect}
                         >
                             {Array.from({ length: 12 }, (_, i) => (
                                 <option key={`month-${i + 1}`} value={i + 1}>
-                                    {i + 1}
+                                    الشهر {i + 1}
                                 </option>
                             ))}
-                        </Form.Select>
+                        </select>
+                    </div>
 
-                        <Form.Select
-                            size="sm"
+                    <div className={styles.filterGroup}>
+                        <select
                             value={year}
                             onChange={(e) => setYear(parseInt(e.target.value))}
+                            className={styles.filterSelect}
                         >
                             {Array.from({ length: 5 }, (_, i) => (
                                 <option key={`year-${i}`} value={new Date().getFullYear() - 2 + i}>
-                                    {new Date().getFullYear() - 2 + i}
+                                    سنة {new Date().getFullYear() - 2 + i}
                                 </option>
                             ))}
-                        </Form.Select>
+                        </select>
+                    </div>
 
-                        <Form.Select
-                            size="sm"
+                    <div className={styles.filterGroup}>
+                        <select
                             value={paymentTypeFilter}
                             onChange={(e) => setPaymentTypeFilter(e.target.value)}
+                            className={styles.filterSelect}
                         >
                             {Object.entries(paymentTypes).map(([key, val]) => (
                                 <option key={`type-${key}`} value={key}>{val}</option>
                             ))}
-                        </Form.Select>
+                        </select>
+                    </div>
 
-                        <Form.Select
-                            size="sm"
+                    <div className={styles.filterGroup}>
+                        <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
+                            className={styles.filterSelect}
                         >
                             {Object.entries(statusLabels).map(([key, val]) => (
                                 <option key={`status-${key}`} value={key}>{val}</option>
                             ))}
-                        </Form.Select>
-
-                        <Button
-                            variant="light"
-                            onClick={() => window.location.reload()}
-                            disabled={loading}
-                        >
-                            <FiRefreshCw className={loading ? 'spin me-1' : 'me-1'} />
-                            تحديث
-                        </Button>
+                        </select>
                     </div>
-                </Card.Header>
+                </div>
 
-                <Card.Body>
-                    {notification && (
-                        <Alert
-                            variant={notification.type}
-                            onClose={() => setNotification(null)}
-                            dismissible
-                            className="mb-3"
-                        >
-                            {notification.message}
-                        </Alert>
-                    )}
+                {/* Notification */}
+                {notification && (
+                    <div className={`${styles.alert} ${
+                        notification.type === 'danger' ? styles.alertDanger : styles.alertSuccess
+                    }`}>
+                        {notification.message}
+                    </div>
+                )}
 
-                    {loading ? (
-                        <div className="text-center py-5">
-                            <Spinner animation="border" variant="primary" />
-                            <p className="mt-3 text-muted">جاري تحميل الدفعات...</p>
-                        </div>
-                    ) : (
-                        <div className="table-responsive">
-                            <Table hover className="mb-0">
-                                <thead className="table-light">
-                                <tr>
-                                    <th>رقم المستخدم</th>
-                                    <th>اسم المستخدم</th>
-                                    <th>نوع الدفع</th>
-                                    <th>المبلغ</th>
-                                    <th>تاريخ الاستحقاق</th>
-                                    <th>الحالة</th>
-                                    <th>تاريخ الدفع</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {filteredPayments.length > 0 ? (
-                                    filteredPayments.map((payment) => (
-                                        <tr key={`payment-${payment.payment_id || payment.paymentId}`}>
-                                            <td>{payment.user_id || payment.userId || '--'}</td>
-                                            <td>{payment.user?.fullName || payment.fullName || '--'}</td>
-                                            <td>{paymentTypes[payment.type || payment.paymentType] || '--'}</td>
-                                            <td>{payment.amount} شيكل</td>
-                                            <td>{formatDate(payment.date)}</td>
-                                            <td>
-                                                <Badge pill bg={statusVariants[payment.status] || 'secondary'}>
+                {/* Content */}
+                {loading ? (
+                    <div className={styles.loading}>
+                        <div className={styles.spinner}></div>
+                        <p>جاري تحميل بيانات المدفوعات...</p>
+                    </div>
+                ) : (
+                    <div className={styles.tableContainer}>
+                        <table className={styles.table}>
+                            <thead>
+                            <tr>
+                                <th>رقم المستخدم</th>
+                                <th>اسم المستخدم</th>
+                                <th>نوع الدفع</th>
+                                <th>المبلغ</th>
+                                <th>تاريخ الاستحقاق</th>
+                                <th>الحالة</th>
+                                <th>تاريخ الدفع</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {filteredPayments.length > 0 ? (
+                                filteredPayments.map((payment) => (
+                                    <tr key={`payment-${payment.paymentId}`}>
+                                        <td>{payment.userId || '--'}</td>
+                                        <td>{payment.fullName || '--'}</td>
+                                        <td>{paymentTypes[payment.paymentType] || '--'}</td>
+                                        <td>{payment.amount} شيكل</td>
+                                        <td>{formatDate(payment.date)}</td>
+                                        <td>
+                                                <span className={`${styles.badge} ${styles[statusVariants[payment.status]]}`}>
                                                     {statusLabels[payment.status] || payment.status}
-                                                </Badge>
-                                            </td>
-                                            <td>{formatDate(payment.paymentDate)}</td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="7" className="text-center py-4">
-                                            لا توجد دفعات لعرضها
+                                                </span>
                                         </td>
+                                        <td>{formatDate(payment.paymentDate)}</td>
                                     </tr>
-                                )}
-                                </tbody>
-                            </Table>
-                        </div>
-                    )}
-                </Card.Body>
-            </Card>
-        </Container>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="7" style={{ textAlign: 'center', padding: '1rem' }}>
+                                        لا توجد مدفوعات لعرضها
+                                    </td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 };
 
