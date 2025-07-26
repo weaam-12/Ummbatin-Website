@@ -74,7 +74,10 @@ export const fetchRecentPayments = async (userId) => {
     const response = await axiosInstance.get(`api/payments/user/${userId}/recent`);
     return response.data;
 };
-
+export const registerFamily = async (familyPayload) => {
+    const response = await axiosInstance.post('/api/auth/register-family', familyPayload);
+    return response.data;
+};
 export const generateWaterBills = async (month, year, rate, userId = null) => {
     const params = { month, year, rate };
     if (userId) params.userId = userId;
