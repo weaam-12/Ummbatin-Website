@@ -352,32 +352,32 @@ const AdminGeneral = () => {
 
                                     <Row>
                                         <Col md={6}>
-                                            <Card className="mb-4 stat-card">
-                                                <Card.Header className="bg-primary text-white">
+                                            <Card className="mb-4">
+                                                <Card.Header>
                                                     <h5>إجراءات سريعة</h5>
                                                 </Card.Header>
                                                 <Card.Body className="quick-actions">
-                                                    <Button variant="success" onClick={() => { setCurrentBillType('WATER'); setShowBillsModal(true); }} className="mb-2">
+                                                    <Button variant="success" onClick={() => { setCurrentBillType('WATER'); setShowBillsModal(true); }}>
                                                         <FiPlus /> توليد فواتير المياه
                                                     </Button>
-                                                    <Button variant="info" onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }} className="mb-2">
+                                                    <Button variant="info" onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }}>
                                                         <FiPlus /> توليد فواتير الأرنونا
                                                     </Button>
-                                                    <Button variant="primary" onClick={() => setShowEventModal(true)} className="mb-2">
+                                                    <Button variant="primary" onClick={() => setShowEventModal(true)}>
                                                         <FiPlus /> إضافة فعالية جديدة
                                                     </Button>
-                                                    <Button variant="warning" onClick={() => setShowAddPropertyModal(true)} className="mb-2">
-                                                        <FiPlus /> إضافة عقار جديد
+                                                    <Button variant="warning" onClick={() => setShowAddPropertyModal(true)}>
+                                                        <FiMapPin /> إضافة عقار جديد
                                                     </Button>
-                                                    <Button variant="secondary" onClick={() => setShowWaterReadingModal(true)} className="mb-2">
-                                                        <FiPlus /> إضافة قراءات المياه
+                                                    <Button variant="info" onClick={() => setShowWaterReadingModal(true)}>
+                                                        <FiActivity /> إضافة قراءات المياه
                                                     </Button>
                                                 </Card.Body>
                                             </Card>
                                         </Col>
                                         <Col md={6}>
-                                            <Card className="stat-card">
-                                                <Card.Header className="bg-primary text-white">
+                                            <Card>
+                                                <Card.Header>
                                                     <h5>آخر الفعاليات</h5>
                                                 </Card.Header>
                                                 <Card.Body>
