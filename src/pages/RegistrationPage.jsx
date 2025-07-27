@@ -49,8 +49,6 @@ const RegistrationPage = () => {
             setLoading(false);
         }
     };
-
-
     const addWife = () => setWives([...wives, { name: "" }]);
     const removeWife = (index) => setWives(wives.filter((_, i) => i !== index));
 

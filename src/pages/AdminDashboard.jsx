@@ -36,6 +36,12 @@ function AdminDashboard() {
         fetchUsers();
     }, [pagination.page]);
 
+    const stats = {
+        totalUsers: users.length,
+        totalAdmins: users.filter(u => u.role === 'ADMIN').length,
+        totalResidents: users.filter(u => u.role === 'RESIDENT').length,
+        activeUsers: users.filter(u => u.isActive).length
+    };
     const fetchUsers = async () => {
         try {
             setLoading(true);
