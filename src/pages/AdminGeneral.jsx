@@ -54,20 +54,25 @@ const AdminGeneral = () => {
 
     // دالة فتح نموذج التعديل
     const handleEditEvent = (event) => {
-        if (!event || !event.id) {
-            console.error('Invalid event object or missing ID:', event);
-            setNotification({ type: 'danger', message: 'لا يمكن تحميل بيانات الفعالية: المعرف غير موجود' });
+        if (!event) {
+            console.error('Event is undefined');
             return;
         }
-        const startDate = event.startDate ? new Date(event.startDate).toISOString().split('T')[0] : '';
 
-        setCurrentEvent(event);
+        // إذا كان `id` غير موجود، حاول استخدام `event_id` أو أي مفتاح آخر
+        const eventId = event.id || event.event_id;
+        if (!eventId) {
+            console.error('Event ID is missing:', event);
+            return;
+        }
+
+        setCurrentEvent({ ...event, id: eventId }); // تأكد من وجود `id`
         setNewEvent({
             title: event.title,
             description: event.description,
             location: event.location,
             image: null,
-            date: startDate
+            date: event.startDate ? event.startDate.split('T')[0] : ''
         });
         setShowEditEventModal(true);
     };
@@ -269,8 +274,12 @@ const AdminGeneral = () => {
     const fetchEvents = async () => {
         try {
             const response = await axiosInstance.get('api/events');
-            console.log('Fetched events:', response.data); // تحقق من وجود `id` لكل حدث
-            setEvents(response.data);
+            const eventsWithId = response.data.map(event => ({
+                ...event,
+                id: event.id || event.event_id // استخدم المفتاح الصحيح
+            }));
+            console.log('Events with ID:', eventsWithId); // تأكد من وجود `id`
+            setEvents(eventsWithId);
         } catch (error) {
             console.error('Error fetching events:', error);
         }
