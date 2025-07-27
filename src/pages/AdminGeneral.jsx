@@ -47,7 +47,95 @@ const AdminGeneral = () => {
     const [selectedUserId, setSelectedUserId] = useState('');
     const [userProperties, setUserProperties] = useState([]);
     const [waterReadings, setWaterReadings] = useState({});
+    const [showEditEventModal, setShowEditEventModal] = useState(false);
+    const [currentEvent, setCurrentEvent] = useState(null);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [newImage, setNewImage] = useState(null);
 
+    // دالة فتح نموذج التعديل
+    const handleEditEvent = (event) => {
+        setCurrentEvent(event);
+        setNewEvent({
+            title: event.title,
+            description: event.description,
+            location: event.location,
+            image: null,
+            date: event.startDate ? event.startDate.split('T')[0] : ''
+        });
+        setShowEditEventModal(true);
+    };
+
+    // دالة حذف الفعالية
+    const handleDeleteEvent = async (eventId) => {
+        try {
+            setLoading(true);
+            await axiosInstance.delete(`api/events/${eventId}`);
+            await fetchEvents();
+            setNotification({ type: 'success', message: 'تم حذف الفعالية بنجاح' });
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في حذف الفعالية' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // دالة تحديث الفعالية
+    const handleUpdateEvent = async () => {
+        try {
+            setLoading(true);
+
+            const eventObj = {
+                title: newEvent.title,
+                description: newEvent.description,
+                location: newEvent.location,
+                startDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
+                endDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
+                active: true
+            };
+
+            const formData = new FormData();
+            formData.append(
+                'event',
+                new Blob([JSON.stringify(eventObj)], { type: 'application/json' })
+            );
+
+            if (newEvent.image) formData.append('image', newEvent.image);
+
+            await axiosInstance.put(`api/events/${currentEvent.id}`, formData, {
+                headers: { 'Content-Type': undefined }
+            });
+
+            await fetchEvents();
+            setShowEditEventModal(false);
+            setNotification({ type: 'success', message: 'تم تحديث الفعالية بنجاح' });
+        } catch (error) {
+            setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في تحديث الفعالية' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // دالة تغيير الصورة
+    const handleChangeImage = async () => {
+        try {
+            setLoading(true);
+
+            const formData = new FormData();
+            formData.append('image', newImage);
+
+            await axiosInstance.post(`api/events/${currentEvent.id}/image`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            await fetchEvents();
+            setShowImageModal(false);
+            setNotification({ type: 'success', message: 'تم تغيير صورة الفعالية بنجاح' });
+        } catch (error) {
+            setNotification({ type: 'danger', message: 'فشل في تغيير الصورة' });
+        } finally {
+            setLoading(false);
+        }
+    };
     // دالة لجلب عقارات المستخدم
     const fetchUserProperties = async (userId) => {
         try {
@@ -519,20 +607,49 @@ const AdminGeneral = () => {
                                             <Col md={4} key={event.id} className="mb-4">
                                                 <Card className="event-card">
                                                     {event.imageUrl && (
-                                                        <Card.Img variant="top" src={event.imageUrl} />
+                                                        <div className="event-image-container">
+                                                            <Card.Img
+                                                                variant="top"
+                                                                src={event.imageUrl}
+                                                                onClick={() => {
+                                                                    setCurrentEvent(event);
+                                                                    setShowImageModal(true);
+                                                                }}
+                                                                style={{ cursor: 'pointer' }}
+                                                            />
+                                                            <div className="event-image-overlay">
+                                                                <FiImage size={24} color="#fff" />
+                                                            </div>
+                                                        </div>
                                                     )}
                                                     <Card.Body>
                                                         <Card.Title>{event.title}</Card.Title>
                                                         <Card.Text>{event.description}</Card.Text>
                                                         <div className="d-flex justify-content-between">
                                                             <small className="text-muted">
-                                                                <FiCalendar /> {new Date(event.date).toLocaleDateString()}
+                                                                <FiCalendar /> {new Date(event.startDate).toLocaleDateString()}
                                                             </small>
                                                             <small className="text-muted">
                                                                 <FiHome /> {event.location}
                                                             </small>
                                                         </div>
                                                     </Card.Body>
+                                                    <Card.Footer className="d-flex justify-content-between">
+                                                        <Button
+                                                            variant="warning"
+                                                            size="sm"
+                                                            onClick={() => handleEditEvent(event)}
+                                                        >
+                                                            <FiEdit /> تعديل
+                                                        </Button>
+                                                        <Button
+                                                            variant="danger"
+                                                            size="sm"
+                                                            onClick={() => handleDeleteEvent(event.id)}
+                                                        >
+                                                            <FiTrash2 /> حذف
+                                                        </Button>
+                                                    </Card.Footer>
                                                 </Card>
                                             </Col>
                                         ))}
@@ -620,7 +737,108 @@ const AdminGeneral = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <Modal show={showEditEventModal} onHide={() => setShowEditEventModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>تعديل الفعالية</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>عنوان الفعالية</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newEvent.title}
+                                onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>وصف الفعالية</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={newEvent.description}
+                                onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>المكان</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={newEvent.location}
+                                        onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>التاريخ</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={newEvent.date}
+                                        onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Form.Group className="mb-3">
+                            <Form.Label>صورة جديدة (اختياري)</Form.Label>
+                            <Form.Control
+                                type="file"
+                                onChange={(e) => setNewEvent({...newEvent, image: e.target.files[0]})}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowEditEventModal(false)}>
+                        إلغاء
+                    </Button>
+                    <Button variant="primary" onClick={handleUpdateEvent} disabled={loading}>
+                        {loading ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
+            // إضافة مودال تغيير الصورة
+            <Modal show={showImageModal} onHide={() => setShowImageModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>تغيير صورة الفعالية</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {currentEvent?.imageUrl && (
+                        <div className="text-center mb-3">
+                            <img
+                                src={currentEvent.imageUrl}
+                                alt="صورة الفعالية الحالية"
+                                style={{ maxWidth: '100%', maxHeight: '300px' }}
+                            />
+                        </div>
+                    )}
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>اختر صورة جديدة</Form.Label>
+                            <Form.Control
+                                type="file"
+                                onChange={(e) => setNewImage(e.target.files[0])}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowImageModal(false)}>
+                        إلغاء
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={handleChangeImage}
+                        disabled={loading || !newImage}
+                    >
+                        {loading ? 'جاري التحميل...' : 'تغيير الصورة'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
             {/* مودال إضافة فعالية جديدة */}
             <Modal show={showEventModal} onHide={() => setShowEventModal(false)} size="lg">
                 <Modal.Header closeButton>
