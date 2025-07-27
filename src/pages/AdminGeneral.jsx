@@ -318,8 +318,8 @@ const AdminGeneral = () => {
                                                 <Card.Body>
                                                     <div className="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <h6>عدد المستخدمين</h6>
-                                                            <h3>{users.length}</h3>
+                                                            <h6>عدد الفعاليات</h6>
+                                                            <h3>{events.length}</h3>
                                                         </div>
                                                         <FiUsers size={30} className="text-primary" />
                                                     </div>
