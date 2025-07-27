@@ -3,7 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import axiosInstance from "../api";
 import { useTranslation } from "react-i18next";
-import { FiTrash2, FiUserPlus, FiRefreshCw, FiEdit, FiEye } from "react-icons/fi";
+import {
+    FiTrash2,
+    FiUserPlus,
+    FiRefreshCw,
+    FiEdit,
+    FiMoreVertical,
+    FiEye,
+    FiX,
+    FiCheck,
+    FiUser,
+    FiShield,
+    FiHome,
+    FiCheckCircle
+} from "react-icons/fi";
 import "./AdminDashboard.css";
 
 function AdminDashboard() {
@@ -13,6 +26,7 @@ function AdminDashboard() {
     const [selectedUser, setSelectedUser] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [pagination, setPagination] = useState({ page: 0, size: 10, total: 0 });
+    const [showDropdownId, setShowDropdownId] = useState(null);
 
     const { user: currentUser } = useAuth();
     const navigate = useNavigate();
@@ -32,10 +46,9 @@ function AdminDashboard() {
                 }
             });
 
-            // Ensure roles are strings and have default values
             const usersWithValidRoles = response.data.content.map(user => ({
                 ...user,
-                role: user.role || 'USER' // Default to 'USER' if role is missing
+                role: user.role || 'USER'
             }));
 
             setUsers(usersWithValidRoles);
@@ -49,11 +62,13 @@ function AdminDashboard() {
             setLoading(false);
         }
     };
+
     const deleteUser = async (id) => {
         if (!window.confirm(t("confirmDelete") || "هل أنت متأكد من حذف هذا المستخدم؟")) return;
         try {
             await axiosInstance.delete(`/api/users/${id}`);
             setUsers(prev => prev.filter(user => user.userId !== id));
+            setShowDropdownId(null);
         } catch (err) {
             setError(t("errors.deleteUser") || "فشل حذف المستخدم");
         }
@@ -66,6 +81,7 @@ function AdminDashboard() {
             setUsers(prev => prev.map(user =>
                 user.userId === id ? { ...user, role: newRole } : user
             ));
+            setShowDropdownId(null);
         } catch (err) {
             setError(t("errors.updateRole") || "فشل تحديث صلاحية المستخدم");
         }
@@ -74,62 +90,211 @@ function AdminDashboard() {
     const openUserDetails = (user) => {
         setSelectedUser(user);
         setShowModal(true);
+        setShowDropdownId(null);
     };
 
-    if (loading) return <div className="loading-spinner" />;
+    const toggleDropdown = (userId) => {
+        setShowDropdownId(showDropdownId === userId ? null : userId);
+    };
+
+    const getRoleVariant = (role) => {
+        if (!role) return "secondary";
+        switch (role) {
+            case "ADMIN": return "danger";
+            case "USER": return "primary";
+            case "RESIDENT": return "success";
+            default: return "secondary";
+        }
+    };
+
+    // حساب الإحصائيات
+    const stats = {
+        totalUsers: users.length,
+        totalAdmins: users.filter(u => u.role === 'ADMIN').length,
+        totalResidents: users.filter(u => u.role === 'RESIDENT').length,
+        activeUsers: users.filter(u => u.isActive).length
+    };
+
+    if (loading) {
+        return (
+            <div className="admin-dashboard">
+                <div className="loading-container">
+                    <div className="spinner">
+                        <FiRefreshCw className="spinner-icon" />
+                    </div>
+                    <p>{t("loading") || "جاري التحميل..."}</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="admin-dashboard">
+                <div className="error-alert">
+                    {error}
+                    <button className="retry-btn" onClick={fetchUsers}>
+                        <FiRefreshCw /> {t("retry") || "إعادة المحاولة"}
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="admin-dashboard">
-            <div className="dashboard-header">
-                <h1>{t("userManagement") || "إدارة المستخدمين"}</h1>
-                <button className="btn-primary" onClick={() => navigate("/register")}>
-                    <FiUserPlus /> {t("register") || "تسجيل مستخدم"}
-                </button>
-            </div>
+            <div className="dashboard-card">
+                {/* Header */}
+                <div className="dashboard-header">
+                    <h1 className="dashboard-title">
+                        <FiUser /> {t("userManagement") || "إدارة المستخدمين"}
+                    </h1>
+                    <div className="action-buttons">
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => navigate("/register")}
+                        >
+                            <FiUserPlus /> {t("register") || "تسجيل مستخدم"}
+                        </button>
+                        <button
+                            className="btn btn-secondary"
+                            onClick={fetchUsers}
+                        >
+                            <FiRefreshCw /> {t("refresh") || "تحديث"}
+                        </button>
+                    </div>
+                </div>
 
-            {error && <div className="error-alert">{error}</div>}
+                {/* Statistics */}
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <FiUser />
+                        </div>
+                        <div className="stat-info">
+                            <h3>إجمالي المستخدمين</h3>
+                            <p>{stats.totalUsers}</p>
+                        </div>
+                    </div>
 
-            <div className="users-table-container">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>{t("email") || "البريد"}</th>
-                        <th>{t("name") || "الاسم"}</th>
-                        <th>{t("role") || "الصلاحية"}</th>
-                        <th>{t("actions") || "إجراءات"}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {users.map((user, index) => (
-                        <tr key={user.userId}>
-                            <td>{index + 1}</td>
-                            <td>{user.email}</td>
-                            <td>{user.fullName || "--"}</td>
-                            <td>
-                          <span className={`role-badge ${typeof user.role === 'string' ? user.role.toLowerCase() : 'unknown'}`}>
-                                   {t(typeof user.role === 'string' ? user.role.toLowerCase() : 'unknown')}
-                          </span>
-                            </td>
-                            <td className="actions-cell">
-                                <button onClick={() => openUserDetails(user)}>
-                                    <FiEye/> {t("view")}
-                                </button>
-                                {user.userId !== currentUser?.userId && (
-                                    <>
-                                        <button onClick={() => changeRole(user.userId, user.role)}>
-                                            <FiEdit/> {t("changeRole")}
-                                        </button>
-                                        <button className="danger" onClick={() => deleteUser(user.userId)}>
-                                            <FiTrash2/> {t("delete")}
-                                        </button>
-                                    </>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <FiShield />
+                        </div>
+                        <div className="stat-info">
+                            <h3>عدد المديرين</h3>
+                            <p>{stats.totalAdmins}</p>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <FiHome />
+                        </div>
+                        <div className="stat-info">
+                            <h3>عدد المقيمين</h3>
+                            <p>{stats.totalResidents}</p>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <FiCheckCircle />
+                        </div>
+                        <div className="stat-info">
+                            <h3>المستخدمين النشطين</h3>
+                            <p>{stats.activeUsers}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Users Table */}
+                <div className="table-container">
+                    {users.length === 0 ? (
+                        <div className="no-results">
+                            {t("noResults") || "لا توجد نتائج"}
+                        </div>
+                    ) : (
+                        <table className="users-table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>{t("email") || "البريد الإلكتروني"}</th>
+                                <th>{t("name") || "الاسم"}</th>
+                                <th>{t("role") || "الصلاحية"}</th>
+                                <th>{t("actions") || "إجراءات"}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {users.map((user, index) => (
+                                <tr key={user.userId}>
+                                    <td>{index + 1}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.fullName || "--"}</td>
+                                    <td>
+                      <span className={`role-badge badge-${getRoleVariant(user.role)}`}>
+                        {t(user.role?.toLowerCase())}
+                      </span>
+                                    </td>
+                                    <td>
+                                        <div className="action-dropdown">
+                                            <button
+                                                className="dropdown-toggle"
+                                                onClick={() => toggleDropdown(user.userId)}
+                                            >
+                                                <FiMoreVertical />
+                                            </button>
+                                            <div className={`dropdown-menu ${showDropdownId === user.userId ? 'show' : ''}`}>
+                                                <button
+                                                    className="dropdown-item"
+                                                    onClick={() => openUserDetails(user)}
+                                                >
+                                                    <FiEye /> {t("view") || "عرض"}
+                                                </button>
+                                                {user.userId !== currentUser?.userId && (
+                                                    <>
+                                                        <button
+                                                            className="dropdown-item"
+                                                            onClick={() => changeRole(user.userId, user.role)}
+                                                        >
+                                                            <FiEdit /> {t("changeRole") || "تغيير الصلاحية"}
+                                                        </button>
+                                                        <button
+                                                            className="dropdown-item danger"
+                                                            onClick={() => deleteUser(user.userId)}
+                                                        >
+                                                            <FiTrash2 /> {t("delete") || "حذف"}
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+
+                {/* Pagination */}
+                <div className="pagination">
+                    <button
+                        className="btn btn-secondary"
+                        disabled={pagination.page === 0}
+                        onClick={() => setPagination(prev => ({...prev, page: prev.page - 1}))}
+                    >
+                        السابق
+                    </button>
+                    <span>الصفحة {pagination.page + 1}</span>
+                    <button
+                        className="btn btn-secondary"
+                        disabled={(pagination.page + 1) * pagination.size >= pagination.total}
+                        onClick={() => setPagination(prev => ({...prev, page: prev.page + 1}))}
+                    >
+                        التالي
+                    </button>
+                </div>
             </div>
 
             {/* User Details Modal */}
@@ -137,8 +302,13 @@ function AdminDashboard() {
                 <div className="modal-overlay">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h2>تفاصيل المستخدم</h2>
-                            <button onClick={() => setShowModal(false)}>×</button>
+                            <h2 className="modal-title">تفاصيل المستخدم</h2>
+                            <button
+                                className="close-btn"
+                                onClick={() => setShowModal(false)}
+                            >
+                                <FiX />
+                            </button>
                         </div>
                         <div className="modal-body">
                             <div className="user-section">
@@ -172,26 +342,17 @@ function AdminDashboard() {
                                 ) : <p>لا يوجد أبناء</p>}
                             </div>
                         </div>
+                        <div className="modal-footer">
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setShowModal(false)}
+                            >
+                                إغلاق
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
-
-            {/* Pagination */}
-            <div className="pagination">
-                <button
-                    disabled={pagination.page === 0}
-                    onClick={() => setPagination(prev => ({...prev, page: prev.page - 1}))}
-                >
-                    السابق
-                </button>
-                <span>الصفحة {pagination.page + 1}</span>
-                <button
-                    disabled={(pagination.page + 1) * pagination.size >= pagination.total}
-                    onClick={() => setPagination(prev => ({...prev, page: prev.page + 1}))}
-                >
-                    التالي
-                </button>
-            </div>
         </div>
     );
 }
