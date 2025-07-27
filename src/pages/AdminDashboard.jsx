@@ -105,15 +105,15 @@ function AdminDashboard() {
     };
 
     const getRoleVariant = (role) => {
-        const roleId = typeof role === 'object' ? role.id :
-            role === 'ADMIN' ? 1 :
-                role === 'RESIDENT' ? 2 : 0;
-
-        switch (roleId) {
-            case 1: return "danger"; // Admin
-            case 2: return "success"; // Resident
-            default: return "secondary";
+        if (typeof role === 'string') {
+            return role === 'ADMIN' ? 'danger' :
+                role === 'RESIDENT' ? 'success' : 'secondary';
+        } else if (role?.id) {
+            return role.id === 1 ? 'danger' :  // Admin
+                role.id === 2 ? 'success' : // Resident
+                    'secondary';                // User
         }
+        return 'secondary';
     };
 
 
@@ -308,33 +308,50 @@ function AdminDashboard() {
                         <div className="modal-body">
                             <div className="user-section">
                                 <h3>معلومات الحساب</h3>
-                                <p><strong>الاسم:</strong> {selectedUser.fullName || "--"}</p>
-                                <p><strong>البريد:</strong> {selectedUser.email}</p>
-                                <p><strong>الصلاحية:</strong> {t(typeof selectedUser.role === 'string' ? selectedUser.role.toLowerCase() : selectedUser.role?.name?.toLowerCase() || 'user')}</p>                            </div>
-
-                            <div className="user-section">
-                                <h3>الزوجات</h3>
-                                {selectedUser.wives?.length > 0 ? (
-                                    <ul>
-                                        {selectedUser.wives.map((wife, i) => (
-                                            <li key={i}>{wife.name}</li>
-                                        ))}
-                                    </ul>
-                                ) : <p>لا يوجد زوجات</p>}
+                                <p><strong>الاسم الكامل:</strong> {selectedUser.fullName || "--"}</p>
+                                <p><strong>البريد الإلكتروني:</strong> {selectedUser.email}</p>
+                                <p>
+                                    <strong>الحالة:</strong>
+                                    <span className={`role-badge badge-${selectedUser.isActive ? 'success' : 'danger'}`}>
+                            {selectedUser.isActive ? 'نشط' : 'غير نشط'}
+                        </span>
+                                </p>
+                                <p>
+                                    <strong>الصلاحية:</strong>
+                                    <span className={`role-badge badge-${getRoleVariant(selectedUser.role)}`}>
+                            {selectedUser.role === 'ADMIN' || selectedUser.role?.id === 1 ? 'مدير' :
+                                selectedUser.role === 'RESIDENT' || selectedUser.role?.id === 2 ? 'مقيم' : 'مستخدم'}
+                        </span>
+                                </p>
                             </div>
 
-                            <div className="user-section">
-                                <h3>الأبناء</h3>
-                                {selectedUser.children?.length > 0 ? (
+                            {selectedUser.wives?.length > 0 && (
+                                <div className="user-section">
+                                    <h3>الزوجات</h3>
                                     <ul>
-                                        {selectedUser.children.map((child, i) => (
+                                        {selectedUser.wives.map((wife, i) => (
                                             <li key={i}>
-                                                {child.name} - {child.birthDate}
+                                                <strong>الاسم:</strong> {wife.name || "--"}<br />
+                                                {wife.birthDate && <><strong>تاريخ الميلاد:</strong> {wife.birthDate}</>}
                                             </li>
                                         ))}
                                     </ul>
-                                ) : <p>لا يوجد أبناء</p>}
-                            </div>
+                                </div>
+                            )}
+
+                            {selectedUser.children?.length > 0 && (
+                                <div className="user-section">
+                                    <h3>الأبناء</h3>
+                                    <ul>
+                                        {selectedUser.children.map((child, i) => (
+                                            <li key={i}>
+                                                <strong>الاسم:</strong> {child.name || "--"}<br />
+                                                {child.birthDate && <><strong>تاريخ الميلاد:</strong> {child.birthDate}</>}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
                         <div className="modal-footer">
                             <button

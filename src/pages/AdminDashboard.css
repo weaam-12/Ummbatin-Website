@@ -357,3 +357,46 @@
 .dropdown-item.danger {
     color: #d32f2f;
 }
+
+.modal-overlay {
+    background: rgba(0,0,0,0.7); /* زيادة عتامة الخلفية */
+    z-index: 1000; /* التأكد من ظهوره فوق كل العناصر */
+}
+
+.modal-content {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    width: 90%;
+    max-width: 600px; /* زيادة العرض قليلاً */
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.user-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f9f9f9;
+    border-radius: 10px;
+}
+
+.user-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.user-section p, .user-section li {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.user-section ul {
+    padding-right: 1rem;
+    list-style-type: disc;
+}
