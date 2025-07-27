@@ -99,12 +99,13 @@ function AdminDashboard() {
     };
 
     const getRoleVariant = (role) => {
-        const roleName = typeof role === 'string' ? role : role?.name;
-        if (!roleName) return "secondary";
-        switch (roleName) {
-            case "ADMIN": return "danger";
-            case "USER": return "primary";
-            case "RESIDENT": return "success";
+        const roleId = typeof role === 'object' ? role.id :
+            role === 'ADMIN' ? 1 :
+                role === 'RESIDENT' ? 2 : 0;
+
+        switch (roleId) {
+            case 1: return "danger"; // Admin
+            case 2: return "success"; // Resident
             default: return "secondary";
         }
     };
@@ -203,10 +204,6 @@ function AdminDashboard() {
                         <div className="stat-icon">
                             <FiCheckCircle />
                         </div>
-                        <div className="stat-info">
-                            <h3>المستخدمين النشطين</h3>
-                            <p>{stats.activeUsers}</p>
-                        </div>
                     </div>
                 </div>
 
@@ -234,9 +231,10 @@ function AdminDashboard() {
                                     <td>{user.email}</td>
                                     <td>{user.fullName || "--"}</td>
                                     <td>
-    <span className={`role-badge badge-${getRoleVariant(user.role)}`}>
-        {t(typeof user.role === 'string' ? user.role.toLowerCase() : user.role?.name?.toLowerCase() || 'user')}
-    </span>
+                                        <span className={`role-badge badge-${getRoleVariant(user.role)}`}>
+                                               {user.role === 1 || user.role?.id === 1 ? 'مدير' :
+                                                user.role === 2 || user.role?.id === 2 ? 'مقيم' : 'مستخدم'}
+                                          </span>
                                     </td>
                                     <td>
                                         <div className="action-dropdown">
