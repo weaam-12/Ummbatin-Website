@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fi';
 import './AdminGeneral.css';
 import { axiosInstance } from '../api.js';
+import pagination from "react-bootstrap/Pagination";
 
 const AdminGeneral = () => {
     // States العامة
@@ -121,7 +122,12 @@ const AdminGeneral = () => {
     // ===================== دوال جلب البيانات =====================
     const fetchUsersWithProperties = async () => {
         try {
-            const response = await axiosInstance.get('api/users/all');
+            const response = await axiosInstance.get("api/users/all", {
+                params: {
+                    page: pagination.page,
+                    size: pagination.size
+                }
+            });
             // تأكد من الوصول إلى محتوى الصفحة (content)
             const users = Array.isArray(response.data) ? response.data : [];
             return users
