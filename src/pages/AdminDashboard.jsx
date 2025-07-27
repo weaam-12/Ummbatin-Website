@@ -110,13 +110,6 @@ function AdminDashboard() {
         }
     };
 
-    // حساب الإحصائيات
-    const stats = {
-        totalUsers: users.length,
-        totalAdmins: users.filter(u => u.role === 'ADMIN').length,
-        totalResidents: users.filter(u => u.role === 'RESIDENT').length,
-        activeUsers: users.filter(u => u.isActive).length
-    };
 
     if (loading) {
         return (
@@ -200,11 +193,6 @@ function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="stat-card">
-                        <div className="stat-icon">
-                            <FiCheckCircle />
-                        </div>
-                    </div>
                 </div>
 
                 {/* Users Table */}

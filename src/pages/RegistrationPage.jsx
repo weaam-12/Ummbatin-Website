@@ -25,21 +25,30 @@ const RegistrationPage = () => {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            await axiosInstance.post("/api/auth/register-family", {
-                user: account,
+            const response = await axiosInstance.post("/api/auth/register-family", {
+                user: {
+                    fullName: account.fullName,
+                    email: account.email,
+                    password: account.password,
+                    phone: account.phone
+                },
                 wives: wives.filter(w => w.name.trim()),
-                children: children.filter(c => c.name.trim())
+                children: children.filter(c => c.name.trim()).map(child => ({
+                    name: child.name,
+                    birthDate: child.birthDate,
+                    motherName: wives[child.wifeIndex]?.name || ""
+                }))
             });
             navigate("/admin", {
                 state: { message: "تم تسجيل العائلة بنجاح" }
             });
         } catch (err) {
+            console.error("Registration error:", err.response?.data);
             setError(err.response?.data?.message || "حدث خطأ أثناء التسجيل");
         } finally {
             setLoading(false);
         }
     };
-
     const addWife = () => setWives([...wives, { name: "" }]);
     const removeWife = (index) => setWives(wives.filter((_, i) => i !== index));
 

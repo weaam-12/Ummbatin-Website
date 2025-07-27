@@ -35,7 +35,8 @@ axiosInstance.interceptors.response.use(
                 originalError: error
             });
         }
-        if (error.response?.data?.message?.includes("user")) { // تغيير "resident" إلى "user"
+        if (error.response?.data?.message?.includes("user")) {
+            console.error("API Error:", error.response?.data);// تغيير "resident" إلى "user"
             return Promise.reject({
                 customMessage: "User ID not available - please login again", // تحديث الرسالة
                 isUserError: true // تغيير isResidentError إلى isUserError
