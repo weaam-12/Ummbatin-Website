@@ -48,7 +48,8 @@ function AdminDashboard() {
 
             const usersWithValidRoles = response.data.content.map(user => ({
                 ...user,
-                role: user.role || 'USER'
+                role: typeof user.role === 'string' ? user.role : user.role?.name || 'USER',
+                userId: user.userId || user.id
             }));
 
             setUsers(usersWithValidRoles);
@@ -98,8 +99,9 @@ function AdminDashboard() {
     };
 
     const getRoleVariant = (role) => {
-        if (!role) return "secondary";
-        switch (role) {
+        const roleName = typeof role === 'string' ? role : role?.name;
+        if (!roleName) return "secondary";
+        switch (roleName) {
             case "ADMIN": return "danger";
             case "USER": return "primary";
             case "RESIDENT": return "success";
@@ -232,9 +234,9 @@ function AdminDashboard() {
                                     <td>{user.email}</td>
                                     <td>{user.fullName || "--"}</td>
                                     <td>
-                      <span className={`role-badge badge-${getRoleVariant(user.role)}`}>
-                        {t(user.role?.toLowerCase())}
-                      </span>
+    <span className={`role-badge badge-${getRoleVariant(user.role)}`}>
+        {t(typeof user.role === 'string' ? user.role.toLowerCase() : user.role?.name?.toLowerCase() || 'user')}
+    </span>
                                     </td>
                                     <td>
                                         <div className="action-dropdown">
@@ -242,14 +244,15 @@ function AdminDashboard() {
                                                 className="dropdown-toggle"
                                                 onClick={() => toggleDropdown(user.userId)}
                                             >
-                                                <FiMoreVertical />
+                                                <FiMoreVertical/>
                                             </button>
-                                            <div className={`dropdown-menu ${showDropdownId === user.userId ? 'show' : ''}`}>
+                                            <div
+                                                className={`dropdown-menu ${showDropdownId === user.userId ? 'show' : ''}`}>
                                                 <button
                                                     className="dropdown-item"
                                                     onClick={() => openUserDetails(user)}
                                                 >
-                                                    <FiEye /> {t("view") || "عرض"}
+                                                    <FiEye/> {t("view") || "عرض"}
                                                 </button>
                                                 {user.userId !== currentUser?.userId && (
                                                     <>
@@ -257,13 +260,13 @@ function AdminDashboard() {
                                                             className="dropdown-item"
                                                             onClick={() => changeRole(user.userId, user.role)}
                                                         >
-                                                            <FiEdit /> {t("changeRole") || "تغيير الصلاحية"}
+                                                            <FiEdit/> {t("changeRole") || "تغيير الصلاحية"}
                                                         </button>
                                                         <button
                                                             className="dropdown-item danger"
                                                             onClick={() => deleteUser(user.userId)}
                                                         >
-                                                            <FiTrash2 /> {t("delete") || "حذف"}
+                                                            <FiTrash2/> {t("delete") || "حذف"}
                                                         </button>
                                                     </>
                                                 )}
@@ -315,8 +318,7 @@ function AdminDashboard() {
                                 <h3>معلومات الحساب</h3>
                                 <p><strong>الاسم:</strong> {selectedUser.fullName || "--"}</p>
                                 <p><strong>البريد:</strong> {selectedUser.email}</p>
-                                <p><strong>الصلاحية:</strong> {t(selectedUser.role?.toLowerCase())}</p>
-                            </div>
+                                <p><strong>الصلاحية:</strong> {t(typeof selectedUser.role === 'string' ? selectedUser.role.toLowerCase() : selectedUser.role?.name?.toLowerCase() || 'user')}</p>                            </div>
 
                             <div className="user-section">
                                 <h3>الزوجات</h3>
