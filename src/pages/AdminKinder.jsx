@@ -16,6 +16,24 @@ const AdminKinder = () => {
     const [notification, setNotification] = useState(null);
 
     useEffect(() => {
+        const loadAll = async () => {
+            setLoading(true);
+            try {
+                const kgs = await fetchKindergartens();
+                console.log('Fetched kindergartens:', kgs); // تحقق من البيانات المستلمة
+
+                setKindergartens(kgs);
+
+                // تحقق من وجود الأطفال
+                kgs.forEach(kg => {
+                    console.log(`Kindergarten ${kg.name} children:`, kg.children);
+                });
+            } catch (error) {
+                console.error('Error loading data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
         loadAll();
     }, []);
 
