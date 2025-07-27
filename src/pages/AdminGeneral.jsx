@@ -54,6 +54,10 @@ const AdminGeneral = () => {
 
     // دالة فتح نموذج التعديل
     const handleEditEvent = (event) => {
+        if (!event?.id) {
+            console.error('Invalid event object:', event);
+            return;
+        }
         setCurrentEvent(event);
         setNewEvent({
             title: event.title,
@@ -64,27 +68,12 @@ const AdminGeneral = () => {
         });
         setShowEditEventModal(true);
     };
-
     // دالة حذف الفعالية
-    const handleDeleteEvent = async (eventId) => {
-        try {
-            setLoading(true);
-            await axiosInstance.delete(`api/events/${eventId}`);
-            await fetchEvents();
-            setNotification({ type: 'success', message: 'تم حذف الفعالية بنجاح' });
-        } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في حذف الفعالية' });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // دالة تحديث الفعالية
     const handleUpdateEvent = async () => {
         try {
             setLoading(true);
 
-            if (!currentEvent || !currentEvent.id) {
+            if (!currentEvent?.id) {
                 console.error('Event ID is not defined');
                 setNotification({ type: 'danger', message: 'حدث خطأ في استرجاع معلومات الفعالية' });
                 return;
@@ -108,10 +97,6 @@ const AdminGeneral = () => {
                 formData.append('image', newEvent.image);
             }
 
-            console.log('Current Event ID:', currentEvent.id);
-            console.log('Event Data:', eventObj);
-            console.log('Image:', newEvent.image);
-
             await axiosInstance.put(`api/events/${currentEvent.id}`, formData, {
                 headers: { 'Content-Type': undefined }
             });
@@ -121,12 +106,32 @@ const AdminGeneral = () => {
             setNotification({ type: 'success', message: 'تم تحديث الفعالية بنجاح' });
         } catch (error) {
             console.error('خطأ في تحديث الفعالية:', error);
-            setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في تحديث الفعالية' });
+            setNotification({
+                type: 'danger',
+                message: error.response?.data?.message || 'فشل في تحديث الفعالية'
+            });
         } finally {
             setLoading(false);
         }
     };
 
+    // دالة تحديث الفعالية
+    const handleDeleteEvent = async (eventId) => {
+        try {
+            setLoading(true);
+            await axiosInstance.delete(`api/events/${eventId}`);
+            await fetchEvents();
+            setNotification({ type: 'success', message: 'تم حذف الفعالية بنجاح' });
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            setNotification({
+                type: 'danger',
+                message: error.response?.data?.message || 'فشل في حذف الفعالية'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
     // دالة تغيير الصورة
     const handleChangeImage = async () => {
         try {
