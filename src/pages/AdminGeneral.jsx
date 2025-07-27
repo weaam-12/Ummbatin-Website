@@ -80,40 +80,43 @@ const AdminGeneral = () => {
     };
 
     // دالة تحديث الفعالية
-    const handleUpdateEvent = async () => {
-        try {
-            setLoading(true);
-            const eventObj = {
-                title: newEvent.title,
-                description: newEvent.description,
-                location: newEvent.location,
-                startDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
-                endDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
-                active: true
-            };
+    const handleUpdateEvent = async () => {try {
+        setLoading(true);
+        const eventObj = {
+            title: newEvent.title,
+            description: newEvent.description,
+            location: newEvent.location,
+            startDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
+            endDate: newEvent.date ? newEvent.date + 'T00:00:00' : null,
+            active: true
+        };
 
-            const formData = new FormData();
-            formData.append(
-                'event',
-                new Blob([JSON.stringify(eventObj)], { type: 'application/json' })
-            );
-            if (newEvent.image) {
-                formData.append('image', newEvent.image);
-            }
-
-            await axiosInstance.put(`api/events/${currentEvent.id}`, formData, {
-                headers: { 'Content-Type': undefined }
-            });
-
-            await fetchEvents();
-            setShowEditEventModal(false);
-            setNotification({ type: 'success', message: 'تم تحديث الفعالية بنجاح' });
-        } catch (error) {
-            console.error('خطأ في تحديث الفعالية:', error);
-            setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في تحديث الفعالية' });
-        } finally {
-            setLoading(false);
+        const formData = new FormData();
+        formData.append(
+            'event',
+            new Blob([JSON.stringify(eventObj)], { type: 'application/json' })
+        );
+        if (newEvent.image) {
+            formData.append('image', newEvent.image);
         }
+
+        console.log('Current Event ID:', currentEvent.id);
+        console.log('Event Data:', eventObj);
+        console.log('Image:', newEvent.image);
+
+        await axiosInstance.put(`api/events/${currentEvent.id}`, formData, {
+            headers: { 'Content-Type': undefined }
+        });
+
+        await fetchEvents();
+        setShowEditEventModal(false);
+        setNotification({ type: 'success', message: 'تم تحديث الفعالية بنجاح' });
+    } catch (error) {
+        console.error('خطأ في تحديث الفعالية:', error);
+        setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في تحديث الفعالية' });
+    } finally {
+        setLoading(false);
+    }
     };
 
     // دالة تغيير الصورة
@@ -618,6 +621,8 @@ const AdminGeneral = () => {
                                                                 onClick={() => {
                                                                     setCurrentEvent(event);
                                                                     setShowImageModal(true);
+                                                                    console.log('Current Event ID:', currentEvent.id);
+
                                                                 }}
                                                                 style={{ cursor: 'pointer' }}
                                                             />
