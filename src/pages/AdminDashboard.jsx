@@ -31,7 +31,14 @@ function AdminDashboard() {
                     size: pagination.size
                 }
             });
-            setUsers(response.data.content);
+
+            // Ensure roles are strings and have default values
+            const usersWithValidRoles = response.data.content.map(user => ({
+                ...user,
+                role: user.role || 'USER' // Default to 'USER' if role is missing
+            }));
+
+            setUsers(usersWithValidRoles);
             setPagination(prev => ({
                 ...prev,
                 total: response.data.totalElements
@@ -42,7 +49,6 @@ function AdminDashboard() {
             setLoading(false);
         }
     };
-
     const deleteUser = async (id) => {
         if (!window.confirm(t("confirmDelete") || "هل أنت متأكد من حذف هذا المستخدم؟")) return;
         try {
@@ -101,9 +107,9 @@ function AdminDashboard() {
                             <td>{user.email}</td>
                             <td>{user.fullName || "--"}</td>
                             <td>
-    <span className={`role-badge ${user.role?.toLowerCase()}`}>
-        {t(typeof user.role === 'string' ? user.role.toLowerCase() : user.role)}
-    </span>
+                          <span className={`role-badge ${typeof user.role === 'string' ? user.role.toLowerCase() : 'unknown'}`}>
+                                   {t(typeof user.role === 'string' ? user.role.toLowerCase() : 'unknown')}
+                          </span>
                             </td>
                             <td className="actions-cell">
                                 <button onClick={() => openUserDetails(user)}>
