@@ -122,7 +122,9 @@ const AdminGeneral = () => {
     const fetchUsersWithProperties = async () => {
         try {
             const response = await axiosInstance.get('api/users/all');
-            return response.data
+            // تأكد من الوصول إلى محتوى الصفحة (content)
+            const users = Array.isArray(response.data) ? response.data : [];
+            return users
                 .filter(u => u.properties?.length > 0)
                 .map(u => ({ ...u, property: u.properties[0] }));
         } catch (error) {
