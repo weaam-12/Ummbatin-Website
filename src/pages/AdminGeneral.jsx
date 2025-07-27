@@ -83,7 +83,6 @@ const AdminGeneral = () => {
     const handleUpdateEvent = async () => {
         try {
             setLoading(true);
-
             const eventObj = {
                 title: newEvent.title,
                 description: newEvent.description,
@@ -98,8 +97,9 @@ const AdminGeneral = () => {
                 'event',
                 new Blob([JSON.stringify(eventObj)], { type: 'application/json' })
             );
-
-            if (newEvent.image) formData.append('image', newEvent.image);
+            if (newEvent.image) {
+                formData.append('image', newEvent.image);
+            }
 
             await axiosInstance.put(`api/events/${currentEvent.id}`, formData, {
                 headers: { 'Content-Type': undefined }
@@ -109,6 +109,7 @@ const AdminGeneral = () => {
             setShowEditEventModal(false);
             setNotification({ type: 'success', message: 'تم تحديث الفعالية بنجاح' });
         } catch (error) {
+            console.error('خطأ في تحديث الفعالية:', error);
             setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في تحديث الفعالية' });
         } finally {
             setLoading(false);
@@ -121,11 +122,14 @@ const AdminGeneral = () => {
             setLoading(true);
 
             const formData = new FormData();
-            formData.append('image', newImage);
-
-            await axiosInstance.post(`api/events/${currentEvent.id}/image`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            formData.append(
+                'event',
+                new Blob([JSON.stringify(eventObj)], { type: 'application/json' })
+            );
+            if (newEvent.image) {
+                formData.append('image', newEvent.image);
+            }newEvent
+            console.log(newEvent);
 
             await fetchEvents();
             setShowImageModal(false);
