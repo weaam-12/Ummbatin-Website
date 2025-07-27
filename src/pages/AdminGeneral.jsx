@@ -54,17 +54,20 @@ const AdminGeneral = () => {
 
     // دالة فتح نموذج التعديل
     const handleEditEvent = (event) => {
-        if (!event?.id) {
-            console.error('Invalid event object:', event);
+        if (!event || !event.id) {
+            console.error('Invalid event object or missing ID:', event);
+            setNotification({ type: 'danger', message: 'لا يمكن تحميل بيانات الفعالية: المعرف غير موجود' });
             return;
         }
+        const startDate = event.startDate ? new Date(event.startDate).toISOString().split('T')[0] : '';
+
         setCurrentEvent(event);
         setNewEvent({
             title: event.title,
             description: event.description,
             location: event.location,
             image: null,
-            date: event.startDate ? event.startDate.split('T')[0] : ''
+            date: startDate
         });
         setShowEditEventModal(true);
     };
@@ -266,6 +269,7 @@ const AdminGeneral = () => {
     const fetchEvents = async () => {
         try {
             const response = await axiosInstance.get('api/events');
+            console.log('Fetched events:', response.data); // تحقق من وجود `id` لكل حدث
             setEvents(response.data);
         } catch (error) {
             console.error('Error fetching events:', error);
@@ -660,7 +664,7 @@ const AdminGeneral = () => {
                                                         <Button
                                                             variant="warning"
                                                             size="sm"
-                                                            onClick={() => handleEditEvent(event)}
+                                                            onClick={() => handleEditEvent(event)} // تأكد من تمرير الكائن الكامل
                                                         >
                                                             <FiEdit /> تعديل
                                                         </Button>
