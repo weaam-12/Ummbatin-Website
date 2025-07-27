@@ -18,7 +18,39 @@
     font-family: var(--font-family);
     direction: rtl;
 }
+/* أنماط إضافية للفعاليات */
+.event-image-container {
+    position: relative;
+    cursor: pointer;
+}
 
+.event-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.event-image-container:hover .event-image-overlay {
+    opacity: 1;
+}
+
+.event-card .card-footer {
+    background: white;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.event-card .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
 /* البطاقة الرئيسية */
 .dashboard-card {
     background: #ffffff;
