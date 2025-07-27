@@ -101,21 +101,21 @@ function AdminDashboard() {
                             <td>{user.email}</td>
                             <td>{user.fullName || "--"}</td>
                             <td>
-                                    <span className={`role-badge ${user.role?.toLowerCase()}`}>
-                                        {t(user.role?.toLowerCase())}
-                                    </span>
+    <span className={`role-badge ${user.role?.toLowerCase()}`}>
+        {t(typeof user.role === 'string' ? user.role.toLowerCase() : user.role)}
+    </span>
                             </td>
                             <td className="actions-cell">
                                 <button onClick={() => openUserDetails(user)}>
-                                    <FiEye /> {t("view")}
+                                    <FiEye/> {t("view")}
                                 </button>
                                 {user.userId !== currentUser?.userId && (
                                     <>
                                         <button onClick={() => changeRole(user.userId, user.role)}>
-                                            <FiEdit /> {t("changeRole")}
+                                            <FiEdit/> {t("changeRole")}
                                         </button>
                                         <button className="danger" onClick={() => deleteUser(user.userId)}>
-                                            <FiTrash2 /> {t("delete")}
+                                            <FiTrash2/> {t("delete")}
                                         </button>
                                     </>
                                 )}
