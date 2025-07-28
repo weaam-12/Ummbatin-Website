@@ -66,8 +66,12 @@ const Complaints = () => {
             console.error('Error loading complaints:', error);
             setNotification({
                 type: 'danger',
-                message: 'Failed to load complaints: ' + (error.message || 'Unexpected error')
+                message: 'فشل تحميل الشكاوى: ' + (error.message || 'خطأ غير متوقع')
             });
+            // إعادة توجيه إلى صفحة تسجيل الدخول إذا كان الخطأ متعلقًا بالمصادقة
+            if (error.isAuthError) {
+                navigate('/login');
+            }
         } finally {
             setLoading(false);
         }
