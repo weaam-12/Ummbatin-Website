@@ -78,7 +78,63 @@ const Complaints = () => {
         }
     };
 
-    // ... (keep other functions the same until the return statement)
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleFileChange = (e) => {
+        setFormData(prev => ({
+            ...prev,
+            image: e.target.files[0]
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            const userId = getUserId();
+            if (!userId) {
+                throw new Error('User ID not available');
+            }
+
+            const response = await submitComplaint({
+                userId: userId,
+                type: formData.type,
+                description: formData.description,
+                location: formData.location,
+                image: formData.image
+            });
+
+            setComplaints(prev => [response, ...prev]);
+            setNotification({
+                type: 'success',
+                message: `Complaint submitted successfully! Ticket #: ${response.ticketNumber}`
+            });
+            setShowForm(false);
+            setFormData({ type: '', description: '', location: '', image: null });
+        } catch (error) {
+            console.error('Error submitting complaint:', error);
+            setNotification({
+                type: 'danger',
+                message: 'Failed to submit complaint: ' +
+                    (error.response?.data?.message || error.message || 'Please try again later')
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '--';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US');
+    };
 
     return (
         <Container className="user-complaints-container py-4">
