@@ -74,31 +74,31 @@ const AdminPayments = () => {
     }, []);
 
     useEffect(() => {
-        const loadPayments = async () => {
-            setLoading(true);
-            try {
-                const data = await getAllPayments(month, year, selectedUser);
-                const enhanced = data.map((p) => ({
-                    ...p,
-                    paymentId: p.payment_id || p.paymentId,
-                    userId: p.user_id || p.userId,
-                    paymentType: p.type || p.paymentType,
-                    paymentDate: p.payment_date || p.paymentDate,
-                    fullName: p.fullName || users.find(u => u.user_id === (p.user_id || p.userId))?.fullName || 'غير معروف'
-                }));
-                setPayments(enhanced);
-            } catch (error) {
-                setNotification({
-                    type: 'danger',
-                    message: error.message || 'فشل في تحميل الدفعات'
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
         loadPayments();
     }, [month, year, selectedUser, users]);
-
+    const loadPayments = async () => {
+        setLoading(true);
+        try {
+            const data = await getAllPayments(month, year, selectedUser);
+            const enhanced = data.map((p) => ({
+                ...p,
+                paymentId: p.payment_id || p.paymentId,
+                userId: p.user_id || p.userId,
+                paymentType: p.type || p.paymentType,
+                paymentDate: p.payment_date || p.paymentDate,
+                fullName: p.fullName || users.find(u => u.user_id === (p.user_id || p.userId))?.fullName || 'غير معروف'
+            }));
+            setPayments(enhanced);
+        } catch (error) {
+            console.error('خطأ في استرجاع الدفعات:', error);
+            setNotification({
+                type: 'danger',
+                message: error.message || 'فشل في تحميل الدفعات'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
     useEffect(() => {
         let result = [...payments];
         if (paymentTypeFilter !== 'ALL') {
