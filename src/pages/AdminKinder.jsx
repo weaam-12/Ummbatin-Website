@@ -203,68 +203,50 @@ const AdminKinder = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {kindergartens.map(kg => {
-                            const available = kg.capacity - (kg.childrenCount || 0);
-                            return (
-                                <tr key={kg.kindergartenId}>
-                                    <td>{kg.kindergartenId}</td>
-                                    <td>
-                                        <strong>{kg.name}</strong>
-                                        {kg.pendingRequests > 0 && (
-                                            <span className={`${styles.badge} ${styles.badgeDanger}`}>
-                                                    {kg.pendingRequests} طلب جديد
-                                                </span>
-                                        )}
-                                    </td>
-                                    <td>{kg.location}</td>
-                                    <td>
-                                        {kg.capacity}
-                                        {available <= 0 && (
-                                            <span className={`${styles.badge} ${styles.badgeDanger}`}>مكتمل</span>
-                                        )}
-                                        {available > 0 && available <= 5 && (
-                                            <span className={`${styles.badge} ${styles.badgeWarning}`}>أماكن محدودة</span>
-                                        )}
-                                    </td>
-                                    <td>{kg.childrenCount || 0}</td>
-                                    <td>{kg.monthlyFee} شيكل</td>
-                                    <td>
-                                            <span className={`${styles.badge} ${
-                                                kg.status === 'OPEN' ? styles.badgeSuccess : styles.badgeDanger
-                                            }`}>
-                                                {kg.status === 'OPEN' ? 'مفتوحة' : 'مغلقة'}
-                                            </span>
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button
-                                                className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
-                                                onClick={() => {
-                                                    setCurrentKg(kg);
-                                                    setShowEditModal(true);
-                                                }}
-                                            >
-                                                <FiEdit /> تعديل
-                                            </button>
-                                            <button
-                                                className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
-                                                onClick={() => handleDeleteKg(kg.kindergartenId)}
-                                            >
-                                                <FiTrash2 /> حذف
-                                            </button>
-                                            <button
-                                                className={`${styles.btn} ${
-                                                    kg.status === 'OPEN' ? styles.btnDanger : styles.btnSuccess
-                                                } ${styles.btnSm}`}
-                                                onClick={() => toggleKindergartenStatus(kg)}
-                                            >
-                                                {kg.status === 'OPEN' ? 'إغلاق' : 'فتح'}
-                                            </button>
+                        {kindergartens.map(kg => (
+                            <details key={kg.kindergartenId} className={styles.details}>
+                                <summary className={styles.detailsHeader}>
+                                    {kg.name} - {kg.childrenCount || 0} / {kg.capacity} طفل
+                                </summary>
+                                <div className={styles.detailsContent}>
+                                    <h3>الأطفال المسجلين</h3>
+                                    {kg.childrenCount > 0 ? (
+                                        <div className={styles.tableContainer}>
+                                            <table className={styles.table}>
+                                                <thead>
+                                                <tr>
+                                                    <th>اسم الطفل</th>
+                                                    <th>العمر</th>
+                                                    <th>ولي الأمر</th>
+                                                    <th>حالة الدفع</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {kg.children?.map(child => (
+                                                    <tr key={child.childId}>
+                                                        <td>{child.name}</td>
+                                                        <td>{child.age} سنوات</td>
+                                                        <td>
+                                                            {users.find(u => u.userId === child.userId)?.fullName || 'غير معروف'}
+                                                        </td>
+                                                        <td>
+                                                            {child.paid ? (
+                                                                <span className={`${styles.badge} ${styles.badgeSuccess}`}>تم الدفع</span>
+                                                            ) : (
+                                                                <span className={`${styles.badge} ${styles.badgeDanger}`}>غير مدفوع</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                </tbody>
+                                            </table>
                                         </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                                    ) : (
+                                        <p style={{ textAlign: 'center', color: '#666' }}>لا يوجد أطفال مسجلين في هذه الحضانة</p>
+                                    )}
+                                </div>
+                            </details>
+                        ))}
                         </tbody>
                     </table>
                 </div>
