@@ -1,3 +1,4 @@
+// استيراد React والمكتبات
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -7,6 +8,7 @@ import './Children.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
+// 🧾 نموذج الدفع
 const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     const stripe = useStripe();
     const elements = useElements();
@@ -20,10 +22,7 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
 
         try {
             const cardElement = elements.getElement(CardElement);
-            const { error, paymentMethod } = await stripe.createPaymentMethod({
-                type: 'card',
-                card: cardElement,
-            });
+            const { error, paymentMethod } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
 
             if (error) {
                 setError(error.message);
@@ -35,7 +34,7 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
                 childId: child.id,
                 kindergartenId: kindergarten.id,
                 paymentMethodId: paymentMethod.id,
-                amount: 500 // Registration fee
+                amount: 500
             });
 
             if (paymentResult.success) {
@@ -43,7 +42,7 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
             } else {
                 setError(paymentResult.message || t('payment.error'));
             }
-        } catch (err) {
+        } catch {
             setError(t('payment.error'));
         } finally {
             setProcessing(false);
@@ -56,15 +55,11 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
                 <h3>{t('enrollment.title')}</h3>
                 <p>{t('enrollment.child')}: {child.name}</p>
                 <p>{t('enrollment.kindergarten')}: {kindergarten.name}</p>
-                <p>{t('enrollment.fee')}: 500 {t('currency')}</p>
-
                 <form onSubmit={handleSubmit}>
                     <CardElement />
                     {error && <div className="error">{error}</div>}
                     <div className="buttons">
-                        <button type="button" onClick={onClose}>
-                            {t('cancel')}
-                        </button>
+                        <button type="button" onClick={onClose}>{t('cancel')}</button>
                         <button type="submit" disabled={processing}>
                             {processing ? t('processing') : t('confirmPayment')}
                         </button>
@@ -75,119 +70,99 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     );
 };
 
+// 📄 الصفحة الرئيسية
 const Children = ({ userId }) => {
     const { t } = useTranslation();
     const [children, setChildren] = useState([]);
     const [kindergartens, setKindergartens] = useState([]);
     const [newChild, setNewChild] = useState({ name: '', birthDate: '' });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [showPayment, setShowPayment] = useState(false);
     const [selectedChild, setSelectedChild] = useState(null);
     const [selectedKindergarten, setSelectedKindergarten] = useState(null);
+    const [showPayment, setShowPayment] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
-            setLoading(true);
-            try {
-                const [kids, kgs] = await Promise.all([
-                    getChildrenByUser(userId),
-                    fetchKindergartens()
-                ]);
-                setChildren(kids);
-                setKindergartens(kgs);
-            } catch (error) {
-                console.error("Failed to load data", error);
-                setError(t('loadError'));
-            } finally {
-                setLoading(false);
-            }
+            const [kids, kgs] = await Promise.all([
+                getChildrenByUser(userId),
+                fetchKindergartens()
+            ]);
+            setChildren(kids);
+            setKindergartens(kgs);
         };
-
         if (userId) loadData();
     }, [userId]);
 
     const handleAddChild = async () => {
         if (!newChild.name || !newChild.birthDate) return;
-
-        try {
-            const child = await createChild({
-                ...newChild,
-                userId
-            });
-            setChildren([...children, child]);
-            setNewChild({ name: '', birthDate: '' });
-        } catch (error) {
-            console.error("Failed to add child", error);
-        }
+        const child = await createChild({ ...newChild, userId });
+        setChildren([...children, child]);
+        setNewChild({ name: '', birthDate: '' });
     };
 
-    const handleEnroll = (child, kindergarten) => {
-        setSelectedChild(child);
-        setSelectedKindergarten(kindergarten);
-        setShowPayment(true);
+    const handleEnroll = (child, kindergartenId) => {
+        const selectedKg = kindergartens.find(k => k.id === kindergartenId);
+        if (selectedKg) {
+            setSelectedChild(child);
+            setSelectedKindergarten(selectedKg);
+            setShowPayment(true);
+        }
     };
 
     return (
         <div className="children-page">
             <h1>{t('myChildren')}</h1>
 
-            {/* Add New Child */}
-            <div className="add-child">
+            {/* جدول الأطفال */}
+            <table className="children-table">
+                <thead>
+                <tr>
+                    <th>{t('childName')}</th>
+                    <th>{t('birthDate')}</th>
+                    <th>{t('kindergarten')}</th>
+                    <th>{t('paymentStatus')}</th>
+                    <th>{t('actions')}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {children.map(child => (
+                    <tr key={child.id}>
+                        <td>{child.name}</td>
+                        <td>{new Date(child.birthDate).toLocaleDateString()}</td>
+                        <td>{kindergartens.find(k => k.id === child.kindergartenId)?.name || t('notEnrolled')}</td>
+                        <td>{child.kindergartenId ? t('paid') : t('notPaid')}</td>
+                        <td>
+                            {!child.kindergartenId && (
+                                <select onChange={(e) => handleEnroll(child, e.target.value)}>
+                                    <option value="">{t('selectKindergarten')}</option>
+                                    {kindergartens.map(kg => (
+                                        <option key={kg.id} value={kg.id}>{kg.name}</option>
+                                    ))}
+                                </select>
+                            )}
+                        </td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+
+            {/* إضافة طفل جديد */}
+            <div className="add-child-section">
                 <h2>{t('addNewChild')}</h2>
                 <input
                     type="text"
                     placeholder={t('childName')}
                     value={newChild.name}
-                    onChange={(e) => setNewChild({...newChild, name: e.target.value})}
+                    onChange={(e) => setNewChild({ ...newChild, name: e.target.value })}
                 />
                 <input
                     type="date"
                     value={newChild.birthDate}
-                    onChange={(e) => setNewChild({...newChild, birthDate: e.target.value})}
+                    onChange={(e) => setNewChild({ ...newChild, birthDate: e.target.value })}
                 />
                 <button onClick={handleAddChild}>{t('add')}</button>
             </div>
 
-            {/* List of Children */}
-            <div className="children-list">
-                <h2>{t('registeredChildren')}</h2>
-                {children.length === 0 ? (
-                    <p>{t('noChildren')}</p>
-                ) : (
-                    <ul>
-                        {children.map(child => (
-                            <li key={child.id}>
-                                <div>
-                                    <h3>{child.name}</h3>
-                                    <p>{t('birthDate')}: {new Date(child.birthDate).toLocaleDateString()}</p>
-                                    {child.kindergartenId ? (
-                                        <p className="enrolled">
-                                            {t('enrolledIn')}: {
-                                            kindergartens.find(k => k.id === child.kindergartenId)?.name || ''
-                                        }
-                                        </p>
-                                    ) : (
-                                        <div className="enroll-options">
-                                            <select onChange={(e) => {
-                                                const kg = kindergartens.find(k => k.id === e.target.value);
-                                                if (kg) handleEnroll(child, kg);
-                                            }}>
-                                                <option value="">{t('selectKindergarten')}</option>
-                                                {kindergartens.map(kg => (
-                                                    <option key={kg.id} value={kg.id}>{kg.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    )}
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-
-            {/* Payment Modal */}
+            {/* مودال الدفع */}
             {showPayment && selectedChild && selectedKindergarten && (
                 <Elements stripe={stripePromise}>
                     <PaymentForm
