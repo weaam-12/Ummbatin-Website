@@ -8,7 +8,7 @@ import {
     createChild,
     createKindergartenPayment,
     confirmKindergartenPayment
-} from './api';
+} from '../api';
 import './Children.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
