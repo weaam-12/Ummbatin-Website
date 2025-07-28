@@ -121,7 +121,7 @@ const Navbar = () => {
                         <FaSearch className="search-icon" />
                         <input
                             type="text"
-                            placeholder={t("search")}
+                            placeholder={t("common.search")}
                         />
                     </div>
 
@@ -147,7 +147,7 @@ const Navbar = () => {
                             {user ? (
                                 <span>{user.fullName || user.email}</span>
                             ) : (
-                                <span>{t("login")}</span>
+                                <span>{t("common.login")}</span>
                             )}
                         </div>
 
@@ -161,7 +161,7 @@ const Navbar = () => {
                                             onClick={closeDropdown}
                                         >
                                             <FaUserCircle />
-                                            {t("profile")}
+                                            {t("common.profile")}
                                         </NavLink>
                                         {isAdmin() && (
                                             <NavLink
@@ -170,7 +170,7 @@ const Navbar = () => {
                                                 onClick={closeDropdown}
                                             >
                                                 <FaUserShield />
-                                                {t("adminPanel")}
+                                                {t("common.adminPanel")}
                                             </NavLink>
                                         )}
                                         <div
@@ -178,7 +178,7 @@ const Navbar = () => {
                                             onClick={handleLogout}
                                         >
                                             <FaTimes />
-                                            {t("logout")}
+                                            {t("common.logout")}
                                         </div>
                                     </>
                                 ) : (
@@ -188,7 +188,7 @@ const Navbar = () => {
                                         onClick={closeDropdown}
                                     >
                                         <FaUserCircle />
-                                        {t("login")}
+                                        {t("common.login")}
                                     </NavLink>
                                 )}
                             </div>
