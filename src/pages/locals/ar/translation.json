@@ -1,13 +1,29 @@
 {
-  "home": {
+  "common": {
+    "home": "الرئيسية",
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "profile": "الملف الشخصي",
+    "adminPanel": "لوحة الأدمن",
+    "loading": "جاري التحميل...",
+    "noData": "لا توجد بيانات متاحة",
+    "close": "إغلاق",
+    "viewDetails": "عرض التفاصيل",
+    "delete": "حذف",
+    "refresh": "تحديث",
+    "submit": "إرسال",
+    "submitting": "جاري الإرسال..."
+  },
+
+  "homePage": {
     "title": "مرحباً بكم في بلدية أم بطين",
     "description": "أم بطين هي بلدة متطورة في النقب، تقدم خدمات بلدية متكاملة، تعليم ذو جودة عالية، وفعاليات ثقافية واجتماعية لكل أفراد العائلة.",
     "bannerAlt": "بلدة أم بطين",
     "servicesTitle": "خدمات البلدية",
     "eventsTitle": "الفعاليات القادمة",
-    "loading": "جاري تحميل الفعاليات...",
     "noEvents": "لا توجد فعاليات قادمة حالياً"
   },
+
   "services": {
     "water": "المياه",
     "arnona": "الأرنونا",
@@ -17,8 +33,10 @@
     "emergency": "طوارئ",
     "payments": "دفع إلكتروني",
     "requests": "متابعة الطلبات",
-    "news": "أخبار وتحديثات"
+    "news": "أخبار وتحديثات",
+    "garbage": "شكاوى للنفايات"
   },
+
   "event": {
     "date": "التاريخ",
     "from": "من",
@@ -26,69 +44,48 @@
     "location": "المكان",
     "organizer": "المنظم"
   },
-  "homeTitle": "مرحبًا بك في خدماتنا",
-  "homeDescription": "إدارة الشكاوى والمدفوعات والنماذج وخدمات الطوارئ.",
-  "aboutTitle": "عن المستوطنة",
-  "aboutDescription": "معلومات تاريخية والخدمات المقدمة للسكان.",
-  "complaintsTitle": "تقديم شكوى",
-  "complaintsDescription": "الإبلاغ عن مشكلات مثل جمع القمامة أو غيرها.",
-  "emergencyTitle": "جهات الاتصال في حالات الطوارئ",
-  "emergencyDescription": "اتصل بالشرطة، الإطفاء، الإسعاف والخدمات الطارئة الأخرى عند الحاجة.",
-  "checkoutTitle": "إتمام الدفع",
-  "paymentButton": "ادفع الآن",
-  "creditCardPaymentTitle": "دفع ببطاقة الائتمان",
-  "loginButton": "تسجيل الدخول",
-  "adminDashboard": "لوحة التحكم",
-  "managePayments": "إدارة الدفعات",
-  "manageComplaints": "إدارة الشكاوى",
-  "home": "الرئيسية",
-  "login": "تسجيل الدخول",
-  "garbageService" : "شكاوى للنفايات",
-  "ourServices": "خدماتنا",
-  "complaints": "شكاوى",
-  "payments": "مدفوعات",
-  "paymentsDescription": "ادفع المدفوعات عبر الإنترنت.",
-  "forms": "نماذج",
-  "formsDescription": "املأ النماذج المختلفة عبر الإنترنت.",
-  "emergency": "طوارئ",
-  "about": "من نحن",
-  "serviceTitle": "خدمة جمع النفايات",
-  "serviceDescription": "تحقق من خدمات جمع النفايات في منطقتك.",
-  "serviceHistory": "سجل الخدمة",
-  "noRecords": "لا توجد سجلات خدمة متاحة",
-  "user": "المستخدم",
-  "date": "التاريخ",
-  "status": "الحالة",
-  "controlPanel": "لوحة التحكم",
-  "generalManagement": "الإدارة العامة",
-  "emergencyManagement": "إدارة الطوارئ",
-  "educationManagement": "إدارة التعليم",
-  "paymentsManagement": "إدارة الدفعات",
-  "complaintsManagement": "إدارة الشكاوى",
-  "adminPanel": "لوحة الأدمن",
-  "profile": "الملف الشخصي",
-  "logout": "تسجيل الخروج",
 
-  "userManagement": "إدارة المستخدمين",
-  "register": "تسجيل مستخدم",
-  "refresh": "تحديث",
-  "searchPlaceholder": "بحث بالبريد أو الاسم...",
-  "allRoles": "كل الأدوار",
-  "admin": "مدير",
-  "resident": "مقيم",
-  "email": "البريد الإلكتروني",
-  "fullName": "الاسم الكامل",
-  "role": "الدور",
-  "registered": "تاريخ التسجيل",
-  "actions": "الإجراءات",
-  "noUsers": "لا يوجد مستخدمين",
-  "viewDetails": "عرض التفاصيل",
-  "changeRoleToAdmin": "تحويل إلى مدير",
-  "changeRoleToUser": "تحويل إلى مستخدم",
-  "delete": "حذف",
-  "close": "إغلاق",
-  "userDetails": "بيانات المستخدم",
-  "noData": "لا توجد بيانات متاحة",
+  "userManagement": {
+    "title": "إدارة المستخدمين",
+    "register": "تسجيل مستخدم",
+    "searchPlaceholder": "بحث بالبريد أو الاسم...",
+    "allRoles": "كل الأدوار",
+    "admin": "مدير",
+    "resident": "مقيم",
+    "email": "البريد الإلكتروني",
+    "fullName": "الاسم الكامل",
+    "role": "الدور",
+    "registered": "تاريخ التسجيل",
+    "actions": "الإجراءات",
+    "noUsers": "لا يوجد مستخدمين",
+    "changeRoleToAdmin": "تحويل إلى مدير",
+    "changeRoleToUser": "تحويل إلى مستخدم",
+    "userDetails": "بيانات المستخدم"
+  },
+
+  "admin": {
+    "dashboard": "لوحة التحكم",
+    "controlPanel": "لوحة التحكم",
+    "generalManagement": "الإدارة العامة",
+    "emergencyManagement": "إدارة الطوارئ",
+    "educationManagement": "إدارة التعليم",
+    "paymentsManagement": "إدارة الدفعات",
+    "complaintsManagement": "إدارة الشكاوى"
+  },
+
+  "complaints": {
+    "title": "تقديم شكوى",
+    "description": "الإبلاغ عن مشكلات مثل جمع القمامة أو غيرها.",
+    "historyTitle": "الشكاوى السابقة",
+    "noComplaints": "لا توجد شكاوى سابقة",
+    "response": "رد البلدية",
+    "statuses": {
+      "SUBMITTED": "قيد المراجعة",
+      "IN_PROGRESS": "قيد المعالجة",
+      "RESOLVED": "تم الحل",
+      "REJECTED": "مرفوض"
+    }
+  },
 
   "garbageComplaint": {
     "title": "بلاغ عن مشكلة نفايات",
@@ -108,26 +105,30 @@
     "image": "إرفاق صورة",
     "chooseImage": "اختر صورة",
     "removeImage": "إزالة الصورة",
-    "submit": "إرسال البلاغ",
-    "submitting": "جاري الإرسال...",
-    "historyTitle": "البلاغات السابقة",
-    "noComplaints": "لا توجد بلاغات سابقة",
-    "response": "رد البلدية",
-    "complaintImage": "صورة البلاغ",
     "imagePreview": "معاينة الصورة",
-    "statuses": {
-      "SUBMITTED": "قيد المراجعة",
-      "IN_PROGRESS": "قيد المعالجة",
-      "RESOLVED": "تم الحل",
-      "REJECTED": "مرفوض"
-    },
-    "success": {
-      "submit": "تم إرسال البلاغ بنجاح"
-    },
-    "errors": {
-      "submitFailed": "فشل في إرسال البلاغ",
-      "loadFailed": "فشل في تحميل البلاغات"
-    }
-  }
+    "complaintImage": "صورة البلاغ"
+  },
 
+  "payment": {
+    "title": "دفع إلكتروني",
+    "button": "ادفع الآن",
+    "creditCardTitle": "دفع ببطاقة الائتمان",
+    "description": "ادفع المدفوعات عبر الإنترنت.",
+    "checkoutTitle": "إتمام الدفع"
+  },
+
+  "forms": {
+    "title": "النماذج",
+    "description": "املأ النماذج المختلفة عبر الإنترنت."
+  },
+
+  "emergency": {
+    "title": "طوارئ",
+    "description": "اتصل بالشرطة، الإطفاء، الإسعاف والخدمات الطارئة الأخرى عند الحاجة."
+  },
+
+  "about": {
+    "title": "عن المستوطنة",
+    "description": "معلومات تاريخية والخدمات المقدمة للسكان."
+  }
 }

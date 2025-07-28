@@ -58,14 +58,14 @@ const Home = () => {
                 <img src={bkg} alt={t("home.bannerAlt")} className={styles.bannerImage} />
 
                 {/* العنوان والوصف */}
-                <h1 className={styles.title}>{t("home.title")}</h1>
+                <h1 className={styles.title}>{t("homePage.title")}</h1>
                 <p className={styles.description}>
                     {t("home.description")}
                 </p>
 
                 {/* قسم الخدمات */}
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>{t("home.servicesTitle")}</h2>
+                    <h2 className={styles.sectionTitle}>{t("homePage.servicesTitle")}</h2>
                     <div className={styles.servicesGrid}>
                         {services.map((service, index) => (
                             <div
@@ -82,9 +82,9 @@ const Home = () => {
 
                 {/* قسم الفعاليات */}
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>{t("home.eventsTitle")}</h2>
+                    <h2 className={styles.sectionTitle}>{t("homePage.eventsTitle")}</h2>
                     {loading ? (
-                        <p className={styles.loading}>{t("home.loading")}</p>
+                        <p className={styles.loading}>{t("homePage.loading")}</p>
                     ) : events.length > 0 ? (
                         <div className={styles.eventsGrid}>
                             {events.map((event, idx) => (
@@ -119,7 +119,7 @@ const Home = () => {
                             ))}
                         </div>
                     ) : (
-                        <p className={styles.noEvents}>{t("home.noEvents")}</p>
+                        <p className={styles.noEvents}>{t("homePage.noEvents")}</p>
                     )}
                 </section>
             </div>
