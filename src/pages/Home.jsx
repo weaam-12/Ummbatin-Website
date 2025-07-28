@@ -1,11 +1,13 @@
 // src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import styles from './Home.module.css';
 import bkg from "./bkg.jpg";
 import { getAllEvents } from '../api';
 
 const Home = () => {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,13 +16,13 @@ const Home = () => {
         const fetchEvents = async () => {
             try {
                 const data = await getAllEvents();
-                // تصفية الفعاليات النشطة فقط وتنسيق التاريخ
+                // تصفية الفعاليات النشطة فقط وتنسيق التاريخ حسب اللغة
                 const formattedEvents = data
                     .filter(event => event.active)
                     .map(event => ({
                         ...event,
-                        startDate: new Date(event.startDate).toLocaleDateString('ar-EG'),
-                        endDate: new Date(event.endDate).toLocaleDateString('ar-EG')
+                        startDate: new Date(event.startDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'he-IL'),
+                        endDate: new Date(event.endDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'he-IL')
                     }));
                 setEvents(formattedEvents);
             } catch (error) {
@@ -31,18 +33,18 @@ const Home = () => {
         };
 
         fetchEvents();
-    }, []);
+    }, [i18n.language]); // إعادة جلب البيانات عند تغيير اللغة
 
     const services = [
-        { name: "المياه", icon: "💧", path: "/water" },
-        { name: "الأرنونا", icon: "🏠", path: "/arnona" },
-        { name: "خدمة النفايات", icon: "🗑️", path: "/waste" },
-        { name: "تسجيل الروضة", icon: "🧒", path: "/kindergarten" },
-        { name: "المعاملات", icon: "📝", path: "/transactions" },
-        { name: "طوارئ", icon: "🚨", path: "/emergency" },
-        { name: "دفع إلكتروني", icon: "💳", path: "/payments" },
-        { name: "متابعة الطلبات", icon: "📬", path: "/requests" },
-        { name: "أخبار وتحديثات", icon: "📰", path: "/news" }
+        { name: t("services.water"), icon: "💧", path: "/water" },
+        { name: t("services.arnona"), icon: "🏠", path: "/arnona" },
+        { name: t("services.waste"), icon: "🗑️", path: "/waste" },
+        { name: t("services.kindergarten"), icon: "🧒", path: "/kindergarten" },
+        { name: t("services.transactions"), icon: "📝", path: "/transactions" },
+        { name: t("services.emergency"), icon: "🚨", path: "/emergency" },
+        { name: t("services.payments"), icon: "💳", path: "/payments" },
+        { name: t("services.requests"), icon: "📬", path: "/requests" },
+        { name: t("services.news"), icon: "📰", path: "/news" }
     ];
 
     const handleServiceClick = (path) => {
@@ -50,20 +52,20 @@ const Home = () => {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
             <div className={styles.mainCard}>
                 {/* البانر الرئيسي */}
-                <img src={bkg} alt="بلدة أم بطين" className={styles.bannerImage} />
+                <img src={bkg} alt={t("home.bannerAlt")} className={styles.bannerImage} />
 
                 {/* العنوان والوصف */}
-                <h1 className={styles.title}>مرحباً بكم في بلدية أم بطين</h1>
+                <h1 className={styles.title}>{t("home.title")}</h1>
                 <p className={styles.description}>
-                    أم بطين هي بلدة متطورة في النقب، تقدم خدمات بلدية متكاملة، تعليم ذو جودة عالية، وفعاليات ثقافية واجتماعية لكل أفراد العائلة.
+                    {t("home.description")}
                 </p>
 
                 {/* قسم الخدمات */}
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>خدمات البلدية</h2>
+                    <h2 className={styles.sectionTitle}>{t("home.servicesTitle")}</h2>
                     <div className={styles.servicesGrid}>
                         {services.map((service, index) => (
                             <div
@@ -80,9 +82,9 @@ const Home = () => {
 
                 {/* قسم الفعاليات */}
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>الفعاليات القادمة</h2>
+                    <h2 className={styles.sectionTitle}>{t("home.eventsTitle")}</h2>
                     {loading ? (
-                        <p className={styles.loading}>جاري تحميل الفعاليات...</p>
+                        <p className={styles.loading}>{t("home.loading")}</p>
                     ) : events.length > 0 ? (
                         <div className={styles.eventsGrid}>
                             {events.map((event, idx) => (
@@ -94,7 +96,7 @@ const Home = () => {
                                             className={styles.eventImage}
                                             onError={(e) => {
                                                 e.target.onerror = null;
-                                                e.target.src = bkg; // صورة بديلة في حالة الخطأ
+                                                e.target.src = bkg;
                                             }}
                                         />
                                     )}
@@ -103,13 +105,13 @@ const Home = () => {
                                         <p className={styles.eventDescription}>{event.description}</p>
                                         <div className={styles.eventDetails}>
                                             <p>
-                                                <strong>التاريخ:</strong> من {event.startDate} إلى {event.endDate}
+                                                <strong>{t("event.date")}:</strong> {t("event.from")} {event.startDate} {t("event.to")} {event.endDate}
                                             </p>
                                             <p>
-                                                <strong>المكان:</strong> {event.location}
+                                                <strong>{t("event.location")}:</strong> {event.location}
                                             </p>
                                             <p>
-                                                <strong>المنظم:</strong> {event.organizer}
+                                                <strong>{t("event.organizer")}:</strong> {event.organizer}
                                             </p>
                                         </div>
                                     </div>
@@ -117,7 +119,7 @@ const Home = () => {
                             ))}
                         </div>
                     ) : (
-                        <p className={styles.noEvents}>لا توجد فعاليات قادمة حالياً</p>
+                        <p className={styles.noEvents}>{t("home.noEvents")}</p>
                     )}
                 </section>
             </div>
