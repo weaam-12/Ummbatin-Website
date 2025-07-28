@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
@@ -16,7 +15,6 @@ const Home = () => {
         const fetchEvents = async () => {
             try {
                 const data = await getAllEvents();
-                // تصفية الفعاليات النشطة فقط وتنسيق التاريخ حسب اللغة
                 const formattedEvents = data
                     .filter(event => event.active)
                     .map(event => ({
@@ -33,7 +31,7 @@ const Home = () => {
         };
 
         fetchEvents();
-    }, [i18n.language]); // إعادة جلب البيانات عند تغيير اللغة
+    }, [i18n.language]);
 
     const services = [
         { name: t("services.water"), icon: "💧", path: "/water" },
@@ -54,16 +52,13 @@ const Home = () => {
     return (
         <div className={styles.container} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
             <div className={styles.mainCard}>
-                {/* البانر الرئيسي */}
-                <img src={bkg} alt={t("home.bannerAlt")} className={styles.bannerImage} />
+                <img src={bkg} alt={t("homePage.bannerAlt")} className={styles.bannerImage} />
 
-                {/* العنوان والوصف */}
                 <h1 className={styles.title}>{t("homePage.title")}</h1>
                 <p className={styles.description}>
-                    {t("home.description")}
+                    {t("homePage.description")}
                 </p>
 
-                {/* قسم الخدمات */}
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>{t("homePage.servicesTitle")}</h2>
                     <div className={styles.servicesGrid}>
@@ -80,11 +75,10 @@ const Home = () => {
                     </div>
                 </section>
 
-                {/* قسم الفعاليات */}
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>{t("homePage.eventsTitle")}</h2>
                     {loading ? (
-                        <p className={styles.loading}>{t("homePage.loading")}</p>
+                        <p className={styles.loading}>{t("common.loading")}</p>
                     ) : events.length > 0 ? (
                         <div className={styles.eventsGrid}>
                             {events.map((event, idx) => (
