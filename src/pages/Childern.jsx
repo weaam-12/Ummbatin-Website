@@ -5,6 +5,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { fetchKindergartens, createChild, enrollChild } from '../api';
 import { useAuth } from '../AuthContext';
 import './Children.css';
+import axiosInstance from '../api'; // أضف هذا الاستيراد
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
