@@ -265,10 +265,30 @@
     "noChildren": "لا يوجد أطفال مسجلين",
     "addNewChild": "يمكنك إضافة طفل جديد باستخدام النموذج أعلاه",
     "notRegistered": "غير مسجل",
-    "loading": "جاري التحميل...",
+    "notEnrolled": "غير مسجل في أي روضة",
+    "enrolledIn": "مسجل في",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "add": "إضافة",
+    "myChildren": "أطفالي",
+    "processing": "جارٍ المعالجة...",
+    "confirmPayment": "تأكيد الدفع",
+    "cancel": "إلغاء",
+    "enrollment": {
+      "title": "تفاصيل التسجيل",
+      "child": "الطفل",
+      "kindergarten": "الروضة",
+      "fee": "رسوم التسجيل"
+    },
+    "currency": "ريال",
+    "loadError": "حدث خطأ أثناء تحميل البيانات",
+    "payment": {
+      "error": "فشل في معالجة الدفع. حاول مرة أخرى."
+    },
     "errors": {
       "requiredFields": "الرجاء ملء جميع الحقول المطلوبة"
-    },
+    }
+  },
     "kindergartens": {
       "flowers": "روضة الأزهار",
       "red": "روضة الأحمر",
@@ -280,4 +300,3 @@
       "mohammed": "محمد"
     }
   }
-}
