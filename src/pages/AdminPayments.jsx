@@ -1,12 +1,11 @@
 // src/pages/AdminPayments.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FiDollarSign, FiRefreshCw, FiCalendar } from 'react-icons/fi';
 import styles from './AdminPayments.module.css';
 import { getAllPayments, getAllUsers } from '../api';
 
 const AdminPayments = () => {
     const [payments, setPayments] = useState([]);
-    const [filteredPayments, setFilteredPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [paymentTypeFilter, setPaymentTypeFilter] = useState('ALL');
     const [statusFilter, setStatusFilter] = useState('ALL');
@@ -42,14 +41,7 @@ const AdminPayments = () => {
     const formatDate = (dateValue) => {
         if (!dateValue) return '--';
         try {
-            if (typeof dateValue === 'object' && dateValue !== null) {
-                if (dateValue.toLocaleDateString) {
-                    return dateValue.toLocaleDateString('ar-SA');
-                }
-                return '--';
-            }
-            const dateStr = String(dateValue).endsWith('Z') ? dateValue : dateValue + 'Z';
-            const date = new Date(dateStr);
+            const date = new Date(dateValue);
             return isNaN(date.getTime()) ? '--' : date.toLocaleDateString('ar-SA');
         } catch (e) {
             console.error('Error formatting date:', e);
@@ -74,12 +66,6 @@ const AdminPayments = () => {
     }, []);
 
     useEffect(() => {
-        if (typeof L === 'undefined') {
-            console.error('Leaflet not loaded!');
-            return;}
-        if (typeof R === 'undefined') {
-            console.error('Leaflet not loaded!');
-            return;}
         loadPayments();
     }, [month, year, selectedUser, users]);
 
@@ -91,12 +77,14 @@ const AdminPayments = () => {
             if (Array.isArray(data)) {
                 const enhanced = data.map((p) => ({
                     ...p,
-                    paymentId: p.payment_id || p.paymentId,
+                    paymentId: p.payment_id || p.paymentId || p.id,
                     userId: p.user_id || p.userId,
                     paymentType: p.type || p.paymentType,
                     paymentDate: p.payment_date || p.paymentDate,
-                    fullName:
-                        p.fullName ||
+                    amount: p.amount || p.fee || 0,
+                    status: p.status || 'PENDING',
+                    date: p.date || p.due_date,
+                    fullName: p.fullName ||
                         users.find((u) => u.user_id === (p.user_id || p.userId))?.fullName ||
                         'غير معروف',
                 }));
@@ -107,7 +95,7 @@ const AdminPayments = () => {
                     type: 'danger',
                     message: 'البيانات المسترجعة من السيرفر غير صالحة',
                 });
-                setPayments([]); // عشان تمنعي أي استخدام سابق للبيانات
+                setPayments([]);
             }
         } catch (error) {
             console.error('🚨 خطأ أثناء تحميل الدفعات:', error);
@@ -115,13 +103,13 @@ const AdminPayments = () => {
                 type: 'danger',
                 message: error.message || 'فشل في تحميل الدفعات',
             });
-            setPayments([]); // حماية إضافية
+            setPayments([]);
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
+    const filteredPayments = useMemo(() => {
         let result = [...payments];
         if (paymentTypeFilter !== 'ALL') {
             result = result.filter(p => p.paymentType === paymentTypeFilter);
@@ -129,11 +117,11 @@ const AdminPayments = () => {
         if (statusFilter !== 'ALL') {
             result = result.filter(p => p.status === statusFilter);
         }
-        setFilteredPayments(result);
+        return result;
     }, [payments, paymentTypeFilter, statusFilter]);
 
     const handleRefresh = () => {
-        window.location.reload();
+        loadPayments();
     };
 
     return (
@@ -261,13 +249,13 @@ const AdminPayments = () => {
                                     <tr key={`payment-${payment.paymentId}`}>
                                         <td>{payment.userId || '--'}</td>
                                         <td>{payment.fullName || '--'}</td>
-                                        <td>{paymentTypes[payment.paymentType] || '--'}</td>
-                                        <td>{payment.amount} شيكل</td>
+                                        <td>{paymentTypes[payment.paymentType] || payment.paymentType || '--'}</td>
+                                        <td>{payment.amount !== undefined ? `${payment.amount} شيكل` : '--'}</td>
                                         <td>{formatDate(payment.date)}</td>
                                         <td>
-                                                <span className={`${styles.badge} ${styles[statusVariants[payment.status]]}`}>
-                                                    {statusLabels[payment.status] || payment.status}
-                                                </span>
+                                            <span className={`${styles.badge} ${styles[statusVariants[payment.status]]}`}>
+                                                {statusLabels[payment.status] || payment.status || '--'}
+                                            </span>
                                         </td>
                                         <td>{formatDate(payment.paymentDate)}</td>
                                     </tr>
