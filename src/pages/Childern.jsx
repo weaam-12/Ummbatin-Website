@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../AuthContext.jsx';
 import './Children.css';
 
 const Children = () => {
