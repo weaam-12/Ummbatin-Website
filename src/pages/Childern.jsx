@@ -1,17 +1,116 @@
-import './Children.css';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Elements, useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+    fetchKindergartens,
+    getChildrenByUser,
+    createChild,
+    createKindergartenPayment,
+    confirmKindergartenPayment
+} from './api';
+import './Children.css';
 
-const Children = () => {
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+
+const CheckoutForm = ({ childId, kindergartenId, amount, onSuccess, onClose }) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    const { t } = useTranslation();
+    const [error, setError] = useState(null);
+    const [processing, setProcessing] = useState(false);
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setProcessing(true);
+
+        if (!stripe || !elements) {
+            return;
+        }
+
+        try {
+            // 1. Create Payment Intent
+            const { clientSecret } = await createKindergartenPayment(
+                childId,
+                kindergartenId,
+                amount * 100 // Convert to cents
+            );
+
+            // 2. Confirm Payment
+            const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: elements.getElement(CardElement),
+                }
+            });
+
+            if (stripeError) {
+                setError(stripeError.message);
+                setProcessing(false);
+                return;
+            }
+
+            if (paymentIntent.status === 'succeeded') {
+                // 3. Confirm Enrollment
+                await confirmKindergartenPayment(paymentIntent.id);
+                onSuccess();
+            }
+        } catch (err) {
+            setError(err.message || t('children.errors.paymentFailed'));
+            console.error('Payment error:', err);
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    return (
+        <div className="payment-form-container">
+            <h3>{t('children.paymentTitle')}</h3>
+            <p>{t('children.paymentAmount')}: ${amount}</p>
+
+            <form onSubmit={handleSubmit} className="payment-form">
+                <CardElement
+                    options={{
+                        style: {
+                            base: {
+                                fontSize: '16px',
+                                color: '#424770',
+                                '::placeholder': {
+                                    color: '#aab7c4',
+                                },
+                            },
+                            invalid: {
+                                color: '#9e2146',
+                            },
+                        },
+                    }}
+                />
+
+                {error && <div className="payment-error">{error}</div>}
+
+                <div className="payment-actions">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="btn-secondary"
+                    >
+                        {t('children.cancel')}
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={!stripe || processing}
+                        className="btn-primary"
+                    >
+                        {processing ? t('children.processing') : t('children.payAndEnroll')}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+};
+
+const Children = ({ userId }) => {
     const { t, i18n } = useTranslation();
-
-    const mockKindergartens = [
-        { id: '1', name: t('children.kindergartens.flowers') },
-        { id: '2', name: t('children.kindergartens.red') },
-        { id: '3', name: t('children.kindergartens.oak') },
-        { id: '4', name: t('children.kindergartens.palm') }
-    ];
-
+    const [kindergartens, setKindergartens] = useState([]);
     const [children, setChildren] = useState([]);
     const [newChild, setNewChild] = useState({
         name: '',
@@ -20,35 +119,63 @@ const Children = () => {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showPayment, setShowPayment] = useState(false);
+    const [selectedChild, setSelectedChild] = useState(null);
+    const [selectedKindergarten, setSelectedKindergarten] = useState(null);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     useEffect(() => {
-        setLoading(true);
-        setTimeout(() => {
-            setChildren([
-                { id: '1', name: t('children.sampleChildren.adam'), birthDate: '2020-05-15', kindergartenId: '1' },
-                { id: '2', name: t('children.sampleChildren.mohammed'), birthDate: '2019-11-22', kindergartenId: '3' }
-            ]);
-            setLoading(false);
-        }, 1000);
-    }, [t]);
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [kgs, userChildren] = await Promise.all([
+                    fetchKindergartens(),
+                    getChildrenByUser(userId)
+                ]);
+                setKindergartens(kgs);
+                setChildren(userChildren);
+            } catch (err) {
+                setError(t('children.errors.loading'));
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [userId, t, refreshKey]);
 
     const handleChildChange = (e) => {
         setNewChild({ ...newChild, [e.target.name]: e.target.value });
     };
 
-    const handleAddChild = () => {
+    const handleAddChild = async () => {
         if (!newChild.name || !newChild.birthDate) {
             setError(t('children.errors.requiredFields'));
             return;
         }
-        const childToAdd = { ...newChild, id: Date.now().toString() };
-        setChildren([...children, childToAdd]);
-        setNewChild({ name: '', birthDate: '', kindergartenId: '' });
-        setError(null);
+
+        try {
+            const child = await createChild({
+                name: newChild.name,
+                birthDate: newChild.birthDate,
+                userId: userId
+            });
+            setChildren([...children, child]);
+            setNewChild({ name: '', birthDate: '', kindergartenId: '' });
+            setError(null);
+        } catch (err) {
+            setError(t('children.errors.addChild'));
+        }
     };
 
-    const handleDeleteChild = (childId) => {
-        setChildren(children.filter(child => child.id !== childId));
+    const handleInitiateEnrollment = (childId, kindergartenId) => {
+        setSelectedChild(childId);
+        setSelectedKindergarten(kindergartenId);
+        setShowPayment(true);
+    };
+
+    const handlePaymentSuccess = () => {
+        setShowPayment(false);
+        setRefreshKey(prev => prev + 1); // Refresh children list
     };
 
     const formatDate = (dateString) => {
@@ -100,21 +227,6 @@ const Children = () => {
                     />
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="kindergarten">{t('children.kindergarten')}</label>
-                    <select
-                        id="kindergarten"
-                        name="kindergartenId"
-                        value={newChild.kindergartenId}
-                        onChange={handleChildChange}
-                    >
-                        <option value="">{t('children.selectKindergarten')}</option>
-                        {mockKindergartens.map(k => (
-                            <option key={k.id} value={k.id}>{k.name}</option>
-                        ))}
-                    </select>
-                </div>
-
                 <button
                     onClick={handleAddChild}
                     className="btn-primary"
@@ -136,27 +248,63 @@ const Children = () => {
                 ) : (
                     <ul className="children-list" aria-live="polite">
                         {children.map(child => {
-                            const kindergarten = mockKindergartens.find(k => k.id === child.kindergartenId);
+                            const kindergarten = kindergartens.find(k => k.id === child.kindergartenId);
                             return (
                                 <li key={child.id} className="child-item">
                                     <div className="child-info">
                                         <h3>{child.name}</h3>
                                         <p>{t('children.birthDate')}: {formatDate(child.birthDate)}</p>
                                         <p>{t('children.kindergarten')}: {kindergarten?.name || t('children.notRegistered')}</p>
+                                        {child.enrollmentStatus && (
+                                            <p className={`status-${child.enrollmentStatus.toLowerCase()}`}>
+                                                {t(`children.status.${child.enrollmentStatus.toLowerCase()}`)}
+                                            </p>
+                                        )}
                                     </div>
-                                    <button
-                                        onClick={() => handleDeleteChild(child.id)}
-                                        className="btn-delete"
-                                        aria-label={`${t('children.deleteChild')} ${child.name}`}
-                                    >
-                                        {t('children.delete')}
-                                    </button>
+                                    {!child.kindergartenId && (
+                                        <div className="enroll-section">
+                                            <select
+                                                value={child.selectedKindergarten || ''}
+                                                onChange={(e) => setChildren(children.map(c =>
+                                                    c.id === child.id ? {...c, selectedKindergarten: e.target.value} : c
+                                                ))}
+                                            >
+                                                <option value="">{t('children.selectKindergarten')}</option>
+                                                {kindergartens.map(k => (
+                                                    <option key={k.id} value={k.id}>{k.name}</option>
+                                                ))}
+                                            </select>
+                                            <button
+                                                onClick={() => handleInitiateEnrollment(child.id, child.selectedKindergarten)}
+                                                className="btn-enroll"
+                                                disabled={!child.selectedKindergarten}
+                                            >
+                                                {t('children.enroll')}
+                                            </button>
+                                        </div>
+                                    )}
                                 </li>
                             );
                         })}
                     </ul>
                 )}
             </div>
+
+            {showPayment && (
+                <div className="payment-modal">
+                    <div className="payment-modal-content">
+                        <Elements stripe={stripePromise}>
+                            <CheckoutForm
+                                childId={selectedChild}
+                                kindergartenId={selectedKindergarten}
+                                amount={500} // Enrollment fee
+                                onSuccess={handlePaymentSuccess}
+                                onClose={() => setShowPayment(false)}
+                            />
+                        </Elements>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -249,6 +249,9 @@
   },
 
   "children": {
+    "payAndEnroll": "ادفع وسجل",
+    "paymentTitle": "دفع رسوم التسجيل",
+    "paymentSuccess": "تم الدفع والتسجيل بنجاح!",
     "title": "إدارة الأطفال",
     "registerTitle": "تسجيل طفل جديد",
     "registeredTitle": "الأطفال المسجلين",

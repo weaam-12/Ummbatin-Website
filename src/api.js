@@ -293,4 +293,38 @@ export const getPropertiesByUserId = async (userId) => {
     const response = await axiosInstance.get(`api/properties/user/${userId}`);
     return response.data;
 };
+// الأطفال
+export const getChildrenByUser = (userId) =>
+    axiosInstance.get(`/api/children/user/${userId}`).then(r => r.data);
+
+export const createChild = (childData) =>
+    axiosInstance.post('/api/children', childData).then(r => r.data);
+
+export const enrollChild = (enrollmentData) =>
+    axiosInstance.post('/api/enrollments', enrollmentData).then(r => r.data);
+
+export const getChildEnrollments = (childId) =>
+    axiosInstance.get(`/api/enrollments/child/${childId}`).then(r => r.data);
+export const getPendingEnrollments = () =>
+    axiosInstance.get('/api/enrollments/pending').then(r => r.data);
+
+export const updateEnrollmentStatus = (enrollmentId, status) =>
+    axiosInstance.patch(`/api/enrollments/${enrollmentId}/status`, { status }).then(r => r.data);
+
+export const createKindergartenPayment = async (childId, kindergartenId, amount) => {
+    const response = await axiosInstance.post('/api/payments/create-kindergarten', {
+        childId,
+        kindergartenId,
+        amount
+    });
+    return response.data;
+};
+
+export const confirmKindergartenPayment = async (paymentIntentId) => {
+    const response = await axiosInstance.post('/api/payments/confirm-kindergarten', {
+        paymentIntentId
+    });
+    return response.data;
+};
+
 export default axiosInstance;
