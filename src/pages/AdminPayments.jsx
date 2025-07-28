@@ -79,6 +79,7 @@ const AdminPayments = () => {
             return;}
         loadPayments();
     }, [month, year, selectedUser, users]);
+
     const loadPayments = async () => {
         setLoading(true);
         try {
@@ -102,6 +103,7 @@ const AdminPayments = () => {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         let result = [...payments];
         if (paymentTypeFilter !== 'ALL') {
