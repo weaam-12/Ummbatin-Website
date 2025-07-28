@@ -104,7 +104,7 @@ const AdminPayments = () => {
                 date: p.date || p.due_date || null,
                 fullName: p.fullName ||
                     (users.find((u) => u.user_id === (p.user_id || p.userId))?.fullName ||
-                    'غير معروف',
+                    'غير معروف')
             }));
 
             setPayments(enhanced);
