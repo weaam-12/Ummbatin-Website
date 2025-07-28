@@ -275,7 +275,7 @@ const AdminKinder = () => {
                                                     )}
                                                 </td>
                                             </tr>
-                                        )))}
+                                        ))}
                                         </tbody>
                                     </table>
                                 </div>
