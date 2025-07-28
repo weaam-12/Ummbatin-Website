@@ -1,4 +1,3 @@
-// src/pages/AdminKinder.jsx
 import React, { useState, useEffect } from 'react';
 import { FiHome, FiUsers, FiFileText, FiDollarSign, FiPlus, FiEdit, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
 import styles from './AdminKinder.module.css';
@@ -15,28 +14,6 @@ const AdminKinder = () => {
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
 
-    useEffect(() => {
-        const loadAll = async () => {
-            setLoading(true);
-            try {
-                const kgs = await fetchKindergartens();
-                console.log('Fetched kindergartens:', kgs); // تحقق من البيانات المستلمة
-
-                setKindergartens(kgs);
-
-                // تحقق من وجود الأطفال
-                kgs.forEach(kg => {
-                    console.log(`Kindergarten ${kg.name} children:`, kg.children);
-                });
-            } catch (error) {
-                console.error('Error loading data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadAll();
-    }, []);
-
     const loadAll = async () => {
         setLoading(true);
         try {
@@ -45,10 +22,13 @@ const AdminKinder = () => {
                 getAllUsers().catch(() => []),
             ]);
 
+            console.log('Fetched kindergartens:', kgs);
+            console.log('Fetched users:', usersData);
+
             setKindergartens(kgs);
             setUsers(usersData);
 
-            // حساب الإحصائيات
+            // Calculate statistics
             const totalChildren = kgs.reduce((sum, kg) => sum + (kg.childrenCount || 0), 0);
             const pendingRequests = kgs.reduce((sum, kg) => sum + (kg.pendingRequests || 0), 0);
             const totalRevenue = kgs.reduce((sum, kg) => sum + (kg.revenue || 0), 0);
@@ -60,6 +40,10 @@ const AdminKinder = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadAll();
+    }, []);
 
     const handleAddKg = async (e) => {
         e.preventDefault();
@@ -204,48 +188,59 @@ const AdminKinder = () => {
                         </thead>
                         <tbody>
                         {kindergartens.map(kg => (
-                            <details key={kg.kindergartenId} className={styles.details}>
-                                <summary className={styles.detailsHeader}>
-                                    {kg.name} - {kg.childrenCount || 0} / {kg.capacity} طفل
-                                </summary>
-                                <div className={styles.detailsContent}>
-                                    <h3>الأطفال المسجلين</h3>
-                                    {kg.childrenCount > 0 ? (
-                                        <div className={styles.tableContainer}>
-                                            <table className={styles.table}>
-                                                <thead>
-                                                <tr>
-                                                    <th>اسم الطفل</th>
-                                                    <th>العمر</th>
-                                                    <th>ولي الأمر</th>
-                                                    <th>حالة الدفع</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {kg.children?.map(child => (
-                                                    <tr key={child.childId}>
-                                                        <td>{child.name}</td>
-                                                        <td>{child.age} سنوات</td>
-                                                        <td>
-                                                            {users.find(u => u.userId === child.userId)?.fullName || 'غير معروف'}
-                                                        </td>
-                                                        <td>
-                                                            {child.paid ? (
-                                                                <span className={`${styles.badge} ${styles.badgeSuccess}`}>تم الدفع</span>
-                                                            ) : (
-                                                                <span className={`${styles.badge} ${styles.badgeDanger}`}>غير مدفوع</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    ) : (
-                                        <p style={{ textAlign: 'center', color: '#666' }}>لا يوجد أطفال مسجلين في هذه الحضانة</p>
+                            <tr key={kg.kindergartenId}>
+                                <td>{kg.kindergartenId}</td>
+                                <td>
+                                    <strong>{kg.name}</strong>
+                                    {kg.pendingRequests > 0 && (
+                                        <span className={`${styles.badge} ${styles.badgeDanger}`}>
+                                            {kg.pendingRequests} طلب جديد
+                                        </span>
                                     )}
-                                </div>
-                            </details>
+                                </td>
+                                <td>{kg.location}</td>
+                                <td>
+                                    {kg.capacity}
+                                    {kg.capacity - (kg.childrenCount || 0) <= 0 && (
+                                        <span className={`${styles.badge} ${styles.badgeDanger}`}>مكتمل</span>
+                                    )}
+                                    {kg.capacity - (kg.childrenCount || 0) > 0 && kg.capacity - (kg.childrenCount || 0) <= 5 && (
+                                        <span className={`${styles.badge} ${styles.badgeWarning}`}>أماكن محدودة</span>
+                                    )}
+                                </td>
+                                <td>{kg.childrenCount || 0}</td>
+                                <td>{kg.monthlyFee} شيكل</td>
+                                <td>
+                                    <span className={`${styles.badge} ${kg.status === 'OPEN' ? styles.badgeSuccess : styles.badgeDanger}`}>
+                                        {kg.status === 'OPEN' ? 'مفتوحة' : 'مغلقة'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button
+                                            className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
+                                            onClick={() => {
+                                                setCurrentKg(kg);
+                                                setShowEditModal(true);
+                                            }}
+                                        >
+                                            <FiEdit /> تعديل
+                                        </button>
+                                        <button
+                                            className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
+                                            onClick={() => handleDeleteKg(kg.kindergartenId)}
+                                        >
+                                            <FiTrash2 /> حذف
+                                        </button>
+                                        <button
+                                            className={`${styles.btn} ${kg.status === 'OPEN' ? styles.btnDanger : styles.btnSuccess} ${styles.btnSm}`}
+                                            onClick={() => toggleKindergartenStatus(kg)}
+                                        >
+                                            {kg.status === 'OPEN' ? 'إغلاق' : 'فتح'}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                         ))}
                         </tbody>
                     </table>
@@ -296,137 +291,137 @@ const AdminKinder = () => {
                         </div>
                     </details>
                 ))}
+
+                {/* Add Kindergarten Modal */}
+                {showAddModal && (
+                    <div className={styles.modalOverlay}>
+                        <div className={styles.modal}>
+                            <div className={styles.modalHeader}>
+                                <h2>إضافة حضانة جديدة</h2>
+                            </div>
+                            <form onSubmit={handleAddKg} className={styles.modalBody}>
+                                <div className={styles.formGroup}>
+                                    <label>اسم الحضانة</label>
+                                    <input
+                                        type="text"
+                                        value={newKg.name}
+                                        onChange={(e) => setNewKg({ ...newKg, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>الموقع</label>
+                                    <input
+                                        type="text"
+                                        value={newKg.location}
+                                        onChange={(e) => setNewKg({ ...newKg, location: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className={styles.formRow}>
+                                    <div className={styles.formGroup}>
+                                        <label>السعة</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={newKg.capacity}
+                                            onChange={(e) => setNewKg({ ...newKg, capacity: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label>الرسوم الشهرية (شيكل)</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={newKg.monthlyFee}
+                                            onChange={(e) => setNewKg({ ...newKg, monthlyFee: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className={styles.modalFooter}>
+                                    <button
+                                        type="button"
+                                        className={`${styles.btn} ${styles.btnSecondary}`}
+                                        onClick={() => setShowAddModal(false)}
+                                    >
+                                        <FiX /> إلغاء
+                                    </button>
+                                    <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
+                                        <FiCheck /> حفظ
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Edit Kindergarten Modal */}
+                {showEditModal && (
+                    <div className={styles.modalOverlay}>
+                        <div className={styles.modal}>
+                            <div className={styles.modalHeader}>
+                                <h2>تعديل بيانات الحضانة</h2>
+                            </div>
+                            <form onSubmit={handleEditKg} className={styles.modalBody}>
+                                <div className={styles.formGroup}>
+                                    <label>اسم الحضانة</label>
+                                    <input
+                                        type="text"
+                                        value={currentKg.name}
+                                        onChange={(e) => setCurrentKg({ ...currentKg, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>الموقع</label>
+                                    <input
+                                        type="text"
+                                        value={currentKg.location}
+                                        onChange={(e) => setCurrentKg({ ...currentKg, location: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className={styles.formRow}>
+                                    <div className={styles.formGroup}>
+                                        <label>السعة</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={currentKg.capacity}
+                                            onChange={(e) => setCurrentKg({ ...currentKg, capacity: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label>الرسوم الشهرية (شيكل)</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={currentKg.monthlyFee}
+                                            onChange={(e) => setCurrentKg({ ...currentKg, monthlyFee: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className={styles.modalFooter}>
+                                    <button
+                                        type="button"
+                                        className={`${styles.btn} ${styles.btnSecondary}`}
+                                        onClick={() => setShowEditModal(false)}
+                                    >
+                                        <FiX /> إلغاء
+                                    </button>
+                                    <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
+                                        <FiCheck /> حفظ التعديلات
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
-
-            {/* Add Kindergarten Modal */}
-            {showAddModal && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modal}>
-                        <div className={styles.modalHeader}>
-                            <h2>إضافة حضانة جديدة</h2>
-                        </div>
-                        <form onSubmit={handleAddKg} className={styles.modalBody}>
-                            <div className={styles.formGroup}>
-                                <label>اسم الحضانة</label>
-                                <input
-                                    type="text"
-                                    value={newKg.name}
-                                    onChange={(e) => setNewKg({...newKg, name: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>الموقع</label>
-                                <input
-                                    type="text"
-                                    value={newKg.location}
-                                    onChange={(e) => setNewKg({...newKg, location: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label>السعة</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={newKg.capacity}
-                                        onChange={(e) => setNewKg({...newKg, capacity: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label>الرسوم الشهرية (شيكل)</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={newKg.monthlyFee}
-                                        onChange={(e) => setNewKg({...newKg, monthlyFee: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className={styles.modalFooter}>
-                                <button
-                                    type="button"
-                                    className={`${styles.btn} ${styles.btnSecondary}`}
-                                    onClick={() => setShowAddModal(false)}
-                                >
-                                    <FiX /> إلغاء
-                                </button>
-                                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
-                                    <FiCheck /> حفظ
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Edit Kindergarten Modal */}
-            {showEditModal && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modal}>
-                        <div className={styles.modalHeader}>
-                            <h2>تعديل بيانات الحضانة</h2>
-                        </div>
-                        <form onSubmit={handleEditKg} className={styles.modalBody}>
-                            <div className={styles.formGroup}>
-                                <label>اسم الحضانة</label>
-                                <input
-                                    type="text"
-                                    value={currentKg.name}
-                                    onChange={(e) => setCurrentKg({...currentKg, name: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>الموقع</label>
-                                <input
-                                    type="text"
-                                    value={currentKg.location}
-                                    onChange={(e) => setCurrentKg({...currentKg, location: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label>السعة</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={currentKg.capacity}
-                                        onChange={(e) => setCurrentKg({...currentKg, capacity: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label>الرسوم الشهرية (شيكل)</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={currentKg.monthlyFee}
-                                        onChange={(e) => setCurrentKg({...currentKg, monthlyFee: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className={styles.modalFooter}>
-                                <button
-                                    type="button"
-                                    className={`${styles.btn} ${styles.btnSecondary}`}
-                                    onClick={() => setShowEditModal(false)}
-                                >
-                                    <FiX /> إلغاء
-                                </button>
-                                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
-                                    <FiCheck /> حفظ التعديلات
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
