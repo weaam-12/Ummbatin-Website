@@ -202,5 +202,49 @@
       "phone": "هاتف",
       "email": "بريد إلكتروني"
     }
+  },
+  "garbageComplaint": {
+    "title": "شكاوى النفايات",
+    "subtitle": "يمكنك الإبلاغ عن مشاكل النفايات في منطقتك هنا",
+    "description": "وصف المشكلة",
+    "descriptionPlaceholder": "صف المشكلة بالتفصيل (مثال: حاوية ممتلئة منذ 3 أيام)",
+    "type": "نوع الشكوى",
+    "types": {
+      "uncollected": "نفايات غير مجمعة",
+      "overflowing": "حاوية ممتلئة",
+      "damagedBin": "حاوية تالفة",
+      "missingBin": "حاوية مفقودة",
+      "illegalDumping": "رمي نفايات غير قانوني"
+    },
+    "location": "الموقع",
+    "locationPlaceholder": "الشارع/الحي (اختياري)",
+    "image": "صورة",
+    "chooseImage": "اختر صورة",
+    "removeImage": "إزالة الصورة",
+    "submit": "إرسال الشكوى",
+    "submitting": "جاري الإرسال...",
+    "historyTitle": "سجل الشكاوى السابقة",
+    "noComplaints": "لا توجد شكاوى مسجلة",
+    "response": "رد البلدية",
+    "statuses": {
+      "SUBMITTED": "تم الاستلام",
+      "IN_PROGRESS": "قيد المعالجة",
+      "RESOLVED": "تم الحل",
+      "REJECTED": "مرفوض"
+    },
+    "success": {
+      "submit": "تم إرسال شكواك بنجاح، رقم التذكرة: {ticketNumber}"
+    },
+    "errors": {
+      "loadFailed": "فشل تحميل الشكاوى السابقة",
+      "submitFailed": "فشل إرسال الشكوى، يرجى المحاولة لاحقًا"
+    }
+  },
+  "auth": {
+    "loginRequired": "يجب تسجيل الدخول لتقديم شكوى",
+    "login": "تسجيل الدخول"
+  },
+  "general": {
+    "loading": "جاري التحميل..."
   }
 }

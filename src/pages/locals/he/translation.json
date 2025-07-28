@@ -202,5 +202,49 @@
       "phone": "טלפון",
       "email": "אימייל"
     }
+  },
+  "garbageComplaint": {
+    "title": "תלונות על אשפה",
+    "subtitle": "אפשר לדווח כאן על בעיות אשפה באזור שלך",
+    "description": "תיאור הבעיה",
+    "descriptionPlaceholder": "תאר את הבעיה בפירוט (לדוגמה: פח מלא כבר 3 ימים)",
+    "type": "סוג התלונה",
+    "types": {
+      "uncollected": "אשפה לא נאספה",
+      "overflowing": "פח מלא",
+      "damagedBin": "פח פגום",
+      "missingBin": "פח חסר",
+      "illegalDumping": "השלכת אשפה בלתי חוקית"
+    },
+    "location": "מיקום",
+    "locationPlaceholder": "רחוב/שכונה (לא חובה)",
+    "image": "תמונה",
+    "chooseImage": "בחר תמונה",
+    "removeImage": "הסר תמונה",
+    "submit": "שלח תלונה",
+    "submitting": "שולח...",
+    "historyTitle": "היסטוריית תלונות קודמות",
+    "noComplaints": "אין תלונות רשומות",
+    "response": "תגובת העירייה",
+    "statuses": {
+      "SUBMITTED": "התקבל",
+      "IN_PROGRESS": "בטיפול",
+      "RESOLVED": "נפתר",
+      "REJECTED": "נדחה"
+    },
+    "success": {
+      "submit": "התלונה נשלחה בהצלחה, מספר כרטיס: {ticketNumber}"
+    },
+    "errors": {
+      "loadFailed": "טעינת תלונות קודמות נכשלה",
+      "submitFailed": "שליחת התלונה נכשלה, נסה שוב מאוחר יותר"
+    }
+  },
+  "auth": {
+    "loginRequired": "נדרש להתחבר כדי להגיש תלונה",
+    "login": "התחברות"
+  },
+  "general": {
+    "loading": "טוען..."
   }
 }

@@ -21,7 +21,6 @@ const GarbageComplaint = () => {
         imagePreview: null,
     });
 
-    // أنواع الشكاوى المتاحة
     const complaintTypes = [
         { value: "uncollected", label: t("garbageComplaint.types.uncollected") },
         { value: "overflowing", label: t("garbageComplaint.types.overflowing") },
@@ -99,7 +98,9 @@ const GarbageComplaint = () => {
                 imagePreview: null,
             });
 
-            toast.success(t("garbageComplaint.success.submit"));
+            toast.success(
+                t("garbageComplaint.success.submit", { ticketNumber: newComplaint.ticketNumber })
+            );
         } catch (error) {
             console.error("Submission error:", error);
             toast.error(error.response?.data?.message || t("garbageComplaint.errors.submitFailed"));
@@ -147,12 +148,13 @@ const GarbageComplaint = () => {
                         required
                         placeholder={t("garbageComplaint.descriptionPlaceholder")}
                         dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                        aria-label={t("garbageComplaint.description")}
                     />
                 </div>
 
                 <div className="form-section">
                     <label>{t("garbageComplaint.type")} *</label>
-                    <div className="type-options">
+                    <div className="type-options" role="group" aria-label={t("garbageComplaint.type")}>
                         {complaintTypes.map((type) => (
                             <label key={type.value} className="type-option">
                                 <input
@@ -162,6 +164,7 @@ const GarbageComplaint = () => {
                                     checked={formData.type === type.value}
                                     onChange={handleInputChange}
                                     required
+                                    aria-checked={formData.type === type.value}
                                 />
                                 <span>{type.label}</span>
                             </label>
@@ -177,28 +180,31 @@ const GarbageComplaint = () => {
                         value={formData.location}
                         onChange={handleInputChange}
                         placeholder={t("garbageComplaint.locationPlaceholder")}
+                        aria-label={t("garbageComplaint.location")}
                     />
                 </div>
 
                 <div className="form-section">
                     <label>{t("garbageComplaint.image")}</label>
                     <div className="image-upload">
-                        <label className="upload-btn">
+                        <label className="upload-btn" aria-label={t("garbageComplaint.chooseImage")}>
                             {t("garbageComplaint.chooseImage")}
                             <input
                                 type="file"
                                 accept="image/*"
                                 onChange={handleImageChange}
                                 style={{ display: 'none' }}
+                                aria-hidden="true"
                             />
                         </label>
                         {formData.imagePreview && (
                             <div className="image-preview">
-                                <img src={formData.imagePreview} alt="Preview" />
+                                <img src={formData.imagePreview} alt={t("garbageComplaint.imagePreview")} />
                                 <button
                                     type="button"
                                     onClick={() => setFormData({...formData, image: null, imagePreview: null})}
                                     className="remove-image"
+                                    aria-label={t("garbageComplaint.removeImage")}
                                 >
                                     {t("garbageComplaint.removeImage")}
                                 </button>
@@ -207,7 +213,12 @@ const GarbageComplaint = () => {
                     </div>
                 </div>
 
-                <button type="submit" disabled={formLoading} className="submit-btn">
+                <button
+                    type="submit"
+                    disabled={formLoading}
+                    className="submit-btn"
+                    aria-busy={formLoading}
+                >
                     {formLoading ? t("garbageComplaint.submitting") : t("garbageComplaint.submit")}
                 </button>
             </form>
@@ -248,7 +259,10 @@ const GarbageComplaint = () => {
 
                                     {complaint.imageUrl && (
                                         <div className="complaint-image">
-                                            <img src={complaint.imageUrl} alt="Complaint" />
+                                            <img
+                                                src={complaint.imageUrl}
+                                                alt={t("garbageComplaint.complaintImage")}
+                                            />
                                         </div>
                                     )}
 
