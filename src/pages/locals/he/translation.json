@@ -144,5 +144,63 @@
       "kindergarten": "גן ילדים"
     },
     "currency": "שקל"
+  },
+  "emergency": {
+    "title": "רשימת מקלטים בכפר אום בטין",
+    "description": "ניתן לעיין ברשימת המיקומים של המקלטים הציבוריים ולוודא שאתם יודעים היכן הקרוב אליכם.",
+    "tableHeaders": {
+      "number": "#",
+      "location": "מיקום",
+      "description": "תיאור"
+    },
+    "shelters": [
+      {
+        "number": "1",
+        "location": "רחוב הראשי 1",
+        "description": "מקלט ציבורי ראשי"
+      },
+      {
+        "number": "2",
+        "location": "רחוב השלום 5",
+        "description": "מקלט שכונתי"
+      },
+      {
+        "number": "3",
+        "location": "שכונת אלחאדר 8",
+        "description": "מקלט בית ספר"
+      },
+      {
+        "number": "4",
+        "location": "רחוב אלנור 3",
+        "description": "מקלט משותף"
+      }
+    ],
+    "services": {
+      "police": {
+        "label": "משטרה",
+        "phone": "100",
+        "email": "contact@police.gov.il",
+        "url": "https://www.police.gov.il"
+      },
+      "fire": {
+        "label": "כבאות והצלה",
+        "phone": "102",
+        "url": "https://www.gov.il/he/departments/firefighting_and_rescue_israel/govil-landing-page"
+      },
+      "medic": {
+        "label": "מד\"א",
+        "phone": "101",
+        "url": "https://www.mdais.org"
+      },
+      "homefront": {
+        "label": "פיקוד העורף",
+        "phone": "104",
+        "url": "https://www.oref.org.il"
+      }
+    },
+    "contact": {
+      "phone": "טלפון",
+      "email": "אימייל"
+    }
   }
 }

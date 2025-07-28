@@ -144,5 +144,63 @@
       "kindergarten": "الحضانة"
     },
     "currency": "شيقل"
+  },
+  "emergency": {
+    "title": "قائمة الملاجئ في قرية أم بطين",
+    "description": "يمكنك الاطلاع على قائمة مواقع الملاجئ العامة والتأكد من معرفتك لأقرب ملجأ إليك.",
+    "tableHeaders": {
+      "number": "#",
+      "location": "الموقع",
+      "description": "الوصف"
+    },
+    "shelters": [
+      {
+        "number": "1",
+        "location": "الشارع الرئيسي 1",
+        "description": "الملجأ العام الرئيسي"
+      },
+      {
+        "number": "2",
+        "location": "شارع السلام 5",
+        "description": "ملجأ حيوي"
+      },
+      {
+        "number": "3",
+        "location": "حي الحضر 8",
+        "description": "ملجأ المدرسة"
+      },
+      {
+        "number": "4",
+        "location": "شارع النور 3",
+        "description": "ملجأ مشترك"
+      }
+    ],
+    "services": {
+      "police": {
+        "label": "الشرطة",
+        "phone": "100",
+        "email": "contact@police.gov.il",
+        "url": "https://www.police.gov.il"
+      },
+      "fire": {
+        "label": "الإطفاء والإنقاذ",
+        "phone": "102",
+        "url": "https://www.gov.il/he/departments/firefighting_and_rescue_israel/govil-landing-page"
+      },
+      "medic": {
+        "label": "الإسعاف",
+        "phone": "101",
+        "url": "https://www.mdais.org"
+      },
+      "homefront": {
+        "label": "قيادة الجبهة الداخلية",
+        "phone": "104",
+        "url": "https://www.oref.org.il"
+      }
+    },
+    "contact": {
+      "phone": "هاتف",
+      "email": "بريد إلكتروني"
+    }
   }
 }
