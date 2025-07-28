@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiHome, FiUsers, FiFileText, FiDollarSign, FiPlus, FiEdit, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
 import styles from './AdminKinder.module.css';
-import { fetchKindergartens, createKindergarten, deleteKindergarten, getAllUsers, updateKindergarten, fetchEnrollments, createEnrollment, deleteEnrollment, updateEnrollmentStatus } from '../api';
+import { fetchKindergartens, createKindergarten, deleteKindergarten, getAllUsers, updateKindergarten } from '../api';
 
 const AdminKinder = () => {
     const [kindergartens, setKindergartens] = useState([]);
@@ -18,23 +18,19 @@ const AdminKinder = () => {
         const loadAll = async () => {
             setLoading(true);
             try {
-                const [kgs, usersData] = await Promise.all([
-                    fetchKindergartens(),
-                    getAllUsers().catch(() => []),
-                ]);
-                console.log('Fetched kindergartens:', kgs);
-                console.log('Fetched users:', usersData);
+                const kgs = await fetchKindergartens();
+                console.log('Fetched kindergartens:', kgs); // Verify the data received
 
                 setKindergartens(kgs);
-                setUsers(usersData.content || []); // Ensure usersData is an array
 
                 // Calculate statistics
-                const totalChildren = kgs.reduce((sum, kg) => sum + (kg.childrenCount || 0), 0);
+                const totalChildren = kgs.reduce((sum, kg) => sum + kg.children.length, 0);
                 const pendingRequests = kgs.reduce((sum, kg) => sum + (kg.pendingRequests || 0), 0);
                 const totalRevenue = kgs.reduce((sum, kg) => sum + (kg.revenue || 0), 0);
 
                 setStats({ totalChildren, pendingRequests, totalRevenue });
             } catch (error) {
+                console.error('Error loading data:', error);
                 setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
             } finally {
                 setLoading(false);
@@ -248,11 +244,11 @@ const AdminKinder = () => {
                 {kindergartens.map(kg => (
                     <details key={kg.kindergartenId} className={styles.details}>
                         <summary className={styles.detailsHeader}>
-                            {kg.name} - {kg.childrenCount || 0} / {kg.capacity} طفل
+                            {kg.name} - {kg.children.length} / {kg.capacity} طفل
                         </summary>
                         <div className={styles.detailsContent}>
                             <h3>الأطفال المسجلين</h3>
-                            {kg.childrenCount > 0 ? (
+                            {kg.children.length > 0 ? (
                                 <div className={styles.tableContainer}>
                                     <table className={styles.table}>
                                         <thead>
