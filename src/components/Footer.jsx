@@ -10,20 +10,20 @@ const Footer = () => {
         <footer className="footer">
             <div className="footer-content">
                 <div className="footer-info">
-                    <p>© 2025 {t("siteName") || "بلدية أم بطين"}. {t("allRightsReserved") || "كل الحقوق محفوظة"}.</p>
+                    <p>© 2025 {t("siteName")}. {t("allRightsReserved")}.</p>
                     <address>
-                        <p><FaMapMarkerAlt /> العنوان: أم بطين</p>
-                        <p><FaPhoneAlt /> هاتف: +972 2 1234 5678</p>
-                        <p><FaPhoneAlt /> فاكس: +972 2 8765 4321</p>
-                        <p><FaEnvelope /> البريد الإلكتروني: info@umbateen.gov.il</p>
+                        <p><FaMapMarkerAlt /> {t("address")}: أم بطين</p>
+                        <p><FaPhoneAlt /> {t("phone")}: +972 2 1234 5678</p>
+                        <p><FaPhoneAlt /> {t("fax")}: +972 2 8765 4321</p>
+                        <p><FaEnvelope /> {t("email")}: info@umbateen.gov.il</p>
                     </address>
                 </div>
 
                 <nav className="footer-links">
-                    <a href="/about">{t("aboutMunicipality") || "عن البلدية"}</a>
-                    <a href="/services">{t("services") || "الخدمات"}</a>
-                    <a href="/privacy-policy">{t("privacyPolicy") || "سياسة الخصوصية"}</a>
-                    <a href="/contact">{t("contactUs") || "اتصل بنا"}</a>
+                    <a href="/about">{t("aboutMunicipality")}</a>
+                    <a href="/services">{t("services")}</a>
+                    <a href="/privacy-policy">{t("privacyPolicy")}</a>
+                    <a href="/contact">{t("contactUs")}</a>
                 </nav>
             </div>
 
