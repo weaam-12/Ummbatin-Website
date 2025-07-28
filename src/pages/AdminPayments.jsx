@@ -77,6 +77,9 @@ const AdminPayments = () => {
         if (typeof L === 'undefined') {
             console.error('Leaflet not loaded!');
             return;}
+        if (typeof R === 'undefined') {
+            console.error('Leaflet not loaded!');
+            return;}
         loadPayments();
     }, [month, year, selectedUser, users]);
 
