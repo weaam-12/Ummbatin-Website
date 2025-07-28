@@ -44,7 +44,7 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
             } else {
                 setError(paymentResult.message || t('children.payment.error'));
             }
-        } catch (err) {
+        } catch (er) {
             setError(t('children.payment.error'));
         } finally {
             setProcessing(false);
