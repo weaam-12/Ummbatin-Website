@@ -1,12 +1,15 @@
 import './Children.css';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Children = () => {
+    const { t, i18n } = useTranslation();
+
     const mockKindergartens = [
-        { id: '1', name: 'גן הפרחים' },
-        { id: '2', name: 'גן האדום' },
-        { id: '3', name: 'גן אלון' },
-        { id: '4', name: 'גן תמר' }
+        { id: '1', name: t('children.kindergartens.flowers') },
+        { id: '2', name: t('children.kindergartens.red') },
+        { id: '3', name: t('children.kindergartens.oak') },
+        { id: '4', name: t('children.kindergartens.palm') }
     ];
 
     const [children, setChildren] = useState([]);
@@ -22,12 +25,12 @@ const Children = () => {
         setLoading(true);
         setTimeout(() => {
             setChildren([
-                { id: '1', name: 'אדם', birthDate: '2020-05-15', kindergartenId: '1' },
-                { id: '2', name: 'מחמד', birthDate: '2019-11-22', kindergartenId: '3' }
+                { id: '1', name: t('children.sampleChildren.adam'), birthDate: '2020-05-15', kindergartenId: '1' },
+                { id: '2', name: t('children.sampleChildren.mohammed'), birthDate: '2019-11-22', kindergartenId: '3' }
             ]);
             setLoading(false);
         }, 1000);
-    }, []);
+    }, [t]);
 
     const handleChildChange = (e) => {
         setNewChild({ ...newChild, [e.target.name]: e.target.value });
@@ -35,7 +38,7 @@ const Children = () => {
 
     const handleAddChild = () => {
         if (!newChild.name || !newChild.birthDate) {
-            setError('נא למלא את כל השדות החובה');
+            setError(t('children.errors.requiredFields'));
             return;
         }
         const childToAdd = { ...newChild, id: Date.now().toString() };
@@ -50,55 +53,62 @@ const Children = () => {
 
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        return new Date(dateString).toLocaleDateString('he-IL', options);
+        return new Date(dateString).toLocaleDateString(i18n.language === 'he' ? 'he-IL' : 'ar-SA', options);
     };
 
     if (loading) {
         return (
-            <div className="loader">
+            <div className="loader" aria-live="polite" aria-busy="true">
                 <div className="spinner"></div>
-                <p>טוען נתונים...</p>
+                <p>{t('children.loading')}</p>
             </div>
         );
     }
 
     return (
-        <div className="children-page" dir="rtl">
-            <h2 className="page-title">ניהול ילדים</h2>
+        <div className={`children-page ${i18n.language === 'he' ? 'rtl' : 'ltr'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
+            <h1 className="page-title" tabIndex="0">{t('children.title')}</h1>
 
-            <div className="card">
-                <h3 className="card-title">רישום ילד חדש</h3>
+            <div className="card" aria-labelledby="register-child-heading">
+                <h2 id="register-child-heading" className="card-title">{t('children.registerTitle')}</h2>
 
-                {error && <div className="alert-error">{error}</div>}
+                {error && <div className="alert-error" role="alert">{error}</div>}
 
                 <div className="form-group">
-                    <label>שם הילד *</label>
+                    <label htmlFor="child-name">{t('children.childName')} *</label>
                     <input
+                        id="child-name"
                         type="text"
                         name="name"
                         value={newChild.name}
                         onChange={handleChildChange}
+                        aria-required="true"
+                        required
                     />
                 </div>
 
                 <div className="form-group">
-                    <label>תאריך לידה *</label>
+                    <label htmlFor="birth-date">{t('children.birthDate')} *</label>
                     <input
+                        id="birth-date"
                         type="date"
                         name="birthDate"
                         value={newChild.birthDate}
                         onChange={handleChildChange}
+                        aria-required="true"
+                        required
                     />
                 </div>
 
                 <div className="form-group">
-                    <label>גן ילדים</label>
+                    <label htmlFor="kindergarten">{t('children.kindergarten')}</label>
                     <select
+                        id="kindergarten"
                         name="kindergartenId"
                         value={newChild.kindergartenId}
                         onChange={handleChildChange}
                     >
-                        <option value="">בחר גן ילדים</option>
+                        <option value="">{t('children.selectKindergarten')}</option>
                         {mockKindergartens.map(k => (
                             <option key={k.id} value={k.id}>{k.name}</option>
                         ))}
@@ -109,37 +119,42 @@ const Children = () => {
                     onClick={handleAddChild}
                     className="btn-primary"
                     disabled={!newChild.name || !newChild.birthDate}
+                    aria-disabled={!newChild.name || !newChild.birthDate}
                 >
-                    הוסף ילד
+                    {t('children.addChild')}
                 </button>
             </div>
 
-            <div className="card">
-                <h3 className="card-title">ילדים רשומים</h3>
+            <div className="card" aria-labelledby="registered-children-heading">
+                <h2 id="registered-children-heading" className="card-title">{t('children.registeredTitle')}</h2>
 
                 {children.length === 0 ? (
                     <div className="empty-state">
-                        <p>לא נמצאו ילדים רשומים</p>
-                        <p>ניתן להוסיף ילד חדש באמצעות הטופס למעלה</p>
+                        <p>{t('children.noChildren')}</p>
+                        <p>{t('children.addNewChild')}</p>
                     </div>
                 ) : (
-                    <div className="children-list">
+                    <ul className="children-list" aria-live="polite">
                         {children.map(child => {
                             const kindergarten = mockKindergartens.find(k => k.id === child.kindergartenId);
                             return (
-                                <div key={child.id} className="child-item">
+                                <li key={child.id} className="child-item">
                                     <div className="child-info">
-                                        <h4>{child.name}</h4>
-                                        <p>תאריך לידה: {formatDate(child.birthDate)}</p>
-                                        <p>גן: {kindergarten?.name || 'לא רשום'}</p>
+                                        <h3>{child.name}</h3>
+                                        <p>{t('children.birthDate')}: {formatDate(child.birthDate)}</p>
+                                        <p>{t('children.kindergarten')}: {kindergarten?.name || t('children.notRegistered')}</p>
                                     </div>
-                                    <button onClick={() => handleDeleteChild(child.id)} className="btn-delete">
-                                        הסר מהרשימה
+                                    <button
+                                        onClick={() => handleDeleteChild(child.id)}
+                                        className="btn-delete"
+                                        aria-label={`${t('children.deleteChild')} ${child.name}`}
+                                    >
+                                        {t('children.delete')}
                                     </button>
-                                </div>
+                                </li>
                             );
                         })}
-                    </div>
+                    </ul>
                 )}
             </div>
         </div>

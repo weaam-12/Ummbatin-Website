@@ -246,5 +246,34 @@
   },
   "general": {
     "loading": "טוען..."
+  },
+  "children": {
+    "title": "ניהול ילדים",
+    "registerTitle": "רישום ילד חדש",
+    "registeredTitle": "ילדים רשומים",
+    "childName": "שם הילד",
+    "birthDate": "תאריך לידה",
+    "kindergarten": "גן ילדים",
+    "selectKindergarten": "בחר גן ילדים",
+    "addChild": "הוסף ילד",
+    "delete": "מחק",
+    "deleteChild": "מחק ילד",
+    "noChildren": "לא נמצאו ילדים רשומים",
+    "addNewChild": "ניתן להוסיף ילד חדש באמצעות הטופס למעלה",
+    "notRegistered": "לא רשום",
+    "loading": "טוען נתונים...",
+    "errors": {
+      "requiredFields": "נא למלא את כל השדות החובה"
+    },
+    "kindergartens": {
+      "flowers": "גן הפרחים",
+      "red": "גן האדום",
+      "oak": "גן אלון",
+      "palm": "גן תמר"
+    },
+    "sampleChildren": {
+      "adam": "אדם",
+      "mohammed": "מחמד"
+    }
   }
 }

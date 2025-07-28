@@ -246,5 +246,35 @@
   },
   "general": {
     "loading": "جاري التحميل..."
+  },
+
+  "children": {
+    "title": "إدارة الأطفال",
+    "registerTitle": "تسجيل طفل جديد",
+    "registeredTitle": "الأطفال المسجلين",
+    "childName": "اسم الطفل",
+    "birthDate": "تاريخ الميلاد",
+    "kindergarten": "روضة الأطفال",
+    "selectKindergarten": "اختر روضة أطفال",
+    "addChild": "إضافة طفل",
+    "delete": "حذف",
+    "deleteChild": "حذف الطفل",
+    "noChildren": "لا يوجد أطفال مسجلين",
+    "addNewChild": "يمكنك إضافة طفل جديد باستخدام النموذج أعلاه",
+    "notRegistered": "غير مسجل",
+    "loading": "جاري التحميل...",
+    "errors": {
+      "requiredFields": "الرجاء ملء جميع الحقول المطلوبة"
+    },
+    "kindergartens": {
+      "flowers": "روضة الأزهار",
+      "red": "روضة الأحمر",
+      "oak": "روضة البلوط",
+      "palm": "روضة النخيل"
+    },
+    "sampleChildren": {
+      "adam": "آدم",
+      "mohammed": "محمد"
+    }
   }
 }
