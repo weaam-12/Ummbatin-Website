@@ -53,7 +53,15 @@ const AdminPayments = () => {
         const fetchUsers = async () => {
             try {
                 const response = await getAllUsers();
-                setUsers(response);
+                if (Array.isArray(response)) {
+                    setUsers(response);
+                } else {
+                    console.error('Expected array but got:', response);
+                    setNotification({
+                        type: 'danger',
+                        message: 'بيانات المستخدمين غير صالحة'
+                    });
+                }
             } catch (error) {
                 console.error('Error fetching users:', error);
                 setNotification({
@@ -73,37 +81,34 @@ const AdminPayments = () => {
         setLoading(true);
         try {
             const response = await getAllPayments(month, year, selectedUser);
-            const data = Array.isArray(response) ? response : [];
 
-            if (data.length === 0) {
-                setNotification({
-                    type: 'info',
-                    message: 'لا توجد مدفوعات متاحة للعرض'
-                });
-            }
-            if (Array.isArray(data)) {
-                const enhanced = data.map((p) => ({
-                    ...p,
-                    paymentId: p.payment_id || p.paymentId || p.id,
-                    userId: p.user_id || p.userId,
-                    paymentType: p.type || p.paymentType,
-                    paymentDate: p.payment_date || p.paymentDate,
-                    amount: p.amount || p.fee || 0,
-                    status: p.status || 'PENDING',
-                    date: p.date || p.due_date,
-                    fullName: p.fullName ||
-                        users.find((u) => u.user_id === (p.user_id || p.userId))?.fullName ||
-                        'غير معروف',
-                }));
-                setPayments(enhanced);
-            } else {
-                console.error('❌ getAllPayments لم تُرجع مصفوفة:', data);
+            // تحقق جيد من أن البيانات مصفوفة
+            if (!Array.isArray(response)) {
+                console.error('Expected array but got:', response);
                 setNotification({
                     type: 'danger',
-                    message: 'البيانات المسترجعة من السيرفر غير صالحة',
+                    message: 'بيانات المدفوعات غير صالحة'
                 });
                 setPayments([]);
+                return;
             }
+
+            const enhanced = response.map((p) => ({
+                ...p,
+                paymentId: p.payment_id || p.paymentId || p.id || Math.random().toString(36).substr(2, 9),
+                userId: p.user_id || p.userId || '--',
+                paymentType: p.type || p.paymentType || 'UNKNOWN',
+                paymentDate: p.payment_date || p.paymentDate || null,
+                amount: p.amount || p.fee || 0,
+                status: p.status || 'PENDING',
+                date: p.date || p.due_date || null,
+                fullName: p.fullName ||
+                    (users.find((u) => u.user_id === (p.user_id || p.userId))?.fullName ||
+                    'غير معروف',
+            }));
+
+            setPayments(enhanced);
+            setNotification(null);
         } catch (error) {
             console.error('🚨 خطأ أثناء تحميل الدفعات:', error);
             setNotification({
@@ -117,6 +122,8 @@ const AdminPayments = () => {
     };
 
     const filteredPayments = useMemo(() => {
+        if (!Array.isArray(payments)) return [];
+
         let result = [...payments];
         if (paymentTypeFilter !== 'ALL') {
             result = result.filter(p => p.paymentType === paymentTypeFilter);
@@ -160,7 +167,7 @@ const AdminPayments = () => {
                             className={styles.filterSelect}
                         >
                             <option value="">جميع المستخدمين</option>
-                            {users.map(user => (
+                            {Array.isArray(users) && users.map(user => (
                                 <option key={`user-${user.user_id}`} value={user.user_id}>
                                     {user.fullName}
                                 </option>
@@ -251,7 +258,7 @@ const AdminPayments = () => {
                             </tr>
                             </thead>
                             <tbody>
-                            {filteredPayments.length > 0 ? (
+                            {Array.isArray(filteredPayments) && filteredPayments.length > 0 ? (
                                 filteredPayments.map((payment) => (
                                     <tr key={`payment-${payment.paymentId}`}>
                                         <td>{payment.userId || '--'}</td>
@@ -260,7 +267,7 @@ const AdminPayments = () => {
                                         <td>{payment.amount !== undefined ? `${payment.amount} شيكل` : '--'}</td>
                                         <td>{formatDate(payment.date)}</td>
                                         <td>
-                                            <span className={`${styles.badge} ${styles[statusVariants[payment.status]]}`}>
+                                            <span className={`${styles.badge} ${styles[statusVariants[payment.status]] || ''}`}>
                                                 {statusLabels[payment.status] || payment.status || '--'}
                                             </span>
                                         </td>
