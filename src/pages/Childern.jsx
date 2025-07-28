@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { fetchKindergartens, getChildrenByUser, createChild, enrollChild } from '../api';
+import { fetchKindergartens, createChild, enrollChild } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import './Children.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -92,12 +93,13 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     );
 };
 
-const Children = ({ userId }) => {
+const Children = () => {
     const { t, i18n } = useTranslation();
+    const { user, getUserId } = useAuth();
     const [children, setChildren] = useState([]);
     const [kindergartens, setKindergartens] = useState([]);
     const [newChild, setNewChild] = useState({ name: '', birthDate: '' });
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showPayment, setShowPayment] = useState(false);
     const [selectedChild, setSelectedChild] = useState(null);
@@ -107,22 +109,26 @@ const Children = ({ userId }) => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const [kids, kgs] = await Promise.all([
-                    getChildrenByUser(userId),
+                const [kgs] = await Promise.all([
                     fetchKindergartens()
                 ]);
-                setChildren(kids);
                 setKindergartens(kgs);
+
+                // جلب بيانات الأطفال للمستخدم الحالي فقط
+                if (getUserId()) {
+                    const response = await axiosInstance.get('/api/children/my-children');
+                    setChildren(response.data);
+                }
             } catch (error) {
-                console.error("Failed to load data", error);
+                console.error("Error loading data", error);
                 setError(t('children.loadError'));
             } finally {
                 setLoading(false);
             }
         };
 
-        if (userId) loadData();
-    }, [userId, t]);
+        loadData();
+    }, [getUserId(), t]);
 
     const handleAddChild = async () => {
         if (!newChild.name || !newChild.birthDate) {
@@ -133,7 +139,7 @@ const Children = ({ userId }) => {
         try {
             const child = await createChild({
                 ...newChild,
-                userId
+                userId: getUserId() // استخدام معرف المستخدم الحالي
             });
             setChildren([...children, child]);
             setNewChild({ name: '', birthDate: '' });
@@ -161,6 +167,17 @@ const Children = ({ userId }) => {
             }
         }
     };
+
+    if (!user) {
+        return (
+            <div className="auth-error">
+                <h3>{t('auth.loginRequired')}</h3>
+                <button onClick={() => window.location.href = '/login'}>
+                    {t('auth.login')}
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className={`children-page ${i18n.language}`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
@@ -286,7 +303,8 @@ const Children = ({ userId }) => {
                         kindergarten={selectedKindergarten}
                         onSuccess={() => {
                             setShowPayment(false);
-                            getChildrenByUser(userId).then(setChildren);
+                            // إعادة تحميل بيانات الأطفال بعد التسجيل الناجح
+                            axiosInstance.get('/api/children/my-children').then(res => setChildren(res.data));
                         }}
                         onClose={() => setShowPayment(false)}
                     />
