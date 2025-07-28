@@ -113,5 +113,36 @@
     "success": {
       "submitSuccess": "تم إرسال الشكوى بنجاح! رقم التذكرة: "
     }
+  },
+  "payments": {
+    "title": "الدفعات الشهرية",
+    "totalDebt": "الدين التراكمي",
+    "loading": "جاري التحميل...",
+    "processing": "جاري المعالجة...",
+    "status": {
+      "PENDING": "قيد الانتظار",
+      "PAID": "تم الدفع",
+      "OVERDUE": "متأخر",
+      "UNKNOWN": "غير معروف"
+    },
+    "invoice": {
+      "amount": "المبلغ",
+      "dueDate": "تاريخ الاستحقاق",
+      "paidSuccess": "تم الدفع بنجاح",
+      "downloadPdf": "تنزيل PDF",
+      "payNow": "دفع الآن",
+      "paymentHistory": "سجل الدفعات السابقة"
+    },
+    "notifications": {
+      "loadError": "فشل تحميل البيانات",
+      "paymentSuccess": "تم الدفع بنجاح",
+      "paymentError": "فشل الدفع، حاول لاحقاً"
+    },
+    "types": {
+      "water": "فاتورة المياه",
+      "arnona": "الأرنونا",
+      "kindergarten": "الحضانة"
+    },
+    "currency": "شيقل"
   }
 }

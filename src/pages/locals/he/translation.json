@@ -113,5 +113,36 @@
     "success": {
       "submitSuccess": "התלונה נשלחה בהצלחה! מספר כרטיס: "
     }
+  },
+  "payments": {
+    "title": "תשלומים חודשיים",
+    "totalDebt": "חוב מצטבר",
+    "loading": "טוען...",
+    "processing": "מעבד...",
+    "status": {
+      "PENDING": "ממתין",
+      "PAID": "שולם",
+      "OVERDUE": "באיחור",
+      "UNKNOWN": "לא ידוע"
+    },
+    "invoice": {
+      "amount": "סכום",
+      "dueDate": "תאריך יעד",
+      "paidSuccess": "התשלום בוצע בהצלחה",
+      "downloadPdf": "הורד PDF",
+      "payNow": "שלם עכשיו",
+      "paymentHistory": "היסטוריית תשלומים"
+    },
+    "notifications": {
+      "loadError": "שגיאה בטעינת נתונים",
+      "paymentSuccess": "התשלום בוצע בהצלחה",
+      "paymentError": "התשלום נכשל, נסה שוב מאוחר יותר"
+    },
+    "types": {
+      "water": "חשבון מים",
+      "arnona": "ארנונה",
+      "kindergarten": "גן ילדים"
+    },
+    "currency": "שקל"
   }
 }

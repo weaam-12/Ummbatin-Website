@@ -1,10 +1,8 @@
-// Payments.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
-import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
+import { useTranslation } from 'react-i18next'; // Add this import
 import {
     Card, Tabs, Tab, Button, Alert, Spinner, Container, ListGroup, Badge, Row, Col
 } from 'react-bootstrap';
@@ -13,10 +11,10 @@ import {
 } from 'react-icons/fi';
 import './Payment.css';
 
-// دالة استدعاء API من ملف api.js
 import { getUserPayments, processPayment } from '../api';
 
 const Payments = () => {
+    const { t } = useTranslation(); // Add this line
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('water');
     const [loading, setLoading] = useState(true);
@@ -29,9 +27,13 @@ const Payments = () => {
     const [debt, setDebt] = useState(0);
 
     const statusVariants = { PENDING: 'warning', PAID: 'success', OVERDUE: 'danger' };
-    const statusLabels = { PENDING: 'قيد الانتظار', PAID: 'تم الدفع', OVERDUE: 'متأخر' };
+    const statusLabels = {
+        PENDING: t('payments.status.PENDING'),
+        PAID: t('payments.status.PAID'),
+        OVERDUE: t('payments.status.OVERDUE')
+    };
 
-    const formatDate = (d) => d ? new Date(d).toLocaleDateString('ar-SA') : '--';
+    const formatDate = (d) => d ? new Date(d).toLocaleDateString() : '--';
 
     // تحميل البيانات
     useEffect(() => {
@@ -87,20 +89,17 @@ const Payments = () => {
     const handlePayment = async (paymentType) => {
         setLoading(true);
         try {
-            const amount = Math.round(payments[paymentType].amount * 100); // بالقروش
+            const amount = Math.round(payments[paymentType].amount * 100);
             const { clientSecret } = await processPayment({
                 userId: user.userId,
                 amount,
                 currency: 'ils',
                 paymentType,
-                description: `دفع ${paymentType}`
+                description: `${t('payments.invoice.payNow')} ${t(`payments.types.${paymentType}`)}`
             });
 
-            // هنا يمكنك فتح نافذة Stripe Checkout أو Checkout Element
-            // سنعرض رابط الدفع ببساطة:
             window.open(`https://checkout.stripe.com/pay/${clientSecret}`, '_blank');
 
-            // تحديث الحالة بعد الدفع (يمكنك استخدام webhook لاحقاً)
             setPayments(prev => ({
                 ...prev,
                 [paymentType]: {
@@ -112,37 +111,43 @@ const Payments = () => {
                     ]
                 }
             }));
-            setNotification({ type: 'success', message: `تم دفع ${paymentType} بنجاح` });
+            setNotification({
+                type: 'success',
+                message: `${t('payments.notifications.paymentSuccess')} ${t(`payments.types.${paymentType}`)}`
+            });
         } catch (e) {
-            setNotification({ type: 'danger', message: 'فشل الدفع، حاول لاحقاً' });
+            setNotification({
+                type: 'danger',
+                message: t('payments.notifications.paymentError')
+            });
         } finally {
             setLoading(false);
         }
     };
 
-    const renderTab = (key, title) => {
+    const renderTab = (key, titleKey) => {
         const item = payments[key];
         if (!item) return null;
         return (
-            <Tab eventKey={key} title={title}>
+            <Tab eventKey={key} title={t(`payments.types.${key}`)}>
                 <div id={`invoice-${key}`} className="payment-details mt-3 p-3">
                     <Row className="align-items-center mb-3">
-                        <Col><h5><FiCreditCard className="me-2" />{title}</h5></Col>
+                        <Col><h5><FiCreditCard className="me-2" />{t(`payments.types.${key}`)}</h5></Col>
                         <Col xs="auto">
                             <Badge pill bg={statusVariants[item.status] || 'secondary'}>
-                                {statusLabels[item.status] || 'غير معروف'}
+                                {statusLabels[item.status] || t('payments.status.UNKNOWN')}
                             </Badge>
                         </Col>
                     </Row>
 
-                    <p>المبلغ: <strong>{item.amount} شيقل</strong></p>
-                    <p>تاريخ الاستحقاق: <strong>{formatDate(item.dueDate)}</strong></p>
+                    <p>{t('payments.invoice.amount')}: <strong>{item.amount} {t('payments.currency')}</strong></p>
+                    <p>{t('payments.invoice.dueDate')}: <strong>{formatDate(item.dueDate)}</strong></p>
 
                     {item.status === 'PAID' ? (
                         <>
-                            <Alert variant="success"><FiCheckCircle /> تم الدفع بنجاح</Alert>
+                            <Alert variant="success"><FiCheckCircle /> {t('payments.invoice.paidSuccess')}</Alert>
                             <Button variant="outline-success" onClick={() => handleDownloadPDF(key)}>
-                                <FiDownload /> تنزيل PDF
+                                <FiDownload /> {t('payments.invoice.downloadPdf')}
                             </Button>
                         </>
                     ) : (
@@ -154,23 +159,23 @@ const Payments = () => {
                             {loading ? (
                                 <>
                                     <Spinner animation="border" size="sm" className="me-2" />
-                                    جاري المعالجة...
+                                    {t('payments.processing')}
                                 </>
                             ) : (
-                                'دفع الآن'
+                                t('payments.invoice.payNow')
                             )}
                         </Button>
                     )}
 
                     <div className="mt-4">
-                        <h6><FiClock className="me-2" />سجل الدفعات السابقة</h6>
+                        <h6><FiClock className="me-2" />{t('payments.invoice.paymentHistory')}</h6>
                         <ListGroup>
                             {(item.history || []).map((p, i) => (
                                 <ListGroup.Item key={i}>
                                     <div className="d-flex justify-content-between">
                                         <span>{formatDate(p.date)}</span>
-                                        <span>{p.amount} شيقل</span>
-                                        <Badge bg="success">تم الدفع</Badge>
+                                        <span>{p.amount} {t('payments.currency')}</span>
+                                        <Badge bg="success">{t('payments.status.PAID')}</Badge>
                                     </div>
                                 </ListGroup.Item>
                             ))}
@@ -191,24 +196,24 @@ const Payments = () => {
 
             <Card className="shadow-sm">
                 <Card.Header className="bg-primary text-white">
-                    <h4 className="mb-0"><FiDollarSign className="me-2" />الدفعات الشهرية</h4>
+                    <h4 className="mb-0"><FiDollarSign className="me-2" />{t('payments.title')}</h4>
                 </Card.Header>
 
                 <Card.Body>
                     <div className="d-flex justify-content-between mb-3">
-                        <span>الدين التراكمي: <strong className="text-danger">{debt} شيقل</strong></span>
+                        <span>{t('payments.totalDebt')}: <strong className="text-danger">{debt} {t('payments.currency')}</strong></span>
                     </div>
 
                     {loading ? (
                         <div className="text-center py-5">
                             <Spinner animation="border" role="status" />
-                            <p className="mt-2">جاري التحميل...</p>
+                            <p className="mt-2">{t('payments.loading')}</p>
                         </div>
                     ) : (
                         <Tabs activeKey={activeTab} onSelect={k => setActiveTab(k)} className="mb-4">
-                            {renderTab('water', 'فاتورة المياه')}
-                            {renderTab('arnona', 'الأرنونا')}
-                            {renderTab('kindergarten', 'الحضانة')}
+                            {renderTab('water')}
+                            {renderTab('arnona')}
+                            {renderTab('kindergarten')}
                         </Tabs>
                     )}
                 </Card.Body>
