@@ -74,6 +74,9 @@ const AdminPayments = () => {
     }, []);
 
     useEffect(() => {
+        if (typeof L === 'undefined') {
+            console.error('Leaflet not loaded!');
+            return;}
         loadPayments();
     }, [month, year, selectedUser, users]);
     const loadPayments = async () => {

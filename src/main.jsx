@@ -11,6 +11,10 @@ import 'bootstrap/dist/js/bootstrap.bundle.js'
 
 // استيراد ملفات CSS الإضافية
 import './pages/AdminComplaints.module.css';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// حل مشكلة أيقونات Marker
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
