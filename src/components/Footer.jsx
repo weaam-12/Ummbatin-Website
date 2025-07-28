@@ -10,20 +10,20 @@ const Footer = () => {
         <footer className="footer">
             <div className="footer-content">
                 <div className="footer-info">
-                    <p>© 2025 {t("siteName")}. {t("allRightsReserved")}.</p>
+                    <p>© 2025 {t("footer.siteName")}. {t("footer.allRightsReserved")}.</p>
                     <address>
-                        <p><FaMapMarkerAlt /> {t("address")}: أم بطين</p>
-                        <p><FaPhoneAlt /> {t("phone")}: +972 2 1234 5678</p>
-                        <p><FaPhoneAlt /> {t("fax")}: +972 2 8765 4321</p>
-                        <p><FaEnvelope /> {t("email")}: info@umbateen.gov.il</p>
+                        <p><FaMapMarkerAlt /> {t("footer.address")}</p>
+                        <p><FaPhoneAlt /> {t("footer.phone")}</p>
+                        <p><FaPhoneAlt /> {t("footer.fax")}</p>
+                        <p><FaEnvelope /> {t("footer.email")}</p>
                     </address>
                 </div>
 
                 <nav className="footer-links">
-                    <a href="/about">{t("aboutMunicipality")}</a>
+                    <a href="/about">{t("footer.aboutMunicipality")}</a>
                     <a href="/services">{t("services")}</a>
-                    <a href="/privacy-policy">{t("privacyPolicy")}</a>
-                    <a href="/contact">{t("contactUs")}</a>
+                    <a href="/privacy-policy">{t("footer.privacyPolicy")}</a>
+                    <a href="/contact">{t("footer.contactUs")}</a>
                 </nav>
             </div>
 

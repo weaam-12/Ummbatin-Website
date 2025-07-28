@@ -57,21 +57,21 @@ const Navbar = () => {
 
     // روابط المستخدم العادي
     const userLinks = [
-        { path: "/", icon: <FaHome />, text: t("home") },
+        { path: "/", icon: <FaHome />, text: t("common.home") },
         { path: "/complaints", icon: <FaExclamationCircle />, text: t("complaints") },
         { path: "/payments", icon: <FaMoneyBillWave />, text: t("payments") },
         { path: "/emergency", icon: <FaBell />, text: t("emergency") },
-        { path: "/garbage-complaints", icon: <FaTrash />, text: t("garbageService") },
-        { path: "/children", icon: <FaGraduationCap />, text: t("education") }
+        { path: "/garbage-complaints", icon: <FaTrash />, text: t("services.garbage") },
+        { path: "/children", icon: <FaGraduationCap />, text: t("navbar.education") }
     ];
 
     // روابط الأدمن فقط
     const adminLinks = [
-        { path: "/admin", icon: <FaChartLine />, text: t("controlPanel") },
-        { path: "/admin/general", icon: <FaCog />, text: t("generalManagement") },
-        { path: "/admin/education", icon: <FaGraduationCap />, text: t("educationManagement") },
-        { path: "/admin/payments", icon: <FaMoneyBillWave />, text: t("paymentsManagement") },
-        { path: "/admin/complaints", icon: <FaExclamationCircle />, text: t("complaintsManagement") }
+        { path: "/admin", icon: <FaChartLine />, text: t("navbar.controlPanel") },
+        { path: "/admin/general", icon: <FaCog />, text: t("navbar.generalManagement") },
+        { path: "/admin/education", icon: <FaGraduationCap />, text: t("navbar.educationManagement") },
+        { path: "/admin/payments", icon: <FaMoneyBillWave />, text: t("navbar.paymentsManagement") },
+        { path: "/admin/complaints", icon: <FaExclamationCircle />, text: t("navbar.complaintsManagement") }
     ];
 
     return (

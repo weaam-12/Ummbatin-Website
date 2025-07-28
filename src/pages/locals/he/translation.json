@@ -12,7 +12,8 @@
     "delete": "מחק",
     "refresh": "רענן",
     "submit": "שלח",
-    "submitting": "שולח..."
+    "submitting": "שולח...",
+    "search": "חיפוש..."
   },
 
   "homePage": {
@@ -37,114 +38,24 @@
     "garbage": "שירות אשפה"
   },
 
-  "event": {
-    "date": "תאריך",
-    "from": "מ",
-    "to": "עד",
-    "location": "מיקום",
-    "organizer": "מארגן"
+  "footer": {
+    "siteName": "עיריית אום בטין",
+    "allRightsReserved": "כל הזכויות שמורות",
+    "aboutMunicipality": "על העירייה",
+    "contactUs": "צור קשר",
+    "privacyPolicy": "מדיניות פרטיות",
+    "address": "כתובת: אום בטין",
+    "phone": "טלפון: +972 2 1234 5678",
+    "fax": "פקס: +972 2 8765 4321",
+    "email": "אימייל: info@umbateen.gov.il"
   },
 
-  "userManagement": {
-    "title": "ניהול משתמשים",
-    "register": "הוספת משתמש",
-    "searchPlaceholder": "חיפוש לפי מייל או שם...",
-    "allRoles": "כל התפקידים",
-    "admin": "מנהל",
-    "resident": "תושב",
-    "email": "אימייל",
-    "fullName": "שם מלא",
-    "role": "תפקיד",
-    "registered": "תאריך הרשמה",
-    "actions": "פעולות",
-    "noUsers": "אין משתמשים",
-    "changeRoleToAdmin": "שנה למנהל",
-    "changeRoleToUser": "שנה למשתמש",
-    "userDetails": "פרטי משתמש"
-  },
-
-  "admin": {
-    "dashboard": "ניהול משתמשים",
+  "navbar": {
+    "education": "חינוך",
     "controlPanel": "לוח בקרה",
-    "generalManagement": "הנהלה כללית",
-    "emergencyManagement": "ניהול חירום",
+    "generalManagement": "ניהול כללי",
     "educationManagement": "ניהול חינוך",
     "paymentsManagement": "ניהול תשלומים",
     "complaintsManagement": "ניהול תלונות"
-  },
-
-  "complaints": {
-    "title": "הגשת תלונה",
-    "description": "דיווח על בעיות כמו איסוף אשפה או נושאים אחרים.",
-    "historyTitle": "תלונות קודמות",
-    "noComplaints": "אין תלונות קודמות",
-    "response": "תגובת העירייה",
-    "statuses": {
-      "SUBMITTED": "בבדיקה",
-      "IN_PROGRESS": "בטיפול",
-      "RESOLVED": "נפתר",
-      "REJECTED": "נדחה"
-    }
-  },
-
-  "garbageComplaint": {
-    "title": "דיווח על בעיית פסולת",
-    "subtitle": "עזרו לנו לשפר את השירות על ידי דיווח על בעיות",
-    "description": "פרטי הבעיה",
-    "descriptionPlaceholder": "תאר את הבעיה בפירוט...",
-    "type": "סוג הבעיה",
-    "types": {
-      "uncollected": "פסולת שלא נאספה",
-      "overflowing": "מיכל מלא",
-      "damagedBin": "מיכל פגום",
-      "missingBin": "מיכל חסר",
-      "illegalDumping": "השלכת פסולת בלתי חוקית"
-    },
-    "location": "מיקום הבעיה",
-    "locationPlaceholder": "הזן מיקום או בחר ממפה",
-    "image": "צירוף תמונה",
-    "chooseImage": "בחר תמונה",
-    "removeImage": "הסר תמונה",
-    "imagePreview": "תצוגה מקדימה",
-    "complaintImage": "תמונת הדיווח"
-  },
-
-  "payment": {
-    "title": "תשלום אלקטרוני",
-    "button": "שלם עכשיו",
-    "creditCardTitle": "תשלום בכרטיס אשראי",
-    "description": "שלם חשבונות באופן מקוון.",
-    "checkoutTitle": "סיום התשלום"
-  },
-  "home": "ראשי",
-  "complaints": "תלונות",
-  "payments": "תשלומים",
-  "emergency": "חירום",
-  "garbageService": "שירות אשפה",
-  "education": "חינוך",
-  "controlPanel": "לוח בקרה",
-  "generalManagement": "ניהול כללי",
-  "educationManagement": "ניהול חינוך",
-  "paymentsManagement": "ניהול תשלומים",
-  "complaintsManagement": "ניהול תלונות",
-  "login": "התחברות",
-  "profile": "פרופיל",
-  "adminPanel": "פאנל מנהל",
-  "forms": {
-    "title": "טפסים",
-    "description": "מלא טפסים שונים אונליין."
-  },
-  "address": "כתובת",
-  "phone": "טלפון",
-  "fax": "פקס",
-  "email": "אימייל",
-  "emergency": {
-    "title": "חירום",
-    "description": "צרו קשר עם משטרה, מכבי אש, מד\"א ושירותי חירום נוספים בעת הצורך."
-  },
-
-  "about": {
-    "title": "על היישוב",
-    "description": "מידע היסטורי ושירותים הניתנים לתושבים."
   }
 }

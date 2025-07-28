@@ -12,27 +12,10 @@
     "delete": "حذف",
     "refresh": "تحديث",
     "submit": "إرسال",
-    "submitting": "جاري الإرسال..."
+    "submitting": "جاري الإرسال...",
+    "search": "بحث..."
   },
-  "address": "العنوان",
-  "phone": "هاتف",
-  "fax": "فاكس",
-  "email": "البريد الإلكتروني",
 
-  "home": "الرئيسية",
-  "complaints": "الشكاوى",
-  "payments": "المدفوعات",
-  "emergency": "الطوارئ",
-  "garbageService": "شكاوى النفايات",
-  "education": "التعليم",
-  "controlPanel": "لوحة التحكم",
-  "generalManagement": "الإدارة العامة",
-  "educationManagement": "إدارة التعليم",
-  "paymentsManagement": "إدارة المدفوعات",
-  "complaintsManagement": "إدارة الشكاوى",
-  "login": "تسجيل الدخول",
-  "profile": "الملف الشخصي",
-  "adminPanel": "لوحة المدير",
   "homePage": {
     "title": "مرحباً بكم في بلدية أم بطين",
     "description": "أم بطين هي بلدة متطورة في النقب، تقدم خدمات بلدية متكاملة، تعليم ذو جودة عالية، وفعاليات ثقافية واجتماعية لكل أفراد العائلة.",
@@ -52,101 +35,27 @@
     "payments": "دفع إلكتروني",
     "requests": "متابعة الطلبات",
     "news": "أخبار وتحديثات",
-    "garbage": "شكاوى للنفايات"
+    "garbage": "شكاوى النفايات"
   },
 
-  "event": {
-    "date": "التاريخ",
-    "from": "من",
-    "to": "إلى",
-    "location": "المكان",
-    "organizer": "المنظم"
+  "footer": {
+    "siteName": "بلدية أم بطين",
+    "allRightsReserved": "كل الحقوق محفوظة",
+    "aboutMunicipality": "عن البلدية",
+    "contactUs": "اتصل بنا",
+    "privacyPolicy": "سياسة الخصوصية",
+    "address": "العنوان: أم بطين",
+    "phone": "هاتف: +972 2 1234 5678",
+    "fax": "فاكس: +972 2 8765 4321",
+    "email": "البريد الإلكتروني: info@umbateen.gov.il"
   },
 
-  "userManagement": {
-    "title": "إدارة المستخدمين",
-    "register": "تسجيل مستخدم",
-    "searchPlaceholder": "بحث بالبريد أو الاسم...",
-    "allRoles": "كل الأدوار",
-    "admin": "مدير",
-    "resident": "مقيم",
-    "email": "البريد الإلكتروني",
-    "fullName": "الاسم الكامل",
-    "role": "الدور",
-    "registered": "تاريخ التسجيل",
-    "actions": "الإجراءات",
-    "noUsers": "لا يوجد مستخدمين",
-    "changeRoleToAdmin": "تحويل إلى مدير",
-    "changeRoleToUser": "تحويل إلى مستخدم",
-    "userDetails": "بيانات المستخدم"
-  },
-
-  "admin": {
-    "dashboard": "لوحة التحكم",
+  "navbar": {
+    "education": "التعليم",
     "controlPanel": "لوحة التحكم",
     "generalManagement": "الإدارة العامة",
-    "emergencyManagement": "إدارة الطوارئ",
     "educationManagement": "إدارة التعليم",
-    "paymentsManagement": "إدارة الدفعات",
+    "paymentsManagement": "إدارة المدفوعات",
     "complaintsManagement": "إدارة الشكاوى"
-  },
-
-  "complaints": {
-    "title": "تقديم شكوى",
-    "description": "الإبلاغ عن مشكلات مثل جمع القمامة أو غيرها.",
-    "historyTitle": "الشكاوى السابقة",
-    "noComplaints": "لا توجد شكاوى سابقة",
-    "response": "رد البلدية",
-    "statuses": {
-      "SUBMITTED": "قيد المراجعة",
-      "IN_PROGRESS": "قيد المعالجة",
-      "RESOLVED": "تم الحل",
-      "REJECTED": "مرفوض"
-    }
-  },
-
-  "garbageComplaint": {
-    "title": "بلاغ عن مشكلة نفايات",
-    "subtitle": "ساعدنا في تحسين الخدمة بالإبلاغ عن أي مشكلة",
-    "description": "تفاصيل المشكلة",
-    "descriptionPlaceholder": "صف المشكلة بدقة...",
-    "type": "نوع المشكلة",
-    "types": {
-      "uncollected": "نفايات لم يتم جمعها",
-      "overflowing": "حاوية ممتلئة",
-      "damagedBin": "حاوية تالفة",
-      "missingBin": "حاوية مفقودة",
-      "illegalDumping": "رمي عشوائي للنفايات"
-    },
-    "location": "موقع المشكلة",
-    "locationPlaceholder": "أدخل الموقع أو اختر من الخريطة",
-    "image": "إرفاق صورة",
-    "chooseImage": "اختر صورة",
-    "removeImage": "إزالة الصورة",
-    "imagePreview": "معاينة الصورة",
-    "complaintImage": "صورة البلاغ"
-  },
-
-  "payment": {
-    "title": "دفع إلكتروني",
-    "button": "ادفع الآن",
-    "creditCardTitle": "دفع ببطاقة الائتمان",
-    "description": "ادفع المدفوعات عبر الإنترنت.",
-    "checkoutTitle": "إتمام الدفع"
-  },
-
-  "forms": {
-    "title": "النماذج",
-    "description": "املأ النماذج المختلفة عبر الإنترنت."
-  },
-
-  "emergency": {
-    "title": "طوارئ",
-    "description": "اتصل بالشرطة، الإطفاء، الإسعاف والخدمات الطارئة الأخرى عند الحاجة."
-  },
-
-  "about": {
-    "title": "عن المستوطنة",
-    "description": "معلومات تاريخية والخدمات المقدمة للسكان."
   }
 }
