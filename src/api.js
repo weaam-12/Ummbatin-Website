@@ -294,8 +294,16 @@ export const getPropertiesByUserId = async (userId) => {
     return response.data;
 };
 // الأطفال
-export const getChildrenByUser = (userId) =>
-    axiosInstance.get(`/api/children/user/${userId}`).then(r => r.data);
+export const getChildrenByUser = async (userId) => {
+    try {
+        const response = await axiosInstance.get(`/api/children/user/${userId}`);
+        console.log('Children data:', response.data); // إضافة لوج للتتبع
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching children:', error);
+        return []; // إرجاع مصفوفة فارغة بدلاً من undefined
+    }
+};
 
 export const createChild = (childData) =>
     axiosInstance.post('/api/children', childData).then(r => r.data);
