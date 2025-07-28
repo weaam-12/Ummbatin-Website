@@ -35,16 +35,16 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
                 childId: child.id,
                 kindergartenId: kindergarten.id,
                 paymentMethodId: paymentMethod.id,
-                amount: 500 // رسوم التسجيل
+                amount: 500
             });
 
             if (paymentResult.success) {
                 onSuccess();
             } else {
-                setError(paymentResult.message || t('payment.error'));
+                setError(paymentResult.message || t('children.payment.error'));
             }
         } catch (err) {
-            setError(t('payment.error'));
+            setError(t('children.payment.error'));
         } finally {
             setProcessing(false);
         }
@@ -53,20 +53,37 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     return (
         <div className="payment-modal">
             <div className="payment-content">
-                <h3>{t('enrollment.title')}</h3>
-                <p>{t('enrollment.child')}: {child.name}</p>
-                <p>{t('enrollment.kindergarten')}: {kindergarten.name}</p>
-                <p>{t('enrollment.fee')}: 500 {t('currency')}</p>
+                <h3>{t('children.enrollment.title')}</h3>
+                <div className="payment-details">
+                    <p><strong>{t('children.enrollment.child')}:</strong> {child.name}</p>
+                    <p><strong>{t('children.enrollment.kindergarten')}:</strong> {kindergarten.name}</p>
+                    <p><strong>{t('children.enrollment.fee')}:</strong> 500 {t('children.currency')}</p>
+                </div>
 
-                <form onSubmit={handleSubmit}>
-                    <CardElement />
-                    {error && <div className="error">{error}</div>}
-                    <div className="buttons">
-                        <button type="button" onClick={onClose}>
-                            {t('cancel')}
+                <form onSubmit={handleSubmit} className="payment-form">
+                    <div className="card-element-container">
+                        <CardElement options={{
+                            style: {
+                                base: {
+                                    fontSize: '16px',
+                                    color: '#424770',
+                                    '::placeholder': {
+                                        color: '#aab7c4',
+                                    },
+                                },
+                                invalid: {
+                                    color: '#9e2146',
+                                },
+                            },
+                        }} />
+                    </div>
+                    {error && <div className="error-message">{error}</div>}
+                    <div className="payment-buttons">
+                        <button type="button" onClick={onClose} className="cancel-btn">
+                            {t('children.cancel')}
                         </button>
-                        <button type="submit" disabled={processing}>
-                            {processing ? t('processing') : t('confirmPayment')}
+                        <button type="submit" disabled={processing} className="confirm-btn">
+                            {processing ? t('children.processing') : t('children.confirmPayment')}
                         </button>
                     </div>
                 </form>
@@ -76,7 +93,7 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
 };
 
 const Children = ({ userId }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [children, setChildren] = useState([]);
     const [kindergartens, setKindergartens] = useState([]);
     const [newChild, setNewChild] = useState({ name: '', birthDate: '' });
@@ -97,18 +114,21 @@ const Children = ({ userId }) => {
                 setChildren(kids);
                 setKindergartens(kgs);
             } catch (error) {
-                console.error("فشل في تحميل البيانات", error);
-                setError(t('loadError'));
+                console.error("Failed to load data", error);
+                setError(t('children.loadError'));
             } finally {
                 setLoading(false);
             }
         };
 
         if (userId) loadData();
-    }, [userId]);
+    }, [userId, t]);
 
     const handleAddChild = async () => {
-        if (!newChild.name || !newChild.birthDate) return;
+        if (!newChild.name || !newChild.birthDate) {
+            setError(t('children.errors.requiredFields'));
+            return;
+        }
 
         try {
             const child = await createChild({
@@ -117,8 +137,10 @@ const Children = ({ userId }) => {
             });
             setChildren([...children, child]);
             setNewChild({ name: '', birthDate: '' });
+            setError(null);
         } catch (error) {
-            console.error("فشل في إضافة الطفل", error);
+            console.error("Failed to add child", error);
+            setError(t('children.loadError'));
         }
     };
 
@@ -128,78 +150,135 @@ const Children = ({ userId }) => {
         setShowPayment(true);
     };
 
-    return (
-        <div className="children-page">
-            <h1>{t('myChildren')}</h1>
+    const handleDeleteChild = async (childId) => {
+        if (window.confirm(t('children.deleteChild'))) {
+            try {
+                // await deleteChild(childId); // Uncomment when you have delete API
+                setChildren(children.filter(child => child.id !== childId));
+            } catch (error) {
+                console.error("Failed to delete child", error);
+                setError(t('children.loadError'));
+            }
+        }
+    };
 
-            {/* إضافة طفل جديد */}
-            <div className="add-child-section">
-                <h2>{t('addNewChild')}</h2>
-                <input
-                    type="text"
-                    placeholder={t('childName')}
-                    value={newChild.name}
-                    onChange={(e) => setNewChild({...newChild, name: e.target.value})}
-                />
-                <input
-                    type="date"
-                    value={newChild.birthDate}
-                    onChange={(e) => setNewChild({...newChild, birthDate: e.target.value})}
-                />
-                <button onClick={handleAddChild}>{t('add')}</button>
+    return (
+        <div className={`children-page ${i18n.language}`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+            <h1 className="page-title">{t('children.myChildren')}</h1>
+
+            {loading && <div className="loading-indicator">{t('general.loading')}</div>}
+            {error && <div className="error-message">{error}</div>}
+
+            {/* Add New Child Section */}
+            <div className="add-child-section card">
+                <h2 className="section-title">{t('children.registerTitle')}</h2>
+                <div className="form-group">
+                    <label htmlFor="childName">{t('children.childName')}</label>
+                    <input
+                        id="childName"
+                        type="text"
+                        placeholder={t('children.childName')}
+                        value={newChild.name}
+                        onChange={(e) => setNewChild({...newChild, name: e.target.value})}
+                        className="form-input"
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="birthDate">{t('children.birthDate')}</label>
+                    <input
+                        id="birthDate"
+                        type="date"
+                        value={newChild.birthDate}
+                        onChange={(e) => setNewChild({...newChild, birthDate: e.target.value})}
+                        className="form-input"
+                    />
+                </div>
+                <button
+                    onClick={handleAddChild}
+                    className="primary-btn"
+                    disabled={!newChild.name || !newChild.birthDate}
+                >
+                    {t('children.addChild')}
+                </button>
             </div>
 
-            {/* قائمة الأطفال */}
-            <div className="children-list">
-                <h2>{t('registeredChildren')}</h2>
+            {/* Registered Children Section */}
+            <div className="registered-children-section">
+                <h2 className="section-title">{t('children.registeredTitle')}</h2>
+
                 {children.length === 0 ? (
-                    <p>{t('noChildren')}</p>
+                    <div className="empty-state">
+                        <p>{t('children.noChildren')}</p>
+                        <p>{t('children.addNewChild')}</p>
+                    </div>
                 ) : (
-                    <table className="children-table">
-                        <thead>
-                        <tr>
-                            <th>{t('childName')}</th>
-                            <th>{t('birthDate')}</th>
-                            <th>{t('status')}</th>
-                            <th>{t('actions')}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {children.map(child => {
-                            const enrolledKg = kindergartens.find(k => k.id === child.kindergartenId);
-                            return (
-                                <tr key={child.id}>
-                                    <td>{child.name}</td>
-                                    <td>{new Date(child.birthDate).toLocaleDateString()}</td>
-                                    <td>
-                                        {enrolledKg ? (
-                                            <span>{t('enrolledIn')}: {enrolledKg.name}</span>
-                                        ) : (
-                                            <span>{t('notEnrolled')}</span>
-                                        )}
-                                    </td>
-                                    <td>
-                                        {!child.kindergartenId && (
-                                            <select onChange={(e) => {
-                                                const kg = kindergartens.find(k => k.id === e.target.value);
-                                                if (kg) handleEnroll(child, kg);
-                                            }}>
-                                                <option value="">{t('selectKindergarten')}</option>
-                                                {kindergartens.map(kg => (
-                                                    <option key={kg.id} value={kg.id}>{kg.name}</option>
-                                                ))}
-                                            </select>
-                                        )}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                        </tbody>
-                    </table>
+                    <div className="responsive-table">
+                        <table className="children-table">
+                            <thead>
+                            <tr>
+                                <th>{t('children.childName')}</th>
+                                <th>{t('children.birthDate')}</th>
+                                <th>{t('children.status')}</th>
+                                <th>{t('children.actions')}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {children.map(child => {
+                                const enrolledKg = kindergartens.find(k => k.id === child.kindergartenId);
+                                return (
+                                    <tr key={child.id}>
+                                        <td data-label={t('children.childName')}>{child.name}</td>
+                                        <td data-label={t('children.birthDate')}>
+                                            {new Date(child.birthDate).toLocaleDateString(i18n.language)}
+                                        </td>
+                                        <td data-label={t('children.status')}>
+                                            {enrolledKg ? (
+                                                <span className="enrolled-status">
+                                                        {t('children.enrolledIn')}: {enrolledKg.name}
+                                                    </span>
+                                            ) : (
+                                                <span className="not-enrolled-status">
+                                                        {t('children.notEnrolled')}
+                                                    </span>
+                                            )}
+                                        </td>
+                                        <td data-label={t('children.actions')}>
+                                            {!child.kindergartenId ? (
+                                                <div className="enroll-action">
+                                                    <select
+                                                        onChange={(e) => {
+                                                            const kg = kindergartens.find(k => k.id === e.target.value);
+                                                            if (kg) handleEnroll(child, kg);
+                                                        }}
+                                                        className="kindergarten-select"
+                                                    >
+                                                        <option value="">{t('children.selectKindergarten')}</option>
+                                                        {kindergartens.map(kg => (
+                                                            <option key={kg.id} value={kg.id}>
+                                                                {kg.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleDeleteChild(child.id)}
+                                                    className="danger-btn"
+                                                >
+                                                    {t('children.delete')}
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 
-            {/* نافذة الدفع */}
+            {/* Payment Modal */}
             {showPayment && selectedChild && selectedKindergarten && (
                 <Elements stripe={stripePromise}>
                     <PaymentForm

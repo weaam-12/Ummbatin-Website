@@ -1,17 +1,151 @@
 /* Children.css */
 
+/* Base Styles */
 .children-page {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f9f9f9;
     color: #333;
+    min-height: 100vh;
 }
 
-h1, h2, h3 {
+/* Language Direction */
+.children-page.ar {
+    direction: rtl;
+    text-align: right;
+}
+
+.children-page.he {
+    direction: rtl;
+    text-align: right;
+}
+
+.children-page.en {
+    direction: ltr;
+    text-align: left;
+}
+
+/* Typography */
+.page-title {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.section-title {
     color: #2c3e50;
     margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+/* Cards */
+.card {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.form-input:focus {
+    border-color: #2ecc71;
+    outline: none;
+}
+
+/* Buttons */
+.primary-btn {
+    padding: 12px 20px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.primary-btn:hover {
+    background-color: #27ae60;
+}
+
+.primary-btn:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+.danger-btn {
+    padding: 8px 16px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.danger-btn:hover {
+    background-color: #c0392b;
+}
+
+.cancel-btn {
+    padding: 10px 16px;
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+    background-color: #7f8c8d;
+}
+
+.confirm-btn {
+    padding: 10px 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.confirm-btn:hover {
+    background-color: #2980b9;
+}
+
+/* Tables */
+.responsive-table {
+    overflow-x: auto;
 }
 
 .children-table {
@@ -21,7 +155,7 @@ h1, h2, h3 {
     background-color: #fff;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .children-table th,
@@ -29,6 +163,13 @@ h1, h2, h3 {
     padding: 16px;
     text-align: left;
     border-bottom: 1px solid #eee;
+}
+
+.children-page.ar .children-table th,
+.children-page.ar .children-table td,
+.children-page.he .children-table th,
+.children-page.he .children-table td {
+    text-align: right;
 }
 
 .children-table th {
@@ -43,43 +184,38 @@ h1, h2, h3 {
     background-color: #f1f1f1;
 }
 
-select, input[type="text"], input[type="date"] {
+.children-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status Indicators */
+.enrolled-status {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+.not-enrolled-status {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+/* Select Dropdown */
+.kindergarten-select {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    margin: 0 8px 16px 0;
     font-size: 14px;
+    min-width: 200px;
 }
 
-button {
-    padding: 10px 16px;
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s ease-in-out;
-}
-
-button:hover {
-    background-color: #27ae60;
-}
-
-.add-child-section {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
+/* Payment Modal */
 .payment-modal {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -90,23 +226,139 @@ button:hover {
     background-color: white;
     padding: 30px;
     border-radius: 12px;
-    width: 400px;
+    width: 450px;
     max-width: 90%;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
-.payment-content h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
+.payment-details {
+    margin-bottom: 20px;
 }
 
-.payment-content .buttons {
+.payment-details p {
+    margin: 8px 0;
+}
+
+.payment-form {
+    margin-top: 20px;
+}
+
+.card-element-container {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.payment-buttons {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
 }
 
-.payment-content .error {
+/* Error Messages */
+.error-message {
     color: #e74c3c;
-    margin-top: 10px;
+    background-color: #fdecea;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border-left: 4px solid #e74c3c;
+}
+
+.children-page.ar .error-message,
+.children-page.he .error-message {
+    border-left: none;
+    border-right: 4px solid #e74c3c;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.empty-state p {
+    color: #7f8c8d;
+    margin-bottom: 10px;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    text-align: center;
+    padding: 20px;
+    color: #3498db;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .children-table {
+        display: block;
+    }
+
+    .children-table thead {
+        display: none;
+    }
+
+    .children-table tr {
+        display: block;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #eee;
+    }
+
+    .children-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+        padding: 10px 15px;
+        border-bottom: 1px dotted #eee;
+    }
+
+    .children-table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+    .children-page.ar .children-table td:before,
+    .children-page.he .children-table td:before {
+        margin-left: 0;
+        margin-right: 10px;
+    }
+
+    .payment-buttons {
+        flex-direction: column;
+    }
+
+    .payment-buttons button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .payment-buttons button:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+    }
+
+    .form-input, .kindergarten-select, button {
+        padding: 10px;
+    }
+
+    .add-child-section {
+        padding: 15px;
+    }
 }
