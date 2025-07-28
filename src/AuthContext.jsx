@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
             return {
                 email: response.data.email,
-                userId: response.data.user_id,
+                userId: response.data.id,
                 fullName: response.data.fullName,
                 role: response.data.role?.roleName || response.data.role
             };
