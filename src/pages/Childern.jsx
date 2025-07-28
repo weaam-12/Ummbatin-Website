@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Elements, useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { fetchKindergartens, getChildrenByUser, createChild, enrollChild } from '../api';
 import './Children.css';
@@ -19,14 +19,25 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
         setProcessing(true);
 
         try {
-            // 1. إنشاء عملية دفع
+            const cardElement = elements.getElement(CardElement);
+            const { error, paymentMethod } = await stripe.createPaymentMethod({
+                type: 'card',
+                card: cardElement,
+            });
+
+            if (error) {
+                setError(error.message);
+                setProcessing(false);
+                return;
+            }
+
             const paymentResult = await enrollChild({
                 childId: child.id,
                 kindergartenId: kindergarten.id,
-                amount: 500 // رسوم التسجيل
+                paymentMethodId: paymentMethod.id,
+                amount: 500 // Registration fee
             });
 
-            // 2. إذا نجحت عملية الدفع
             if (paymentResult.success) {
                 onSuccess();
             } else {
@@ -69,12 +80,15 @@ const Children = ({ userId }) => {
     const [children, setChildren] = useState([]);
     const [kindergartens, setKindergartens] = useState([]);
     const [newChild, setNewChild] = useState({ name: '', birthDate: '' });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [showPayment, setShowPayment] = useState(false);
     const [selectedChild, setSelectedChild] = useState(null);
     const [selectedKindergarten, setSelectedKindergarten] = useState(null);
-    const [showPayment, setShowPayment] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
+            setLoading(true);
             try {
                 const [kids, kgs] = await Promise.all([
                     getChildrenByUser(userId),
@@ -84,6 +98,9 @@ const Children = ({ userId }) => {
                 setKindergartens(kgs);
             } catch (error) {
                 console.error("Failed to load data", error);
+                setError(t('loadError'));
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -115,7 +132,7 @@ const Children = ({ userId }) => {
         <div className="children-page">
             <h1>{t('myChildren')}</h1>
 
-            {/* إضافة طفل جديد */}
+            {/* Add New Child */}
             <div className="add-child">
                 <h2>{t('addNewChild')}</h2>
                 <input
@@ -132,7 +149,7 @@ const Children = ({ userId }) => {
                 <button onClick={handleAddChild}>{t('add')}</button>
             </div>
 
-            {/* قائمة الأطفال */}
+            {/* List of Children */}
             <div className="children-list">
                 <h2>{t('registeredChildren')}</h2>
                 {children.length === 0 ? (
@@ -170,7 +187,7 @@ const Children = ({ userId }) => {
                 )}
             </div>
 
-            {/* نافذة الدفع */}
+            {/* Payment Modal */}
             {showPayment && selectedChild && selectedKindergarten && (
                 <Elements stripe={stripePromise}>
                     <PaymentForm
@@ -178,7 +195,6 @@ const Children = ({ userId }) => {
                         kindergarten={selectedKindergarten}
                         onSuccess={() => {
                             setShowPayment(false);
-                            // تحديث القائمة بعد التسجيل الناجح
                             getChildrenByUser(userId).then(setChildren);
                         }}
                         onClose={() => setShowPayment(false)}
