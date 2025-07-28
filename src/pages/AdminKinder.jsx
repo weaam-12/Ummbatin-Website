@@ -14,34 +14,28 @@ const AdminKinder = () => {
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
 
-    const loadAll = async () => {
-        setLoading(true);
-        try {
-            const [kgs, usersData] = await Promise.all([
-                fetchKindergartens(),
-                getAllUsers().catch(() => []),
-            ]);
-
-            console.log('Fetched kindergartens:', kgs);
-            console.log('Fetched users:', usersData);
-
-            setKindergartens(kgs);
-            setUsers(usersData);
-
-            // Calculate statistics
-            const totalChildren = kgs.reduce((sum, kg) => sum + (kg.childrenCount || 0), 0);
-            const pendingRequests = kgs.reduce((sum, kg) => sum + (kg.pendingRequests || 0), 0);
-            const totalRevenue = kgs.reduce((sum, kg) => sum + (kg.revenue || 0), 0);
-
-            setStats({ totalChildren, pendingRequests, totalRevenue });
-        } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const loadAll = async () => {
+            setLoading(true);
+            try {
+                const kgs = await fetchKindergartens();
+                console.log('Fetched kindergartens:', kgs); // Verify the data received
+
+                setKindergartens(kgs);
+
+                // Calculate statistics
+                const totalChildren = kgs.reduce((sum, kg) => sum + kg.children.length, 0);
+                const pendingRequests = kgs.reduce((sum, kg) => sum + (kg.pendingRequests || 0), 0);
+                const totalRevenue = kgs.reduce((sum, kg) => sum + (kg.revenue || 0), 0);
+
+                setStats({ totalChildren, pendingRequests, totalRevenue });
+            } catch (error) {
+                console.error('Error loading data:', error);
+                setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
+            } finally {
+                setLoading(false);
+            }
+        };
         loadAll();
     }, []);
 
@@ -51,7 +45,7 @@ const AdminKinder = () => {
             await createKindergarten(newKg);
             setShowAddModal(false);
             setNewKg({ name: '', location: '', capacity: '', monthlyFee: '' });
-            setNotification({ type: 'success', message: 'تمت إضافة الحضانة بنجاح' });
+            setNotification({ type: 'success', message: 'تم إضافة الحضانة بنجاح' });
             loadAll();
         } catch (error) {
             setNotification({ type: 'danger', message: 'فشل في إضافة الحضانة' });
@@ -201,14 +195,14 @@ const AdminKinder = () => {
                                 <td>{kg.location}</td>
                                 <td>
                                     {kg.capacity}
-                                    {kg.capacity - (kg.childrenCount || 0) <= 0 && (
+                                    {kg.capacity - kg.children.length <= 0 && (
                                         <span className={`${styles.badge} ${styles.badgeDanger}`}>مكتمل</span>
                                     )}
-                                    {kg.capacity - (kg.childrenCount || 0) > 0 && kg.capacity - (kg.childrenCount || 0) <= 5 && (
+                                    {kg.capacity - kg.children.length > 0 && kg.capacity - kg.children.length <= 5 && (
                                         <span className={`${styles.badge} ${styles.badgeWarning}`}>أماكن محدودة</span>
                                     )}
                                 </td>
-                                <td>{kg.childrenCount || 0}</td>
+                                <td>{kg.children.length}</td>
                                 <td>{kg.monthlyFee} شيكل</td>
                                 <td>
                                     <span className={`${styles.badge} ${kg.status === 'OPEN' ? styles.badgeSuccess : styles.badgeDanger}`}>
@@ -250,11 +244,11 @@ const AdminKinder = () => {
                 {kindergartens.map(kg => (
                     <details key={kg.kindergartenId} className={styles.details}>
                         <summary className={styles.detailsHeader}>
-                            {kg.name} - {kg.childrenCount || 0} / {kg.capacity} طفل
+                            {kg.name} - {kg.children.length} / {kg.capacity} طفل
                         </summary>
                         <div className={styles.detailsContent}>
                             <h3>الأطفال المسجلين</h3>
-                            {kg.childrenCount > 0 ? (
+                            {kg.children.length > 0 ? (
                                 <div className={styles.tableContainer}>
                                     <table className={styles.table}>
                                         <thead>
@@ -266,12 +260,12 @@ const AdminKinder = () => {
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {kg.children?.map(child => (
+                                        {kg.children.map(child => (
                                             <tr key={child.childId}>
                                                 <td>{child.name}</td>
-                                                <td>{child.age} سنوات</td>
+                                                <td>{new Date(child.birthDate).getFullYear()}-{new Date(child.birthDate).getMonth() + 1} سنوات</td>
                                                 <td>
-                                                    {users.find(u => u.userId === child.userId)?.fullName || 'غير معروف'}
+                                                    {users.find(u => u.id === child.user.id)?.fullName || 'غير معروف'}
                                                 </td>
                                                 <td>
                                                     {child.paid ? (
@@ -281,7 +275,7 @@ const AdminKinder = () => {
                                                     )}
                                                 </td>
                                             </tr>
-                                        ))}
+                                        )))}
                                         </tbody>
                                     </table>
                                 </div>
