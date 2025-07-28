@@ -72,8 +72,15 @@ const AdminPayments = () => {
     const loadPayments = async () => {
         setLoading(true);
         try {
-            const data = await getAllPayments(month, year, selectedUser);
+            const response = await getAllPayments(month, year, selectedUser);
+            const data = Array.isArray(response) ? response : [];
 
+            if (data.length === 0) {
+                setNotification({
+                    type: 'info',
+                    message: 'لا توجد مدفوعات متاحة للعرض'
+                });
+            }
             if (Array.isArray(data)) {
                 const enhanced = data.map((p) => ({
                     ...p,
