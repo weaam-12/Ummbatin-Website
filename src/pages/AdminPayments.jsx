@@ -84,21 +84,35 @@ const AdminPayments = () => {
         setLoading(true);
         try {
             const data = await getAllPayments(month, year, selectedUser);
-            const enhanced = data.map((p) => ({
-                ...p,
-                paymentId: p.payment_id || p.paymentId,
-                userId: p.user_id || p.userId,
-                paymentType: p.type || p.paymentType,
-                paymentDate: p.payment_date || p.paymentDate,
-                fullName: p.fullName || users.find(u => u.user_id === (p.user_id || p.userId))?.fullName || 'غير معروف'
-            }));
-            setPayments(enhanced);
+
+            if (Array.isArray(data)) {
+                const enhanced = data.map((p) => ({
+                    ...p,
+                    paymentId: p.payment_id || p.paymentId,
+                    userId: p.user_id || p.userId,
+                    paymentType: p.type || p.paymentType,
+                    paymentDate: p.payment_date || p.paymentDate,
+                    fullName:
+                        p.fullName ||
+                        users.find((u) => u.user_id === (p.user_id || p.userId))?.fullName ||
+                        'غير معروف',
+                }));
+                setPayments(enhanced);
+            } else {
+                console.error('❌ getAllPayments لم تُرجع مصفوفة:', data);
+                setNotification({
+                    type: 'danger',
+                    message: 'البيانات المسترجعة من السيرفر غير صالحة',
+                });
+                setPayments([]); // عشان تمنعي أي استخدام سابق للبيانات
+            }
         } catch (error) {
-            console.error('خطأ في استرجاع الدفعات:', error);
+            console.error('🚨 خطأ أثناء تحميل الدفعات:', error);
             setNotification({
                 type: 'danger',
-                message: error.message || 'فشل في تحميل الدفعات'
+                message: error.message || 'فشل في تحميل الدفعات',
             });
+            setPayments([]); // حماية إضافية
         } finally {
             setLoading(false);
         }
