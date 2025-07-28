@@ -1,43 +1,29 @@
 {
-  "homeTitle": "ברוכים הבאים לשירותים שלנו",
-  "homeDescription": "ניהול תלונות, תשלומים, טפסים ושירותי חירום.",
-  "aboutTitle": "על היישוב",
-  "aboutDescription": "מידע היסטורי ושירותים הניתנים לתושבים.",
-  "complaintsTitle": "הגשת תלונה",
-  "complaintsDescription": "דיווח על בעיות כמו איסוף אשפה או נושאים אחרים.",
-  "emergencyTitle": "אנשי קשר לשעת חירום",
-  "emergencyDescription": "צרו קשר עם משטרה, מכבי אש, מד\"א ושירותי חירום נוספים בעת הצורך.",
-  "checkoutTitle": "סיום התשלום",
-  "paymentButton": "שלם עכשיו",
-  "creditCardPaymentTitle": "תשלום בכרטיס אשראי",
-  "loginButton": "התחבר",
-  "userManagement": "ניהול משתמשים",
-  "register": "הוספת משתמש",
-  "refresh": "רענן",
-  "searchPlaceholder": "חיפוש לפי מייל או שם...",
-  "allRoles": "כל התפקידים",
-  "admin": "מנהל",
-  "resident": "תושב",
-  "role": "תפקיד",
-  "registered": "תאריך הרשמה",
-  "actions": "פעולות",
-  "noUsers": "אין משתמשים",
-  "viewDetails": "הצג פרטים",
-  "changeRoleToAdmin": "שנה למנהל",
-  "changeRoleToUser": "שנה למשתמש",
-  "delete": "מחק",
-  "close": "סגור",
-  "userDetails": "פרטי משתמש",
-  "noData": "אין מידע זמין",
-  "home": {
+  "common": {
+    "home": "ראשי",
+    "login": "התחברות",
+    "logout": "התנתקות",
+    "profile": "פרופיל אישי",
+    "adminPanel": "פאנל ניהול",
+    "loading": "טעינה...",
+    "noData": "אין מידע זמין",
+    "close": "סגור",
+    "viewDetails": "הצג פרטים",
+    "delete": "מחק",
+    "refresh": "רענן",
+    "submit": "שלח",
+    "submitting": "שולח..."
+  },
+
+  "homePage": {
     "title": "ברוכים הבאים לעיריית אום בטין",
     "description": "אום בטין היא יישוב מתפתח בנגב, המציע שירותים מוניציפליים מקיפים, חינוך איכותי ואירועים תרבותיים וחברתיים לכל המשפחה.",
     "bannerAlt": "יישוב אום בטין",
     "servicesTitle": "שירותי העירייה",
     "eventsTitle": "אירועים קרובים",
-    "loading": "טוען אירועים...",
     "noEvents": "אין אירועים קרובים כרגע"
   },
+
   "services": {
     "water": "מים",
     "arnona": "ארנונה",
@@ -47,8 +33,10 @@
     "emergency": "חירום",
     "payments": "תשלום אלקטרוני",
     "requests": "מעקב בקשות",
-    "news": "חדשות ועדכונים"
+    "news": "חדשות ועדכונים",
+    "garbage": "שירות אשפה"
   },
+
   "event": {
     "date": "תאריך",
     "from": "מ",
@@ -56,78 +44,48 @@
     "location": "מיקום",
     "organizer": "מארגן"
   },
-  "adminDashboard": "ניהול משתמשים",
-  "managePayments": "ניהול תשלומים",
-  "manageComplaints": "ניהול תלונות",
-  "adminPanel": "פאנל ניהול",
-  "profile": "פרופיל אישי",
-  "logout": "התנתקות",
 
+  "userManagement": {
+    "title": "ניהול משתמשים",
+    "register": "הוספת משתמש",
+    "searchPlaceholder": "חיפוש לפי מייל או שם...",
+    "allRoles": "כל התפקידים",
+    "admin": "מנהל",
+    "resident": "תושב",
+    "email": "אימייל",
+    "fullName": "שם מלא",
+    "role": "תפקיד",
+    "registered": "תאריך הרשמה",
+    "actions": "פעולות",
+    "noUsers": "אין משתמשים",
+    "changeRoleToAdmin": "שנה למנהל",
+    "changeRoleToUser": "שנה למשתמש",
+    "userDetails": "פרטי משתמש"
+  },
 
-  "controlPanel": "ניהול משתמשים",
-  "generalManagement": "לוח בקרה",
-  "emergencyManagement": "ניהול חירום",
-  "educationManagement": "ניהול חינוך",
-  "paymentsManagement": "ניהול תשלומים",
-  "complaintsManagement": "ניהול תלונות",
+  "admin": {
+    "dashboard": "ניהול משתמשים",
+    "controlPanel": "לוח בקרה",
+    "generalManagement": "הנהלה כללית",
+    "emergencyManagement": "ניהול חירום",
+    "educationManagement": "ניהול חינוך",
+    "paymentsManagement": "ניהול תשלומים",
+    "complaintsManagement": "ניהול תלונות"
+  },
 
-
-  "home": "ראשי",
-  "complaints": "תלונות",
-  "payments": "תשלומים",
-  "emergency": "חירום",
-  "about": "אודות",
-  "login": "התחברות",
-  "garbageService" : "שירות אשפה",
-
-  "ourServices": "השירותים שלנו",
-  "paymentsDescription": "שלם חשבונות באופן מקוון.",
-  "formsDescription": "מלא טפסים שונים אונליין.",
-
-    "title": "תשלומים",
-    "enterDetails": "הכנס את פרטי התשלום שלך למטה:",
-    "amount": "סכום:",
-    "cardNumber": "מספר כרטיס:",
-    "expiryDate": "תוקף הכרטיס:",
-    "cvv": "CVV:",
-    "payNow": "שלם עכשיו",
-    "paymentSuccessful": "התשלום בוצע בהצלחה!",
-    "paymentFailed": "הייתה בעיה בתשלום. אנא נסה שנית.",
-    "invalidCardNumber": "מספר כרטיס לא תקין. על להיות באורך12 תוים.",
-    "invalidExpiryDate": "תוקף כרטיס לא תקין. פורמט: MM/YY.",
-    "invalidCvv": "CVV לא תקין. על להיות 3-4 תוים.",
-    "amountGreaterThanZero": "הסכום חייב להיות גדול מ-0.",
-    "errorOccurred": "אירעה שגיאה. אנא נסה שנית.",
-
-  "about2": "כאן תוכל להגיש תלונה על כל בעיה שקרתה",
-  "typeComplaint": "הקלד את התלונה שלך",
-  "complaintEmpty": "הדף לא יכול להיות ריק. אנא כתוב תלונה",
-  "complaintShort": "התלונה קצרה מדי. אנא כתוב יותר",
-  "loading": "טעינה...",
-  "submittedComplaints": "תלונות שהוגשו",
-  "errorSubmitting": "שגיאה בהגשת התלונה. אנא נסה שוב מאוחר יותר",
-
-
-  "siteName": "שירותי היישוב",
-  "allRightsReserved": "כל הזכויות שמורות",
-  "privacyPolicy": "מדיניות פרטיות",
-  "termsOfService": "תנאי שימוש",
-  "contactUs": "צור קשר",
-
-  "complaints2": "שירותים ותלונות",
-  "selectService": "בחר שירות להגשת תלונה או ביצוע פעולה",
-  "garbage": "אשפה",
-  "garbageDescription": "דווח על בעיות באיסוף אשפה.",
-  "education": "חינוך",
-  "educationDescription": "דווח על בעיות בבתי ספר או שירותי חינוך.",
-  "water": "מים",
-  "waterDescription": "דווח על בעיות באספקת מים או חיוב.",
-  "propertyTax": "ארנונה",
-  "propertyTaxDescription": "דווח על בעיות בתשלומי ארנונה.",
-  "submitComplaint": "הגשת תלונה",
-  "payment": "תשלום",
-  "forms": "טפסים",
-
+  "complaints": {
+    "title": "הגשת תלונה",
+    "description": "דיווח על בעיות כמו איסוף אשפה או נושאים אחרים.",
+    "historyTitle": "תלונות קודמות",
+    "noComplaints": "אין תלונות קודמות",
+    "response": "תגובת העירייה",
+    "statuses": {
+      "SUBMITTED": "בבדיקה",
+      "IN_PROGRESS": "בטיפול",
+      "RESOLVED": "נפתר",
+      "REJECTED": "נדחה"
+    }
+  },
 
   "garbageComplaint": {
     "title": "דיווח על בעיית פסולת",
@@ -147,52 +105,30 @@
     "image": "צירוף תמונה",
     "chooseImage": "בחר תמונה",
     "removeImage": "הסר תמונה",
-    "submit": "שלח דיווח",
-    "submitting": "שולח...",
-    "historyTitle": "דיווחים קודמים",
-    "noComplaints": "אין דיווחים קודמים",
-    "response": "תגובת העירייה",
-    "complaintImage": "תמונת הדיווח",
     "imagePreview": "תצוגה מקדימה",
-    "statuses": {
-      "SUBMITTED": "בבדיקה",
-      "IN_PROGRESS": "בטיפול",
-      "RESOLVED": "נפתר",
-      "REJECTED": "נדחה"
-    },
-    "success": {
-      "submit": "הדיווח נשלח בהצלחה"
-    },
-    "errors": {
-      "submitFailed": "שליחת הדיווח נכשלה",
-      "loadFailed": "טעינת הדיווחים נכשלה"
-    }
+    "complaintImage": "תמונת הדיווח"
+  },
 
-},
+  "payment": {
+    "title": "תשלום אלקטרוני",
+    "button": "שלם עכשיו",
+    "creditCardTitle": "תשלום בכרטיס אשראי",
+    "description": "שלם חשבונות באופן מקוון.",
+    "checkoutTitle": "סיום התשלום"
+  },
 
-  "paymentFormTitle": "טופס תשלום",
-  "paymentFormDescription": "אנא מלא את הפרטים כדי לקבל קבלה על התשלום.",
-  "fullName": "שם מלא",
-  "idNumber": "מספר תעודת זהות",
-  "serviceType": "בחר שירות",
-  "email": "אימייל",
-  "processing": "מעבד את הבקשה...",
-  "successMessage": "✅ הבקשה נשלחה בהצלחה!",
-  "receiptDownloadMessage": "הקבלה תורד באופן אוטומטי.",
-  "serviceTitle": "שירות איסוף אשפה",
-  "serviceDescription": "בדוק את שירותי איסוף האשפה באזור שלך.",
-  "serviceHistory": "היסטוריית השירות",
-  "noRecords": "אין רשומות שירות זמינות",
-  "user": "משתמש",
-  "date": "תאריך",
-  "status": "סטטוס",
+  "forms": {
+    "title": "טפסים",
+    "description": "מלא טפסים שונים אונליין."
+  },
 
-  "welcomeBack": "ברוך שובך",
-  "ourSolutions": "הפתרונות שלנו",
-  "getStarted": "התחל עכשיו",
-  "contactUsToday": "צור קשר היום"
+  "emergency": {
+    "title": "חירום",
+    "description": "צרו קשר עם משטרה, מכבי אש, מד\"א ושירותי חירום נוספים בעת הצורך."
+  },
+
+  "about": {
+    "title": "על היישוב",
+    "description": "מידע היסטורי ושירותים הניתנים לתושבים."
+  }
 }
-
-
-
-
