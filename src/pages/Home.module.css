@@ -198,3 +198,98 @@
         grid-template-columns: 1fr;
     }
 }
+.eventsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    padding: 0 1rem;
+}
+
+.eventCard {
+    background: #ffffff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.eventCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.eventImage {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+}
+
+.eventContent {
+    padding: 1.5rem;
+}
+
+.eventTitle {
+    font-size: 1.3rem;
+    color: #0066cc;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.eventDescription {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.eventDetails {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.eventDetails p {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.eventDetails strong {
+    color: #333;
+    min-width: 60px;
+    display: inline-block;
+}
+
+.loading, .noEvents {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+    padding: 2rem;
+}
+
+/* تعديلات للجوال */
+@media (max-width: 768px) {
+    .eventsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .eventImage {
+        height: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .eventImage {
+        height: 150px;
+    }
+
+    .eventContent {
+        padding: 1rem;
+    }
+
+    .eventTitle {
+        font-size: 1.1rem;
+    }
+}
