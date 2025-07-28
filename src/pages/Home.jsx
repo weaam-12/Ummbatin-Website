@@ -1,11 +1,37 @@
 // src/pages/Home.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import styles from './Home.module.css';
 import bkg from "./bkg.jpg";
+import { getAllEvents } from '../api';
 
 const Home = () => {
     const navigate = useNavigate();
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                const data = await getAllEvents();
+                // تصفية الفعاليات النشطة فقط وتنسيق التاريخ
+                const formattedEvents = data
+                    .filter(event => event.active)
+                    .map(event => ({
+                        ...event,
+                        startDate: new Date(event.startDate).toLocaleDateString('ar-EG'),
+                        endDate: new Date(event.endDate).toLocaleDateString('ar-EG')
+                    }));
+                setEvents(formattedEvents);
+            } catch (error) {
+                console.error('Error fetching events:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEvents();
+    }, []);
 
     const services = [
         { name: "المياه", icon: "💧", path: "/water" },
@@ -15,15 +41,8 @@ const Home = () => {
         { name: "المعاملات", icon: "📝", path: "/transactions" },
         { name: "طوارئ", icon: "🚨", path: "/emergency" },
         { name: "دفع إلكتروني", icon: "💳", path: "/payments" },
-        { name: "حجز موعد", icon: "📅", path: "/appointments" },
         { name: "متابعة الطلبات", icon: "📬", path: "/requests" },
         { name: "أخبار وتحديثات", icon: "📰", path: "/news" }
-    ];
-
-    const activities = [
-        { title: "يوم رياضي مجتمعي", date: "2025-07-10", duration: 3 },
-        { title: "سوق صيفي", date: "2025-07-15", duration: 4 },
-        { title: "أمسية ثقافية", date: "2025-07-20", duration: 2 }
     ];
 
     const handleServiceClick = (path) => {
@@ -62,19 +81,44 @@ const Home = () => {
                 {/* قسم الفعاليات */}
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>الفعاليات القادمة</h2>
-                    <div className={styles.activitiesGrid}>
-                        {activities.map((activity, idx) => (
-                            <div key={idx} className={styles.activityCard}>
-                                <h3 className={styles.activityTitle}>{activity.title}</h3>
-                                <p className={styles.activityDetail}>
-                                    <strong>التاريخ:</strong> {activity.date}
-                                </p>
-                                <p className={styles.activityDetail}>
-                                    <strong>المدة:</strong> {activity.duration} ساعات
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+                    {loading ? (
+                        <p className={styles.loading}>جاري تحميل الفعاليات...</p>
+                    ) : events.length > 0 ? (
+                        <div className={styles.eventsGrid}>
+                            {events.map((event, idx) => (
+                                <div key={idx} className={styles.eventCard}>
+                                    {event.imageUrl && (
+                                        <img
+                                            src={event.imageUrl}
+                                            alt={event.title}
+                                            className={styles.eventImage}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = bkg; // صورة بديلة في حالة الخطأ
+                                            }}
+                                        />
+                                    )}
+                                    <div className={styles.eventContent}>
+                                        <h3 className={styles.eventTitle}>{event.title}</h3>
+                                        <p className={styles.eventDescription}>{event.description}</p>
+                                        <div className={styles.eventDetails}>
+                                            <p>
+                                                <strong>التاريخ:</strong> من {event.startDate} إلى {event.endDate}
+                                            </p>
+                                            <p>
+                                                <strong>المكان:</strong> {event.location}
+                                            </p>
+                                            <p>
+                                                <strong>المنظم:</strong> {event.organizer}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className={styles.noEvents}>لا توجد فعاليات قادمة حالياً</p>
+                    )}
                 </section>
             </div>
         </div>
