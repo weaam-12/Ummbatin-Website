@@ -35,10 +35,13 @@
     "payments": "תשלום אלקטרוני",
     "requests": "מעקב בקשות",
     "news": "חדשות ועדכונים",
-    "garbage": "שירות אשפה"
+    "garbage": "שירות אשפה",
+    "complaints": "תלונות"
+
   },
 
   "footer": {
+    "services": "שירות",
     "siteName": "עיריית אום בטין",
     "allRightsReserved": "כל הזכויות שמורות",
     "aboutMunicipality": "על העירייה",

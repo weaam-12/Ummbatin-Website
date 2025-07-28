@@ -58,9 +58,9 @@ const Navbar = () => {
     // روابط المستخدم العادي
     const userLinks = [
         { path: "/", icon: <FaHome />, text: t("common.home") },
-        { path: "/complaints", icon: <FaExclamationCircle />, text: t("complaints") },
-        { path: "/payments", icon: <FaMoneyBillWave />, text: t("payments") },
-        { path: "/emergency", icon: <FaBell />, text: t("emergency") },
+        { path: "/complaints", icon: <FaExclamationCircle />, text: t("servic.complaints") },
+        { path: "/payments", icon: <FaMoneyBillWave />, text: t("transactions.payments") },
+        { path: "/emergency", icon: <FaBell />, text: t("servic.esemergency") },
         { path: "/garbage-complaints", icon: <FaTrash />, text: t("services.garbage") },
         { path: "/children", icon: <FaGraduationCap />, text: t("navbar.education") }
     ];
