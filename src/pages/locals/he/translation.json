@@ -248,6 +248,9 @@
     "loading": "טוען..."
   },
   "children": {
+    "payAndEnroll": "שלם והירשם",
+    "paymentTitle": "תשלום דמי רישום",
+    "paymentSuccess": "התשלום והרישום בוצעו בהצלחה!",
     "title": "ניהול ילדים",
     "registerTitle": "רישום ילד חדש",
     "registeredTitle": "ילדים רשומים",
@@ -261,10 +264,30 @@
     "noChildren": "לא נמצאו ילדים רשומים",
     "addNewChild": "ניתן להוסיף ילד חדש באמצעות הטופס למעלה",
     "notRegistered": "לא רשום",
-    "loading": "טוען נתונים...",
-    "errors": {
-      "requiredFields": "נא למלא את כל השדות החובה"
+    "notEnrolled": "לא רשום לאף גן",
+    "enrolledIn": "רשום ב",
+    "status": "סטטוס",
+    "actions": "פעולות",
+    "add": "הוסף",
+    "myChildren": "הילדים שלי",
+    "processing": "מעבד...",
+    "confirmPayment": "אשר תשלום",
+    "cancel": "ביטול",
+    "enrollment": {
+      "title": "פרטי רישום",
+      "child": "ילד",
+      "kindergarten": "גן",
+      "fee": "דמי רישום"
     },
+    "currency": "שקל",
+    "loadError": "אירעה שגיאה בטעינת הנתונים",
+    "payment": {
+      "error": "שגיאה בעיבוד התשלום. נסה שוב."
+    },
+    "errors": {
+      "requiredFields": "אנא מלא את כל השדות הנדרשים"
+    }
+  },
     "kindergartens": {
       "flowers": "גן הפרחים",
       "red": "גן האדום",
@@ -276,4 +299,3 @@
       "mohammed": "מחמד"
     }
   }
-}
