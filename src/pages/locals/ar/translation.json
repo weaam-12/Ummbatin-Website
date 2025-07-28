@@ -60,5 +60,59 @@
     "educationManagement": "إدارة التعليم",
     "paymentsManagement": "إدارة المدفوعات",
     "complaintsManagement": "إدارة الشكاوى"
-  }
+  },
+
+  "complaints": {
+    "myComplaints": "شكاوائي",
+    "newComplaint": "شكوى جديدة",
+    "noComplaints": "لا توجد شكاوى",
+    "submitFirstComplaint": "تقديم أول شكوى",
+    "complaintForm": {
+      "title": "نموذج الشكوى",
+      "type": "نوع الشكوى",
+      "description": "الوصف",
+      "location": "الموقع",
+      "image": "صورة (اختياري)",
+      "submit": "إرسال الشكوى",
+      "cancel": "إلغاء",
+      "selectType": "اختر نوع الشكوى",
+      "types": {
+        "Infrastructure": "بنية تحتية",
+        "Cleanliness": "نظافة",
+        "Safety": "سلامة",
+        "Other": "أخرى"
+      },
+      "descriptionPlaceholder": "صف المشكلة بالتفصيل",
+      "locationPlaceholder": "مثال: المبنى أ، الطابق الثاني بالقرب من المصعد"
+    },
+    "table": {
+      "ticketNumber": "رقم التذكرة",
+      "type": "النوع",
+      "description": "الوصف",
+      "location": "الموقع",
+      "status": "الحالة",
+      "date": "التاريخ",
+      "response": "الرد",
+      "image": "الصورة",
+      "view": "عرض",
+      "noResponse": "لا يوجد رد بعد"
+    },
+    "status": {
+      "SUBMITTED": "تم الاستلام",
+      "IN_PROGRESS": "قيد المعالجة",
+      "RESOLVED": "تم الحل",
+      "REJECTED": "مرفوض"
+    },
+    "loading": "جاري تحميل الشكاوى...",
+    "submitting": "جاري إرسال الشكوى...",
+    "error": {
+      "loadError": "فشل تحميل الشكاوى: ",
+      "submitError": "فشل إرسال الشكوى: ",
+      "authError": "يجب تسجيل الدخول أولاً"
+    },
+    "success": {
+      "submitSuccess": "تم إرسال الشكوى بنجاح! رقم التذكرة: "
+    }
+  },
+
 }

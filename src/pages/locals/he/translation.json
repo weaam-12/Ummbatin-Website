@@ -60,5 +60,58 @@
     "educationManagement": "ניהול חינוך",
     "paymentsManagement": "ניהול תשלומים",
     "complaintsManagement": "ניהול תלונות"
+  },
+
+  "complaints": {
+    "myComplaints": "התלונות שלי",
+    "newComplaint": "תלונה חדשה",
+    "noComplaints": "לא נמצאו תלונות",
+    "submitFirstComplaint": "שלח תלונה ראשונה",
+    "complaintForm": {
+      "title": "טופס תלונה",
+      "type": "סוג התלונה",
+      "description": "תיאור",
+      "location": "מיקום",
+      "image": "תמונה (אופציונלי)",
+      "submit": "שלח תלונה",
+      "cancel": "ביטול",
+      "selectType": "בחר סוג תלונה",
+      "types": {
+        "Infrastructure": "תשתיות",
+        "Cleanliness": "ניקיון",
+        "Safety": "בטיחות",
+        "Other": "אחר"
+      },
+      "descriptionPlaceholder": "תאר את הבעיה בפירוט",
+      "locationPlaceholder": "דוגמה: בניין א, קומה שנייה ליד המעלית"
+    },
+    "table": {
+      "ticketNumber": "מספר כרטיס",
+      "type": "סוג",
+      "description": "תיאור",
+      "location": "מיקום",
+      "status": "סטטוס",
+      "date": "תאריך",
+      "response": "תגובה",
+      "image": "תמונה",
+      "view": "הצג",
+      "noResponse": "עדיין אין תגובה"
+    },
+    "status": {
+      "SUBMITTED": "התקבל",
+      "IN_PROGRESS": "בטיפול",
+      "RESOLVED": "נפתר",
+      "REJECTED": "נדחה"
+    },
+    "loading": "טוען תלונות...",
+    "submitting": "שולח תלונה...",
+    "error": {
+      "loadError": "שגיאה בטעינת תלונות: ",
+      "submitError": "שגיאה בשליחת תלונה: ",
+      "authError": "יש להתחבר תחילה"
+    },
+    "success": {
+      "submitSuccess": "התלונה נשלחה בהצלחה! מספר כרטיס: "
+    }
   }
 }
