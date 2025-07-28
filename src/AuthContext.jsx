@@ -8,15 +8,20 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     useEffect(() => {
-        console.log("Current user data:", user);
+        const token = localStorage.getItem("token");
+        console.log("Current token:", token);
+        if (token) {
+            console.log("Decoded token data:", decodeToken(token));
+        }
     }, [user]);
     const decodeToken = (token) => {
         if (!token) return null;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
+            console.log("Token payload:", payload); // أضف هذا السطر للتحقق
             return {
                 email: payload.sub,
-                userId: payload.userId || payload.id, // احتياطي إذا كان السيرفر يستخدم id
+                userId: payload.userId || payload.id || payload.sub, // المزيد من الاحتياطات
                 role: payload.role
             };
         } catch (e) {
@@ -28,11 +33,15 @@ export const AuthProvider = ({ children }) => {
     const fetchUserProfile = useCallback(async () => {
         try {
             const response = await axiosInstance.get("/api/users/profile");
-            console.log("Profile API Response:", response.data);
+            console.log("Full profile response:", response); // أضف هذا للتحقق
+
+            if (!response.data.id) {
+                throw new Error("User ID not found in profile response");
+            }
 
             return {
                 email: response.data.email,
-                userId: response.data.id,
+                userId: response.data.id, // تأكد من أن السيرفر يعيد id
                 fullName: response.data.fullName,
                 role: response.data.role?.roleName || response.data.role
             };
@@ -69,14 +78,30 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (credentials) => {
         setLoading(true);
+        setError(null);
         try {
             const response = await axiosInstance.post("api/auth/login", credentials);
+            console.log("Login response:", response.data); // أضف للتحقق
+
+            if (!response.data.token) {
+                throw new Error("No token received");
+            }
+
             localStorage.setItem("token", response.data.token);
-            await initializeAuth();
+            axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+
+            const profile = await fetchUserProfile();
+            console.log("Fetched profile:", profile); // أضف للتحقق
+
+            setUser({
+                ...profile,
+                role: profile.role || (decodeToken(response.data.token)?.role)
+            });
+
             return true;
         } catch (err) {
             console.error("Login error:", err);
-            setError(err);
+            setError(err.message || "Login failed");
             throw err;
         } finally {
             setLoading(false);
