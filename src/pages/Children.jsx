@@ -11,7 +11,7 @@ import './Children.css';
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
     const [selectedKg, setSelectedKg] = useState('');
-    const kg = kindergartens.find(k => k.kindergartenId === selectedKg);
+    const kg = kindergartens.find(k => String(k.kindergartenId) === selectedKg);
 
     return (
         <div className="child-card">
