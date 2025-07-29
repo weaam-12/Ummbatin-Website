@@ -4,14 +4,14 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useTranslation } from 'react-i18next';
 import {
-    Card, Tabs, Tab, Button, Alert, Spinner, Container, ListGroup, Badge, Row, Col
+    Card, Tabs, Tab, Button, Alert, Spinner, Container, ListGroup, Badge, Row, Col, Accordion
 } from 'react-bootstrap';
 import {
-    FiCreditCard, FiCheckCircle, FiClock, FiDollarSign, FiDownload
+    FiCreditCard, FiCheckCircle, FiClock, FiDollarSign, FiDownload, FiHome
 } from 'react-icons/fi';
 import './Payment.css';
 
-import { getUserPayments, processPayment } from '../api';
+import { getUserPayments, processPayment, getPropertiesByUserId } from '../api';
 
 const Payments = () => {
     const { t } = useTranslation();
@@ -20,9 +20,10 @@ const Payments = () => {
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
     const [payments, setPayments] = useState({
-        water: { status: 'PENDING', amount: 0, dueDate: null, history: [] },
-        arnona: { status: 'PENDING', amount: 0, dueDate: null, history: [] }
+        water: [],
+        arnona: []
     });
+    const [properties, setProperties] = useState([]);
     const [debt, setDebt] = useState(0);
 
     const statusVariants = {
@@ -44,22 +45,22 @@ const Payments = () => {
     useEffect(() => {
         const load = async () => {
             try {
+                // جلب العقارات أولاً
+                const props = await getPropertiesByUserId(user?.userId);
+                setProperties(props);
+
+                // جلب الدفعات
                 const data = await getUserPayments(user?.userId);
-                const map = data.reduce((acc, item) => {
-                    const key = item.paymentType.toLowerCase();
-                    acc[key] = acc[key] || { status: 'PENDING', amount: 0, dueDate: null, history: [] };
-                    acc[key].amount = item.amount; // استخدام أحدث مبلغ
-                    acc[key].status = item.status;
-                    acc[key].dueDate = item.date;
-                    acc[key].history.unshift({
-                        date: item.date,
-                        amount: item.amount,
-                        status: item.status
-                    });
-                    return acc;
-                }, {});
-                setPayments(map);
-            } catch {
+
+                // تنظيم الدفعات حسب النوع والعقار
+                const organizedPayments = {
+                    water: organizePaymentsByProperty(data.filter(p => p.paymentType === 'WATER')),
+                    arnona: organizePaymentsByProperty(data.filter(p => p.paymentType === 'ARNONA'))
+                };
+
+                setPayments(organizedPayments);
+            } catch (e) {
+                console.error('Error loading data:', e);
                 setNotification({ type: 'danger', message: 'فشل تحميل البيانات' });
             } finally {
                 setLoading(false);
@@ -68,18 +69,47 @@ const Payments = () => {
         if (user) load();
     }, [user]);
 
+    // تنظيم الدفعات حسب العقار
+    const organizePaymentsByProperty = (payments) => {
+        const byProperty = {};
+
+        payments.forEach(payment => {
+            const propertyId = payment.propertyId;
+            if (!byProperty[propertyId]) {
+                const property = properties.find(p => p.propertyId === propertyId) || {};
+                byProperty[propertyId] = {
+                    propertyInfo: {
+                        address: property.address || 'غير معروف',
+                        area: property.area || 0,
+                        units: property.numberOfUnits || 0
+                    },
+                    payments: []
+                };
+            }
+            byProperty[propertyId].payments.push(payment);
+        });
+
+        return byProperty;
+    };
+
     // حساب الدين التراكمي (يشمل PENDING و FAILED فقط)
     useEffect(() => {
-        const totalDebt = Object.values(payments).reduce(
-            (sum, p) => (p?.status === 'PENDING' || p?.status === 'FAILED') ? sum + p.amount : sum, 0
-        );
+        const totalDebt = Object.values(payments).reduce((sum, paymentType) => {
+            return sum + Object.values(paymentType).reduce((typeSum, propertyPayments) => {
+                return typeSum + propertyPayments.payments.reduce((propertySum, payment) => {
+                    return (payment.status === 'PENDING' || payment.status === 'FAILED') ?
+                        propertySum + payment.amount :
+                        propertySum;
+                }, 0);
+            }, 0);
+        }, 0);
         setDebt(totalDebt);
     }, [payments]);
 
     // توليد PDF
-    const handleDownloadPDF = (type) => {
+    const handleDownloadPDF = (type, propertyId) => {
         setLoading(true);
-        const element = document.getElementById(`invoice-${type}`);
+        const element = document.getElementById(`invoice-${type}-${propertyId}`);
         html2canvas(element, {
             scale: 2,
             logging: false,
@@ -90,7 +120,7 @@ const Payments = () => {
             const w = pdf.internal.pageSize.getWidth();
             const h = (canvas.height * w) / canvas.width;
             pdf.addImage(img, 'PNG', 0, 0, w, h);
-            pdf.save(`${t(`payments.types.${type}`)}-${new Date().toLocaleDateString()}.pdf`);
+            pdf.save(`${t(`payments.types.${type}`)}-${propertyId}-${new Date().toLocaleDateString()}.pdf`);
             setLoading(false);
         }).catch(() => {
             setNotification({ type: 'danger', message: t('payments.notifications.pdfError') });
@@ -99,10 +129,18 @@ const Payments = () => {
     };
 
     // الدفع الحقيقي عبر الباك-إند
-    const handlePayment = async (paymentType) => {
+    const handlePayment = async (paymentType, paymentId) => {
         setLoading(true);
         try {
-            const amount = Math.round(payments[paymentType].amount * 100);
+            const payment = Object.values(payments[paymentType])
+                .flatMap(p => p.payments)
+                .find(p => p.paymentId === paymentId);
+
+            if (!payment) {
+                throw new Error('Payment not found');
+            }
+
+            const amount = Math.round(payment.amount * 100);
             const { clientSecret } = await processPayment({
                 userId: user.userId,
                 amount,
@@ -121,26 +159,19 @@ const Payments = () => {
                     try {
                         // إعادة تحميل بيانات الدفع للتأكد من الحالة
                         const updatedData = await getUserPayments(user.userId);
-                        const updatedPayment = updatedData.find(
-                            item => item.paymentType.toLowerCase() === paymentType
-                        );
+                        const updatedPayment = updatedData.find(p => p.paymentId === paymentId);
 
                         if (updatedPayment && updatedPayment.status === 'PAID') {
-                            setPayments(prev => ({
-                                ...prev,
-                                [paymentType]: {
-                                    ...prev[paymentType],
-                                    status: 'PAID',
-                                    history: [
-                                        {
-                                            date: new Date().toISOString(),
-                                            amount: prev[paymentType].amount,
-                                            status: 'PAID'
-                                        },
-                                        ...prev[paymentType].history
-                                    ]
-                                }
-                            }));
+                            setPayments(prev => {
+                                const newPayments = {...prev};
+                                Object.keys(newPayments[paymentType]).forEach(propertyId => {
+                                    newPayments[paymentType][propertyId].payments =
+                                        newPayments[paymentType][propertyId].payments.map(p =>
+                                            p.paymentId === paymentId ? {...p, status: 'PAID'} : p
+                                        );
+                                });
+                                return newPayments;
+                            });
                             setNotification({
                                 type: 'success',
                                 message: `${t('payments.notifications.paymentSuccess')} ${t(`payments.types.${paymentType}`)}`
@@ -153,13 +184,16 @@ const Payments = () => {
             }, 1000);
 
         } catch (e) {
-            setPayments(prev => ({
-                ...prev,
-                [paymentType]: {
-                    ...prev[paymentType],
-                    status: 'FAILED'
-                }
-            }));
+            setPayments(prev => {
+                const newPayments = {...prev};
+                Object.keys(newPayments[paymentType]).forEach(propertyId => {
+                    newPayments[paymentType][propertyId].payments =
+                        newPayments[paymentType][propertyId].payments.map(p =>
+                            p.paymentId === paymentId ? {...p, status: 'FAILED'} : p
+                        );
+                });
+                return newPayments;
+            });
             setNotification({
                 type: 'danger',
                 message: t('payments.notifications.paymentError')
@@ -169,76 +203,126 @@ const Payments = () => {
         }
     };
 
-    const renderTab = (key, titleKey) => {
-        const item = payments[key];
-        if (!item) return null;
+    const renderPropertyPayments = (propertyId, paymentsData, paymentType) => {
+        const { propertyInfo, payments } = paymentsData;
+        const pendingPayments = payments.filter(p => p.status === 'PENDING' || p.status === 'FAILED');
+        const paidPayments = payments.filter(p => p.status === 'PAID');
+
         return (
-            <Tab eventKey={key} title={t(`payments.types.${key}`)}>
-                <div id={`invoice-${key}`} className="payment-details mt-3 p-3">
-                    <Row className="align-items-center mb-3">
-                        <Col><h5><FiCreditCard className="me-2" />{t(`payments.types.${key}`)}</h5></Col>
-                        <Col xs="auto">
-                            <Badge pill bg={statusVariants[item.status] || 'secondary'}>
-                                {statusLabels[item.status] || t('payments.status.UNKNOWN')}
+            <Accordion.Item key={propertyId} eventKey={propertyId} className="mb-3">
+                <Accordion.Header>
+                    <div className="d-flex justify-content-between w-100">
+                        <span>
+                            <FiHome className="me-2" />
+                            {propertyInfo.address} (مساحة: {propertyInfo.area} م²، وحدات: {propertyInfo.units})
+                        </span>
+                        {pendingPayments.length > 0 && (
+                            <Badge bg="danger" className="ms-2">
+                                {pendingPayments.length} {t('payments.pending')}
                             </Badge>
-                        </Col>
-                    </Row>
+                        )}
+                    </div>
+                </Accordion.Header>
+                <Accordion.Body>
+                    <div id={`invoice-${paymentType}-${propertyId}`} className="payment-details p-3">
+                        <h5 className="mb-3">{t(`payments.types.${paymentType}`)}</h5>
 
-                    <p>{t('payments.invoice.amount')}: <strong>{item.amount} {t('payments.currency')}</strong></p>
-                    <p>{t('payments.invoice.dueDate')}: <strong>{formatDate(item.dueDate)}</strong></p>
+                        {/* الدفعات المعلقة */}
+                        {pendingPayments.length > 0 && (
+                            <>
+                                <h6 className="mt-3 text-danger">
+                                    <FiClock className="me-2" />
+                                    {t('payments.pendingPayments')}
+                                </h6>
+                                <ListGroup className="mb-4">
+                                    {pendingPayments.map((payment, i) => (
+                                        <ListGroup.Item key={`pending-${i}`} className="position-relative">
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span className="d-block">{formatDate(payment.date)}</span>
+                                                    <small className="text-muted">رقم الفاتورة: {payment.paymentId}</small>
+                                                </div>
+                                                <span className="fw-bold">{payment.amount} {t('payments.currency')}</span>
+                                                <Badge bg={statusVariants[payment.status] || 'secondary'}>
+                                                    {statusLabels[payment.status] || t('payments.status.UNKNOWN')}
+                                                </Badge>
+                                            </div>
+                                            <Button
+                                                variant={payment.status === 'FAILED' ? 'danger' : 'primary'}
+                                                size="sm"
+                                                className="mt-2"
+                                                onClick={() => handlePayment(paymentType, payment.paymentId)}
+                                                disabled={loading}
+                                            >
+                                                {loading ? (
+                                                    <Spinner animation="border" size="sm" className="me-2" />
+                                                ) : (
+                                                    payment.status === 'FAILED' ? t('payments.retryPayment') : t('payments.invoice.payNow')
+                                                )}
+                                            </Button>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            </>
+                        )}
 
-                    {item.status === 'PAID' ? (
-                        <>
-                            <Alert variant="success"><FiCheckCircle /> {t('payments.invoice.paidSuccess')}</Alert>
-                            <Button
-                                variant="outline-success"
-                                onClick={() => handleDownloadPDF(key)}
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <Spinner animation="border" size="sm" className="me-2" />
-                                ) : (
-                                    <FiDownload className="me-2" />
-                                )}
-                                {t('payments.invoice.downloadPdf')}
-                            </Button>
-                        </>
-                    ) : (
-                        <Button
-                            variant={item.status === 'FAILED' ? 'danger' : 'primary'}
-                            disabled={loading}
-                            onClick={() => handlePayment(key)}
-                            className="payment-button"
-                        >
-                            {loading ? (
-                                <>
-                                    <Spinner animation="border" size="sm" className="me-2" />
-                                    {t('payments.processing')}
-                                </>
-                            ) : (
-                                <>
-                                    {item.status === 'FAILED' ? t('payments.retryPayment') : t('payments.invoice.payNow')}
-                                </>
-                            )}
-                        </Button>
-                    )}
-
-                    <div className="mt-4">
-                        <h6><FiClock className="me-2" />{t('payments.invoice.paymentHistory')}</h6>
+                        {/* سجل الدفعات */}
+                        <h6 className="mt-3">
+                            <FiClock className="me-2" />
+                            {t('payments.invoice.paymentHistory')}
+                        </h6>
                         <ListGroup>
-                            {(item.history || []).map((p, i) => (
-                                <ListGroup.Item key={i}>
+                            {paidPayments.map((payment, i) => (
+                                <ListGroup.Item key={`paid-${i}`}>
                                     <div className="d-flex justify-content-between align-items-center">
-                                        <span>{formatDate(p.date)}</span>
-                                        <span>{p.amount} {t('payments.currency')}</span>
-                                        <Badge bg={statusVariants[p.status] || 'secondary'}>
-                                            {statusLabels[p.status] || t('payments.status.UNKNOWN')}
+                                        <div>
+                                            <span className="d-block">{formatDate(payment.paymentDate || payment.date)}</span>
+                                            <small className="text-muted">رقم الفاتورة: {payment.paymentId}</small>
+                                        </div>
+                                        <span className="fw-bold">{payment.amount} {t('payments.currency')}</span>
+                                        <Badge bg="success">
+                                            {statusLabels.PAID}
                                         </Badge>
                                     </div>
+                                    <Button
+                                        variant="outline-success"
+                                        size="sm"
+                                        className="mt-2"
+                                        onClick={() => handleDownloadPDF(paymentType, propertyId)}
+                                        disabled={loading}
+                                    >
+                                        <FiDownload className="me-1" />
+                                        {t('payments.invoice.downloadPdf')}
+                                    </Button>
                                 </ListGroup.Item>
                             ))}
                         </ListGroup>
                     </div>
+                </Accordion.Body>
+            </Accordion.Item>
+        );
+    };
+
+    const renderTab = (key) => {
+        const paymentData = payments[key];
+        if (!paymentData || Object.keys(paymentData).length === 0) {
+            return (
+                <Tab eventKey={key} title={t(`payments.types.${key}`)}>
+                    <Alert variant="info" className="mt-3">
+                        {t('payments.noPaymentsFound')}
+                    </Alert>
+                </Tab>
+            );
+        }
+
+        return (
+            <Tab eventKey={key} title={t(`payments.types.${key}`)}>
+                <div className="mt-3">
+                    <Accordion defaultActiveKey={Object.keys(paymentData)[0]}>
+                        {Object.entries(paymentData).map(([propertyId, paymentsData]) =>
+                            renderPropertyPayments(propertyId, paymentsData, key)
+                        )}
+                    </Accordion>
                 </div>
             </Tab>
         );

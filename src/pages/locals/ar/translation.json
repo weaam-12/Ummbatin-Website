@@ -113,11 +113,13 @@
     "totalDebt": "الدين التراكمي",
     "loading": "جاري التحميل...",
     "processing": "جاري المعالجة...",
+    "retryPayment":"أعد محاولة الدفع",
     "status": {
       "PENDING": "قيد الانتظار",
       "PAID": "تم الدفع",
       "OVERDUE": "متأخر",
-      "UNKNOWN": "غير معروف"
+      "UNKNOWN": "غير معروف",
+      "FAILED": "فشل الدفع"
     },
     "invoice": {
       "amount": "المبلغ",

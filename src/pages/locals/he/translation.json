@@ -119,11 +119,14 @@
     "totalDebt": "חוב מצטבר",
     "loading": "טוען...",
     "processing": "מעבד...",
+    "retryPayment":"נסה שוב לשלם",
     "status": {
       "PENDING": "ממתין",
       "PAID": "שולם",
       "OVERDUE": "באיחור",
-      "UNKNOWN": "לא ידוע"
+      "UNKNOWN": "לא ידוע",
+      "FAILED": " תשלום נכשל"
+
     },
     "invoice": {
       "amount": "סכום",
