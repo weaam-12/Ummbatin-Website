@@ -292,21 +292,23 @@ export const addWaterReading = async (propertyId, amount) => {
 export const getPropertiesByUserId = async (userId) => {
     try {
         const response = await axiosInstance.get(`/api/properties/user/${userId}`);
-        return response.data;
+
+        // معالجة البيانات لإزالة التكرار الدائري
+        const processedProperties = response.data.map(property => ({
+            propertyId: property.propertyId,
+            address: property.address,
+            area: property.area,
+            numberOfUnits: property.numberOfUnits,
+            type: property.type,
+            plotNumber: property.plotNumber,
+            status: property.status
+            // إزالة حقل user أو properties المتداخلة
+        }));
+
+        return processedProperties;
     } catch (error) {
         console.error('Error fetching properties:', error);
-        if (error.response) {
-            // الخطأ من الخادم (5xx, 4xx)
-            console.error('Server responded with:', error.response.status);
-            console.error('Response data:', error.response.data);
-        } else if (error.request) {
-            // لم يتم استلام أي رد من الخادم
-            console.error('No response received:', error.request);
-        } else {
-            // خطأ في إعداد الطلب
-            console.error('Request setup error:', error.message);
-        }
-        return []; // إرجاع مصفوفة فارغة بدلاً من undefined
+        return []; // إرجاع مصفوفة فارغة في حالة الخطأ
     }
 };
 // الأطفال
