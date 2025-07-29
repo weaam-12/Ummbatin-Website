@@ -159,7 +159,7 @@ const Profile = () => {
                             <FaUsers/> معلومات العائلة
                         </div>
 
-                        {/* معلومات الزوجة */}
+                        {/* معلومللات الزوجة */}
                         {profile.wives && profile.wives.length > 0 && (
                             <div className="family-members">
                                 {profile.wives.map((wife, index) => (
