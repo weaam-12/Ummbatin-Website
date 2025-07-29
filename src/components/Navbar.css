@@ -89,7 +89,7 @@
 .view-all {
     text-align: center;
     padding: 0.5rem;
-    color: var(--navbar-primary);
+    color: rgba(0, 102, 204, 0.1);
     font-weight: 600;
     cursor: pointer;
 }
