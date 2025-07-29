@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import { enrollChild } from '../api';
-import { useAuth } from '../AuthContext';
 import './Children.css';
-
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+import { FaMoneyBillWave } from 'react-icons/fa';
 
 const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     const stripe = useStripe();
@@ -17,28 +14,32 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!stripe || !elements) {
+            // Stripe.js hasn't loaded yet
+            return;
+        }
+
         setProcessing(true);
+        setError(null);
 
         try {
-            const cardElement = elements.getElement(CardElement);
-            const { error, paymentMethod } = await stripe.createPaymentMethod({
+            const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
                 type: 'card',
-                card: cardElement,
+                card: elements.getElement(CardElement),
             });
 
-            if (error) {
-                setError(error.message);
+            if (stripeError) {
+                setError(stripeError.message);
                 setProcessing(false);
                 return;
             }
 
-            console.log("Payment method created:", paymentMethod);
-
             const paymentResult = await enrollChild({
-                childId: child.id,
-                kindergartenId: kindergarten.id,
+                childId: child.childId, // تغيير من child.id إلى child.childId
+                kindergartenId: kindergarten.kindergartenId, // تغيير من kindergarten.id إلى kindergarten.kindergartenId
                 paymentMethodId: paymentMethod.id,
-                amount: 500
+                amount: kindergarten.monthlyFee // استخدام القيمة الفعلية من الروضة بدلاً من القيمة الثابتة
             });
 
             if (paymentResult.success) {
@@ -46,7 +47,8 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
             } else {
                 setError(paymentResult.message || t('children.payment.error'));
             }
-        } catch (er) {
+        } catch (err) {
+            console.error('Payment error:', err);
             setError(t('children.payment.error'));
         } finally {
             setProcessing(false);
@@ -56,37 +58,57 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     return (
         <div className="payment-modal">
             <div className="payment-content">
-                <h3>{t('children.enrollment.title')}</h3>
+                <h3>{t('children.paymentTitle')}</h3>
                 <div className="payment-details">
                     <p><strong>{t('children.enrollment.child')}:</strong> {child.name}</p>
                     <p><strong>{t('children.enrollment.kindergarten')}:</strong> {kindergarten.name}</p>
-                    <p><strong>{t('children.enrollment.fee')}:</strong> 500 {t('children.currency')}</p>
+                    <p><strong>{t('children.enrollment.fee')}:</strong> {kindergarten.monthlyFee} {t('general.currency')}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="payment-form">
                     <div className="card-element-container">
-                        <CardElement options={{
-                            style: {
-                                base: {
-                                    fontSize: '16px',
-                                    color: '#424770',
-                                    '::placeholder': {
-                                        color: '#aab7c4',
+                        <CardElement
+                            options={{
+                                style: {
+                                    base: {
+                                        fontSize: '16px',
+                                        color: '#424770',
+                                        '::placeholder': {
+                                            color: '#aab7c4',
+                                        },
+                                    },
+                                    invalid: {
+                                        color: '#e53935',
                                     },
                                 },
-                                invalid: {
-                                    color: '#9e2146',
-                                },
-                            },
-                        }} />
+                                hidePostalCode: true
+                            }}
+                        />
                     </div>
+
                     {error && <div className="error-message">{error}</div>}
+
                     <div className="payment-buttons">
-                        <button type="button" onClick={onClose} className="cancel-btn">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="cancel-btn"
+                            disabled={processing}
+                        >
                             {t('children.cancel')}
                         </button>
-                        <button type="submit" disabled={processing} className="confirm-btn">
-                            {processing ? t('children.processing') : t('children.confirmPayment')}
+                        <button
+                            type="submit"
+                            disabled={!stripe || processing}
+                            className="confirm-btn"
+                        >
+                            {processing ? (
+                                t('children.processing')
+                            ) : (
+                                <>
+                                    <FaMoneyBillWave /> {t('children.payAndEnroll')}
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>
