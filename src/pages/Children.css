@@ -1,185 +1,159 @@
-/* الخط العام */
 .children-page {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f8fb;
     padding: 20px;
-    background-color: #fafafa;
-}
-
-/* العنوان الرئيسي */
-.page-title {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 32px;
-    font-weight: bold;
     color: #333;
 }
 
-/* تحميل / خطأ */
-.loading-indicator,
-.error-message,
-.auth-error {
+.page-title {
     text-align: center;
-    font-size: 18px;
-    margin: 20px auto;
-}
-
-.error-message {
-    color: #d32f2f;
-}
-
-/* الإحصائيات */
-.stats {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
+    font-size: 28px;
+    color: #0d47a1;
     margin-bottom: 30px;
 }
 
-.stats div {
+.stats-cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background-color: #fff;
+    border: 1px solid #d1e3f8;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 20px;
+    border-radius: 12px;
+    width: 180px;
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: #1976d2;
+}
+
+.stat-icon.success {
+    color: #2e7d32;
+}
+
+.stat-icon.danger {
+    color: #c62828;
+}
+
+.cards-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.child-card {
     background-color: #ffffff;
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.05);
-    font-size: 18px;
-    font-weight: 500;
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 10px;
+    width: 250px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    text-align: center;
 }
 
-/* العناوين الفرعية */
-.section-title {
-    font-size: 24px;
+.child-card h3 {
+    margin-bottom: 10px;
+    color: #0d47a1;
+}
+
+.child-card p {
     margin-bottom: 15px;
-    color: #444;
-    text-align: center;
+    color: #555;
 }
 
-/* في حال لا يوجد أطفال */
-.empty-state {
-    text-align: center;
-    color: #777;
-    font-style: italic;
+.child-card select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #bbb;
 }
 
-/* جدول الأطفال */
-.responsive-table {
-    overflow-x: auto;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+.all-enrolled-msg {
+    text-align: center;
+    font-size: 18px;
+    color: #2e7d32;
+    margin: 30px 0;
+}
+
+.registered-children-section {
+    margin-top: 40px;
+}
+
+.section-title {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #0d47a1;
+    text-align: center;
 }
 
 .children-table {
     width: 100%;
     border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .children-table th,
 .children-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eee;
-    text-align: left;
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
 }
 
 .children-table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
+    background-color: #e3f2fd;
+    color: #0d47a1;
 }
 
-.children-table tr:hover {
-    background-color: #fafafa;
+.children-table td {
+    color: #333;
 }
 
-/* حالة الطفل */
-.enrolled-status {
-    color: #388e3c;
-    font-weight: bold;
+.auth-error {
+    text-align: center;
+    margin-top: 60px;
 }
 
-.not-enrolled-status {
-    color: #f57c00;
-    font-weight: bold;
+.loading-indicator,
+.error-message {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 18px;
 }
 
-/* زر التسجيل */
-.enroll-action {
-    margin-top: 5px;
+.error-message {
+    color: #c62828;
 }
 
-.kindergarten-select {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    width: 100%;
-}
-
-/* مودال الدفع */
 .payment-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0,0,0,0.6);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 9999;
 }
 
 .payment-content {
     background-color: white;
-    padding: 25px;
-    border-radius: 8px;
+    padding: 30px;
+    border-radius: 10px;
     width: 90%;
-    max-width: 420px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.15);
-}
-
-.payment-details {
-    margin-bottom: 20px;
-    font-size: 16px;
-}
-
-.card-element-container {
-    margin-bottom: 20px;
-}
-
-.payment-buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.payment-buttons button {
-    flex: 1;
-    padding: 10px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.3s;
-}
-
-.cancel-btn {
-    background-color: #e53935;
-    color: white;
-}
-
-.cancel-btn:hover {
-    background-color: #c62828;
-}
-
-.confirm-btn {
-    background-color: #43a047;
-    color: white;
-}
-
-.confirm-btn:hover {
-    background-color: #2e7d32;
-}
-
-/* دعم الوضع RTL */
-html[dir="rtl"] .children-table th,
-html[dir="rtl"] .children-table td {
-    text-align: right;
+    max-width: 450px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
