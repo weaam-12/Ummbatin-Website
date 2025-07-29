@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { fetchKindergartens, createChild, enrollChild } from '../api';
+import { fetchKindergartens, enrollChild } from '../api';
 import { useAuth } from '../AuthContext';
 import './Children.css';
-import axiosInstance from '../api'; // أضف هذا الاستيراد
+import axiosInstance from '../api';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
@@ -96,10 +96,9 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
 
 const Children = () => {
     const { t, i18n } = useTranslation();
-    const { user, getUserId } = useAuth();
+    const { user } = useAuth();
     const [children, setChildren] = useState([]);
     const [kindergartens, setKindergartens] = useState([]);
-    const [newChild, setNewChild] = useState({ name: '', birthDate: '' });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showPayment, setShowPayment] = useState(false);
@@ -110,16 +109,12 @@ const Children = () => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const [kgs] = await Promise.all([
-                    fetchKindergartens()
+                const [kgs, childrenRes] = await Promise.all([
+                    fetchKindergartens(),
+                    axiosInstance.get('/api/children/my-children')
                 ]);
                 setKindergartens(kgs);
-
-                // جلب بيانات الأطفال للمستخدم الحالي فقط
-                if (getUserId()) {
-                    const response = await axiosInstance.get('/api/children/my-children');
-                    setChildren(response.data);
-                }
+                setChildren(childrenRes.data);
             } catch (error) {
                 console.error("Error loading data", error);
                 setError(t('children.loadError'));
@@ -128,45 +123,15 @@ const Children = () => {
             }
         };
 
-        loadData();
-    }, [getUserId(), t]);
-
-    const handleAddChild = async () => {
-        if (!newChild.name || !newChild.birthDate) {
-            setError(t('children.errors.requiredFields'));
-            return;
+        if (user) {
+            loadData();
         }
-
-        try {
-            const child = await createChild({
-                ...newChild,
-                userId: getUserId() // استخدام معرف المستخدم الحالي
-            });
-            setChildren([...children, child]);
-            setNewChild({ name: '', birthDate: '' });
-            setError(null);
-        } catch (error) {
-            console.error("Failed to add child", error);
-            setError(t('children.loadError'));
-        }
-    };
+    }, [user, t]);
 
     const handleEnroll = (child, kindergarten) => {
         setSelectedChild(child);
         setSelectedKindergarten(kindergarten);
         setShowPayment(true);
-    };
-
-    const handleDeleteChild = async (childId) => {
-        if (window.confirm(t('children.deleteChild'))) {
-            try {
-                // await deleteChild(childId); // Uncomment when you have delete API
-                setChildren(children.filter(child => child.id !== childId));
-            } catch (error) {
-                console.error("Failed to delete child", error);
-                setError(t('children.loadError'));
-            }
-        }
     };
 
     if (!user) {
@@ -187,47 +152,12 @@ const Children = () => {
             {loading && <div className="loading-indicator">{t('general.loading')}</div>}
             {error && <div className="error-message">{error}</div>}
 
-            {/* Add New Child Section */}
-            <div className="add-child-section card">
-                <h2 className="section-title">{t('children.registerTitle')}</h2>
-                <div className="form-group">
-                    <label htmlFor="childName">{t('children.childName')}</label>
-                    <input
-                        id="childName"
-                        type="text"
-                        placeholder={t('children.childName')}
-                        value={newChild.name}
-                        onChange={(e) => setNewChild({...newChild, name: e.target.value})}
-                        className="form-input"
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="birthDate">{t('children.birthDate')}</label>
-                    <input
-                        id="birthDate"
-                        type="date"
-                        value={newChild.birthDate}
-                        onChange={(e) => setNewChild({...newChild, birthDate: e.target.value})}
-                        className="form-input"
-                    />
-                </div>
-                <button
-                    onClick={handleAddChild}
-                    className="primary-btn"
-                    disabled={!newChild.name || !newChild.birthDate}
-                >
-                    {t('children.addChild')}
-                </button>
-            </div>
-
-            {/* Registered Children Section */}
             <div className="registered-children-section">
                 <h2 className="section-title">{t('children.registeredTitle')}</h2>
 
                 {children.length === 0 ? (
                     <div className="empty-state">
                         <p>{t('children.noChildren')}</p>
-                        <p>{t('children.addNewChild')}</p>
                     </div>
                 ) : (
                     <div className="responsive-table">
@@ -261,7 +191,7 @@ const Children = () => {
                                             )}
                                         </td>
                                         <td data-label={t('children.actions')}>
-                                            {!child.kindergartenId ? (
+                                            {!child.kindergartenId && (
                                                 <div className="enroll-action">
                                                     <select
                                                         onChange={(e) => {
@@ -278,13 +208,6 @@ const Children = () => {
                                                         ))}
                                                     </select>
                                                 </div>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleDeleteChild(child.id)}
-                                                    className="danger-btn"
-                                                >
-                                                    {t('children.delete')}
-                                                </button>
                                             )}
                                         </td>
                                     </tr>
@@ -296,7 +219,6 @@ const Children = () => {
                 )}
             </div>
 
-            {/* Payment Modal */}
             {showPayment && selectedChild && selectedKindergarten && (
                 <Elements stripe={stripePromise}>
                     <PaymentForm
@@ -304,7 +226,6 @@ const Children = () => {
                         kindergarten={selectedKindergarten}
                         onSuccess={() => {
                             setShowPayment(false);
-                            // إعادة تحميل بيانات الأطفال بعد التسجيل الناجح
                             axiosInstance.get('/api/children/my-children').then(res => setChildren(res.data));
                         }}
                         onClose={() => setShowPayment(false)}
