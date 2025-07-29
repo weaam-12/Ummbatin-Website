@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../api';
 import PaymentForm from './PaymentForm';
-import './Children.css';
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from '../AuthContext';
 import './Children.css';
 
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const Children = () => {
     const { t, i18n } = useTranslation();
@@ -19,6 +18,9 @@ const Children = () => {
     const [showPayment, setShowPayment] = useState(false);
     const [selectedChild, setSelectedChild] = useState(null);
     const [selectedKindergarten, setSelectedKindergarten] = useState(null);
+    const [totalChildren, setTotalChildren] = useState(0);
+    const [enrolledChildren, setEnrolledChildren] = useState(0);
+    const [unenrolledChildren, setUnenrolledChildren] = useState(0);
 
     useEffect(() => {
         const loadData = async () => {
@@ -28,10 +30,14 @@ const Children = () => {
                     axiosInstance.get('/api/kindergartens'),
                     axiosInstance.get('/api/children/my-children')
                 ]);
-                console.log("Kindergartens:", kgs.data);
-                console.log("Children:", childrenRes.data);
                 setKindergartens(kgs.data);
                 setChildren(childrenRes.data);
+                const total = childrenRes.data.length;
+                const enrolled = childrenRes.data.filter(child => child.kindergartenId).length;
+                const unenrolled = total - enrolled;
+                setTotalChildren(total);
+                setEnrolledChildren(enrolled);
+                setUnenrolledChildren(unenrolled);
             } catch (error) {
                 console.error("Error loading data", error);
                 setError(t('children.loadError'));
@@ -69,6 +75,12 @@ const Children = () => {
             {loading && <div className="loading-indicator">{t('general.loading')}</div>}
             {error && <div className="error-message">{error}</div>}
 
+            <div className="stats">
+                <div><strong>{totalChildren}</strong> {t('children.totalChildren')}</div>
+                <div><strong>{enrolledChildren}</strong> {t('children.enrolledChildren')}</div>
+                <div><strong>{unenrolledChildren}</strong> {t('children.unenrolledChildren')}</div>
+            </div>
+
             <div className="registered-children-section">
                 <h2 className="section-title">{t('children.registeredTitle')}</h2>
 
@@ -90,7 +102,6 @@ const Children = () => {
                             <tbody>
                             {children.map(child => {
                                 const enrolledKg = kindergartens.find(k => k.kindergartenId === child.kindergartenId);
-                                console.log("Enrolled Kindergarten for child", child.childId, enrolledKg);
                                 return (
                                     <tr key={child.childId}>
                                         <td data-label={t('children.childName')}>{child.name}</td>
@@ -145,8 +156,13 @@ const Children = () => {
                         onSuccess={() => {
                             setShowPayment(false);
                             axiosInstance.get('/api/children/my-children').then(res => {
-                                console.log("Updated Children Data:", res.data);
                                 setChildren(res.data);
+                                const total = res.data.length;
+                                const enrolled = res.data.filter(child => child.kindergartenId).length;
+                                const unenrolled = total - enrolled;
+                                setTotalChildren(total);
+                                setEnrolledChildren(enrolled);
+                                setUnenrolledChildren(unenrolled);
                             });
                         }}
                         onClose={() => setShowPayment(false)}
