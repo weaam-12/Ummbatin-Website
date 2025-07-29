@@ -57,7 +57,7 @@ const Payments = () => {
                     water: organizePaymentsByProperty(data.filter(p => p.paymentType === 'WATER')),
                     arnona: organizePaymentsByProperty(data.filter(p => p.paymentType === 'ARNONA'))
                 };
-
+                console.log("organizedPayments" + organizedPayments);
                 setPayments(organizedPayments);
             } catch (e) {
                 console.error('Error loading data:', e);
