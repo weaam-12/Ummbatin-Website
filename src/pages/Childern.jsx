@@ -1,98 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import { fetchKindergartens, enrollChild } from '../api';
-import { useAuth } from '../AuthContext';
-import './Children.css';
+import { useTranslation, useAuth } from 'react-i18next';
 import axiosInstance from '../api';
-
+import PaymentForm from './PaymentForm';
+import './Children.css';
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
-
-const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
-    const stripe = useStripe();
-    const elements = useElements();
-    const { t } = useTranslation();
-    const [error, setError] = useState(null);
-    const [processing, setProcessing] = useState(false);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setProcessing(true);
-
-        try {
-            const cardElement = elements.getElement(CardElement);
-            const { error, paymentMethod } = await stripe.createPaymentMethod({
-                type: 'card',
-                card: cardElement,
-            });
-
-            if (error) {
-                setError(error.message);
-                setProcessing(false);
-                return;
-            }
-
-            const paymentResult = await enrollChild({
-                childId: child.id,
-                kindergartenId: kindergarten.id,
-                paymentMethodId: paymentMethod.id,
-                amount: 500
-            });
-
-            if (paymentResult.success) {
-                onSuccess();
-            } else {
-                setError(paymentResult.message || t('children.payment.error'));
-            }
-        } catch (er) {
-            setError(t('children.payment.error'));
-        } finally {
-            setProcessing(false);
-        }
-    };
-
-    return (
-        <div className="payment-modal">
-            <div className="payment-content">
-                <h3>{t('children.enrollment.title')}</h3>
-                <div className="payment-details">
-                    <p><strong>{t('children.enrollment.child')}:</strong> {child.name}</p>
-                    <p><strong>{t('children.enrollment.kindergarten')}:</strong> {kindergarten.name}</p>
-                    <p><strong>{t('children.enrollment.fee')}:</strong> 500 {t('children.currency')}</p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="payment-form">
-                    <div className="card-element-container">
-                        <CardElement options={{
-                            style: {
-                                base: {
-                                    fontSize: '16px',
-                                    color: '#424770',
-                                    '::placeholder': {
-                                        color: '#aab7c4',
-                                    },
-                                },
-                                invalid: {
-                                    color: '#9e2146',
-                                },
-                            },
-                        }} />
-                    </div>
-                    {error && <div className="error-message">{error}</div>}
-                    <div className="payment-buttons">
-                        <button type="button" onClick={onClose} className="cancel-btn">
-                            {t('children.cancel')}
-                        </button>
-                        <button type="submit" disabled={processing} className="confirm-btn">
-                            {processing ? t('children.processing') : t('children.confirmPayment')}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
 
 const Children = () => {
     const { t, i18n } = useTranslation();
@@ -110,10 +21,12 @@ const Children = () => {
             setLoading(true);
             try {
                 const [kgs, childrenRes] = await Promise.all([
-                    fetchKindergartens(),
+                    axiosInstance.get('/api/kindergartens'),
                     axiosInstance.get('/api/children/my-children')
                 ]);
-                setKindergartens(kgs);
+                console.log("Kindergartens:", kgs.data);
+                console.log("Children:", childrenRes.data);
+                setKindergartens(kgs.data);
                 setChildren(childrenRes.data);
             } catch (error) {
                 console.error("Error loading data", error);
@@ -173,6 +86,7 @@ const Children = () => {
                             <tbody>
                             {children.map(child => {
                                 const enrolledKg = kindergartens.find(k => k.id === child.kindergartenId);
+                                console.log("Enrolled Kindergarten for child", child.id, enrolledKg);
                                 return (
                                     <tr key={child.id}>
                                         <td data-label={t('children.childName')}>{child.name}</td>
@@ -182,12 +96,12 @@ const Children = () => {
                                         <td data-label={t('children.status')}>
                                             {enrolledKg ? (
                                                 <span className="enrolled-status">
-                                                        {t('children.enrolledIn')}: {enrolledKg.name}
-                                                    </span>
+                                                    {t('children.enrolledIn')}: {enrolledKg.name}
+                                                </span>
                                             ) : (
                                                 <span className="not-enrolled-status">
-                                                        {t('children.notEnrolled')}
-                                                    </span>
+                                                    {t('children.notEnrolled')}
+                                                </span>
                                             )}
                                         </td>
                                         <td data-label={t('children.actions')}>
@@ -226,7 +140,10 @@ const Children = () => {
                         kindergarten={selectedKindergarten}
                         onSuccess={() => {
                             setShowPayment(false);
-                            axiosInstance.get('/api/children/my-children').then(res => setChildren(res.data));
+                            axiosInstance.get('/api/children/my-children').then(res => {
+                                console.log("Updated Children Data:", res.data);
+                                setChildren(res.data);
+                            });
                         }}
                         onClose={() => setShowPayment(false)}
                     />
