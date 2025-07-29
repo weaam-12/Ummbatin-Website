@@ -79,9 +79,9 @@ const Payments = () => {
                 const property = properties.find(p => p.propertyId === propertyId) || {};
                 byProperty[propertyId] = {
                     propertyInfo: {
-                        address: property.address || 'غير معروف',
-                        area: property.area || 0,
-                        units: property.numberOfUnits || 0
+                        address: property.address,
+                        area: property.area,
+                        units: property.numberOfUnits
                     },
                     payments: []
                 };
