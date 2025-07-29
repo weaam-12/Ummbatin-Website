@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { useTranslation } from 'react-i18next'; // Add this import
+import { useTranslation } from 'react-i18next';
 import {
     Card, Tabs, Tab, Button, Alert, Spinner, Container, ListGroup, Badge, Row, Col
 } from 'react-bootstrap';
@@ -14,23 +14,28 @@ import './Payment.css';
 import { getUserPayments, processPayment } from '../api';
 
 const Payments = () => {
-    const { t } = useTranslation(); // Add this line
+    const { t } = useTranslation();
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('water');
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
     const [payments, setPayments] = useState({
         water: { status: 'PENDING', amount: 0, dueDate: null, history: [] },
-        arnona: { status: 'PENDING', amount: 0, dueDate: null, history: [] },
-        kindergarten: { status: 'PENDING', amount: 0, dueDate: null, history: [] }
+        arnona: { status: 'PENDING', amount: 0, dueDate: null, history: [] }
     });
     const [debt, setDebt] = useState(0);
 
-    const statusVariants = { PENDING: 'warning', PAID: 'success', OVERDUE: 'danger' };
+    const statusVariants = {
+        PENDING: 'warning',
+        PAID: 'success',
+        OVERDUE: 'danger',
+        FAILED: 'danger'
+    };
     const statusLabels = {
         PENDING: t('payments.status.PENDING'),
         PAID: t('payments.status.PAID'),
-        OVERDUE: t('payments.status.OVERDUE')
+        OVERDUE: t('payments.status.OVERDUE'),
+        FAILED: t('payments.status.FAILED')
     };
 
     const formatDate = (d) => d ? new Date(d).toLocaleDateString() : '--';
@@ -40,18 +45,17 @@ const Payments = () => {
         const load = async () => {
             try {
                 const data = await getUserPayments(user?.userId);
-                console.log('🧾 Raw API response:', data);
-                console.log('🔑 Keys received:', Object.keys(data));
-                Object.values(data).forEach((v, i) =>
-                    console.log(`📦 Item ${i} :`, v)
-                );
                 const map = data.reduce((acc, item) => {
                     const key = item.paymentType.toLowerCase();
                     acc[key] = acc[key] || { status: 'PENDING', amount: 0, dueDate: null, history: [] };
-                    acc[key].amount += item.amount;
+                    acc[key].amount = item.amount; // استخدام أحدث مبلغ
                     acc[key].status = item.status;
-                    acc[key].dueDate = item.date; // يمكنك تعديله لاحقًا
-                    acc[key].history.unshift({ date: item.date, amount: item.amount });
+                    acc[key].dueDate = item.date;
+                    acc[key].history.unshift({
+                        date: item.date,
+                        amount: item.amount,
+                        status: item.status
+                    });
                     return acc;
                 }, {});
                 setPayments(map);
@@ -64,24 +68,33 @@ const Payments = () => {
         if (user) load();
     }, [user]);
 
-    // حساب الدين التراكمي
+    // حساب الدين التراكمي (يشمل PENDING و FAILED فقط)
     useEffect(() => {
         const totalDebt = Object.values(payments).reduce(
-            (sum, p) => (p?.status === 'PENDING' ? sum + p.amount : sum), 0
+            (sum, p) => (p?.status === 'PENDING' || p?.status === 'FAILED') ? sum + p.amount : sum, 0
         );
         setDebt(totalDebt);
     }, [payments]);
 
     // توليد PDF
     const handleDownloadPDF = (type) => {
+        setLoading(true);
         const element = document.getElementById(`invoice-${type}`);
-        html2canvas(element, { scale: 2 }).then((canvas) => {
+        html2canvas(element, {
+            scale: 2,
+            logging: false,
+            useCORS: true
+        }).then((canvas) => {
             const img = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
             const w = pdf.internal.pageSize.getWidth();
             const h = (canvas.height * w) / canvas.width;
             pdf.addImage(img, 'PNG', 0, 0, w, h);
-            pdf.save(`invoice-${type}-${Date.now()}.pdf`);
+            pdf.save(`${t(`payments.types.${type}`)}-${new Date().toLocaleDateString()}.pdf`);
+            setLoading(false);
+        }).catch(() => {
+            setNotification({ type: 'danger', message: t('payments.notifications.pdfError') });
+            setLoading(false);
         });
     };
 
@@ -98,24 +111,55 @@ const Payments = () => {
                 description: `${t('payments.invoice.payNow')} ${t(`payments.types.${paymentType}`)}`
             });
 
-            window.open(`https://checkout.stripe.com/pay/${clientSecret}`, '_blank');
+            // فتح صفحة الدفع في نافذة جديدة
+            const paymentWindow = window.open(`https://checkout.stripe.com/pay/${clientSecret}`, '_blank');
 
+            // مراقبة إغلاق نافذة الدفع
+            const checkPayment = setInterval(async () => {
+                if (paymentWindow.closed) {
+                    clearInterval(checkPayment);
+                    try {
+                        // إعادة تحميل بيانات الدفع للتأكد من الحالة
+                        const updatedData = await getUserPayments(user.userId);
+                        const updatedPayment = updatedData.find(
+                            item => item.paymentType.toLowerCase() === paymentType
+                        );
+
+                        if (updatedPayment && updatedPayment.status === 'PAID') {
+                            setPayments(prev => ({
+                                ...prev,
+                                [paymentType]: {
+                                    ...prev[paymentType],
+                                    status: 'PAID',
+                                    history: [
+                                        {
+                                            date: new Date().toISOString(),
+                                            amount: prev[paymentType].amount,
+                                            status: 'PAID'
+                                        },
+                                        ...prev[paymentType].history
+                                    ]
+                                }
+                            }));
+                            setNotification({
+                                type: 'success',
+                                message: `${t('payments.notifications.paymentSuccess')} ${t(`payments.types.${paymentType}`)}`
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error verifying payment:', e);
+                    }
+                }
+            }, 1000);
+
+        } catch (e) {
             setPayments(prev => ({
                 ...prev,
                 [paymentType]: {
                     ...prev[paymentType],
-                    status: 'PAID',
-                    history: [
-                        { date: new Date().toISOString(), amount: prev[paymentType].amount },
-                        ...prev[paymentType].history
-                    ]
+                    status: 'FAILED'
                 }
             }));
-            setNotification({
-                type: 'success',
-                message: `${t('payments.notifications.paymentSuccess')} ${t(`payments.types.${paymentType}`)}`
-            });
-        } catch (e) {
             setNotification({
                 type: 'danger',
                 message: t('payments.notifications.paymentError')
@@ -146,15 +190,25 @@ const Payments = () => {
                     {item.status === 'PAID' ? (
                         <>
                             <Alert variant="success"><FiCheckCircle /> {t('payments.invoice.paidSuccess')}</Alert>
-                            <Button variant="outline-success" onClick={() => handleDownloadPDF(key)}>
-                                <FiDownload /> {t('payments.invoice.downloadPdf')}
+                            <Button
+                                variant="outline-success"
+                                onClick={() => handleDownloadPDF(key)}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <Spinner animation="border" size="sm" className="me-2" />
+                                ) : (
+                                    <FiDownload className="me-2" />
+                                )}
+                                {t('payments.invoice.downloadPdf')}
                             </Button>
                         </>
                     ) : (
                         <Button
-                            variant="primary"
+                            variant={item.status === 'FAILED' ? 'danger' : 'primary'}
                             disabled={loading}
                             onClick={() => handlePayment(key)}
+                            className="payment-button"
                         >
                             {loading ? (
                                 <>
@@ -162,7 +216,9 @@ const Payments = () => {
                                     {t('payments.processing')}
                                 </>
                             ) : (
-                                t('payments.invoice.payNow')
+                                <>
+                                    {item.status === 'FAILED' ? t('payments.retryPayment') : t('payments.invoice.payNow')}
+                                </>
                             )}
                         </Button>
                     )}
@@ -172,10 +228,12 @@ const Payments = () => {
                         <ListGroup>
                             {(item.history || []).map((p, i) => (
                                 <ListGroup.Item key={i}>
-                                    <div className="d-flex justify-content-between">
+                                    <div className="d-flex justify-content-between align-items-center">
                                         <span>{formatDate(p.date)}</span>
                                         <span>{p.amount} {t('payments.currency')}</span>
-                                        <Badge bg="success">{t('payments.status.PAID')}</Badge>
+                                        <Badge bg={statusVariants[p.status] || 'secondary'}>
+                                            {statusLabels[p.status] || t('payments.status.UNKNOWN')}
+                                        </Badge>
                                     </div>
                                 </ListGroup.Item>
                             ))}
@@ -201,7 +259,11 @@ const Payments = () => {
 
                 <Card.Body>
                     <div className="d-flex justify-content-between mb-3">
-                        <span>{t('payments.totalDebt')}: <strong className="text-danger">{debt} {t('payments.currency')}</strong></span>
+                        <span>{t('payments.totalDebt')}:
+                            <strong className={debt > 0 ? 'text-danger' : 'text-success'}>
+                                {debt} {t('payments.currency')}
+                            </strong>
+                        </span>
                     </div>
 
                     {loading ? (
@@ -213,7 +275,6 @@ const Payments = () => {
                         <Tabs activeKey={activeTab} onSelect={k => setActiveTab(k)} className="mb-4">
                             {renderTab('water')}
                             {renderTab('arnona')}
-                            {renderTab('kindergarten')}
                         </Tabs>
                     )}
                 </Card.Body>
