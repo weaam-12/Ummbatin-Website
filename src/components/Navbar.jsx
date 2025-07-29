@@ -5,12 +5,11 @@ import {
     FaBars,
     FaTimes,
     FaUserCircle,
-    FaSearch,
+    FaBell,
     FaUserShield,
     FaHome,
     FaExclamationCircle,
     FaMoneyBillWave,
-    FaBell,
     FaTrash,
     FaGraduationCap,
     FaCog,
@@ -26,7 +25,13 @@ const Navbar = () => {
     const { user, isAdmin, logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
+    const [notifications, setNotifications] = useState([
+        { id: 1, title: "تم دفع الفاتورة بنجاح", time: "منذ ساعتين", read: false },
+        { id: 2, title: "شكوى جديدة تحتاج إلى مراجعة", time: "منذ يوم", read: true },
+        { id: 3, title: "تمت الموافقة على طلبك", time: "منذ 3 أيام", read: true }
+    ]);
 
     useEffect(() => {
         document.body.dir = "rtl";
@@ -45,15 +50,28 @@ const Navbar = () => {
         setShowDropdown(!showDropdown);
     };
 
-    const closeDropdown = () => {
+    const toggleNotifications = () => {
+        setShowNotifications(!showNotifications);
+    };
+
+    const closeDropdowns = () => {
         setShowDropdown(false);
+        setShowNotifications(false);
     };
 
     const handleLogout = () => {
         logout();
-        closeDropdown();
+        closeDropdowns();
         navigate("/login");
     };
+
+    const markAsRead = (id) => {
+        setNotifications(notifications.map(notification =>
+            notification.id === id ? { ...notification, read: true } : notification
+        ));
+    };
+
+    const unreadCount = notifications.filter(n => !n.read).length;
 
     // روابط المستخدم العادي
     const userLinks = [
@@ -117,12 +135,37 @@ const Navbar = () => {
                 </ul>
 
                 <div className="navbar-right">
-                    <div className="search-bar">
-                        <FaSearch className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder={t("common.search")}
-                        />
+                    <div className="notifications-menu">
+                        <div className="notifications-button" onClick={toggleNotifications}>
+                            <FaBell className="notifications-icon" />
+                            {unreadCount > 0 && (
+                                <span className="notifications-badge">{unreadCount}</span>
+                            )}
+                        </div>
+
+                        {showNotifications && (
+                            <div className="notifications-dropdown show">
+                                <div className="dropdown-header" style={{ padding: "0.5rem 1rem", fontWeight: "bold" }}>
+                                    الإشعارات
+                                </div>
+                                {notifications.map(notification => (
+                                    <div
+                                        key={notification.id}
+                                        className={`notification-item ${!notification.read ? "unread" : ""}`}
+                                        onClick={() => markAsRead(notification.id)}
+                                    >
+                                        <div className="notification-title">{notification.title}</div>
+                                        <div className="notification-time">{notification.time}</div>
+                                    </div>
+                                ))}
+                                <div className="view-all" onClick={() => {
+                                    navigate("/notifications");
+                                    closeDropdowns();
+                                }}>
+                                    عرض الكل
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="language-selector">
@@ -158,7 +201,7 @@ const Navbar = () => {
                                         <NavLink
                                             to="/profile"
                                             className="dropdown-item"
-                                            onClick={closeDropdown}
+                                            onClick={closeDropdowns}
                                         >
                                             <FaUserCircle />
                                             {t("common.profile")}
@@ -167,7 +210,7 @@ const Navbar = () => {
                                             <NavLink
                                                 to="/admin"
                                                 className="dropdown-item"
-                                                onClick={closeDropdown}
+                                                onClick={closeDropdowns}
                                             >
                                                 <FaUserShield />
                                                 {t("common.adminPanel")}
@@ -185,7 +228,7 @@ const Navbar = () => {
                                     <NavLink
                                         to="/login"
                                         className="dropdown-item"
-                                        onClick={closeDropdown}
+                                        onClick={closeDropdowns}
                                     >
                                         <FaUserCircle />
                                         {t("common.login")}

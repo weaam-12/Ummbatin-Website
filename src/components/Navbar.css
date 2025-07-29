@@ -1,193 +1,52 @@
-:root {
-    --navbar-bg: #ffffff;
-    --navbar-text: #2c3e50;
-    --navbar-primary: #0066cc;
-    --navbar-hover: #004c99;
-    --navbar-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    --transition-speed: 0.3s;
-    --font-family: 'Almarai', sans-serif;
-    --border-radius: 8px;
-}
-
-/* الهيكل الأساسي */
-.navbar {
-    background-color: var(--navbar-bg);
-    box-shadow: var(--navbar-shadow);
-    padding: 0.5rem 1.5rem;
-    font-family: var(--font-family);
-    direction: rtl;
+/* استبدال جزء البحث بالإشعارات */
+.notifications-menu {
     position: relative;
-    z-index: 1000;
+    cursor: pointer;
 }
 
-.navbar-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-/* العلامة التجارية */
-.brand-container {
+.notifications-button {
     display: flex;
     align-items: center;
-}
-
-.navbar-brand {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--navbar-primary);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.navbar-brand img {
+    justify-content: center;
+    width: 40px;
     height: 40px;
-}
-
-/* أيقونة القائمة */
-.menu-icon {
-    display: none;
-    cursor: pointer;
-    font-size: 1.5rem;
-    color: var(--navbar-primary);
-    transition: color var(--transition-speed);
-    padding: 0.5rem;
-}
-
-/* روابط التنقل */
-.navbar-links {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    gap: 5px;
-}
-
-.navbar-links li {
-    margin: 0;
-}
-
-.navbar-links a {
-    display: flex;
-    align-items: center;
-    padding: 0.8rem 1rem;
-    color: var(--navbar-text);
-    text-decoration: none;
-    border-radius: var(--border-radius);
-    transition: all var(--transition-speed);
-    font-weight: 600;
-    font-size: 0.95rem;
-    gap: 8px;
-}
-
-.navbar-links a:hover,
-.navbar-links a.active {
-    background-color: rgba(0, 102, 204, 0.1);
-    color: var(--navbar-primary);
-}
-
-/* روابط الأدمن */
-.admin-link {
-    color: #d32f2f !important;
-}
-
-.admin-link:hover {
-    background-color: rgba(211, 47, 47, 0.1) !important;
-}
-
-/* العناصر الجانبية */
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.search-bar {
-    display: flex;
-    align-items: center;
-    background-color: #f5f7fb;
-    border-radius: 30px;
-    padding: 0.5rem 1rem;
-    transition: all var(--transition-speed);
-    border: 1px solid #e0e0e0;
-}
-
-.search-bar:focus-within {
-    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
-}
-
-.search-icon {
-    color: #6c757d;
-}
-
-.search-bar input {
-    border: none;
-    background: transparent;
-    outline: none;
-    width: 150px;
-    font-family: var(--font-family);
-    font-size: 0.9rem;
-    padding: 0 0.5rem;
-}
-
-.language-selector {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.language-selector button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--navbar-text);
-    transition: color var(--transition-speed);
-    font-size: 0.9rem;
-    padding: 0.5rem;
-}
-
-.language-selector button.active {
-    color: var(--navbar-primary);
-    font-weight: 700;
-}
-
-.profile-menu {
-    position: relative;
-}
-
-.profile-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius);
+    border-radius: 50%;
     transition: all var(--transition-speed);
     color: var(--navbar-text);
-    font-weight: 600;
-    font-size: 0.95rem;
 }
 
-.profile-button:hover {
+.notifications-button:hover {
     background-color: rgba(0, 102, 204, 0.1);
 }
 
-.profile-icon {
-    font-size: 1.5rem;
+.notifications-icon {
+    font-size: 1.2rem;
     color: var(--navbar-primary);
 }
 
-.dropdown-menu {
+.notifications-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #d32f2f;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.notifications-dropdown {
     position: absolute;
     right: 0;
     top: 100%;
-    min-width: 200px;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
     background: white;
     border-radius: var(--border-radius);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -198,90 +57,56 @@
     transition: all var(--transition-speed);
 }
 
-.dropdown-menu.show {
+.notifications-dropdown.show {
     opacity: 1;
     visibility: visible;
 }
 
-.dropdown-item {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    color: var(--navbar-text);
-    text-decoration: none;
+.notification-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
     transition: all var(--transition-speed);
-    gap: 10px;
 }
 
-.dropdown-item:hover {
+.notification-item:hover {
     background-color: #f5f7fb;
+}
+
+.notification-item.unread {
+    background-color: rgba(0, 102, 204, 0.05);
+}
+
+.notification-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.notification-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.view-all {
+    text-align: center;
+    padding: 0.5rem;
     color: var(--navbar-primary);
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.dropdown-item.logout {
-    color: #d32f2f;
+.view-all:hover {
+    background-color: rgba(0, 102, 204, 0.1);
 }
 
-.dropdown-item.logout:hover {
-    background-color: rgba(211, 47, 47, 0.1);
-}
-
-/* التصميم المتجاوب */
+/* تعديلات التصميم المتجاوب */
 @media (max-width: 992px) {
-    .navbar-container {
-        padding: 0.5rem;
-    }
-
-    .menu-icon {
-        display: block;
-    }
-
-    .navbar-links {
-        flex-direction: column;
-        width: 100%;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height var(--transition-speed);
-    }
-
-    .navbar-links.active {
-        max-height: 500px;
-        padding: 1rem 0;
-    }
-
-    .navbar-links li {
-        width: 100%;
-    }
-
-    .navbar-links a {
-        justify-content: flex-start;
-        padding: 0.8rem 1.5rem;
-    }
-
-    .navbar-right {
-        width: 100%;
-        justify-content: space-between;
-        padding: 0.5rem 0;
-        flex-wrap: wrap;
-    }
-
-    .search-bar {
+    .notifications-menu {
         order: 1;
+    }
+
+    .notifications-dropdown {
         width: 100%;
-        margin: 0.5rem 0;
-    }
-
-    .language-selector {
-        order: 2;
-    }
-
-    .profile-menu {
-        order: 3;
-    }
-}
-
-@media (max-width: 576px) {
-    .search-bar input {
-        width: 100%;
+        right: auto;
+        left: 0;
     }
 }
