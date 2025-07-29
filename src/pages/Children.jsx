@@ -9,7 +9,45 @@ import { FaChild, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import './Children.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
+    const [selectedKg, setSelectedKg] = useState('');
+    const kg = kindergartens.find(k => k.kindergartenId === selectedKg);
 
+    return (
+        <div className="child-card">
+            <h3>{child.name}</h3>
+            <p>{t('children.birthDate')}: {new Date(child.birthDate).toLocaleDateString(i18n.language)}</p>
+
+            <select
+                value={selectedKg}
+                onChange={(e) => setSelectedKg(e.target.value)}
+            >
+                <option value="">{t('children.selectKindergarten')}</option>
+                {kindergartens.map(kg => (
+                    <option key={kg.kindergartenId} value={kg.kindergartenId}>
+                        {kg.name} ({t('children.fees')}: {kg.monthlyFee} {t('general.currency')})
+                    </option>
+                ))}
+            </select>
+
+            {selectedKg && kg && (
+                <div className="payment-info">
+                    <p>{t('children.selectedKindergarten')}: <strong>{kg.name}</strong></p>
+                    <p>{t('children.monthlyFees')}: <strong>{kg.monthlyFee} {t('general.currency')}</strong></p>
+                    <p>{t('children.availableSlots')}: <strong>{kg.availableSlots}</strong></p>
+                </div>
+            )}
+
+            <button
+                className="enroll-button"
+                onClick={() => handleEnroll(child, selectedKg)}
+                disabled={!selectedKg}
+            >
+                <FaMoneyBillWave /> {t('children.payAndRegister')}
+            </button>
+        </div>
+    );
+};
 const Children = () => {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
@@ -109,49 +147,18 @@ const Children = () => {
             </div>
 
             {unenrolledChildren > 0 ? (
-                <>
-                    <div className="cards-section">
-                        {children.filter(c => !c.kindergartenId).map(child => {
-                            const [selectedKg, setSelectedKg] = useState('');
-                            const kg = kindergartens.find(k => k.kindergartenId === selectedKg);
-
-                            return (
-                                <div key={child.childId} className="child-card">
-                                    <h3>{child.name}</h3>
-                                    <p>تاريخ الميلاد: {new Date(child.birthDate).toLocaleDateString(i18n.language)}</p>
-
-                                    <select
-                                        value={selectedKg}
-                                        onChange={(e) => setSelectedKg(e.target.value)}
-                                    >
-                                        <option value="">{t('children.selectKindergarten')}</option>
-                                        {kindergartens.map(kg => (
-                                            <option key={kg.kindergartenId} value={kg.kindergartenId}>
-                                                {kg.name} (رسوم: {kg.monthlyFee} د.ك)
-                                            </option>
-                                        ))}
-                                    </select>
-
-                                    {selectedKg && kg && (
-                                        <div className="payment-info">
-                                            <p>الحضانة المختارة: <strong>{kg.name}</strong></p>
-                                            <p>الرسوم الشهرية: <strong>{kg.monthlyFee} د.ك</strong></p>
-                                            <p>السعة المتاحة: <strong>{kg.availableSlots}</strong></p>
-                                        </div>
-                                    )}
-
-                                    <button
-                                        className="enroll-button"
-                                        onClick={() => handleEnroll(child, selectedKg)}
-                                        disabled={!selectedKg}
-                                    >
-                                        <FaMoneyBillWave /> دفع وتسجيل
-                                    </button>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </>
+                <div className="cards-section">
+                    {children.filter(c => !c.kindergartenId).map(child => (
+                        <ChildCard
+                            key={child.childId}
+                            child={child}
+                            kindergartens={kindergartens}
+                            handleEnroll={handleEnroll}
+                            t={t}
+                            i18n={i18n}
+                        />
+                    ))}
+                </div>
             ) : (
                 <div className="all-enrolled-msg">
                     🎉 {t('children.allEnrolled')}
