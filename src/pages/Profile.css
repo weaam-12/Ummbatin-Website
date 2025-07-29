@@ -1,25 +1,377 @@
-/* ---------- أساس ---------- */
+/* ---------- أنماط جديدة للعقارات ---------- */
+.properties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.property-card {
+    background-color: #f0fdf4;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #bbf7d0;
+    position: relative;
+}
+
+.property-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    background-color: #22c55e;
+    border-radius: 10px 0 0 10px;
+}
+
+.property-title {
+    font-weight: 600;
+    color: #166534;
+    margin-bottom: 8px;
+}
+
+.property-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.property-detail {
+    display: flex;
+    justify-content: space-between;
+}
+
+.detail-label {
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.detail-value {
+    color: #0f172a;
+    font-weight: 500;
+}
+
+/* ---------- أنماط الفواتير ---------- */
+.bills-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.bills-table th, .bills-table td {
+    padding: 12px 15px;
+    text-align: right;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.bills-table th {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 600;
+}
+
+.bill-paid {
+    color: #166534;
+    background-color: #dcfce7;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.bill-pending {
+    color: #9a3412;
+    background-color: #ffedd5;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.bill-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.view-bill-btn {
+    background-color: #0369a1;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.pay-bill-btn {
+    background-color: #22c55e;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+/* ---------- نموذج طلب وثيقة ---------- */
+.document-form {
+    background-color: #f8fafc;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.submit-btn {
+    background-color: #0369a1;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.submit-btn:hover {
+    background-color: #0284c7;
+}
+
+/* أيقونات إضافية */
+.property-icon {
+    color: #22c55e;
+    margin-left: 5px;
+}
+
+.bill-icon {
+    color: #0369a1;
+    margin-left: 5px;
+}
+
+.request-icon {
+    color: #9333ea;
+    margin-left: 5px;
+}
+
+/* ---------- أساس التصميم ---------- */
 .profile-container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 40px auto;
-    padding: 24px;
+    padding: 30px;
     background-color: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     direction: rtl;
     color: #1e293b;
+    border: 1px solid #e0f2fe;
 }
 
-.profile-container h1 {
-    font-size: 1.8rem;
-    font-weight: bold;
+.profile-header {
     text-align: center;
-    margin-bottom: 24px;
-    color: #0f172a;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0f2fe;
 }
 
-/* ---------- הודעת שגיאה ---------- */
+.profile-header h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #0369a1;
+    margin-bottom: 10px;
+}
+
+.profile-header p {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+/* ---------- أقسام البروفايل ---------- */
+.profile-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #0369a1;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0f2fe;
+    display: flex;
+    align-items: center;
+}
+
+.section-title svg {
+    margin-left: 8px;
+}
+
+/* ---------- بطاقات المعلومات ---------- */
+.info-card {
+    background-color: #f8fafc;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 15px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border-color: #bae6fd;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #475569;
+    font-size: 1rem;
+    min-width: 120px;
+}
+
+.info-value {
+    color: #0f172a;
+    font-size: 1rem;
+    text-align: left;
+    flex-grow: 1;
+}
+
+/* ---------- قسم العائلة ---------- */
+.family-members {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.member-card {
+    background-color: #f0f9ff;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #bae6fd;
+}
+
+.member-name {
+    font-weight: 600;
+    color: #0369a1;
+    margin-bottom: 5px;
+}
+
+.member-relation {
+    font-size: 0.9rem;
+    color: #64748b;
+    background-color: #e0f2fe;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+/* ---------- قسم الملفات ---------- */
+.documents-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.document-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.document-name {
+    font-weight: 500;
+    color: #475569;
+}
+
+.download-btn {
+    background-color: #0369a1;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.download-btn:hover {
+    background-color: #0284c7;
+}
+
+/* ---------- الأزرار ---------- */
+.profile-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.primary-btn {
+    background-color: #0369a1;
+    color: white;
+}
+
+.primary-btn:hover {
+    background-color: #0284c7;
+}
+
+.secondary-btn {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.secondary-btn:hover {
+    background-color: #bae6fd;
+}
+
+/* ---------- رسائل الخطأ ---------- */
 .error-message {
     background-color: #fee2e2;
     color: #b91c1c;
@@ -30,44 +382,29 @@
     margin-bottom: 20px;
 }
 
-/* ---------- פרטי פרופיל ---------- */
-.profile-details {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
+/* ---------- تفاعل مع الشاشات الصغيرة ---------- */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 20px;
+        margin: 20px 10px;
+    }
 
-.profile-field {
-    background-color: #f1f5f9;
-    padding: 14px 18px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #e2e8f0;
-}
+    .family-members {
+        grid-template-columns: 1fr;
+    }
 
-.field-label {
-    font-weight: 600;
-    color: #334155;
-    font-size: 1rem;
-}
-
-.field-value {
-    color: #0f172a;
-    font-size: 1rem;
-}
-
-/* ---------- رد فعل على حجم شاشة קטן ---------- */
-@media (max-width: 480px) {
-    .profile-field {
+    .info-row {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
+        gap: 5px;
     }
 
-    .field-label,
-    .field-value {
-        font-size: 0.95rem;
+    .profile-actions {
+        flex-direction: column;
+    }
+
+    .action-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
+
