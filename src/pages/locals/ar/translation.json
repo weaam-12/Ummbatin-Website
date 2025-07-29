@@ -115,6 +115,7 @@
     "processing": "جاري المعالجة...",
     "retryPayment":"أعد محاولة الدفع",
     "pendingPayments": "الدفعات المعلّقة",
+    "pending": "قيد الانتظار",
 
     "status": {
       "PENDING": "قيد الانتظار",
