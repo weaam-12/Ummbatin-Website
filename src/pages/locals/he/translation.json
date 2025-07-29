@@ -249,6 +249,7 @@
   },
   "children": {
     "payAndEnroll": "שלם והירשם",
+    "payAndRegister": "שלם והירשם", // נוסף להתאמה לקוד
     "paymentTitle": "תשלום דמי רישום",
     "paymentSuccess": "התשלום והרישום בוצעו בהצלחה!",
     "title": "ניהול ילדים",
@@ -286,16 +287,29 @@
     },
     "errors": {
       "requiredFields": "אנא מלא את כל השדות הנדרשים"
-    }
-  },
-    "kindergartens": {
-      "flowers": "גן הפרחים",
-      "red": "גן האדום",
-      "oak": "גן אלון",
-      "palm": "גן תמר"
     },
-    "sampleChildren": {
-      "adam": "אדם",
-      "mohammed": "מחמד"
-    }
+    // תוספות חדשות להתאמה לקוד
+    "totalChildren": "סה\"כ ילדים",
+    "enrolledChildren": "ילדים רשומים",
+    "unenrolledChildren": "ילדים לא רשומים",
+    "allEnrolled": "כל הילדים רשומים!",
+    "fees": "דמי",
+    "selectedKindergarten": "גן נבחר",
+    "monthlyFees": "דמי חודשיים",
+    "availableSlots": "מקומות פנויים"
+  },
+  "kindergartens": {
+    "flowers": "גן הפרחים",
+    "red": "גן האדום",
+    "oak": "גן אלון",
+    "palm": "גן תמר"
+  },
+  "sampleChildren": {
+    "adam": "אדם",
+    "mohammed": "מחמד"
+  },
+  "general": {
+    "loading": "טוען...",
+    "currency": "ש\"ח"
+  }
   }

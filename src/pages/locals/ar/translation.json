@@ -15,7 +15,6 @@
     "submitting": "جاري الإرسال...",
     "search": "بحث..."
   },
-
   "homePage": {
     "title": "مرحباً بكم في بلدية أم بطين",
     "description": "أم بطين هي بلدة متطورة في النقب، تقدم خدمات بلدية متكاملة، تعليم ذو جودة عالية، وفعاليات ثقافية واجتماعية لكل أفراد العائلة.",
@@ -24,7 +23,6 @@
     "eventsTitle": "الفعاليات القادمة",
     "noEvents": "لا توجد فعاليات قادمة حالياً"
   },
-
   "services": {
     "water": "المياه",
     "arnona": "الأرنونا",
@@ -38,10 +36,8 @@
     "garbage": "شكاوى النفايات",
     "complaints": "شكاوى"
   },
-
   "footer": {
     "services": "الخدمات",
-
     "siteName": "بلدية أم بطين",
     "allRightsReserved": "كل الحقوق محفوظة",
     "aboutMunicipality": "عن البلدية",
@@ -52,7 +48,6 @@
     "fax": "فاكس: +972 2 8765 4321",
     "email": "البريد الإلكتروني: info@umbateen.gov.il"
   },
-
   "navbar": {
     "education": "التعليم",
     "controlPanel": "لوحة التحكم",
@@ -61,7 +56,6 @@
     "paymentsManagement": "إدارة المدفوعات",
     "complaintsManagement": "إدارة الشكاوى"
   },
-
   "complaints": {
     "myComplaints": "شكاوائي",
     "newComplaint": "شكوى جديدة",
@@ -247,9 +241,10 @@
   "general": {
     "loading": "جاري التحميل..."
   },
-
   "children": {
     "payAndEnroll": "ادفع وسجل",
+    "payAndRegister": "ادفع وسجل",
+    // مضافة لتتناسب مع الكود
     "paymentTitle": "دفع رسوم التسجيل",
     "paymentSuccess": "تم الدفع والتسجيل بنجاح!",
     "title": "إدارة الأطفال",
@@ -287,16 +282,29 @@
     },
     "errors": {
       "requiredFields": "الرجاء ملء جميع الحقول المطلوبة"
-    }
-  },
-    "kindergartens": {
-      "flowers": "روضة الأزهار",
-      "red": "روضة الأحمر",
-      "oak": "روضة البلوط",
-      "palm": "روضة النخيل"
     },
-    "sampleChildren": {
-      "adam": "آدم",
-      "mohammed": "محمد"
-    }
+    // الإضافات الجديدة لتتناسب مع الكود
+    "totalChildren": "إجمالي الأطفال",
+    "enrolledChildren": "الأطفال المسجلين",
+    "unenrolledChildren": "الأطفال غير المسجلين",
+    "allEnrolled": "جميع الأطفال مسجلين!",
+    "fees": "الرسوم",
+    "selectedKindergarten": "الروضة المختارة",
+    "monthlyFees": "الرسوم الشهرية",
+    "availableSlots": "الأماكن المتاحة"
+  },
+  "kindergartens": {
+    "flowers": "روضة الأزهار",
+    "red": "روضة الأحمر",
+    "oak": "روضة البلوط",
+    "palm": "روضة النخيل"
+  },
+  "sampleChildren": {
+    "adam": "آدم",
+    "mohammed": "محمد"
+  },
+  "general": {
+    "loading": "جار التحميل...",
+    "currency": "شيقل"
   }
+}
