@@ -157,58 +157,23 @@ const Payments = () => {
     const handlePayment = async (paymentType, paymentId) => {
         setLoading(true);
         try {
-            const payment = Object.values(payments[paymentType] || {})
-                .flatMap(p => p.payments || [])
-                .find(p => p.paymentId === paymentId);
-
-            if (!payment) {
-                throw new Error('Payment not found');
-            }
-
-            // تأكد من أن user.userId موجود وصالح
-            if (!user?.userId) {
-                throw new Error('User ID is not available');
-            }
-
-            const amount = Math.round(payment.amount * 100);
-            const { clientSecret } = await processPayment({
-                userId: user.userId,
-                amount,
-                currency: 'ils',
-                paymentType,
-                description: `${t('payments.invoice.payNow')} ${t(`payments.types.${paymentType}`)}`
+            // 1. إرسال طلب إلى الخادم للحصول على clientSecret
+            const { data } = await axios.post("/api/payments/process", {
+                amount: Math.round(payment.amount * 100), // تحويل المبلغ إلى سنترات
+                currency: "ils",
+                description: `دفع ${paymentType}`,
             });
 
-            // فتح صفحة الدفع في نافذة جديدة
-            window.open(`https://checkout.stripe.com/pay/${clientSecret}`, '_blank');
+            // 2. فتح صفحة Stripe Checkout مباشرة
+            window.location.href = `https://checkout.stripe.com/pay/${data.clientSecret}`;
 
-            // إعادة تحميل البيانات بعد الدفع
-            const updatedData = await getUserPayments(user.userId);
-            const organizedPayments = {
-                water: organizePaymentsByProperty(
-                    updatedData.filter(p => p.paymentType === 'WATER'),
-                    properties
-                ),
-                arnona: organizePaymentsByProperty(
-                    updatedData.filter(p => p.paymentType === 'ARNONA'),
-                    properties
-                )
-            };
-            setPayments(organizedPayments);
-            setNotification({
-                type: 'success',
-                message: t('payments.notifications.paymentSuccess')
-            });
-        } catch (e) {
-            console.error('Payment error:', e);
-            setNotification({
-                type: 'danger',
-                message: e.message || t('payments.notifications.paymentError')
-            });
+        } catch (error) {
+            alert("فشل في إعداد الدفع: " + error.message);
         } finally {
             setLoading(false);
         }
     };
+
 
     const renderPropertyPayments = (propertyId, paymentsData, paymentType) => {
         const { propertyInfo, payments } = paymentsData;
