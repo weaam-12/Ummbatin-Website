@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { enrollChild } from '../api';
+import { useAuth } from '../AuthContext';
 import './Children.css';
 
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     const stripe = useStripe();

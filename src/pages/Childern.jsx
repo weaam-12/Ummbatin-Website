@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation, useAuth } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import axiosInstance from '../api';
 import PaymentForm from './PaymentForm';
 import './Children.css';
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+import { loadStripe } from '@stripe/stripe-js';
+import { useAuth } from '../AuthContext';
+import './Children.css';
 
 const Children = () => {
     const { t, i18n } = useTranslation();
