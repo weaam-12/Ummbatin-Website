@@ -5,7 +5,7 @@ import PaymentForm from './PaymentForm';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { useAuth } from '../AuthContext';
-import { FaChild, FaCheckCircle, FaTimesCircle ,FaMoneyBillWave } from 'react-icons/fa';
+import { FaChild, FaCheckCircle, FaTimesCircle, FaMoneyBillWave } from 'react-icons/fa';
 import './Children.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -48,6 +48,7 @@ const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
         </div>
     );
 };
+
 const Children = () => {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
