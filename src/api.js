@@ -290,8 +290,24 @@ export const addWaterReading = async (propertyId, amount) => {
 };
 
 export const getPropertiesByUserId = async (userId) => {
-    const response = await axiosInstance.get(`api/properties/user/${userId}`);
-    return response.data;
+    try {
+        const response = await axiosInstance.get(`/api/properties/user/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching properties:', error);
+        if (error.response) {
+            // الخطأ من الخادم (5xx, 4xx)
+            console.error('Server responded with:', error.response.status);
+            console.error('Response data:', error.response.data);
+        } else if (error.request) {
+            // لم يتم استلام أي رد من الخادم
+            console.error('No response received:', error.request);
+        } else {
+            // خطأ في إعداد الطلب
+            console.error('Request setup error:', error.message);
+        }
+        return []; // إرجاع مصفوفة فارغة بدلاً من undefined
+    }
 };
 // الأطفال
 export const getChildrenByUser = async (userId) => {
