@@ -193,21 +193,24 @@ const Children = () => {
             </div>
 
             {showPayment && selectedChild && selectedKindergarten && (
-                <div className="payment-modal">
-                    <div className="payment-content">
-                        <Elements stripe={stripePromise}>
-                            <PaymentForm
-                                child={selectedChild}
-                                kindergarten={selectedKindergarten}
-                                onSuccess={() => {
-                                    setShowPayment(false);
-                                    reloadChildren();
-                                }}
-                                onClose={() => setShowPayment(false)}
-                            />
-                        </Elements>
+                <>
+                    {console.log("🔵 Payment Modal Triggered", selectedChild, selectedKindergarten, showPayment)}
+                    <div className="payment-modal">
+                        <div className="payment-content">
+                            <Elements stripe={stripePromise}>
+                                <PaymentForm
+                                    child={selectedChild}
+                                    kindergarten={selectedKindergarten}
+                                    onSuccess={() => {
+                                        setShowPayment(false);
+                                        reloadChildren();
+                                    }}
+                                    onClose={() => setShowPayment(false)}
+                                />
+                            </Elements>
+                        </div>
                     </div>
-                </div>
+                </>
             )}
         </div>
     );
