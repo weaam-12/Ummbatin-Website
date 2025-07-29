@@ -95,7 +95,7 @@ const Profile = () => {
                 additionalNotes: ""
             });
         } catch (err) {
-            setError("فشل إرسال الطلب، يرجى المحاولة لاحقاً");
+            setError("فشل إرسال الطلب، يرجى المحكاولة لاحقاً");
         }
     };
 
