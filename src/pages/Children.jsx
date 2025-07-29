@@ -35,7 +35,7 @@ const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
             {selectedKg && kg && (
                 <div className="payment-info">
                     <p>{t('children.selectedKindergarten')}: <strong>{kg.name}</strong></p>
-                    <p>{t('children.monthlyFees')}: <strong>{kg.monthlyFee} {t('general.currency')}</strong></p>
+                    <p>{t('children.monthlyFees')}: <strong>{"250₪"} {t('general.currency')}</strong></p>
                     <p>{t('children.availableSlots')}: <strong>{kg.availableSlots}</strong></p>
                 </div>
             )}
