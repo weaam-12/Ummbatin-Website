@@ -205,7 +205,7 @@ const Profile = () => {
                         <div className="section-title">
                             <FaHome/> <span className="property-icon">العقارات المملوكة</span>
                         </div>
-                        {properties.length > 0 ? (
+                        {properties && properties.length > 0 ? (
                             <div className="properties-grid">
                                 {properties.map((property) => (
                                     <div className="property-card" key={property.propertyId}>
