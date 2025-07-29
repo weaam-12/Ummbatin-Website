@@ -76,12 +76,18 @@ const Payments = () => {
         payments.forEach(payment => {
             const propertyId = payment.propertyId;
             if (!byProperty[propertyId]) {
-                const property = properties.find(p => p.propertyId === propertyId) || {};
+                // البحث عن العقار في مصفوفة properties
+                const property = properties.find(p => p.propertyId == propertyId) || {
+                    address: 'عنوان غير معروف',
+                    area: 0,
+                    numberOfUnits: 0
+                };
+
                 byProperty[propertyId] = {
                     propertyInfo: {
-                        address: property.address,
-                        area: property.area,
-                        units: property.numberOfUnits
+                        address: property.address || 'عنوان غير معروف',
+                        area: property.area || 0,
+                        units: property.numberOfUnits || 0
                     },
                     payments: []
                 };
@@ -94,17 +100,33 @@ const Payments = () => {
 
     // حساب الدين التراكمي (يشمل PENDING و FAILED فقط)
     useEffect(() => {
-        const totalDebt = Object.values(payments).reduce((sum, paymentType) => {
-            return sum + Object.values(paymentType).reduce((typeSum, propertyPayments) => {
-                return typeSum + propertyPayments.payments.reduce((propertySum, payment) => {
-                    return (payment.status === 'PENDING' || payment.status === 'FAILED') ?
-                        propertySum + payment.amount :
-                        propertySum;
-                }, 0);
-            }, 0);
-        }, 0);
-        setDebt(totalDebt);
-    }, [payments]);
+        const load = async () => {
+            try {
+                // جلب العقارات أولاً
+                const props = await getPropertiesByUserId(user?.userId);
+                setProperties(props);
+
+                // جلب الدفعات
+                const data = await getUserPayments(user?.userId);
+
+                // تنظيم الدفعات حسب النوع والعقار
+                const organizedPayments = {
+                    water: organizePaymentsByProperty(data.filter(p => p.paymentType === 'WATER')),
+                    arnona: organizePaymentsByProperty(data.filter(p => p.paymentType === 'ARNONA'))
+                };
+                console.log('العقارات:', properties);
+                console.log('الدفعات:', data);
+                console.log('الدفعات المنظمة:', organizedPayments);
+                setPayments(organizedPayments);
+            } catch (e) {
+                console.error('Error loading data:', e);
+                setNotification({ type: 'danger', message: 'فشل تحميل البيانات' });
+            } finally {
+                setLoading(false);
+            }
+        };
+        if (user) load();
+    }, [user]);
 
     // توليد PDF
     const handleDownloadPDF = (type, propertyId) => {
