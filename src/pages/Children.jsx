@@ -11,8 +11,10 @@ import './Children.css';
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
     const [selectedKg, setSelectedKg] = useState('');
-    const kg = kindergartens.find(k => String(k.kindergartenId) === selectedKg);
-
+    const kg = kindergartens.find(k => {
+        console.log("🧪 Matching KG:", k.kindergartenId, selectedKg);
+        return String(k.kindergartenId) === selectedKg;
+    });
     return (
         <div className="child-card">
             <h3>{child.name}</h3>
@@ -40,8 +42,19 @@ const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
 
             <button
                 className="enroll-button"
-                onClick={() => handleEnroll(child, selectedKg)}
-                disabled={!selectedKg}
+                onClick={() => {
+                    console.log("🔘 Enroll Clicked:", child.name, "Selected KG ID:", selectedKg);
+                    const kg = kindergartens.find(k => {
+                        console.log("🧪 Matching KG:", k.kindergartenId, selectedKg);
+                        return String(k.kindergartenId) === selectedKg;
+                    });
+
+                    if (!kg) {
+                        console.warn("❌ No matching kindergarten found!");
+                    }
+
+                    handleEnroll(child, kg);
+                }}                disabled={!selectedKg}
             >
                 <FaMoneyBillWave /> {t('children.payAndRegister')}
             </button>
@@ -92,9 +105,8 @@ const Children = () => {
         }
     }, [user, t]);
 
-    const handleEnroll = (child, kindergartenId) => {
-        const kg = kindergartens.find(k => k.kindergartenId === kindergartenId);
-        if (!kg) return;
+    const handleEnroll = (child, kg) => {
+        console.log("📥 handleEnroll called", child, kg);
         setSelectedChild(child);
         setSelectedKindergarten(kg);
         setShowPayment(true);
