@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchUserProfile, getChildrenByUser, getPropertiesByUserId, getUserPayments } from "../api";
+import {axiosInstance, fetchUserProfile, getChildrenByUser, getPropertiesByUserId, getUserPayments} from "../api";
 import { useAuth } from "../AuthContext";
 import './Profile.css';
 import {
@@ -23,32 +23,58 @@ const Profile = () => {
     useEffect(() => {
         const loadProfile = async () => {
             try {
-                const data = await fetchUserProfile();
-                setProfile(data);
+                const response = await axiosInstance.get('/api/users/profile');
 
-                // تحميل بيانات الأطفال إذا كان المستخدم لديه أطفال
-                if (data.id) {
-                    const childrenData = await getChildrenByUser(data.id);
-                    setChildren(childrenData);
+                if (!response.data) {
+                    throw new Error("لا توجد بيانات مستلمة");
+                }
 
-                    // تحميل العقارات المملوكة
-                    const propertiesData = await getPropertiesByUserId(data.id);
-                    setProperties(propertiesData);
+                setProfile(response.data);
 
-                    // تحميل الفواتير
-                    const billsData = await getUserPayments(data.id);
-                    setBills(billsData);
+                // تحميل البيانات الإضافية إذا كان هناك معرف مستخدم
+                if (response.data.id) {
+                    try {
+                        const [childrenRes, propertiesRes, billsRes] = await Promise.all([
+                            axiosInstance.get(`/api/children/user/${response.data.id}`),
+                            axiosInstance.get(`/api/properties/user/${response.data.id}`),
+                            axiosInstance.get(`/api/payments/user/${response.data.id}`)
+                        ]);
+
+                        setChildren(childrenRes.data || []);
+                        setProperties(propertiesRes.data || []);
+                        setBills(billsRes.data || []);
+                    } catch (secondaryError) {
+                        console.error("Error loading additional data:", secondaryError);
+                        setError("تم تحميل البيانات الأساسية ولكن حدث خطأ في بعض البيانات الإضافية");
+                    }
                 }
             } catch (err) {
                 console.error("Profile error details:", err);
-                setError(err.response?.data?.message || "فشل تحميل البيانات، يرجى المحاولة لاحقاً");
+
+                if (err.response) {
+                    // خطأ من الخادم
+                    if (err.response.status === 401) {
+                        logout();
+                        setError("انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى");
+                    } else if (err.response.status === 500) {
+                        setError("حدث خطأ في الخادم، يرجى المحاولة لاحقاً");
+                    } else {
+                        setError(err.response.data?.message || "حدث خطأ غير متوقع");
+                    }
+                } else if (err.request) {
+                    // لم يتم استلام رد من الخادم
+                    setError("لا يوجد اتصال بالخادم، يرجى التحقق من اتصال الإنترنت");
+                } else {
+                    // خطأ في إعداد الطلب
+                    setError("حدث خطأ أثناء إعداد الطلب");
+                }
             }
         };
 
         if (user) {
             loadProfile();
         }
-    }, [user]);
+    }, [user, logout]);
 
     const handleDocumentRequestChange = (e) => {
         const { name, value } = e.target;
