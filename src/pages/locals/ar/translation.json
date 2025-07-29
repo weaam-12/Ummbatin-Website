@@ -242,6 +242,11 @@
     "loading": "جاري التحميل..."
   },
   "children": {
+    "receipt": "إيصال الدفع",
+    "amount": "المبلغ",
+    "paymentDate": "تاريخ الدفع",
+    "paymentId": "رقم الإيصال",
+    "close": "إغلاق",
     "payAndEnroll": "ادفع وسجل",
     "payAndRegister": "ادفع وسجل",
     "paymentTitle": "دفع رسوم التسجيل",

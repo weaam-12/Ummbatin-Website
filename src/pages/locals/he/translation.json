@@ -248,6 +248,11 @@
     "loading": "טוען..."
   },
   "children": {
+    "receipt": "קבלת תשלום",
+    "amount": "סכום",
+    "paymentDate": "תאריך תשלום",
+    "paymentId": "מספר קבלה",
+    "close": "סגור",
     "payAndEnroll": "שלם והירשם",
     "payAndRegister": "שלם והירשם",
     "paymentTitle": "תשלום דמי רישום",

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { enrollChild } from '../api';
 import './Children.css';
-import { FaMoneyBillWave } from 'react-icons/fa';
+import { FaMoneyBillWave, FaReceipt } from 'react-icons/fa';
 
 const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     const stripe = useStripe();
@@ -11,12 +11,13 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     const { t } = useTranslation();
     const [error, setError] = useState(null);
     const [processing, setProcessing] = useState(false);
+    const [paymentCompleted, setPaymentCompleted] = useState(false);
+    const [receipt, setReceipt] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!stripe || !elements) {
-            // Stripe.js hasn't loaded yet
             return;
         }
 
@@ -24,6 +25,7 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
         setError(null);
 
         try {
+            // 1. إنشاء طريقة دفع
             const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
                 type: 'card',
                 card: elements.getElement(CardElement),
@@ -35,15 +37,23 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
                 return;
             }
 
+            // 2. معالجة الدفع (250 شيكل ثابتة)
             const paymentResult = await enrollChild({
-                childId: child.childId, // تغيير من child.id إلى child.childId
-                kindergartenId: kindergarten.kindergartenId, // تغيير من kindergarten.id إلى kindergarten.kindergartenId
+                childId: child.childId,
+                kindergartenId: kindergarten.kindergartenId,
                 paymentMethodId: paymentMethod.id,
-                amount: kindergarten.monthlyFee // استخدام القيمة الفعلية من الروضة بدلاً من القيمة الثابتة
+                amount: 250 // المبلغ الثابت
             });
 
             if (paymentResult.success) {
-                onSuccess();
+                setReceipt({
+                    childName: child.name,
+                    kindergartenName: kindergarten.name,
+                    amount: 250,
+                    date: new Date().toLocaleDateString(),
+                    paymentId: paymentResult.paymentId
+                });
+                setPaymentCompleted(true);
             } else {
                 setError(paymentResult.message || t('children.payment.error'));
             }
@@ -55,6 +65,38 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
         }
     };
 
+    if (paymentCompleted && receipt) {
+        return (
+            <div className="payment-modal">
+                <div className="payment-content">
+                    <h3>{t('children.paymentSuccess')}</h3>
+                    <div className="receipt-container">
+                        <div className="receipt-header">
+                            <FaReceipt size={24} />
+                            <h4>{t('children.receipt')}</h4>
+                        </div>
+                        <div className="receipt-details">
+                            <p><strong>{t('children.childName')}:</strong> {receipt.childName}</p>
+                            <p><strong>{t('children.kindergarten')}:</strong> {receipt.kindergartenName}</p>
+                            <p><strong>{t('children.amount')}:</strong> {receipt.amount} {t('general.currency')}</p>
+                            <p><strong>{t('children.paymentDate')}:</strong> {receipt.date}</p>
+                            <p><strong>{t('children.paymentId')}:</strong> {receipt.paymentId}</p>
+                        </div>
+                        <button
+                            className="confirm-btn"
+                            onClick={() => {
+                                onSuccess();
+                                onClose();
+                            }}
+                        >
+                            {t('children.close')}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="payment-modal">
             <div className="payment-content">
@@ -62,7 +104,7 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
                 <div className="payment-details">
                     <p><strong>{t('children.enrollment.child')}:</strong> {child.name}</p>
                     <p><strong>{t('children.enrollment.kindergarten')}:</strong> {kindergarten.name}</p>
-                    <p><strong>{t('children.enrollment.fee')}:</strong> {kindergarten.monthlyFee} {t('general.currency')}</p>
+                    <p><strong>{t('children.enrollment.fee')}:</strong> 250 {t('general.currency')}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="payment-form">

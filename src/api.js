@@ -308,8 +308,6 @@ export const getChildrenByUser = async (userId) => {
 export const createChild = (childData) =>
     axiosInstance.post('/api/children', childData).then(r => r.data);
 
-export const enrollChild = (enrollmentData) =>
-    axiosInstance.post('/api/enrollments', enrollmentData).then(r => r.data);
 
 export const getChildEnrollments = (childId) =>
     axiosInstance.get(`/api/enrollments/child/${childId}`).then(r => r.data);
@@ -334,5 +332,26 @@ export const confirmKindergartenPayment = async (paymentIntentId) => {
     });
     return response.data;
 };
+export const enrollChild = async (enrollmentData) => {
+    try {
+        const response = await axiosInstance.post('/api/enrollments', {
+            childId: enrollmentData.childId,
+            kindergartenId: enrollmentData.kindergartenId,
+            paymentMethodId: enrollmentData.paymentMethodId,
+            amount: enrollmentData.amount
+        });
 
+        return {
+            success: true,
+            paymentId: response.data.paymentId,
+            message: "Payment and enrollment completed successfully"
+        };
+    } catch (error) {
+        console.error('Enrollment error:', error);
+        return {
+            success: false,
+            message: error.response?.data?.message || "Failed to process enrollment"
+        };
+    }
+};
 export default axiosInstance;
