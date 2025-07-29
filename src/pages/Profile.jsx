@@ -210,19 +210,11 @@ const Profile = () => {
                                         <div className="property-details">
                                             <div className="property-detail">
                                                 <span className="detail-label">نوع العقار:</span>
-                                                <span className="detail-value">{property.type || 'غير محدد'}</span>
+                                                <span className="detail-value">{property.numberOfUnits|| 'غير محدد'}</span>
                                             </div>
                                             <div className="property-detail">
                                                 <span className="detail-label">المساحة:</span>
                                                 <span className="detail-value">{property.area ? `${property.area} م²` : 'غير محدد'}</span>
-                                            </div>
-                                            <div className="property-detail">
-                                                <span className="detail-label">رقم القطعة:</span>
-                                                <span className="detail-value">{property.plotNumber || 'غير محدد'}</span>
-                                            </div>
-                                            <div className="property-detail">
-                                                <span className="detail-label">الحالة:</span>
-                                                <span className="detail-value">{property.status || 'غير محدد'}</span>
                                             </div>
                                         </div>
                                     </div>
