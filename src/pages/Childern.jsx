@@ -8,6 +8,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from '../AuthContext';
 import './Children.css';
 
+
 const Children = () => {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
@@ -88,10 +89,10 @@ const Children = () => {
                             </thead>
                             <tbody>
                             {children.map(child => {
-                                const enrolledKg = kindergartens.find(k => k.id === child.kindergartenId);
-                                console.log("Enrolled Kindergarten for child", child.id, enrolledKg);
+                                const enrolledKg = kindergartens.find(k => k.kindergartenId === child.kindergartenId);
+                                console.log("Enrolled Kindergarten for child", child.childId, enrolledKg);
                                 return (
-                                    <tr key={child.id}>
+                                    <tr key={child.childId}>
                                         <td data-label={t('children.childName')}>{child.name}</td>
                                         <td data-label={t('children.birthDate')}>
                                             {new Date(child.birthDate).toLocaleDateString(i18n.language)}
@@ -112,14 +113,14 @@ const Children = () => {
                                                 <div className="enroll-action">
                                                     <select
                                                         onChange={(e) => {
-                                                            const kg = kindergartens.find(k => k.id === e.target.value);
+                                                            const kg = kindergartens.find(k => k.kindergartenId === e.target.value);
                                                             if (kg) handleEnroll(child, kg);
                                                         }}
                                                         className="kindergarten-select"
                                                     >
                                                         <option value="">{t('children.selectKindergarten')}</option>
                                                         {kindergartens.map(kg => (
-                                                            <option key={kg.id} value={kg.id}>
+                                                            <option key={kg.kindergartenId} value={kg.kindergartenId}>
                                                                 {kg.name}
                                                             </option>
                                                         ))}
