@@ -33,14 +33,16 @@ const Profile = () => {
                 // تحميل البيانات الإضافية إذا كان هناك معرف مستخدم
                 if (response.data.id) {
                     try {
-                        const [childrenRes, propertiesRes, billsRes] = await Promise.all([
+                        const [childrenRes, propertiesRes] = await Promise.all([
                             axiosInstance.get(`/api/children/user/${response.data.id}`),
-                            axiosInstance.get(`/api/properties/user/${response.data.id}`),
-                            axiosInstance.get(`/api/payments/user/${response.data.id}`)
+                            axiosInstance.get(`/api/properties/user/${response.data.id}`)
                         ]);
 
                         setChildren(childrenRes.data || []);
                         setProperties(propertiesRes.data || []);
+                        console.log("propertiesRes data:", propertiesRes.data );
+
+
                     } catch (secondaryError) {
                         console.error("Error loading additional data:", secondaryError);
                         setError("تم تحميل البيانات الأساسية ولكن حدث خطأ في بعض البيانات الإضافية");
