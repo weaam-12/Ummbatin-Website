@@ -47,17 +47,20 @@ const Payments = () => {
             try {
                 // جلب العقارات أولاً
                 const props = await getPropertiesByUserId(user?.userId);
+                console.log('العقارات المحملة:', props); // للتتبع
                 setProperties(props);
 
                 // جلب الدفعات
                 const data = await getUserPayments(user?.userId);
+                console.log('الدفعات المحملة:', data); // للتتبع
 
                 // تنظيم الدفعات حسب النوع والعقار
                 const organizedPayments = {
-                    water: organizePaymentsByProperty(data.filter(p => p.paymentType === 'WATER')),
-                    arnona: organizePaymentsByProperty(data.filter(p => p.paymentType === 'ARNONA'))
+                    water: organizePaymentsByProperty(data.filter(p => p.paymentType === 'WATER'), props),
+                    arnona: organizePaymentsByProperty(data.filter(p => p.paymentType === 'ARNONA'), props)
                 };
 
+                console.log('الدفعات المنظمة:', organizedPayments); // للتتبع
                 setPayments(organizedPayments);
             } catch (e) {
                 console.error('Error loading data:', e);
@@ -70,24 +73,30 @@ const Payments = () => {
     }, [user]);
 
     // تنظيم الدفعات حسب العقار
-    const organizePaymentsByProperty = (payments) => {
+    const organizePaymentsByProperty = (payments, properties = []) => {
         const byProperty = {};
 
         payments.forEach(payment => {
             const propertyId = payment.propertyId;
             if (!byProperty[propertyId]) {
-                // البحث عن العقار في مصفوفة properties
-                const property = properties.find(p => p.propertyId == propertyId) || {
-                    address: 'عنوان غير معروف',
-                    area: 0,
-                    numberOfUnits: 0
-                };
+                // البحث عن العقار في مصفوفة properties أولاً
+                let property = properties.find(p => p.propertyId == propertyId);
+
+                // إذا لم يوجد العقار في properties، نستخدم البيانات من الدفعة
+                if (!property && payment.propertyAddress) {
+                    property = {
+                        propertyId: propertyId,
+                        address: payment.propertyAddress,
+                        area: payment.propertyArea || 0,
+                        numberOfUnits: payment.propertyUnits || 0
+                    };
+                }
 
                 byProperty[propertyId] = {
                     propertyInfo: {
-                        address: property.address || 'عنوان غير معروف',
-                        area: property.area || 0,
-                        units: property.numberOfUnits || 0
+                        address: property?.address || 'عنوان غير معروف',
+                        area: property?.area || 0,
+                        units: property?.numberOfUnits || 0
                     },
                     payments: []
                 };
@@ -100,33 +109,17 @@ const Payments = () => {
 
     // حساب الدين التراكمي (يشمل PENDING و FAILED فقط)
     useEffect(() => {
-        const load = async () => {
-            try {
-                // جلب العقارات أولاً
-                const props = await getPropertiesByUserId(user?.userId);
-                setProperties(props);
-
-                // جلب الدفعات
-                const data = await getUserPayments(user?.userId);
-
-                // تنظيم الدفعات حسب النوع والعقار
-                const organizedPayments = {
-                    water: organizePaymentsByProperty(data.filter(p => p.paymentType === 'WATER')),
-                    arnona: organizePaymentsByProperty(data.filter(p => p.paymentType === 'ARNONA'))
-                };
-                console.log('العقارات:', properties);
-                console.log('الدفعات:', data);
-                console.log('الدفعات المنظمة:', organizedPayments);
-                setPayments(organizedPayments);
-            } catch (e) {
-                console.error('Error loading data:', e);
-                setNotification({ type: 'danger', message: 'فشل تحميل البيانات' });
-            } finally {
-                setLoading(false);
-            }
-        };
-        if (user) load();
-    }, [user]);
+        const totalDebt = Object.values(payments).reduce((sum, paymentType) => {
+            return sum + Object.values(paymentType).reduce((typeSum, propertyPayments) => {
+                return typeSum + propertyPayments.payments.reduce((propertySum, payment) => {
+                    return (payment.status === 'PENDING' || payment.status === 'FAILED') ?
+                        propertySum + payment.amount :
+                        propertySum;
+                }, 0);
+            }, 0);
+        }, 0);
+        setDebt(totalDebt);
+    }, [payments]);
 
     // توليد PDF
     const handleDownloadPDF = (type, propertyId) => {
@@ -154,8 +147,8 @@ const Payments = () => {
     const handlePayment = async (paymentType, paymentId) => {
         setLoading(true);
         try {
-            const payment = Object.values(payments[paymentType])
-                .flatMap(p => p.payments)
+            const payment = Object.values(payments[paymentType] || {})
+                .flatMap(p => p.payments || [])
                 .find(p => p.paymentId === paymentId);
 
             if (!payment) {
@@ -206,16 +199,7 @@ const Payments = () => {
             }, 1000);
 
         } catch (e) {
-            setPayments(prev => {
-                const newPayments = {...prev};
-                Object.keys(newPayments[paymentType]).forEach(propertyId => {
-                    newPayments[paymentType][propertyId].payments =
-                        newPayments[paymentType][propertyId].payments.map(p =>
-                            p.paymentId === paymentId ? {...p, status: 'FAILED'} : p
-                        );
-                });
-                return newPayments;
-            });
+            console.error('Payment error:', e);
             setNotification({
                 type: 'danger',
                 message: t('payments.notifications.paymentError')
