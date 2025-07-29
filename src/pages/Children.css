@@ -1,45 +1,71 @@
+/* الخط العام */
 .children-page {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+    background-color: #fafafa;
 }
 
+/* العنوان الرئيسي */
 .page-title {
     text-align: center;
-    margin: 20px 0;
+    margin-bottom: 30px;
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
 }
 
-.loading-indicator {
+/* تحميل / خطأ */
+.loading-indicator,
+.error-message,
+.auth-error {
     text-align: center;
-    margin: 20px 0;
+    font-size: 18px;
+    margin: 20px auto;
 }
 
 .error-message {
-    color: red;
-    text-align: center;
-    margin: 20px 0;
+    color: #d32f2f;
 }
 
-.auth-error {
-    text-align: center;
-    margin: 50px 0;
+/* الإحصائيات */
+.stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
-.registered-children-section {
-    margin: 20px 0;
+.stats div {
+    background-color: #ffffff;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    font-size: 18px;
+    font-weight: 500;
 }
 
+/* العناوين الفرعية */
 .section-title {
     font-size: 24px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    color: #444;
+    text-align: center;
 }
 
+/* في حال لا يوجد أطفال */
 .empty-state {
     text-align: center;
-    color: #888;
+    color: #777;
+    font-style: italic;
 }
 
+/* جدول الأطفال */
 .responsive-table {
-    width: 100%;
     overflow-x: auto;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
 .children-table {
@@ -49,89 +75,111 @@
 
 .children-table th,
 .children-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
     text-align: left;
 }
 
 .children-table th {
-    background-color: #f2f2f2;
+    background-color: #f5f5f5;
+    font-weight: bold;
 }
 
+.children-table tr:hover {
+    background-color: #fafafa;
+}
+
+/* حالة الطفل */
+.enrolled-status {
+    color: #388e3c;
+    font-weight: bold;
+}
+
+.not-enrolled-status {
+    color: #f57c00;
+    font-weight: bold;
+}
+
+/* زر التسجيل */
 .enroll-action {
-    margin-top: 10px;
-}
-
-.kindergarten-select {
-    width: 100%;
-    padding: 8px;
     margin-top: 5px;
 }
 
+.kindergarten-select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;
+}
+
+/* مودال الدفع */
 .payment-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1000;
 }
 
 .payment-content {
     background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 80%;
-    max-width: 400px;
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.15);
 }
 
 .payment-details {
     margin-bottom: 20px;
-}
-
-.payment-details p {
-    margin: 5px 0;
+    font-size: 16px;
 }
 
 .card-element-container {
     margin-bottom: 20px;
 }
 
-.error-message {
-    color: red;
-    margin-bottom: 20px;
-}
-
 .payment-buttons {
     display: flex;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .payment-buttons button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
     cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
 }
 
 .cancel-btn {
-    background-color: #f44336;
+    background-color: #e53935;
     color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #c62828;
 }
 
 .confirm-btn {
-    background-color: #4caf50;
+    background-color: #43a047;
     color: white;
 }
 
-.stats {
-    margin: 20px 0;
-    text-align: center;
+.confirm-btn:hover {
+    background-color: #2e7d32;
 }
 
-.stats div {
-    margin: 5px 0;
+/* دعم الوضع RTL */
+html[dir="rtl"] .children-table th,
+html[dir="rtl"] .children-table td {
+    text-align: right;
 }

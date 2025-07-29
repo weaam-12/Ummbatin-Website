@@ -16,7 +16,7 @@ import Payments from "./pages/Payments";
 import AdminPayments from "./pages/AdminPayments";
 import AdminGeneral from "./pages/AdminGeneral.jsx";
 import ErrorBoundary from "./pages/ErrorBoundary";
-import Childern from "./pages/Childern";
+import Childern from "./pages/Children.jsx";
 import Forms from "./pages/Forms";
 import Profile from "./pages/Profile"; // Added
 import AdminComplaints from "./pages/AdminComplaints"
