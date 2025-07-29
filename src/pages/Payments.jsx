@@ -165,6 +165,11 @@ const Payments = () => {
                 throw new Error('Payment not found');
             }
 
+            // تأكد من أن user.userId موجود وصالح
+            if (!user?.userId) {
+                throw new Error('User ID is not available');
+            }
+
             const amount = Math.round(payment.amount * 100);
             const { clientSecret } = await processPayment({
                 userId: user.userId,
@@ -175,44 +180,30 @@ const Payments = () => {
             });
 
             // فتح صفحة الدفع في نافذة جديدة
-            const paymentWindow = window.open(`https://checkout.stripe.com/pay/${clientSecret}`, '_blank');
+            window.open(`https://checkout.stripe.com/pay/${clientSecret}`, '_blank');
 
-            // مراقبة إغلاق نافذة الدفع
-            const checkPayment = setInterval(async () => {
-                if (paymentWindow.closed) {
-                    clearInterval(checkPayment);
-                    try {
-                        // إعادة تحميل بيانات الدفع للتأكد من الحالة
-                        const updatedData = await getUserPayments(user.userId);
-                        const updatedPayment = updatedData.find(p => p.paymentId === paymentId);
-
-                        if (updatedPayment && updatedPayment.status === 'PAID') {
-                            setPayments(prev => {
-                                const newPayments = {...prev};
-                                Object.keys(newPayments[paymentType]).forEach(propertyId => {
-                                    newPayments[paymentType][propertyId].payments =
-                                        newPayments[paymentType][propertyId].payments.map(p =>
-                                            p.paymentId === paymentId ? {...p, status: 'PAID'} : p
-                                        );
-                                });
-                                return newPayments;
-                            });
-                            setNotification({
-                                type: 'success',
-                                message: `${t('payments.notifications.paymentSuccess')} ${t(`payments.types.${paymentType}`)}`
-                            });
-                        }
-                    } catch (e) {
-                        console.error('Error verifying payment:', e);
-                    }
-                }
-            }, 1000);
-
+            // إعادة تحميل البيانات بعد الدفع
+            const updatedData = await getUserPayments(user.userId);
+            const organizedPayments = {
+                water: organizePaymentsByProperty(
+                    updatedData.filter(p => p.paymentType === 'WATER'),
+                    properties
+                ),
+                arnona: organizePaymentsByProperty(
+                    updatedData.filter(p => p.paymentType === 'ARNONA'),
+                    properties
+                )
+            };
+            setPayments(organizedPayments);
+            setNotification({
+                type: 'success',
+                message: t('payments.notifications.paymentSuccess')
+            });
         } catch (e) {
             console.error('Payment error:', e);
             setNotification({
                 type: 'danger',
-                message: t('payments.notifications.paymentError')
+                message: e.message || t('payments.notifications.paymentError')
             });
         } finally {
             setLoading(false);
