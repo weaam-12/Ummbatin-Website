@@ -38,8 +38,8 @@ const Profile = () => {
                             axiosInstance.get(`/api/properties/user/${response.data.id}`)
                         ]);
 
-                        setChildren(childrenRes.data || []);
-                        setProperties(propertiesRes.data || []);
+                        setChildren(Array.isArray(childrenRes?.data) ? childrenRes.data : []);
+                        setProperties(Array.isArray(propertiesRes?.data) ? propertiesRes.data : []);
                         console.log("propertiesRes data:", propertiesRes.data );
 
 
