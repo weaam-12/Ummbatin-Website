@@ -249,7 +249,7 @@
   },
   "children": {
     "payAndEnroll": "שלם והירשם",
-    "payAndRegister": "שלם והירשם", // נוסף להתאמה לקוד
+    "payAndRegister": "שלם והירשם",
     "paymentTitle": "תשלום דמי רישום",
     "paymentSuccess": "התשלום והרישום בוצעו בהצלחה!",
     "title": "ניהול ילדים",
@@ -288,7 +288,7 @@
     "errors": {
       "requiredFields": "אנא מלא את כל השדות הנדרשים"
     },
-    // תוספות חדשות להתאמה לקוד
+
     "totalChildren": "סה\"כ ילדים",
     "enrolledChildren": "ילדים רשומים",
     "unenrolledChildren": "ילדים לא רשומים",
