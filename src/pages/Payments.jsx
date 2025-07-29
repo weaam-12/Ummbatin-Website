@@ -47,56 +47,66 @@ const Payments = () => {
             try {
                 // جلب العقارات أولاً
                 const props = await getPropertiesByUserId(user?.userId);
-                console.log('العقارات المحملة:', props); // للتتبع
-                setProperties(props);
+                console.log('العقارات المحملة:', props);
 
                 // جلب الدفعات
                 const data = await getUserPayments(user?.userId);
-                console.log('الدفعات المحملة:', data); // للتتبع
+                console.log('الدفعات المحملة:', data);
 
-                // تنظيم الدفعات حسب النوع والعقار
+                // تنظيم الدفعات مع ربطها بالعقارات
                 const organizedPayments = {
-                    water: organizePaymentsByProperty(data.filter(p => p.paymentType === 'WATER'), props),
-                    arnona: organizePaymentsByProperty(data.filter(p => p.paymentType === 'ARNONA'), props)
+                    water: organizePaymentsByProperty(
+                        data.filter(p => p.paymentType === 'WATER'),
+                        props
+                    ),
+                    arnona: organizePaymentsByProperty(
+                        data.filter(p => p.paymentType === 'ARNONA'),
+                        props
+                    )
                 };
 
-                console.log('الدفعات المنظمة:', organizedPayments); // للتتبع
+                console.log('الدفعات المنظمة:', organizedPayments);
                 setPayments(organizedPayments);
+                setProperties(props);
             } catch (e) {
                 console.error('Error loading data:', e);
-                setNotification({ type: 'danger', message: 'فشل تحميل البيانات' });
+                setNotification({
+                    type: 'danger',
+                    message: 'فشل تحميل البيانات: ' + e.message
+                });
             } finally {
                 setLoading(false);
             }
         };
+
         if (user) load();
     }, [user]);
 
-    // تنظيم الدفعات حسب العقار
     const organizePaymentsByProperty = (payments, properties = []) => {
         const byProperty = {};
 
         payments.forEach(payment => {
-            const propertyId = payment.propertyId;
+            // محاولة العثور على العقار باستخدام propertyId أولاً
+            let property = properties.find(p => p.propertyId == payment.propertyId);
+
+            // إذا لم يتم العثور على العقار، نبحث باستخدام العنوان
+            if (!property && payment.propertyAddress) {
+                property = properties.find(p =>
+                    p.address && payment.propertyAddress &&
+                    p.address.trim() === payment.propertyAddress.trim()
+                );
+            }
+
+            // إذا لم يتم العثور على العقار بعد، نستخدم بيانات من الدفعة
+            const propertyId = property?.propertyId || payment.propertyAddress || 'unknown';
+
             if (!byProperty[propertyId]) {
-                // البحث عن العقار في مصفوفة properties أولاً
-                let property = properties.find(p => p.propertyId == propertyId);
-
-                // إذا لم يوجد العقار في properties، نستخدم البيانات من الدفعة
-                if (!property && payment.propertyAddress) {
-                    property = {
-                        propertyId: propertyId,
-                        address: payment.propertyAddress,
-                        area: payment.propertyArea || 0,
-                        numberOfUnits: payment.propertyUnits || 0
-                    };
-                }
-
                 byProperty[propertyId] = {
                     propertyInfo: {
-                        address: property?.address || 'عنوان غير معروف',
-                        area: property?.area || 0,
-                        units: property?.numberOfUnits || 0
+                        address: property?.address || payment.propertyAddress || 'عنوان غير معروف',
+                        area: property?.area || payment.propertyArea || 0,
+                        units: property?.numberOfUnits || payment.propertyUnits || 0,
+                        originalPropertyId: property?.propertyId
                     },
                     payments: []
                 };
