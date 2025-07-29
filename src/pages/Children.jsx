@@ -84,48 +84,80 @@ const Children = () => {
     }
 
     return (
-        <div className={`children-page ${i18n.language}`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-            <h1 className="page-title">{t('children.myChildren')}</h1>
+        <div className={`children-page modern ${i18n.language}`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+            <h1 className="page-title">👶 {t('children.myChildren')}</h1>
 
             {loading && <div className="loading-indicator">{t('general.loading')}</div>}
             {error && <div className="error-message">{error}</div>}
 
             <div className="stats-cards">
                 <div className="stat-card">
-                    <FaChild className="stat-icon" />
-                    <div><strong>{totalChildren}</strong></div>
-                    <div>{t('children.totalChildren')}</div>
+                    <div className="stat-icon">🧒</div>
+                    <div className="stat-value">{totalChildren}</div>
+                    <div className="stat-label">{t('children.totalChildren')}</div>
                 </div>
                 <div className="stat-card">
-                    <FaCheckCircle className="stat-icon success" />
-                    <div><strong>{enrolledChildren}</strong></div>
-                    <div>{t('children.enrolledChildren')}</div>
+                    <div className="stat-icon">🏫</div>
+                    <div className="stat-value">{enrolledChildren}</div>
+                    <div className="stat-label">{t('children.enrolledChildren')}</div>
                 </div>
                 <div className="stat-card">
-                    <FaTimesCircle className="stat-icon danger" />
-                    <div><strong>{unenrolledChildren}</strong></div>
-                    <div>{t('children.unenrolledChildren')}</div>
+                    <div className="stat-icon">❓</div>
+                    <div className="stat-value">{unenrolledChildren}</div>
+                    <div className="stat-label">{t('children.unenrolledChildren')}</div>
                 </div>
             </div>
 
             {unenrolledChildren > 0 ? (
-                <div className="cards-section">
-                    {children.filter(c => !c.kindergartenId).map(child => (
-                        <div key={child.childId} className="child-card">
-                            <h3>{child.name}</h3>
-                            <p>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</p>
-                            <select onChange={(e) => handleEnroll(child, e.target.value)} defaultValue="">
-                                <option value="">{t('children.selectKindergarten')}</option>
-                                {kindergartens.map(kg => (
-                                    <option key={kg.kindergartenId} value={kg.kindergartenId}>{kg.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                    ))}
-                </div>
+                <>
+                    <div className="cards-section">
+                        {children.filter(c => !c.kindergartenId).map(child => {
+                            const [selectedKg, setSelectedKg] = useState('');
+                            const kg = kindergartens.find(k => k.kindergartenId === selectedKg);
+
+                            return (
+                                <div key={child.childId} className="child-card">
+                                    <h3>{child.name}</h3>
+                                    <p>تاريخ الميلاد: {new Date(child.birthDate).toLocaleDateString(i18n.language)}</p>
+
+                                    <select
+                                        value={selectedKg}
+                                        onChange={(e) => setSelectedKg(e.target.value)}
+                                    >
+                                        <option value="">{t('children.selectKindergarten')}</option>
+                                        {kindergartens.map(kg => (
+                                            <option key={kg.kindergartenId} value={kg.kindergartenId}>
+                                                {kg.name} (رسوم: {kg.monthlyFee} د.ك)
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    {selectedKg && kg && (
+                                        <div className="payment-info">
+                                            <p>الحضانة المختارة: <strong>{kg.name}</strong></p>
+                                            <p>الرسوم الشهرية: <strong>{kg.monthlyFee} د.ك</strong></p>
+                                            <p>السعة المتاحة: <strong>{kg.availableSlots}</strong></p>
+                                        </div>
+                                    )}
+
+                                    <button
+                                        className="enroll-button"
+                                        onClick={() => handleEnroll(child, selectedKg)}
+                                        disabled={!selectedKg}
+                                    >
+                                        <FaMoneyBillWave /> دفع وتسجيل
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </>
             ) : (
-                <div className="all-enrolled-msg">{t('children.allEnrolled')}</div>
+                <div className="all-enrolled-msg">
+                    🎉 {t('children.allEnrolled')}
+                </div>
             )}
+
 
             <div className="registered-children-section">
                 <h2 className="section-title">{t('children.registeredTitle')}</h2>
