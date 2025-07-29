@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {axiosInstance, fetchUserProfile, getChildrenByUser, getPropertiesByUserId, getUserPayments} from "../api";
+import {axiosInstance} from "../api";
 import { useAuth } from "../AuthContext";
 import './Profile.css';
 import {
@@ -11,7 +11,6 @@ const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [children, setChildren] = useState([]);
     const [properties, setProperties] = useState([]);
-    const [bills, setBills] = useState([]);
     const [error, setError] = useState("");
     const [documentRequest, setDocumentRequest] = useState({
         documentType: "",
@@ -42,7 +41,6 @@ const Profile = () => {
 
                         setChildren(childrenRes.data || []);
                         setProperties(propertiesRes.data || []);
-                        setBills(billsRes.data || []);
                     } catch (secondaryError) {
                         console.error("Error loading additional data:", secondaryError);
                         setError("تم تحميل البيانات الأساسية ولكن حدث خطأ في بعض البيانات الإضافية");
@@ -232,62 +230,6 @@ const Profile = () => {
                             </div>
                         ) : (
                             <p style={{ color: '#64748b', textAlign: 'center' }}>لا توجد عقارات مسجلة</p>
-                        )}
-                    </div>
-
-                    {/* الفواتير والمدفوعات */}
-                    <div className="profile-section">
-                        <div className="section-title">
-                            <FaFileInvoiceDollar /> <span className="bill-icon">الفواتير والمدفوعات</span>
-                        </div>
-                        {bills.length > 0 ? (
-                            <div style={{ overflowX: 'auto' }}>
-                                <table className="bills-table">
-                                    <thead>
-                                    <tr>
-                                        <th>رقم الفاتورة</th>
-                                        <th>النوع</th>
-                                        <th>المبلغ</th>
-                                        <th>تاريخ الإصدار</th>
-                                        <th>تاريخ الاستحقاق</th>
-                                        <th>الحالة</th>
-                                        <th>إجراءات</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {bills.map((bill) => (
-                                        <tr key={bill.paymentId}>
-                                            <td>{bill.paymentId}</td>
-                                            <td>{bill.paymentType}</td>
-                                            <td>{bill.amount} ريال</td>
-                                            <td>{new Date(bill.issueDate).toLocaleDateString('ar-EG')}</td>
-                                            <td>{new Date(bill.dueDate).toLocaleDateString('ar-EG')}</td>
-                                            <td>
-                                                {bill.status === 'PAID' ? (
-                                                    <span className="bill-paid">
-                                                            <FaCheck /> مدفوعة
-                                                        </span>
-                                                ) : (
-                                                    <span className="bill-pending">
-                                                            <FaClock /> معلقة
-                                                        </span>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <div className="bill-actions">
-                                                    <button className="view-bill-btn">عرض</button>
-                                                    {bill.status !== 'PAID' && (
-                                                        <button className="pay-bill-btn">دفع</button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        ) : (
-                            <p style={{ color: '#64748b', textAlign: 'center' }}>لا توجد فواتير حالية</p>
                         )}
                     </div>
 
