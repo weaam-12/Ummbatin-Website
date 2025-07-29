@@ -120,6 +120,8 @@
     "loading": "טוען...",
     "processing": "מעבד...",
     "retryPayment":"נסה שוב לשלם",
+    "pendingPayments": "תשלומים ממתינים",
+
     "status": {
       "PENDING": "ממתין",
       "PAID": "שולם",

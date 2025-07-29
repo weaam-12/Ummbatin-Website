@@ -114,6 +114,8 @@
     "loading": "جاري التحميل...",
     "processing": "جاري المعالجة...",
     "retryPayment":"أعد محاولة الدفع",
+    "pendingPayments": "الدفعات المعلّقة",
+
     "status": {
       "PENDING": "قيد الانتظار",
       "PAID": "تم الدفع",
