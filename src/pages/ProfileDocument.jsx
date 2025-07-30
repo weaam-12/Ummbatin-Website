@@ -1,6 +1,6 @@
 import React from "react";
 import { Page, Text, View, Document, StyleSheet, Image } from "@react-pdf/renderer";
-import logo from "../styles/img.png"; // تأكد من المسار الصحيح لشعار البلدية
+import logo from "../components/styles/img.png"; // تأكد من المسار الصحيح لشعار البلدية
 
 // تعريف الأنماط
 const styles = StyleSheet.create({
