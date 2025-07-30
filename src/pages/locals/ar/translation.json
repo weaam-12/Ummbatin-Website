@@ -15,6 +15,34 @@
     "submitting": "جاري الإرسال...",
     "search": "بحث..."
   },
+  "payment": {
+    "title": "دفع إلكتروني",
+    "cardDetails": "تفاصيل البطاقة",
+    "cardName": "اسم حامل البطاقة",
+    "cardNamePlaceholder": "كما هو مدون على البطاقة",
+    "cardNumberError": "رقم البطاقة غير صحيح (يجب أن يكون 16 رقمًا)",
+    "cardExpiryError": "تاريخ الانتهاء غير صحيح (يجب أن يكون MM/YY)",
+    "cardCvcError": "رمز الأمان غير صحيح (يجب أن يكون 3 أرقام)",
+    "cardNameError": "اسم حامل البطاقة قصير جدًا",
+    "cardExpiredError": "بطاقة منتهية الصلاحية",
+    "summary": "ملخص الدفع",
+    "successTitle": "تم الدفع بنجاح!",
+    "successMessage": "شكراً لك، تمت عملية الدفع بنجاح",
+    "receiptDetails": "تفاصيل الفاتورة",
+    "childName": "اسم الطفل",
+    "kindergarten": "الحضانة",
+    "amount": "المبلغ",
+    "paymentDate": "تاريخ الدفع",
+    "transactionId": "رقم المعاملة",
+    "close": "إغلاق",
+    "cancel": "إلغاء",
+    "payNow": "دفع الآن",
+    "processing": "جاري المعالجة...",
+    "generalError": "حدث خطأ أثناء عملية الدفع",
+    "pdfError": "حدث خطأ أثناء إنشاء ملف PDF",
+    "downloadReceipt": "تحميل الإيصال",
+    "currency": "شيقل"
+  },
   "homePage": {
     "title": "مرحباً بكم في بلدية أم بطين",
     "description": "أم بطين هي بلدة متطورة في النقب، تقدم خدمات بلدية متكاملة، تعليم ذو جودة عالية، وفعاليات ثقافية واجتماعية لكل أفراد العائلة.",
@@ -180,6 +208,7 @@
       "paymentSuccess": "تم الدفع بنجاح",
       "paymentError": "فشل الدفع، حاول لاحقاً"
     },
+
     "types": {
       "water": "فاتورة المياه",
       "arnona": "الأرنونا",

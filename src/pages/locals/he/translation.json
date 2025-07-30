@@ -15,7 +15,34 @@
     "submitting": "שולח...",
     "search": "חיפוש..."
   },
-
+  "payment": {
+    "title": "תשלום אלקטרוני",
+    "cardDetails": "פרטי כרטיס",
+    "cardName": "שם בעל הכרטיס",
+    "cardNamePlaceholder": "כפי שמופיע על הכרטיס",
+    "cardNumberError": "מספר כרטיס לא תקין (חייב להיות 16 ספרות)",
+    "cardExpiryError": "תאריך תפוגה לא תקין (חייב להיות MM/YY)",
+    "cardCvcError": "קוד אבטחה לא תקין (חייב להיות 3 ספרות)",
+    "cardNameError": "שם בעל הכרטיס קצר מדי",
+    "cardExpiredError": "כרטיס פג תוקף",
+    "summary": "סיכום תשלום",
+    "successTitle": "התשלום בוצע בהצלחה!",
+    "successMessage": "תודה, התשלום בוצע בהצלחה",
+    "receiptDetails": "פרטי קבלה",
+    "childName": "שם הילד",
+    "kindergarten": "גן ילדים",
+    "amount": "סכום",
+    "paymentDate": "תאריך תשלום",
+    "transactionId": "מספר עסקה",
+    "close": "סגור",
+    "cancel": "ביטול",
+    "payNow": "שלם עכשיו",
+    "processing": "מעבד...",
+    "generalError": "אירעה שגיאה בעיבוד התשלום",
+    "pdfError": "אירעה שגיאה ביצירת קובץ PDF",
+    "downloadReceipt": "הורד קבלה",
+    "currency": "ש\"ח"
+  },
   "homePage": {
     "title": "ברוכים הבאים לעיריית אום בטין",
     "description": "אום בטין היא יישוב מתפתח בנגב, המציע שירותים מוניציפליים מקיפים, חינוך איכותי ואירועים תרבותיים וחברתיים לכל המשפחה.",
@@ -356,9 +383,5 @@
   "sampleChildren": {
     "adam": "אדם",
     "mohammed": "מחמד"
-  },
-  "general": {
-    "loading": "טוען...",
-    "currency": "ש\"ח"
   }
-  }
+}
