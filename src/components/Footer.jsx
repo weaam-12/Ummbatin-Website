@@ -21,9 +21,7 @@ const Footer = () => {
 
                 <nav className="footer-links">
                     <a href="/about">{t("footer.aboutMunicipality")}</a>
-                    <a href="/services">{t("footer.services")}</a>
                     <a href="/privacy-policy">{t("footer.privacyPolicy")}</a>
-                    <a href="/contact">{t("footer.contactUs")}</a>
                 </nav>
             </div>
 
