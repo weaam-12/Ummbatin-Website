@@ -1,5 +1,5 @@
 import React from "react";
-import "./Ticker.css";
+import "./NewsTicker.css";
 
 const NewsTicker = () => {
     const messages = [
@@ -9,15 +9,11 @@ const NewsTicker = () => {
         "📌 تابعوا آخر التحديثات من بلدية أم بطين.",
     ];
 
-    const repeatedMessages = messages.concat(messages).concat(messages); // تكرار الرسائل لملء الشريط باستمرار
-
     return (
         <div className="ticker-wrapper">
             <div className="ticker-content">
-                {repeatedMessages.map((msg, index) => (
-                    <span key={index} style={{ margin: "0 2rem" }}>
-            {msg}
-          </span>
+                {messages.map((msg, index) => (
+                    <span key={index}>{msg}</span>
                 ))}
             </div>
         </div>
