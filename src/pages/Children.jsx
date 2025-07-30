@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../api';
-import PaymentForm from './PaymentForm';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
 import { useAuth } from '../AuthContext';
-import { FaChild, FaCheckCircle, FaTimesCircle, FaMoneyBillWave } from 'react-icons/fa';
+import { FaChild, FaCheckCircle, FaMoneyBillWave } from 'react-icons/fa';
 import './Children.css';
-
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+import {
+    Card, Button, Alert, Spinner, Container, Modal, Form, Row, Col
+} from 'react-bootstrap';
+import { FiCreditCard, FiX } from 'react-icons/fi';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
     const [selectedKg, setSelectedKg] = useState('');
-    const kg = kindergartens.find(k => {
-        console.log("🧪 Matching KG:", k.kindergartenId, selectedKg);
-        return String(k.kindergartenId) === selectedKg;
-    });
+    const kg = kindergartens.find(k => String(k.kindergartenId) === selectedKg);
+
     return (
         <div className="child-card">
             <h3>{child.name}</h3>
@@ -36,26 +35,15 @@ const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
             {selectedKg && kg && (
                 <div className="payment-info">
                     <p>{t('children.selectedKindergarten')}: <strong>{kg.name}</strong></p>
-                    <p>{t('children.monthlyFees')}: <strong>{"250₪"} {t('general.currency')}</strong></p>
+                    <p>{t('children.monthlyFees')}: <strong>{kg.monthlyFee} {t('general.currency')}</strong></p>
                     <p>{t('children.availableSlots')}: <strong>{kg.availableSlots}</strong></p>
                 </div>
             )}
 
             <button
                 className="enroll-button"
-                onClick={() => {
-                    console.log("🔘 Enroll Clicked:", child.name, "Selected KG ID:", selectedKg);
-                    const kg = kindergartens.find(k => {
-                        console.log("🧪 Matching KG:", k.kindergartenId, selectedKg);
-                        return String(k.kindergartenId) === selectedKg;
-                    });
-
-                    if (!kg) {
-                        console.warn("❌ No matching kindergarten found!");
-                    }
-
-                    handleEnroll(child, kg);
-                }}                disabled={!selectedKg}
+                onClick={() => handleEnroll(child, kg)}
+                disabled={!selectedKg}
             >
                 <FaMoneyBillWave /> {t('children.payAndRegister')}
             </button>
@@ -76,6 +64,15 @@ const Children = () => {
     const [totalChildren, setTotalChildren] = useState(0);
     const [enrolledChildren, setEnrolledChildren] = useState(0);
     const [unenrolledChildren, setUnenrolledChildren] = useState(0);
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
+    const [receipt, setReceipt] = useState(null);
+    const [cardData, setCardData] = useState({
+        number: '',
+        name: '',
+        expiry: '',
+        cvc: ''
+    });
+    const [notification, setNotification] = useState(null);
 
     useEffect(() => {
         const loadData = async () => {
@@ -107,10 +104,11 @@ const Children = () => {
     }, [user, t]);
 
     const handleEnroll = (child, kg) => {
-        console.log("📥 handleEnroll called", child, kg);
         setSelectedChild(child);
         setSelectedKindergarten(kg);
         setShowPayment(true);
+        setPaymentSuccess(false);
+        setReceipt(null);
     };
 
     const reloadChildren = async () => {
@@ -122,6 +120,124 @@ const Children = () => {
         setTotalChildren(total);
         setEnrolledChildren(enrolled);
         setUnenrolledChildren(unenrolled);
+    };
+
+    const handleCardInput = (e) => {
+        const { name, value } = e.target;
+        if (name === 'number') {
+            const v = value.replace(/\s+/g, '').replace(/(\d{4})/g, '$1 ').trim();
+            setCardData({...cardData, [name]: v});
+        }
+        else if (name === 'expiry') {
+            const v = value.replace(/\D/g, '').replace(/(\d{2})(\d{0,2})/, '$1/$2');
+            setCardData({...cardData, [name]: v});
+        }
+        else if (name === 'cvc') {
+            const v = value.replace(/\D/g, '').substring(0, 3);
+            setCardData({...cardData, [name]: v});
+        }
+        else {
+            setCardData({...cardData, [name]: value});
+        }
+    };
+
+    const validateCard = () => {
+        if (!/^\d{4}\s\d{4}\s\d{4}\s\d{4}$/.test(cardData.number)) {
+            return t('payment.cardNumberError');
+        }
+        if (!/^\d{2}\/\d{2}$/.test(cardData.expiry)) {
+            return t('payment.cardExpiryError');
+        }
+        if (!/^\d{3}$/.test(cardData.cvc)) {
+            return t('payment.cardCvcError');
+        }
+        if (cardData.name.trim().length < 3) {
+            return t('payment.cardNameError');
+        }
+        const [month, year] = cardData.expiry.split('/');
+        const currentYear = new Date().getFullYear() % 100;
+        const currentMonth = new Date().getMonth() + 1;
+        if (parseInt(year) < currentYear ||
+            (parseInt(year) === currentYear && parseInt(month) < currentMonth)) {
+            return t('payment.cardExpiredError');
+        }
+        return null;
+    };
+
+    const processPayment = async () => {
+        const validationError = validateCard();
+        if (validationError) {
+            setNotification({ type: 'danger', message: validationError });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // 1. إنشاء سجل الدفع في الخادم
+            const paymentResponse = await axiosInstance.post('/api/payments/create-kindergarten', {
+                childId: selectedChild.childId,
+                kindergartenId: selectedKindergarten.kindergartenId,
+                amount: selectedKindergarten.monthlyFee
+            });
+
+            // 2. تحديث حالة الدفع في الخادم
+            await axiosInstance.patch(`/api/payments/${paymentResponse.data.paymentId}/status`, {
+                status: 'PAID'
+            });
+
+            // 3. تحديث حالة التسجيل
+            await axiosInstance.post('/api/children/enroll', {
+                childId: selectedChild.childId,
+                kindergartenId: selectedKindergarten.kindergartenId,
+                paymentId: paymentResponse.data.paymentId
+            });
+
+            // 4. حفظ الفاتورة
+            const receiptData = {
+                paymentId: paymentResponse.data.paymentId,
+                amount: selectedKindergarten.monthlyFee,
+                paymentDate: new Date().toISOString(),
+                childName: selectedChild.name,
+                kindergartenName: selectedKindergarten.name
+            };
+
+            setReceipt(receiptData);
+            setPaymentSuccess(true);
+            setNotification({ type: 'success', message: t('payment.successMessage') });
+
+            // 5. إعادة تحميل بيانات الأطفال
+            await reloadChildren();
+        } catch (error) {
+            console.error("Payment processing error:", error);
+            setNotification({
+                type: "danger",
+                message: error.response?.data?.message || t('payment.generalError')
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDownloadReceipt = () => {
+        setLoading(true);
+        const element = document.getElementById('kindergarten-receipt');
+        html2canvas(element, { scale: 2 }).then((canvas) => {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const w = pdf.internal.pageSize.getWidth();
+            const h = (canvas.height * w) / canvas.width;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, h);
+            pdf.save(`receipt-${selectedChild.name}-${new Date().toLocaleDateString()}.pdf`);
+            setLoading(false);
+        }).catch(() => {
+            setNotification({ type: 'danger', message: t('payment.pdfError') });
+            setLoading(false);
+        });
+    };
+
+    const resetPaymentModal = () => {
+        setShowPayment(false);
+        setPaymentSuccess(false);
+        setCardData({ number: '', name: '', expiry: '', cvc: '' });
     };
 
     if (!user) {
@@ -141,6 +257,11 @@ const Children = () => {
 
             {loading && <div className="loading-indicator">{t('general.loading')}</div>}
             {error && <div className="error-message">{error}</div>}
+            {notification && (
+                <Alert variant={notification.type} onClose={() => setNotification(null)} dismissible>
+                    {notification.message}
+                </Alert>
+            )}
 
             <div className="stats-cards">
                 <div className="stat-card">
@@ -179,7 +300,6 @@ const Children = () => {
                 </div>
             )}
 
-
             <div className="registered-children-section">
                 <h2 className="section-title">{t('children.registeredTitle')}</h2>
                 <table className="children-table">
@@ -205,26 +325,146 @@ const Children = () => {
                 </table>
             </div>
 
-            {showPayment && selectedChild && selectedKindergarten && (
-                <>
-                    {console.log("🔵 Payment Modal Triggered", selectedChild, selectedKindergarten, showPayment)}
-                    <div className="payment-modal">
-                        <div className="payment-content">
-                            <Elements stripe={stripePromise}>
-                                <PaymentForm
-                                    child={selectedChild}
-                                    kindergarten={selectedKindergarten}
-                                    onSuccess={() => {
-                                        setShowPayment(false);
-                                        reloadChildren();
-                                    }}
-                                    onClose={() => setShowPayment(false)}
-                                />
-                            </Elements>
+            <Modal show={showPayment} onHide={resetPaymentModal} size="lg" centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('payment.title')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {paymentSuccess && receipt ? (
+                        <div className="payment-success">
+                            <div id="kindergarten-receipt" className="receipt-details">
+                                <div className="text-center mb-4">
+                                    <FaCheckCircle className="text-success" size={48} />
+                                    <h3 className="mt-2">{t('payment.successTitle')}</h3>
+                                </div>
+
+                                <h4 className="mb-3">{t('payment.receiptDetails')}</h4>
+                                <div className="receipt-item">
+                                    <span>{t('payment.childName')}:</span>
+                                    <strong>{receipt.childName}</strong>
+                                </div>
+                                <div className="receipt-item">
+                                    <span>{t('payment.kindergarten')}:</span>
+                                    <strong>{receipt.kindergartenName}</strong>
+                                </div>
+                                <div className="receipt-item">
+                                    <span>{t('payment.amount')}:</span>
+                                    <strong>{receipt.amount} {t('payment.currency')}</strong>
+                                </div>
+                                <div className="receipt-item">
+                                    <span>{t('payment.paymentDate')}:</span>
+                                    <strong>{new Date(receipt.paymentDate).toLocaleString()}</strong>
+                                </div>
+                                <div className="receipt-item">
+                                    <span>{t('payment.transactionId')}:</span>
+                                    <strong>{receipt.paymentId}</strong>
+                                </div>
+                            </div>
+
+                            <div className="d-flex justify-content-between mt-4">
+                                <Button variant="success" onClick={handleDownloadReceipt}>
+                                    {t('payment.downloadReceipt')}
+                                </Button>
+                                <Button variant="primary" onClick={resetPaymentModal}>
+                                    {t('payment.close')}
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                </>
-            )}
+                    ) : (
+                        <>
+                            <div className="payment-summary mb-4">
+                                <h5>{t('payment.summary')}</h5>
+                                <div className="summary-item">
+                                    <span>{t('payment.child')}:</span>
+                                    <strong>{selectedChild?.name}</strong>
+                                </div>
+                                <div className="summary-item">
+                                    <span>{t('payment.kindergarten')}:</span>
+                                    <strong>{selectedKindergarten?.name}</strong>
+                                </div>
+                                <div className="summary-item">
+                                    <span>{t('payment.amount')}:</span>
+                                    <strong>{selectedKindergarten?.monthlyFee} {t('payment.currency')}</strong>
+                                </div>
+                            </div>
+
+                            <Form>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>{t('payment.cardDetails')}</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="number"
+                                        placeholder="1234 5678 9012 3456"
+                                        value={cardData.number}
+                                        onChange={handleCardInput}
+                                        maxLength={19}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3">
+                                    <Form.Label>{t('payment.cardName')}</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="name"
+                                        placeholder={t('payment.cardNamePlaceholder')}
+                                        value={cardData.name}
+                                        onChange={handleCardInput}
+                                    />
+                                </Form.Group>
+
+                                <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>{t('payment.cardExpiry')}</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="expiry"
+                                                placeholder="MM/YY"
+                                                value={cardData.expiry}
+                                                onChange={handleCardInput}
+                                                maxLength={5}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>{t('payment.cardCvv')}</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="cvc"
+                                                placeholder="123"
+                                                value={cardData.cvc}
+                                                onChange={handleCardInput}
+                                                maxLength={3}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+
+                                <div className="d-flex justify-content-between mt-4">
+                                    <Button variant="secondary" onClick={resetPaymentModal}>
+                                        {t('payment.cancel')}
+                                    </Button>
+                                    <Button
+                                        variant="primary"
+                                        onClick={processPayment}
+                                        disabled={loading}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Spinner animation="border" size="sm" className="me-2" />
+                                                {t('payment.processing')}
+                                            </>
+                                        ) : (
+                                            t('payment.payNow')
+                                        )}
+                                    </Button>
+                                </div>
+                            </Form>
+                        </>
+                    )}
+                </Modal.Body>
+            </Modal>
         </div>
     );
 };
