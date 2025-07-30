@@ -32,7 +32,15 @@ const Navbar = () => {
         { id: 2, title: "شكوى جديدة تحتاج إلى مراجعة", time: "منذ يوم", read: true },
         { id: 3, title: "تمت الموافقة على طلبك", time: "منذ 3 أيام", read: true }
     ]);
-
+    const NewsTicker = () => {
+        return (
+            <div className="bg-yellow-100 text-yellow-900 py-2 px-4 overflow-hidden whitespace-nowrap">
+                <div className="animate-marquee text-sm font-medium">
+                    📢 إشعار هام: بدء التسجيل لحضانات عام 2025 | 💧 يمكنك الآن دفع فاتورة المياه والارنونا إلكترونيًا | 🛠️ أعمال صيانة في شبكة الكهرباء يوم الإثنين
+                </div>
+            </div>
+        );
+    };
     useEffect(() => {
         document.body.dir = "rtl";
     }, []);
@@ -93,7 +101,10 @@ const Navbar = () => {
     ];
 
     return (
+
         <nav className="navbar">
+            {(!isAdmin()) && <NewsTicker />}
+
             <div className="navbar-container">
                 <div className="brand-container">
                     <NavLink to="/" className="navbar-brand">
@@ -135,38 +146,37 @@ const Navbar = () => {
                 </ul>
 
                 <div className="navbar-right">
-                    <div className="notifications-menu">
-                        <div className="notifications-button" onClick={toggleNotifications}>
-                            <FaBell className="notifications-icon" />
-                            {unreadCount > 0 && (
-                                <span className="notifications-badge">{unreadCount}</span>
+                    {user && (
+                        <div className="notifications-menu">
+                            <div className="notifications-button" onClick={toggleNotifications}>
+                                <FaBell className="notifications-icon" />
+                                {unreadCount > 0 && (
+                                    <span className="notifications-badge">{unreadCount}</span>
+                                )}
+                            </div>
+                            {showNotifications && (
+                                <div className="notifications-dropdown show">
+                                    <div className="dropdown-header">الإشعارات</div>
+                                    {notifications.map(notification => (
+                                        <div
+                                            key={notification.id}
+                                            className={`notification-item ${!notification.read ? "unread" : ""}`}
+                                            onClick={() => markAsRead(notification.id)}
+                                        >
+                                            <div className="notification-title">{notification.title}</div>
+                                            <div className="notification-time">{notification.time}</div>
+                                        </div>
+                                    ))}
+                                    <div className="view-all" onClick={() => {
+                                        navigate("/notifications");
+                                        closeDropdowns();
+                                    }}>
+                                        عرض الكل
+                                    </div>
+                                </div>
                             )}
                         </div>
-
-                        {showNotifications && (
-                            <div className="notifications-dropdown show">
-                                <div className="dropdown-header" style={{ padding: "0.5rem 1rem", fontWeight: "bold" }}>
-                                    الإشعارات
-                                </div>
-                                {notifications.map(notification => (
-                                    <div
-                                        key={notification.id}
-                                        className={`notification-item ${!notification.read ? "unread" : ""}`}
-                                        onClick={() => markAsRead(notification.id)}
-                                    >
-                                        <div className="notification-title">{notification.title}</div>
-                                        <div className="notification-time">{notification.time}</div>
-                                    </div>
-                                ))}
-                                <div className="view-all" onClick={() => {
-                                    navigate("/notifications");
-                                    closeDropdowns();
-                                }}>
-                                    عرض الكل
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    )}
 
                     <div className="language-selector">
                         <button
@@ -186,7 +196,7 @@ const Navbar = () => {
 
                     <div className="profile-menu">
                         <div className="profile-button" onClick={toggleDropdown}>
-                            <FaUserCircle className="profile-icon" />
+                            <FaUserCircle className="profile-icon"/>
                             {user ? (
                                 <span>{user.fullName || user.email}</span>
                             ) : (
@@ -203,7 +213,7 @@ const Navbar = () => {
                                             className="dropdown-item"
                                             onClick={closeDropdowns}
                                         >
-                                            <FaUserCircle />
+                                            <FaUserCircle/>
                                             {t("common.profile")}
                                         </NavLink>
                                         {isAdmin() && (
@@ -212,7 +222,7 @@ const Navbar = () => {
                                                 className="dropdown-item"
                                                 onClick={closeDropdowns}
                                             >
-                                                <FaUserShield />
+                                                <FaUserShield/>
                                                 {t("common.adminPanel")}
                                             </NavLink>
                                         )}
@@ -220,7 +230,7 @@ const Navbar = () => {
                                             className="dropdown-item logout"
                                             onClick={handleLogout}
                                         >
-                                            <FaTimes />
+                                            <FaTimes/>
                                             {t("common.logout")}
                                         </div>
                                     </>
@@ -230,7 +240,7 @@ const Navbar = () => {
                                         className="dropdown-item"
                                         onClick={closeDropdowns}
                                     >
-                                        <FaUserCircle />
+                                        <FaUserCircle/>
                                         {t("common.login")}
                                     </NavLink>
                                 )}
