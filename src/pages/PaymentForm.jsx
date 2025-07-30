@@ -27,7 +27,7 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
         }
 
         try {
-            // 1. إنشاء Payment Intent مع الخادم
+            // 1. إنشاء Payment Intent
             const { clientSecret } = await createPaymentIntent({
                 amount: kindergarten.monthlyFee * 100,
                 currency: 'ils',
@@ -51,10 +51,17 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
                 return;
             }
 
-            // 3. حفظ الفاتورة في قاعدة البيانات
+            // 3. التحقق من أن الدفع ناجح قبل المتابعة
+            if (paymentIntent.status !== 'succeeded') {
+                setError(t('payment.paymentNotCompleted'));
+                setLoading(false);
+                return;
+            }
+
+            // 4. حفظ الفاتورة في قاعدة البيانات
             const { data: invoice } = await axios.post('/api/payments/save-invoice', {
                 paymentIntentId: paymentIntent.id,
-                amount: paymentIntent.amount / 100, // تحويل إلى وحدة العملة
+                amount: paymentIntent.amount / 100,
                 currency: paymentIntent.currency,
                 status: paymentIntent.status,
                 childId: child.childId,
@@ -63,16 +70,17 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
                 receiptEmail: paymentIntent.receipt_email
             });
 
-            // 4. تحديث حالة التسجيل
+            // 5. تحديث حالة التسجيل
             await axios.post('/api/children/enroll', {
                 childId: child.childId,
                 kindergartenId: kindergarten.kindergartenId,
-                paymentId: invoice.paymentId
+                paymentId: invoice.paymentId,
+                status: 'paid' // تأكد من إضافة هذه الحالة
             });
 
             setReceipt(invoice);
             setPaymentSuccess(true);
-            onSuccess();
+            onSuccess(invoice); // تعديل الدالة لتمرير الفاتورة
         } catch (err) {
             console.error('Payment error:', err);
             setError(err.response?.data?.message || t('payment.generalError'));

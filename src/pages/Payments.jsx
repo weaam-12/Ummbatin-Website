@@ -5,14 +5,13 @@ import html2canvas from 'html2canvas';
 import { useTranslation } from 'react-i18next';
 import {
     Card, Tabs, Tab, Button, Alert, Spinner, Container, ListGroup, Badge, Row, Col, Accordion,
-    Modal,Form
+    Modal, Form
 } from 'react-bootstrap';
 import {
     FiCreditCard, FiCheckCircle, FiClock, FiDollarSign, FiDownload, FiHome, FiX
 } from 'react-icons/fi';
 import './Payment.css';
-
-import { getUserPayments, getPropertiesByUserId } from '../api';
+import { getUserPayments, getPropertiesByUserId, updatePaymentStatus } from '../api';
 
 const Payments = () => {
     const { t } = useTranslation();
@@ -28,6 +27,13 @@ const Payments = () => {
     const [debt, setDebt] = useState(0);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [currentPayment, setCurrentPayment] = useState(null);
+    const [cardData, setCardData] = useState({
+        number: '',
+        name: '',
+        expiry: '',
+        cvc: ''
+    });
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
 
     const statusVariants = {
         PENDING: 'warning',
@@ -35,6 +41,7 @@ const Payments = () => {
         OVERDUE: 'danger',
         FAILED: 'danger'
     };
+
     const statusLabels = {
         PENDING: t('payments.status.PENDING'),
         PAID: t('payments.status.PAID'),
@@ -43,27 +50,14 @@ const Payments = () => {
     };
 
     const formatDate = (d) => d ? new Date(d).toLocaleDateString() : '--';
-    const [cardData, setCardData] = useState({
-        number: '',
-        name: '',
-        expiry: '',
-        cvc: ''
-    });
-    const [paymentSuccess, setPaymentSuccess] = useState(false);
-    // تحميل البيانات
+
     useEffect(() => {
-        const load = async () => {
+        const loadData = async () => {
             try {
-                // جلب العقارات أولاً
                 const props = await getPropertiesByUserId(user?.userId);
-                console.log('العقارات المحملة:', props);
-
-                // جلب الدفعات
                 const data = await getUserPayments(user?.userId);
-                console.log('الدفعات المحملة:', data);
 
-                // تنظيم الدفعات مع ربطها بالعقارات
-                const organizedPayments = {
+                setPayments({
                     water: organizePaymentsByProperty(
                         data.filter(p => p.paymentType === 'WATER'),
                         props
@@ -72,13 +66,9 @@ const Payments = () => {
                         data.filter(p => p.paymentType === 'ARNONA'),
                         props
                     )
-                };
-
-                console.log('الدفعات المنظمة:', organizedPayments);
-                setPayments(organizedPayments);
+                });
                 setProperties(props);
             } catch (e) {
-                console.error('Error loading data:', e);
                 setNotification({
                     type: 'danger',
                     message: 'فشل تحميل البيانات: ' + e.message
@@ -88,22 +78,14 @@ const Payments = () => {
             }
         };
 
-        if (user) load();
+        if (user) loadData();
     }, [user]);
 
     const organizePaymentsByProperty = (payments, properties = []) => {
         const byProperty = {};
-
         payments.forEach(payment => {
-            let property = properties.find(p => p.propertyId == payment.propertyId);
-
-            if (!property && payment.propertyAddress) {
-                property = properties.find(p =>
-                    p.address && payment.propertyAddress &&
-                    p.address.trim() === payment.propertyAddress.trim()
-                );
-            }
-
+            const property = properties.find(p => p.propertyId == payment.propertyId) ||
+                properties.find(p => p.address?.trim() === payment.propertyAddress?.trim());
             const propertyId = property?.propertyId || payment.propertyAddress || 'unknown';
 
             if (!byProperty[propertyId]) {
@@ -119,39 +101,31 @@ const Payments = () => {
             }
             byProperty[propertyId].payments.push(payment);
         });
-
         return byProperty;
     };
 
-    // حساب الدين التراكمي (يشمل PENDING و FAILED فقط)
     useEffect(() => {
         const totalDebt = Object.values(payments).reduce((sum, paymentType) => {
             return sum + Object.values(paymentType).reduce((typeSum, propertyPayments) => {
                 return typeSum + propertyPayments.payments.reduce((propertySum, payment) => {
                     return (payment.status === 'PENDING' || payment.status === 'FAILED') ?
-                        propertySum + payment.amount :
-                        propertySum;
+                        propertySum + payment.amount : propertySum;
                 }, 0);
             }, 0);
         }, 0);
         setDebt(totalDebt);
     }, [payments]);
 
-
     const handleCardInput = (e) => {
         const { name, value } = e.target;
-
-        // تنسيق رقم البطاقة (إضافة مسافة كل 4 أرقام)
         if (name === 'number') {
             const v = value.replace(/\s+/g, '').replace(/(\d{4})/g, '$1 ').trim();
             setCardData({...cardData, [name]: v});
         }
-        // تنسيق تاريخ الانتهاء (إضافة / بعد شهرين)
         else if (name === 'expiry') {
             const v = value.replace(/\D/g, '').replace(/(\d{2})(\d{0,2})/, '$1/$2');
             setCardData({...cardData, [name]: v});
         }
-        // تنسيق CVC (3 أرقام فقط)
         else if (name === 'cvc') {
             const v = value.replace(/\D/g, '').substring(0, 3);
             setCardData({...cardData, [name]: v});
@@ -162,50 +136,36 @@ const Payments = () => {
     };
 
     const validateCard = () => {
-        // تحقق من رقم البطاقة (16 رقم)
         if (!/^\d{4}\s\d{4}\s\d{4}\s\d{4}$/.test(cardData.number)) {
             return 'رقم البطاقة غير صحيح (يجب أن يكون 16 رقمًا)';
         }
-
-        // تحقق من تاريخ الانتهاء (MM/YY)
         if (!/^\d{2}\/\d{2}$/.test(cardData.expiry)) {
             return 'تاريخ الانتهاء غير صحيح (يجب أن يكون MM/YY)';
         }
-
-        // تحقق من CVC (3 أرقام)
         if (!/^\d{3}$/.test(cardData.cvc)) {
             return 'رمز الأمان غير صحيح (يجب أن يكون 3 أرقام)';
         }
-
-        // تحقق من اسم حامل البطاقة
         if (cardData.name.trim().length < 3) {
             return 'اسم حامل البطاقة قصير جدًا';
         }
         const [month, year] = cardData.expiry.split('/');
         const currentYear = new Date().getFullYear() % 100;
         const currentMonth = new Date().getMonth() + 1;
-
         if (parseInt(year) < currentYear ||
             (parseInt(year) === currentYear && parseInt(month) < currentMonth)) {
             return 'بطاقة منتهية الصلاحية';
         }
-
         return null;
     };
-    // توليد PDF
+
     const handleDownloadPDF = (type, propertyId) => {
         setLoading(true);
         const element = document.getElementById(`invoice-${type}-${propertyId}`);
-        html2canvas(element, {
-            scale: 2,
-            logging: false,
-            useCORS: true
-        }).then((canvas) => {
-            const img = canvas.toDataURL('image/png');
+        html2canvas(element, { scale: 2 }).then((canvas) => {
             const pdf = new jsPDF('p', 'mm', 'a4');
             const w = pdf.internal.pageSize.getWidth();
             const h = (canvas.height * w) / canvas.width;
-            pdf.addImage(img, 'PNG', 0, 0, w, h);
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, h);
             pdf.save(`${t(`payments.types.${type}`)}-${propertyId}-${new Date().toLocaleDateString()}.pdf`);
             setLoading(false);
         }).catch(() => {
@@ -214,18 +174,14 @@ const Payments = () => {
         });
     };
 
-    // الدفع الحقيقي عبر الباك-إند
     const handlePayment = async (paymentType, paymentId) => {
         setLoading(true);
         try {
-            // البحث عن الدفع المحدد في state `payments`
             const payment = Object.values(payments[paymentType] || {})
                 .flatMap(propertyPayments => propertyPayments.payments || [])
                 .find(p => p.paymentId === paymentId);
 
-            if (!payment) {
-                throw new Error("Payment not found");
-            }
+            if (!payment) throw new Error("Payment not found");
 
             setCurrentPayment({
                 type: paymentType,
@@ -234,13 +190,8 @@ const Payments = () => {
                 description: `دفع ${paymentType}`
             });
             setShowPaymentModal(true);
-
         } catch (error) {
-            console.error("Payment error:", error);
-            setNotification({
-                type: "danger",
-                message: error.message || "فشل في إعداد الدفع"
-            });
+            setNotification({ type: "danger", message: error.message || "فشل في إعداد الدفع" });
         } finally {
             setLoading(false);
         }
@@ -255,19 +206,10 @@ const Payments = () => {
 
         setLoading(true);
         try {
-            // هنا في الواقع سترسل بيانات الدفع للخادم
-            // ولكن لأغراض المشروع الجامعي، سنحاكي عملية الدفع
+            // تحديث حالة الدفع في الخادم
+            await updatePaymentStatus(currentPayment.id, 'PAID');
 
-            // محاكاة انتظار عملية الدفع
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            setPaymentSuccess(true);
-            setNotification({
-                type: "success",
-                message: "تم الدفع بنجاح!"
-            });
-
-            // تحديث حالة الدفع في الواجهة
+            // تحديث الحالة محليًا
             const updatedPayments = { ...payments };
             Object.values(updatedPayments[currentPayment.type]).forEach(propertyPayments => {
                 propertyPayments.payments.forEach(p => {
@@ -279,11 +221,13 @@ const Payments = () => {
             });
             setPayments(updatedPayments);
 
+            setPaymentSuccess(true);
+            setNotification({ type: "success", message: "تم الدفع بنجاح!" });
         } catch (error) {
             console.error("Payment processing error:", error);
             setNotification({
                 type: "danger",
-                message: error.message || "فشل في عملية الدفع"
+                message: error.response?.data?.message || "فشل في عملية الدفع"
             });
         } finally {
             setLoading(false);
@@ -293,12 +237,7 @@ const Payments = () => {
     const resetPaymentModal = () => {
         setShowPaymentModal(false);
         setPaymentSuccess(false);
-        setCardData({
-            number: '',
-            name: '',
-            expiry: '',
-            cvc: ''
-        });
+        setCardData({ number: '', name: '', expiry: '', cvc: '' });
     };
 
     const renderPropertyPayments = (propertyId, paymentsData, paymentType) => {
@@ -325,7 +264,6 @@ const Payments = () => {
                     <div id={`invoice-${paymentType}-${propertyId}`} className="payment-details p-3">
                         <h5 className="mb-3">{t(`payments.types.${paymentType}`)}</h5>
 
-                        {/* الدفعات المعلقة */}
                         {pendingPayments.length > 0 && (
                             <>
                                 <h6 className="mt-3 text-danger">
@@ -364,7 +302,6 @@ const Payments = () => {
                             </>
                         )}
 
-                        {/* سجل الدفعات */}
                         <h6 className="mt-3">
                             <FiClock className="me-2" />
                             {t('payments.invoice.paymentHistory')}
@@ -433,7 +370,7 @@ const Payments = () => {
                     {notification.message}
                 </Alert>
             )}
-            {/* Modal لإدخال بيانات الدفع */}
+
             <Modal show={showPaymentModal} onHide={resetPaymentModal} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>إدخال بيانات الدفع</Modal.Title>
