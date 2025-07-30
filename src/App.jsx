@@ -105,12 +105,12 @@ const App = () => {
                                         <GarbageComplaint />
                                     </ProtectedRoute>
                                 } />
-                                <Route path="/garbage-complaints" element={
+                                <Route path="/about" element={
                                     <ProtectedRoute>
                                         <About />
                                     </ProtectedRoute>
                                 } />
-                                <Route path="/garbage-complaints" element={
+                                <Route path="/privacy-policy" element={
                                     <ProtectedRoute>
                                         <PrivacyPolicy />
                                     </ProtectedRoute>
