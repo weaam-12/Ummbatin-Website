@@ -166,14 +166,6 @@ const Home = () => {
                                 </div>
                             </div>
 
-                            <div className={styles.modalActions}>
-                                <button className={styles.registerButton}>
-                                    {t("eventDetails.register")}
-                                </button>
-                                <button className={styles.shareButton}>
-                                    {t("eventDetails.share")}
-                                </button>
-                            </div>
                         </div>
                     </div>
                 )}
