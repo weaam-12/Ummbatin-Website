@@ -15,6 +15,17 @@
     "submitting": "שולח...",
     "search": "חיפוש..."
   },
+  "eventDetails": {
+    "title": "פרטי האירוע",
+    "close": "סגור",
+    "date": "תאריך",
+    "time": "שעה",
+    "location": "מיקום",
+    "organizer": "מארגן",
+    "description": "תיאור האירוע",
+    "register": "הרשמה",
+    "share": "שתף"
+  },
   "login": {
     "title": "התחברות",
     "email": "אימייל",
@@ -399,5 +410,12 @@
   "sampleChildren": {
     "adam": "אדם",
     "mohammed": "מחמד"
+  },
+  "event": {
+    "date": "תאריך",
+    "from": "מ",
+    "to": "עד",
+    "location": "מיקום",
+    "organizer": "מארגן"
   }
 }

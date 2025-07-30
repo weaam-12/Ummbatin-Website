@@ -10,6 +10,8 @@ const Home = () => {
     const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -20,7 +22,9 @@ const Home = () => {
                     .map(event => ({
                         ...event,
                         startDate: new Date(event.startDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'he-IL'),
-                        endDate: new Date(event.endDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'he-IL')
+                        endDate: new Date(event.endDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'he-IL'),
+                        startTime: new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        endTime: new Date(event.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     }));
                 setEvents(formattedEvents);
             } catch (error) {
@@ -32,6 +36,15 @@ const Home = () => {
 
         fetchEvents();
     }, [i18n.language]);
+
+    const handleEventClick = (event) => {
+        setSelectedEvent(event);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
 
     const services = [
         { name: t("services.water"), icon: "💧", path: "" },
@@ -45,9 +58,6 @@ const Home = () => {
         { name: t("services.news"), icon: "📰", path: "/news" }
     ];
 
-    const handleServiceClick = (path) => {
-        navigate(path);
-    };
 
     return (
         <div className={styles.container} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
@@ -81,7 +91,11 @@ const Home = () => {
                     ) : events.length > 0 ? (
                         <div className={styles.eventsGrid}>
                             {events.map((event, idx) => (
-                                <div key={idx} className={styles.eventCard}>
+                                <div
+                                    key={idx}
+                                    className={styles.eventCard}
+                                    onClick={() => handleEventClick(event)}
+                                >
                                     {event.imageUrl && (
                                         <img
                                             src={event.imageUrl}
@@ -95,18 +109,9 @@ const Home = () => {
                                     )}
                                     <div className={styles.eventContent}>
                                         <h3 className={styles.eventTitle}>{event.title}</h3>
-                                        <p className={styles.eventDescription}>{event.description}</p>
-                                        <div className={styles.eventDetails}>
-                                            <p>
-                                                <strong>{t("event.date")}:</strong> {t("event.from")} {event.startDate} {t("event.to")} {event.endDate}
-                                            </p>
-                                            <p>
-                                                <strong>{t("event.location")}:</strong> {event.location}
-                                            </p>
-                                            <p>
-                                                <strong>{t("event.organizer")}:</strong> {event.organizer}
-                                            </p>
-                                        </div>
+                                        <p className={styles.eventDate}>
+                                            {event.startDate} {event.startTime !== '00:00' ? `- ${event.startTime}` : ''}
+                                        </p>
                                     </div>
                                 </div>
                             ))}
@@ -115,9 +120,67 @@ const Home = () => {
                         <p className={styles.noEvents}>{t("homePage.noEvents")}</p>
                     )}
                 </section>
+
+                {/* النافذة المنبثقة */}
+                {isModalOpen && selectedEvent && (
+                    <div className={styles.modalOverlay}>
+                        <div className={styles.modal} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+                            <button className={styles.closeButton} onClick={closeModal}>
+                                {t("eventDetails.close")}
+                            </button>
+
+                            <h2 className={styles.modalTitle}>{selectedEvent.title}</h2>
+
+                            <div className={styles.modalContent}>
+                                {selectedEvent.imageUrl && (
+                                    <img
+                                        src={selectedEvent.imageUrl}
+                                        alt={selectedEvent.title}
+                                        className={styles.modalImage}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = bkg;
+                                        }}
+                                    />
+                                )}
+
+                                <div className={styles.modalDetails}>
+                                    <p>
+                                        <strong>{t("eventDetails.date")}:</strong> {selectedEvent.startDate}
+                                        {selectedEvent.startTime !== '00:00' && ` - ${selectedEvent.startTime}`}
+                                        {selectedEvent.endDate !== selectedEvent.startDate &&
+                                            ` ${t("event.to")} ${selectedEvent.endDate}`}
+                                    </p>
+
+                                    <p>
+                                        <strong>{t("eventDetails.location")}:</strong> {selectedEvent.location}
+                                    </p>
+
+                                    <p>
+                                        <strong>{t("eventDetails.organizer")}:</strong> {selectedEvent.organizer}
+                                    </p>
+
+                                    <p>
+                                        <strong>{t("eventDetails.description")}:</strong> {selectedEvent.description}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.modalActions}>
+                                <button className={styles.registerButton}>
+                                    {t("eventDetails.register")}
+                                </button>
+                                <button className={styles.shareButton}>
+                                    {t("eventDetails.share")}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
-    );
-};
 
-export default Home;
+    );
+            };
+
+            export default Home;
