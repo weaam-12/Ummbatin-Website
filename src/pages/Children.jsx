@@ -11,26 +11,19 @@ import './Children.css';
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
-    const [selectedKgId, setSelectedKgId] = useState('');
-
-    const selectedKg = kindergartens.find(k => String(k.kindergartenId) === selectedKgId);
-
-    const handleEnrollClick = () => {
-        if (!selectedKg) {
-            console.warn("❌ No matching kindergarten selected!");
-            return;
-        }
-        handleEnroll(child, selectedKg);
-    };
-
+    const [selectedKg, setSelectedKg] = useState('');
+    const kg = kindergartens.find(k => {
+        console.log("🧪 Matching KG:", k.kindergartenId, selectedKg);
+        return String(k.kindergartenId) === selectedKg;
+    });
     return (
         <div className="child-card">
             <h3>{child.name}</h3>
             <p>{t('children.birthDate')}: {new Date(child.birthDate).toLocaleDateString(i18n.language)}</p>
 
             <select
-                value={selectedKgId}
-                onChange={(e) => setSelectedKgId(e.target.value)}
+                value={selectedKg}
+                onChange={(e) => setSelectedKg(e.target.value)}
             >
                 <option value="">{t('children.selectKindergarten')}</option>
                 {kindergartens.map(kg => (
@@ -40,25 +33,35 @@ const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
                 ))}
             </select>
 
-            {selectedKg && (
+            {selectedKg && kg && (
                 <div className="payment-info">
-                    <p>{t('children.selectedKindergarten')}: <strong>{selectedKg.name}</strong></p>
-                    <p>{t('children.monthlyFees')}: <strong>{selectedKg.monthlyFee} {t('general.currency')}</strong></p>
-                    <p>{t('children.availableSlots')}: <strong>{selectedKg.availableSlots}</strong></p>
+                    <p>{t('children.selectedKindergarten')}: <strong>{kg.name}</strong></p>
+                    <p>{t('children.monthlyFees')}: <strong>{"250₪"} {t('general.currency')}</strong></p>
+                    <p>{t('children.availableSlots')}: <strong>{kg.availableSlots}</strong></p>
                 </div>
             )}
 
             <button
                 className="enroll-button"
-                onClick={handleEnrollClick}
-                disabled={!selectedKgId}
+                onClick={() => {
+                    console.log("🔘 Enroll Clicked:", child.name, "Selected KG ID:", selectedKg);
+                    const kg = kindergartens.find(k => {
+                        console.log("🧪 Matching KG:", k.kindergartenId, selectedKg);
+                        return String(k.kindergartenId) === selectedKg;
+                    });
+
+                    if (!kg) {
+                        console.warn("❌ No matching kindergarten found!");
+                    }
+
+                    handleEnroll(child, kg);
+                }}                disabled={!selectedKg}
             >
                 <FaMoneyBillWave /> {t('children.payAndRegister')}
             </button>
         </div>
     );
 };
-
 
 const Children = () => {
     const { t, i18n } = useTranslation();
@@ -203,21 +206,24 @@ const Children = () => {
             </div>
 
             {showPayment && selectedChild && selectedKindergarten && (
-                <div className="payment-modal">
-                    <div className="payment-content">
-                        <Elements stripe={stripePromise}>
-                            <PaymentForm
-                                child={selectedChild}
-                                kindergarten={selectedKindergarten}
-                                onSuccess={() => {
-                                    setShowPayment(false);
-                                    reloadChildren();
-                                }}
-                                onClose={() => setShowPayment(false)}
-                            />
-                        </Elements>
+                <>
+                    {console.log("🔵 Payment Modal Triggered", selectedChild, selectedKindergarten, showPayment)}
+                    <div className="payment-modal">
+                        <div className="payment-content">
+                            <Elements stripe={stripePromise}>
+                                <PaymentForm
+                                    child={selectedChild}
+                                    kindergarten={selectedKindergarten}
+                                    onSuccess={() => {
+                                        setShowPayment(false);
+                                        reloadChildren();
+                                    }}
+                                    onClose={() => setShowPayment(false)}
+                                />
+                            </Elements>
+                        </div>
                     </div>
-                </div>
+                </>
             )}
         </div>
     );
