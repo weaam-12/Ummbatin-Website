@@ -177,7 +177,7 @@ const Children = () => {
             const paymentResponse = await axiosInstance.post('/api/payments/create-kindergarten', {
                 childId: selectedChild.childId,
                 kindergartenId: selectedKindergarten.kindergartenId,
-                amount: selectedKindergarten.monthlyFee
+                amount: 35
             });
 
             // 2. تحديث حالة الدفع في الخادم
@@ -195,7 +195,7 @@ const Children = () => {
             // 4. حفظ الفاتورة
             const receiptData = {
                 paymentId: paymentResponse.data.paymentId,
-                amount: selectedKindergarten.monthlyFee,
+                amount: 35,
                 paymentDate: new Date().toISOString(),
                 childName: selectedChild.name,
                 kindergartenName: selectedKindergarten.name
@@ -349,7 +349,7 @@ const Children = () => {
                                 </div>
                                 <div className="receipt-item">
                                     <span>{t('payment.amount')}:</span>
-                                    <strong>{receipt.amount} {t('payment.currency')}</strong>
+                                    <strong>{"35"} {t('payment.currency')}</strong>
                                 </div>
                                 <div className="receipt-item">
                                     <span>{t('payment.paymentDate')}:</span>
@@ -384,7 +384,7 @@ const Children = () => {
                                 </div>
                                 <div className="summary-item">
                                     <span>{t('payment.amount')}:</span>
-                                    <strong>{selectedKindergarten?.monthlyFee} {t('payment.currency')}</strong>
+                                    <strong>{"35"} {t('payment.currency')}</strong>
                                 </div>
                             </div>
 
