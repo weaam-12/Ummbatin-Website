@@ -157,18 +157,33 @@ const Payments = () => {
     const handlePayment = async (paymentType, paymentId) => {
         setLoading(true);
         try {
-            // 1. إرسال طلب إلى الخادم للحصول على clientSecret
+            // 1. البحث عن الدفع المحدد في state `payments`
+            const payment = Object.values(payments[paymentType] || {})
+                .flatMap(propertyPayments => propertyPayments.payments || [])
+                .find(p => p.paymentId === paymentId);
+
+            if (!payment) {
+                throw new Error("Payment not found");
+            }
+
+            // 2. إرسال طلب إلى الخادم للحصول على clientSecret
             const { data } = await axios.post("/api/payments/process", {
-                amount: Math.round(payment.amount * 100), // تحويل المبلغ إلى سنترات
+                amount: Math.round(payment.amount * 100), // تحويل المبلغ إلى سنتات
                 currency: "ils",
                 description: `دفع ${paymentType}`,
+                userId: user.userId, // إضافة userId إذا كان الخادم يحتاجه
+                paymentId: payment.paymentId // إضافة paymentId إذا كان الخادم يحتاجه
             });
 
-            // 2. فتح صفحة Stripe Checkout مباشرة
+            // 3. فتح صفحة Stripe Checkout مباشرة
             window.location.href = `https://checkout.stripe.com/pay/${data.clientSecret}`;
 
         } catch (error) {
-            alert("فشل في إعداد الدفع: " + error.message);
+            console.error("Payment error:", error);
+            setNotification({
+                type: "danger",
+                message: error.message || "فشل في إعداد الدفع"
+            });
         } finally {
             setLoading(false);
         }
