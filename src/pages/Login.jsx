@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import { useTranslation } from "react-i18next";
 import '../components/styles/Login.css';
 
 const Login = () => {
+    const { t } = useTranslation();
     const [form, setForm] = useState({ email: "", password: "" });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -32,10 +34,10 @@ const Login = () => {
 
         try {
             await login(form);
-            setSuccess("تم تسجيل الدخول بنجاح!");
+            setSuccess(t("login.success"));
             navigate('/profile');
         } catch (err) {
-            const msg = err.response?.data?.message || err.message || "حدث خطأ أثناء تسجيل الدخول.";
+            const msg = err.response?.data?.message || err.message || t("login.error");
             setError(msg);
         } finally {
             setLoading(false);
@@ -43,41 +45,41 @@ const Login = () => {
     };
 
     if (authLoading) {
-        return <div className="loading-message">جارٍ التحميل...</div>;
+        return <div className="loading-message">{t("common.loading")}</div>;
     }
 
     return (
         <div className="login-container">
             <div className="login-card">
-                <h2 className="login-title">تسجيل الدخول</h2>
+                <h2 className="login-title">{t("login.title")}</h2>
 
                 {error && <div className="error-message">{error}</div>}
                 {success && <div className="success-message">{success}</div>}
 
                 <form onSubmit={handleLogin} className="login-form">
                     <div className="form-group">
-                        <label htmlFor="email" className="form-label">البريد الإلكتروني</label>
+                        <label htmlFor="email" className="form-label">{t("login.email")}</label>
                         <input
                             id="email"
                             type="email"
                             name="email"
                             value={form.email}
                             onChange={handleChange}
-                            placeholder="أدخل البريد الإلكتروني"
+                            placeholder={t("login.emailPlaceholder")}
                             required
                             className="form-input"
                         />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password" className="form-label">كلمة المرور</label>
+                        <label htmlFor="password" className="form-label">{t("login.password")}</label>
                         <input
                             id="password"
                             type="password"
                             name="password"
                             value={form.password}
                             onChange={handleChange}
-                            placeholder="أدخل كلمة المرور"
+                            placeholder={t("login.passwordPlaceholder")}
                             required
                             className="form-input"
                         />
@@ -88,7 +90,7 @@ const Login = () => {
                         disabled={loading}
                         className={`login-button ${loading ? "loading" : ""}`}
                     >
-                        {loading ? "جاري الدخول..." : "دخول"}
+                        {loading ? t("login.submitting") : t("login.submit")}
                     </button>
                 </form>
             </div>

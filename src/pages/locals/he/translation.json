@@ -15,6 +15,17 @@
     "submitting": "שולח...",
     "search": "חיפוש..."
   },
+  "login": {
+    "title": "התחברות",
+    "email": "אימייל",
+    "password": "סיסמה",
+    "emailPlaceholder": "הכנס אימייל",
+    "passwordPlaceholder": "הכנס סיסמה",
+    "submit": "כניסה",
+    "submitting": "מתחבר...",
+    "success": "התחברות בוצעה בהצלחה!",
+    "error": "שגיאה במהלך ההתחברות."
+  },
   "payment": {
     "title": "תשלום אלקטרוני",
     "cardDetails": "פרטי כרטיס",
