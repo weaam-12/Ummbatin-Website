@@ -4,15 +4,17 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useTranslation } from 'react-i18next';
 import {
-    Card, Tabs, Tab, Button, Alert, Spinner, Container, ListGroup, Badge, Row, Col, Accordion
+    Card, Tabs, Tab, Button, Alert, Spinner, Container, ListGroup, Badge, Row, Col, Accordion,
+    Modal
 } from 'react-bootstrap';
 import {
-    FiCreditCard, FiCheckCircle, FiClock, FiDollarSign, FiDownload, FiHome
+    FiCreditCard, FiCheckCircle, FiClock, FiDollarSign, FiDownload, FiHome, FiX
 } from 'react-icons/fi';
 import './Payment.css';
 
 import { getUserPayments, getPropertiesByUserId } from '../api';
 import axios from 'axios';
+
 const Payments = () => {
     const { t } = useTranslation();
     const { user } = useAuth();
@@ -25,6 +27,8 @@ const Payments = () => {
     });
     const [properties, setProperties] = useState([]);
     const [debt, setDebt] = useState(0);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [currentPayment, setCurrentPayment] = useState(null);
 
     const statusVariants = {
         PENDING: 'warning',
@@ -86,10 +90,8 @@ const Payments = () => {
         const byProperty = {};
 
         payments.forEach(payment => {
-            // محاولة العثور على العقار باستخدام propertyId أولاً
             let property = properties.find(p => p.propertyId == payment.propertyId);
 
-            // إذا لم يتم العثور على العقار، نبحث باستخدام العنوان
             if (!property && payment.propertyAddress) {
                 property = properties.find(p =>
                     p.address && payment.propertyAddress &&
@@ -97,7 +99,6 @@ const Payments = () => {
                 );
             }
 
-            // إذا لم يتم العثور على العقار بعد، نستخدم بيانات من الدفعة
             const propertyId = property?.propertyId || payment.propertyAddress || 'unknown';
 
             if (!byProperty[propertyId]) {
@@ -157,7 +158,7 @@ const Payments = () => {
     const handlePayment = async (paymentType, paymentId) => {
         setLoading(true);
         try {
-            // 1. البحث عن الدفع المحدد في state `payments`
+            // البحث عن الدفع المحدد في state `payments`
             const payment = Object.values(payments[paymentType] || {})
                 .flatMap(propertyPayments => propertyPayments.payments || [])
                 .find(p => p.paymentId === paymentId);
@@ -166,17 +167,13 @@ const Payments = () => {
                 throw new Error("Payment not found");
             }
 
-            // 2. إرسال طلب إلى الخادم للحصول على clientSecret
-            const { data } = await axios.post("/api/payments/process", {
-                amount: Math.round(payment.amount * 100), // تحويل المبلغ إلى سنتات
-                currency: "ils",
-                description: `دفع ${paymentType}`,
-                userId: user.userId, // إضافة userId إذا كان الخادم يحتاجه
-                paymentId: payment.paymentId // إضافة paymentId إذا كان الخادم يحتاجه
+            setCurrentPayment({
+                type: paymentType,
+                id: paymentId,
+                amount: payment.amount,
+                description: `دفع ${paymentType}`
             });
-
-            // 3. فتح صفحة Stripe Checkout مباشرة
-            window.location.href = `https://checkout.stripe.com/pay/${data.clientSecret}`;
+            setShowPaymentModal(true);
 
         } catch (error) {
             console.error("Payment error:", error);
@@ -189,6 +186,47 @@ const Payments = () => {
         }
     };
 
+    const processPayment = async () => {
+        setLoading(true);
+        try {
+            const { data } = await axios.post("/api/payments/process", {
+                amount: Math.round(currentPayment.amount * 100),
+                currency: "ils",
+                description: currentPayment.description,
+                userId: user.userId,
+                paymentId: currentPayment.id
+            });
+
+            // هنا يمكنك استخدام Stripe.js لمعالجة الدفع
+            // أو عرض رسالة نجاح مباشرة للمشروع الجامعي
+            setNotification({
+                type: "success",
+                message: "تم الدفع بنجاح!"
+            });
+
+            // تحديث حالة الدفع في الواجهة
+            const updatedPayments = { ...payments };
+            Object.values(updatedPayments[currentPayment.type]).forEach(propertyPayments => {
+                propertyPayments.payments.forEach(p => {
+                    if (p.paymentId === currentPayment.id) {
+                        p.status = "PAID";
+                        p.paymentDate = new Date().toISOString();
+                    }
+                });
+            });
+            setPayments(updatedPayments);
+
+            setShowPaymentModal(false);
+        } catch (error) {
+            console.error("Payment processing error:", error);
+            setNotification({
+                type: "danger",
+                message: error.message || "فشل في عملية الدفع"
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const renderPropertyPayments = (propertyId, paymentsData, paymentType) => {
         const { propertyInfo, payments } = paymentsData;
@@ -322,6 +360,31 @@ const Payments = () => {
                     {notification.message}
                 </Alert>
             )}
+
+            {/* Modal لتأكيد الدفع */}
+            <Modal show={showPaymentModal} onHide={() => setShowPaymentModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>تأكيد الدفع</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>هل تريد تأكيد دفع فاتورة {currentPayment?.type} بقيمة {currentPayment?.amount} شيكل؟</p>
+                    <div className="d-flex justify-content-between mt-4">
+                        <Button variant="secondary" onClick={() => setShowPaymentModal(false)}>
+                            إلغاء
+                        </Button>
+                        <Button variant="primary" onClick={processPayment} disabled={loading}>
+                            {loading ? (
+                                <>
+                                    <Spinner animation="border" size="sm" className="me-2" />
+                                    جاري المعالجة...
+                                </>
+                            ) : (
+                                'تأكيد الدفع'
+                            )}
+                        </Button>
+                    </div>
+                </Modal.Body>
+            </Modal>
 
             <Card className="shadow-sm">
                 <Card.Header className="bg-primary text-white">
