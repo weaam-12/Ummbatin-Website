@@ -13,7 +13,6 @@ import {
 import './Payment.css';
 
 import { getUserPayments, getPropertiesByUserId } from '../api';
-import axios from 'axios';
 
 const Payments = () => {
     const { t } = useTranslation();
@@ -44,7 +43,13 @@ const Payments = () => {
     };
 
     const formatDate = (d) => d ? new Date(d).toLocaleDateString() : '--';
-
+    const [cardData, setCardData] = useState({
+        number: '',
+        name: '',
+        expiry: '',
+        cvc: ''
+    });
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
     // تحميل البيانات
     useEffect(() => {
         const load = async () => {
@@ -132,6 +137,61 @@ const Payments = () => {
         setDebt(totalDebt);
     }, [payments]);
 
+
+    const handleCardInput = (e) => {
+        const { name, value } = e.target;
+
+        // تنسيق رقم البطاقة (إضافة مسافة كل 4 أرقام)
+        if (name === 'number') {
+            const v = value.replace(/\s+/g, '').replace(/(\d{4})/g, '$1 ').trim();
+            setCardData({...cardData, [name]: v});
+        }
+        // تنسيق تاريخ الانتهاء (إضافة / بعد شهرين)
+        else if (name === 'expiry') {
+            const v = value.replace(/\D/g, '').replace(/(\d{2})(\d{0,2})/, '$1/$2');
+            setCardData({...cardData, [name]: v});
+        }
+        // تنسيق CVC (3 أرقام فقط)
+        else if (name === 'cvc') {
+            const v = value.replace(/\D/g, '').substring(0, 3);
+            setCardData({...cardData, [name]: v});
+        }
+        else {
+            setCardData({...cardData, [name]: value});
+        }
+    };
+
+    const validateCard = () => {
+        // تحقق من رقم البطاقة (16 رقم)
+        if (!/^\d{4}\s\d{4}\s\d{4}\s\d{4}$/.test(cardData.number)) {
+            return 'رقم البطاقة غير صحيح (يجب أن يكون 16 رقمًا)';
+        }
+
+        // تحقق من تاريخ الانتهاء (MM/YY)
+        if (!/^\d{2}\/\d{2}$/.test(cardData.expiry)) {
+            return 'تاريخ الانتهاء غير صحيح (يجب أن يكون MM/YY)';
+        }
+
+        // تحقق من CVC (3 أرقام)
+        if (!/^\d{3}$/.test(cardData.cvc)) {
+            return 'رمز الأمان غير صحيح (يجب أن يكون 3 أرقام)';
+        }
+
+        // تحقق من اسم حامل البطاقة
+        if (cardData.name.trim().length < 3) {
+            return 'اسم حامل البطاقة قصير جدًا';
+        }
+        const [month, year] = cardData.expiry.split('/');
+        const currentYear = new Date().getFullYear() % 100;
+        const currentMonth = new Date().getMonth() + 1;
+
+        if (parseInt(year) < currentYear ||
+            (parseInt(year) === currentYear && parseInt(month) < currentMonth)) {
+            return 'بطاقة منتهية الصلاحية';
+        }
+
+        return null;
+    };
     // توليد PDF
     const handleDownloadPDF = (type, propertyId) => {
         setLoading(true);
@@ -187,18 +247,21 @@ const Payments = () => {
     };
 
     const processPayment = async () => {
+        const validationError = validateCard();
+        if (validationError) {
+            setNotification({ type: 'danger', message: validationError });
+            return;
+        }
+
         setLoading(true);
         try {
-            const { data } = await axios.post("/api/payments/process", {
-                amount: Math.round(currentPayment.amount * 100),
-                currency: "ils",
-                description: currentPayment.description,
-                userId: user.userId,
-                paymentId: currentPayment.id
-            });
+            // هنا في الواقع سترسل بيانات الدفع للخادم
+            // ولكن لأغراض المشروع الجامعي، سنحاكي عملية الدفع
 
-            // هنا يمكنك استخدام Stripe.js لمعالجة الدفع
-            // أو عرض رسالة نجاح مباشرة للمشروع الجامعي
+            // محاكاة انتظار عملية الدفع
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            setPaymentSuccess(true);
             setNotification({
                 type: "success",
                 message: "تم الدفع بنجاح!"
@@ -216,7 +279,6 @@ const Payments = () => {
             });
             setPayments(updatedPayments);
 
-            setShowPaymentModal(false);
         } catch (error) {
             console.error("Payment processing error:", error);
             setNotification({
@@ -226,6 +288,17 @@ const Payments = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const resetPaymentModal = () => {
+        setShowPaymentModal(false);
+        setPaymentSuccess(false);
+        setCardData({
+            number: '',
+            name: '',
+            expiry: '',
+            cvc: ''
+        });
     };
 
     const renderPropertyPayments = (propertyId, paymentsData, paymentType) => {
@@ -360,29 +433,106 @@ const Payments = () => {
                     {notification.message}
                 </Alert>
             )}
-
-            {/* Modal لتأكيد الدفع */}
-            <Modal show={showPaymentModal} onHide={() => setShowPaymentModal(false)}>
+            {/* Modal لإدخال بيانات الدفع */}
+            <Modal show={showPaymentModal} onHide={resetPaymentModal} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>تأكيد الدفع</Modal.Title>
+                    <Modal.Title>إدخال بيانات الدفع</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>هل تريد تأكيد دفع فاتورة {currentPayment?.type} بقيمة {currentPayment?.amount} شيكل؟</p>
-                    <div className="d-flex justify-content-between mt-4">
-                        <Button variant="secondary" onClick={() => setShowPaymentModal(false)}>
-                            إلغاء
-                        </Button>
-                        <Button variant="primary" onClick={processPayment} disabled={loading}>
-                            {loading ? (
-                                <>
-                                    <Spinner animation="border" size="sm" className="me-2" />
-                                    جاري المعالجة...
-                                </>
-                            ) : (
-                                'تأكيد الدفع'
-                            )}
-                        </Button>
-                    </div>
+                    {paymentSuccess ? (
+                        <div className="text-center py-4">
+                            <FiCheckCircle className="text-success mb-3" size={48} />
+                            <h4>تمت عملية الدفع بنجاح!</h4>
+                            <p className="text-muted">تم دفع {currentPayment?.amount} شيكل بنجاح</p>
+                            <Button variant="success" onClick={resetPaymentModal}>
+                                العودة لصفحة الفواتير
+                            </Button>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="mb-4">
+                                <h5 className="mb-3">فاتورة {currentPayment?.type}</h5>
+                                <div className="d-flex justify-content-between">
+                                    <span>المبلغ المطلوب:</span>
+                                    <strong>{currentPayment?.amount} شيكل</strong>
+                                </div>
+                            </div>
+
+                            <Form>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>رقم البطاقة</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="number"
+                                        placeholder="1234 5678 9012 3456"
+                                        value={cardData.number}
+                                        onChange={handleCardInput}
+                                        maxLength={19}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3">
+                                    <Form.Label>اسم حامل البطاقة</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="name"
+                                        placeholder="كما هو مدون على البطاقة"
+                                        value={cardData.name}
+                                        onChange={handleCardInput}
+                                    />
+                                </Form.Group>
+
+                                <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>تاريخ الانتهاء</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="expiry"
+                                                placeholder="MM/YY"
+                                                value={cardData.expiry}
+                                                onChange={handleCardInput}
+                                                maxLength={5}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>رمز الأمان (CVV)</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="cvc"
+                                                placeholder="123"
+                                                value={cardData.cvc}
+                                                onChange={handleCardInput}
+                                                maxLength={3}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+
+                                <div className="d-flex justify-content-between mt-4">
+                                    <Button variant="secondary" onClick={resetPaymentModal}>
+                                        إلغاء
+                                    </Button>
+                                    <Button
+                                        variant="primary"
+                                        onClick={processPayment}
+                                        disabled={loading}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Spinner animation="border" size="sm" className="me-2" />
+                                                جاري المعالجة...
+                                            </>
+                                        ) : (
+                                            'تأكيد الدفع'
+                                        )}
+                                    </Button>
+                                </div>
+                            </Form>
+                        </>
+                    )}
                 </Modal.Body>
             </Modal>
 
