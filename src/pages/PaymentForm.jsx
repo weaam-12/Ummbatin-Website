@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FaCreditCard, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import './PaymentForm.css';
+import { createPaymentIntent} from '../api';
 
 const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     const { t } = useTranslation();
