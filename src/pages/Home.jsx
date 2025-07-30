@@ -34,7 +34,7 @@ const Home = () => {
     }, [i18n.language]);
 
     const services = [
-        { name: t("services.water"), icon: "💧", path: "/water" },
+        { name: t("services.water"), icon: "💧", path: "" },
         { name: t("services.arnona"), icon: "🏠", path: "/arnona" },
         { name: t("services.waste"), icon: "🗑️", path: "/waste" },
         { name: t("services.kindergarten"), icon: "🧒", path: "/kindergarten" },
@@ -66,7 +66,6 @@ const Home = () => {
                             <div
                                 key={index}
                                 className={styles.serviceItem}
-                                onClick={() => handleServiceClick(service.path)}
                             >
                                 <div className={styles.serviceIcon}>{service.icon}</div>
                                 <div className={styles.serviceName}>{service.name}</div>
