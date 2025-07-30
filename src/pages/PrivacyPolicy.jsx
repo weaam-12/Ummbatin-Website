@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { ShieldCheck } from "lucide-react"; // أيقونة الخصوصية
-
+import "./PrivacyPolicy.css"
 const PrivacyPolicy = () => {
     const { t } = useTranslation();
 

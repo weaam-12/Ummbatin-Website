@@ -1,22 +1,27 @@
-.news-ticker-container {
-    background-color: #b91c1c; /* أحمر داكن */
+.ticker-wrapper {
+    width: 100%;
+    background-color: #b91c1c; /* أحمر غامق */
     color: white;
     overflow: hidden;
-    white-space: nowrap;
-    padding: 10px 0;
-    font-size: 16px;
-    font-weight: 500;
+    position: relative;
+    padding: 0.5rem 0;
     direction: rtl;
-    border-top: 2px solid #7f1d1d;
 }
 
-.news-ticker-content {
+.ticker-content {
     display: inline-block;
-    padding-right: 100%; /* يبدأ خارج الشاشة */
-    animation: marquee 25s linear infinite;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: ticker 25s linear infinite;
+    font-size: 1rem;
+    font-weight: 500;
 }
 
-@keyframes marquee {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
+@keyframes ticker {
+    0% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
 }

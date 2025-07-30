@@ -1,0 +1,44 @@
+.policy-container {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    min-height: 100vh;
+    background-color: #f9fafb; /* رمادي فاتح */
+    padding: 2.5rem 1rem;
+}
+
+.policy-card {
+    max-width: 768px;
+    width: 100%;
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    padding: 2rem;
+}
+
+.policy-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.policy-icon {
+    color: #2563eb; /* أزرق */
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: 0.5rem;
+}
+
+.policy-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f2937; /* رمادي داكن */
+}
+
+.policy-text {
+    color: #374151;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    white-space: pre-line;
+}
