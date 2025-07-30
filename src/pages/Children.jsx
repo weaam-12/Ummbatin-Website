@@ -36,7 +36,7 @@ const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
                 <div className="payment-info">
                     <p>{t('children.selectedKindergarten')}: <strong>{kg.name}</strong></p>
                     <p>{t('children.monthlyFees')}: <strong>{"35"} {t('general.currency')}</strong></p>
-                    <p>{t('children.availableSlots')}: <strong>{kg.availableSlots}</strong></p>
+                    <p>{t('children.availableSlots')}: <strong>{"19"}</strong></p>
                 </div>
             )}
 
