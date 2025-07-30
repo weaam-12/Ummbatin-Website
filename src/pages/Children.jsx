@@ -173,39 +173,32 @@ const Children = () => {
 
         setLoading(true);
         try {
-            // 1. إنشاء سجل الدفع في الخادم
+            // 1. إنشاء الدفع
             const paymentResponse = await axiosInstance.post('/api/payments/create-kindergarten', {
                 childId: selectedChild.childId,
                 kindergartenId: selectedKindergarten.kindergartenId,
-                amount: 35
+                amount: 35,
+                userId: user.userId
             });
 
-            // 2. تحديث حالة الدفع في الخادم
-            await axiosInstance.patch(`/api/payments/${paymentResponse.data.paymentId}/status`, {
-                status: 'PAID'
-            });
-
-            // 3. تحديث حالة التسجيل
-            await axiosInstance.post('/api/children/enroll', {
+            // 2. تأكيد التسجيل
+            await axiosInstance.post('/api/payments/enroll-child', {
                 childId: selectedChild.childId,
                 kindergartenId: selectedKindergarten.kindergartenId,
                 paymentId: paymentResponse.data.paymentId
             });
 
-            // 4. حفظ الفاتورة
-            const receiptData = {
+            // 3. إنشاء الفاتورة
+            setReceipt({
                 paymentId: paymentResponse.data.paymentId,
                 amount: 35,
                 paymentDate: new Date().toISOString(),
                 childName: selectedChild.name,
                 kindergartenName: selectedKindergarten.name
-            };
+            });
 
-            setReceipt(receiptData);
             setPaymentSuccess(true);
             setNotification({ type: 'success', message: t('payment.successMessage') });
-
-            // 5. إعادة تحميل بيانات الأطفال
             await reloadChildren();
         } catch (error) {
             console.error("Payment processing error:", error);
