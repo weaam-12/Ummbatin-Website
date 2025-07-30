@@ -253,52 +253,6 @@ const Profile = () => {
 
                         {/* نموذج طلب وثيقة جديدة */}
                         <h3 style={{marginTop: '30px', color: '#475569'}}>طلب وثيقة جديدة</h3>
-                        <form className="document-form" onSubmit={handleDocumentRequestSubmit}>
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="documentType">نوع الوثيقة المطلوبة</label>
-                                <select
-                                    id="documentType"
-                                    name="documentType"
-                                    className="form-select"
-                                    value={documentRequest.documentType}
-                                    onChange={handleDocumentRequestChange}
-                                    required
-                                >
-                                    <option value="">-- اختر نوع الوثيقة --</option>
-                                    {documentTypes.map((type, index) => (
-                                        <option key={index} value={type}>{type}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="purpose">الغرض من الوثيقة</label>
-                                <input
-                                    type="text"
-                                    id="purpose"
-                                    name="purpose"
-                                    className="form-input"
-                                    value={documentRequest.purpose}
-                                    onChange={handleDocumentRequestChange}
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="additionalNotes">ملاحظات إضافية</label>
-                                <textarea
-                                    id="additionalNotes"
-                                    name="additionalNotes"
-                                    className="form-textarea"
-                                    value={documentRequest.additionalNotes}
-                                    onChange={handleDocumentRequestChange}
-                                />
-                            </div>
-
-                            <button type="submit" className="submit-btn">
-                                إرسال طلب الوثيقة
-                            </button>
-                        </form>
                     </div>
 
                     {/* أزرار التحكم */}
