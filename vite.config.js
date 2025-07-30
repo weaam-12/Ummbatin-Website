@@ -5,6 +5,9 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  define: {
+    'Buffer': ['buffer', 'Buffer'], // أضف هذا السطر
+  },
   base: "/", // تأكد أنها "/" وليس "/Ummbatin-Website"
   server: {
     port: 5173,
