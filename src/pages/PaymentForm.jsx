@@ -1,97 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { enrollChild } from '../api';
+import axiosInstance from '../api';
 import './Children.css';
-import { FaMoneyBillWave, FaReceipt } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     const stripe = useStripe();
     const elements = useElements();
     const { t } = useTranslation();
+    const [clientSecret, setClientSecret] = useState(null);
     const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(false);
     const [processing, setProcessing] = useState(false);
-    const [paymentCompleted, setPaymentCompleted] = useState(false);
-    const [receipt, setReceipt] = useState(null);
+
+    useEffect(() => {
+        const fetchClientSecret = async () => {
+            const response = await axiosInstance.post('/api/stripe/setup-intent');
+            setClientSecret(response.data.clientSecret);
+        };
+        fetchClientSecret();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!stripe || !elements) {
-            return;
-        }
-
         setProcessing(true);
         setError(null);
 
         try {
-            // 1. إنشاء طريقة دفع
-            const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
-                type: 'card',
-                card: elements.getElement(CardElement),
+            const result = await stripe.confirmCardSetup(clientSecret, {
+                payment_method: {
+                    card: elements.getElement(CardElement),
+                },
             });
 
-            if (stripeError) {
-                setError(stripeError.message);
-                setProcessing(false);
-                return;
-            }
-
-            // 2. معالجة الدفع (250 شيكل ثابتة)
-            const paymentResult = await enrollChild({
-                childId: child.childId,
-                kindergartenId: kindergarten.kindergartenId,
-                paymentMethodId: paymentMethod.id,
-                amount: 250 // المبلغ الثابت
-            });
-
-            if (paymentResult.success) {
-                setReceipt({
-                    childName: child.name,
-                    kindergartenName: kindergarten.name,
-                    amount: 250,
-                    date: new Date().toLocaleDateString(),
-                    paymentId: paymentResult.paymentId
-                });
-                setPaymentCompleted(true);
+            if (result.error) {
+                setError(result.error.message);
             } else {
-                setError(paymentResult.message || t('children.payment.error'));
+                setSuccess(true); // تمت المصادقة
             }
         } catch (err) {
-            console.error('Payment error:', err);
             setError(t('children.payment.error'));
         } finally {
             setProcessing(false);
         }
     };
 
-    if (paymentCompleted && receipt) {
+    if (success) {
         return (
             <div className="payment-modal">
                 <div className="payment-content">
-                    <h3>{t('children.paymentSuccess')}</h3>
-                    <div className="receipt-container">
-                        <div className="receipt-header">
-                            <FaReceipt size={24} />
-                            <h4>{t('children.receipt')}</h4>
-                        </div>
-                        <div className="receipt-details">
-                            <p><strong>{t('children.childName')}:</strong> {receipt.childName}</p>
-                            <p><strong>{t('children.kindergarten')}:</strong> {receipt.kindergartenName}</p>
-                            <p><strong>{t('children.amount')}:</strong> {receipt.amount} {t('general.currency')}</p>
-                            <p><strong>{t('children.paymentDate')}:</strong> {receipt.date}</p>
-                            <p><strong>{t('children.paymentId')}:</strong> {receipt.paymentId}</p>
-                        </div>
-                        <button
-                            className="confirm-btn"
-                            onClick={() => {
-                                onSuccess();
-                                onClose();
-                            }}
-                        >
-                            {t('children.close')}
-                        </button>
-                    </div>
+                    <FaCheckCircle size={48} color="green" />
+                    <h3>{t('children.cardValidated')}</h3>
+                    <p>{t('children.noCharge')}</p>
+                    <button className="confirm-btn" onClick={() => {
+                        onSuccess();
+                        onClose();
+                    }}>
+                        {t('children.close')}
+                    </button>
                 </div>
             </div>
         );
@@ -100,57 +67,18 @@ const PaymentForm = ({ child, kindergarten, onSuccess, onClose }) => {
     return (
         <div className="payment-modal">
             <div className="payment-content">
-                <h3>{t('children.paymentTitle')}</h3>
-                <div className="payment-details">
-                    <p><strong>{t('children.enrollment.child')}:</strong> {child.name}</p>
-                    <p><strong>{t('children.enrollment.kindergarten')}:</strong> {kindergarten.name}</p>
-                    <p><strong>{t('children.enrollment.fee')}:</strong> 250 {t('general.currency')}</p>
-                </div>
-
+                <h3>{t('children.cardInfo')}</h3>
                 <form onSubmit={handleSubmit} className="payment-form">
                     <div className="card-element-container">
-                        <CardElement
-                            options={{
-                                style: {
-                                    base: {
-                                        fontSize: '16px',
-                                        color: '#424770',
-                                        '::placeholder': {
-                                            color: '#aab7c4',
-                                        },
-                                    },
-                                    invalid: {
-                                        color: '#e53935',
-                                    },
-                                },
-                                hidePostalCode: true
-                            }}
-                        />
+                        <CardElement options={{ hidePostalCode: true }} />
                     </div>
-
-                    {error && <div className="error-message">{error}</div>}
-
+                    {error && <div className="error-message"><FaTimesCircle /> {error}</div>}
                     <div className="payment-buttons">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="cancel-btn"
-                            disabled={processing}
-                        >
+                        <button type="button" onClick={onClose} className="cancel-btn" disabled={processing}>
                             {t('children.cancel')}
                         </button>
-                        <button
-                            type="submit"
-                            disabled={!stripe || processing}
-                            className="confirm-btn"
-                        >
-                            {processing ? (
-                                t('children.processing')
-                            ) : (
-                                <>
-                                    <FaMoneyBillWave /> {t('children.payAndEnroll')}
-                                </>
-                            )}
+                        <button type="submit" className="confirm-btn" disabled={!stripe || !clientSecret || processing}>
+                            {processing ? t('children.processing') : t('children.validateCard')}
                         </button>
                     </div>
                 </form>
