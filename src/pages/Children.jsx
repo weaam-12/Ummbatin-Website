@@ -173,12 +173,11 @@ const Children = () => {
 
         setLoading(true);
         try {
-            const amountInCents = 35 * 100;
-
+            // 1. إنشاء الدفع (بدون Stripe)
             const paymentResponse = await axiosInstance.post('/api/payments/create-kindergarten', {
                 childId: selectedChild.childId,
                 kindergartenId: selectedKindergarten.kindergartenId,
-                amount: amountInCents, // إرسال القيمة بالسنترات
+                amount: 3500, // 35 دولار = 3500 سنت
                 userId: user.userId
             });
 
@@ -202,12 +201,11 @@ const Children = () => {
             setNotification({ type: 'success', message: t('payment.successMessage') });
             await reloadChildren();
         } catch (error) {
-            const errorMessage = error.response?.data?.message ||
-                error.response?.data ||
-                error.message ||
-                "Payment failed";
-            setNotification({ type: "danger", message: errorMessage });
-
+            console.error("Payment processing error:", error);
+            setNotification({
+                type: "danger",
+                message: error.response?.data?.message || t('payment.generalError')
+            });
         } finally {
             setLoading(false);
         }
