@@ -1,4 +1,15 @@
 {
+  "municipalityName": "עיריית אום בטין",
+  "allRightsReserved": "כל הזכויות שמורות",
+  "profile": {
+    "documentLabels": {
+      "residentInfo": "פרטי תושב",
+      "documentDetails": "פרטי מסמך",
+      "documentType": "סוג מסמך",
+      "documentNumber": "מספר מסמך",
+      "electronicDocument": "מסמך זה נוצר אלקטרונית דרך פורטל עיריית אום בטין"
+    }
+  },
   "profile": {
     "title": "פרופיל תושב",
     "subtitle": "עיריית אום בטין - פורטל שירותים דיגיטלי",

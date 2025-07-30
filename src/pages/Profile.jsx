@@ -7,7 +7,7 @@ import {
     FaUser, FaUsers, FaFileDownload, FaSignOutAlt, FaUserEdit,
     FaHome, FaFileAlt
 } from "react-icons/fa";
-import ProfileDocument from "./ProfileDocument";
+import ProfileDocument from "./ProfileDocument.jsx";
 import './Profile.css';
 
 const Profile = () => {

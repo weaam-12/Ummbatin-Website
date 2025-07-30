@@ -1,7 +1,8 @@
 import React from "react";
 import { Page, Text, View, Document, StyleSheet, Image } from "@react-pdf/renderer";
-import logo from "./styles/img.png"; // شعار البلدية
+import logo from "../styles/img.png"; // تأكد من المسار الصحيح لشعار البلدية
 
+// تعريف الأنماط
 const styles = StyleSheet.create({
     page: {
         flexDirection: "column",
@@ -48,32 +49,32 @@ const styles = StyleSheet.create({
     }
 });
 
-const ProfileDocument = ({ document, profile }) => (
+const ProfileDocument = ({ document, profile, t }) => (
     <Document>
         <Page size="A4" style={styles.page}>
             <View style={styles.header}>
                 <Image src={logo} style={styles.logo} />
-                <Text>بلدية أم بطين</Text>
+                <Text>{t("municipalityName")}</Text>
             </View>
 
             <Text style={styles.title}>{document.name}</Text>
 
             <View style={styles.section}>
-                <Text style={styles.label}>معلومات المواطن:</Text>
-                <Text style={styles.value}>الاسم: {profile.fullName}</Text>
-                <Text style={styles.value}>رقم الهوية: {profile.idNumber}</Text>
+                <Text style={styles.label}>{t("profile.documentLabels.residentInfo")}:</Text>
+                <Text style={styles.value}>{t("profile.labels.fullName")}: {profile.fullName}</Text>
+                <Text style={styles.value}>{t("profile.labels.idNumber")}: {profile.idNumber}</Text>
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.label}>تفاصيل الوثيقة:</Text>
-                <Text style={styles.value}>نوع الوثيقة: {document.name}</Text>
-                <Text style={styles.value}>تاريخ الإصدار: {document.date}</Text>
-                <Text style={styles.value}>رقم الوثيقة: {document.id}</Text>
+                <Text style={styles.label}>{t("profile.documentLabels.documentDetails")}:</Text>
+                <Text style={styles.value}>{t("profile.labels.documentType")}: {document.name}</Text>
+                <Text style={styles.value}>{t("profile.labels.issueDate")}: {document.date}</Text>
+                <Text style={styles.value}>{t("profile.labels.documentNumber")}: {document.id}</Text>
             </View>
 
             <View style={styles.footer}>
-                <Text>هذه الوثيقة صادرة إلكترونياً من بوابة بلدية أم بطين</Text>
-                <Text>© {new Date().getFullYear()} جميع الحقوق محفوظة</Text>
+                <Text>{t("profile.documentLabels.electronicDocument")}</Text>
+                <Text>© {new Date().getFullYear()} {t("allRightsReserved")}</Text>
             </View>
         </Page>
     </Document>

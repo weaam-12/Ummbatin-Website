@@ -1,4 +1,15 @@
 {
+  "municipalityName": "بلدية أم بطين",
+  "allRightsReserved": "جميع الحقوق محفوظة",
+  "profile": {
+    "documentLabels": {
+      "residentInfo": "معلومات المواطن",
+      "documentDetails": "تفاصيل الوثيقة",
+      "documentType": "نوع الوثيقة",
+      "documentNumber": "رقم الوثيقة",
+      "electronicDocument": "هذه الوثيقة صادرة إلكترونياً من بوابة بلدية أم بطين"
+    }
+  },
   "profile": {
     "title": "الملف الشخصي للمقيم",
     "subtitle": "بلدية أم بطين - بوابة الخدمات الإلكترونية",
