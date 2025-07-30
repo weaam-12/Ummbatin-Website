@@ -350,20 +350,7 @@ export const confirmKindergartenPayment = async (paymentIntentId) => {
     });
     return response.data;
 };
-// في الخادم
-app.post('/api/payments/create-intent', async (req, res) => {
-    const { amount, currency, description, metadata } = req.body;
 
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount,
-        currency,
-        description,
-        metadata,
-        payment_method_types: ['card'],
-    });
-
-    res.json({ clientSecret: paymentIntent.client_secret });
-});
 
 export const enrollChild = async (enrollmentData) => {
     try {
