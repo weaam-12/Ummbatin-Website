@@ -41,7 +41,10 @@
     "generalError": "אירעה שגיאה בעיבוד התשלום",
     "pdfError": "אירעה שגיאה ביצירת קובץ PDF",
     "downloadReceipt": "הורד קבלה",
-    "currency": "ש\"ח"
+    "currency": "ש\"ח",
+    "cardExpiry": "תאריך תפוגה",
+    "cardCvv": "קוד אבטחה (CVV)",
+    "child": "ילד"
   },
   "homePage": {
     "title": "ברוכים הבאים לעיריית אום בטין",
@@ -316,7 +319,9 @@
     "login": "התחברות"
   },
   "general": {
-    "loading": "טוען..."
+    "loading": "טוען...",
+    "currency": "ש\"ח"
+
   },
   "children": {
     "receipt": "קבלת תשלום",
