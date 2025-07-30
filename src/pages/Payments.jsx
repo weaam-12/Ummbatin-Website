@@ -11,8 +11,8 @@ import {
 } from 'react-icons/fi';
 import './Payment.css';
 
-import { getUserPayments, processPayment, getPropertiesByUserId } from '../api';
-
+import { getUserPayments, getPropertiesByUserId } from '../api';
+import axios from 'axios';
 const Payments = () => {
     const { t } = useTranslation();
     const { user } = useAuth();
