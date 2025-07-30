@@ -165,15 +165,9 @@ const Children = () => {
     };
 
     const processPayment = async () => {
-        const validationError = validateCard();
-        if (validationError) {
-            setNotification({ type: 'danger', message: validationError });
-            return;
-        }
-
         setLoading(true);
         try {
-            // 1. إنشاء الدفع (بدون Stripe)
+            // 1. إنشاء سجل الدفع
             const paymentResponse = await axiosInstance.post('/api/payments/create-kindergarten', {
                 childId: selectedChild.childId,
                 kindergartenId: selectedKindergarten.kindergartenId,
@@ -181,14 +175,14 @@ const Children = () => {
                 userId: user.userId
             });
 
-            // 2. تأكيد التسجيل
+            // 2. تسجيل الطفل في الحضانة
             await axiosInstance.post('/api/payments/enroll-child', {
                 childId: selectedChild.childId,
                 kindergartenId: selectedKindergarten.kindergartenId,
                 paymentId: paymentResponse.data.paymentId
             });
 
-            // 3. إنشاء الفاتورة
+            // 3. عرض الفاتورة
             setReceipt({
                 paymentId: paymentResponse.data.paymentId,
                 amount: 35,
@@ -200,11 +194,15 @@ const Children = () => {
             setPaymentSuccess(true);
             setNotification({ type: 'success', message: t('payment.successMessage') });
             await reloadChildren();
+
         } catch (error) {
-            console.error("Payment processing error:", error);
+            console.error("Payment error details:", error.response?.data || error.message);
             setNotification({
                 type: "danger",
-                message: error.response?.data?.message || t('payment.generalError')
+                message: error.response?.data?.message ||
+                    error.response?.data ||
+                    error.message ||
+                    t('payment.generalError')
             });
         } finally {
             setLoading(false);
