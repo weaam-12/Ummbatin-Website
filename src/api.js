@@ -350,6 +350,21 @@ export const confirmKindergartenPayment = async (paymentIntentId) => {
     });
     return response.data;
 };
+// في الخادم
+app.post('/api/payments/create-intent', async (req, res) => {
+    const { amount, currency, description, metadata } = req.body;
+
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency,
+        description,
+        metadata,
+        payment_method_types: ['card'],
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+});
+
 export const enrollChild = async (enrollmentData) => {
     try {
         const response = await axiosInstance.post('/api/enrollments', {
@@ -371,5 +386,20 @@ export const enrollChild = async (enrollmentData) => {
             message: error.response?.data?.message || "Failed to process enrollment"
         };
     }
+};
+export const saveInvoice = async (invoiceData) => {
+    const response = await axiosInstance.post('api/payments/save-invoice', invoiceData);
+    return response.data;
+};
+export const createKindergartenPaymentIntent = async (amount, childId, kindergartenId) => {
+    const response = await axiosInstance.post('api/payments/create-intent', {
+        amount,
+        metadata: { childId, kindergartenId }
+    });
+    return response.data;
+};
+export const createPaymentIntent = async (paymentData) => {
+    const response = await axiosInstance.post('api/payments/create-intent', paymentData);
+    return response.data;
 };
 export default axiosInstance;
