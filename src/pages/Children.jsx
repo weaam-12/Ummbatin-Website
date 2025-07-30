@@ -27,7 +27,7 @@ const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
                 <option value="">{t('children.selectKindergarten')}</option>
                 {kindergartens.map(kg => (
                     <option key={kg.kindergartenId} value={kg.kindergartenId}>
-                        {kg.name} ({t('children.fees')}: {kg.monthlyFee} {t('general.currency')})
+                        {kg.name}
                     </option>
                 ))}
             </select>
