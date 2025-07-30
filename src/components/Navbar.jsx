@@ -18,7 +18,7 @@ import {
 import logo from "./styles/img.png";
 import { useAuth } from "../AuthContext";
 import "./Navbar.css";
-
+import NewsTicker from "./NewsTicker";
 const Navbar = () => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
@@ -32,15 +32,7 @@ const Navbar = () => {
         { id: 2, title: "شكوى جديدة تحتاج إلى مراجعة", time: "منذ يوم", read: true },
         { id: 3, title: "تمت الموافقة على طلبك", time: "منذ 3 أيام", read: true }
     ]);
-    const NewsTicker = () => {
-        return (
-            <div className="bg-yellow-100 text-yellow-900 py-2 px-4 overflow-hidden whitespace-nowrap">
-                <div className="animate-marquee text-sm font-medium">
-                    📢 إشعار هام: بدء التسجيل لحضانات عام 2025 | 💧 يمكنك الآن دفع فاتورة المياه والارنونا إلكترونيًا | 🛠️ أعمال صيانة في شبكة الكهرباء يوم الإثنين
-                </div>
-            </div>
-        );
-    };
+
     useEffect(() => {
         document.body.dir = "rtl";
     }, []);
