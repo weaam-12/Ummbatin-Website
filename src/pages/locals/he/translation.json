@@ -1,4 +1,41 @@
 {
+  "profile": {
+    "title": "פרופיל תושב",
+    "subtitle": "עיריית אום בטין - פורטל שירותים דיגיטלי",
+    "sections": {
+      "residentInfo": "פרטי תושב",
+      "familyInfo": "פרטי משפחה",
+      "properties": "נכסים בבעלות",
+      "documents": "מסמכים ואישורים"
+    },
+    "labels": {
+      "fullName": "שם מלא",
+      "email": "אימייל",
+      "phone": "טלפון",
+      "idNumber": "תעודת זהות",
+      "spouse": "אישה",
+      "child": "בן/בת",
+      "birthDate": "תאריך לידה",
+      "kindergarten": "גן",
+      "units": "מספר יחידות",
+      "area": "שטח",
+      "issueDate": "תאריך הוצאה",
+      "newDocument": "בקשת מסמך חדש",
+      "editProfile": "ערוך פרופיל",
+      "logout": "התנתק",
+      "download": "הורד",
+      "noProperties": "אין נכסים רשומים",
+      "wife": "אישה"
+    },
+    "documents": {
+      "residenceApproval": "אישור מגורים ביישוב",
+      "familyRecord": "רישום משפחתי",
+      "housingCertificate": "תעודת מגורים",
+      "residenceCertificate": "תעודת תושב",
+      "buildingApproval": "אישור בנייה",
+      "commercialLicense": "רישיון עסק"
+    }
+  },
   "common": {
     "home": "ראשי",
     "login": "התחברות",

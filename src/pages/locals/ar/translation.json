@@ -1,4 +1,42 @@
 {
+  "profile": {
+    "title": "الملف الشخصي للمقيم",
+    "subtitle": "بلدية أم بطين - بوابة الخدمات الإلكترونية",
+    "sections": {
+      "residentInfo": "معلومات المقيم",
+      "familyInfo": "معلومات العائلة",
+      "properties": "العقارات المملوكة",
+      "documents": "الوثائق والموافقات"
+    },
+    "labels": {
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "idNumber": "رقم الهوية",
+      "spouse": "زوجة",
+      "child": "ابن/ابنة",
+      "birthDate": "تاريخ الميلاد",
+      "kindergarten": "روضة",
+      "units": "عدد الوحدات",
+      "area": "المساحة",
+      "issueDate": "تاريخ الإصدار",
+      "newDocument": "طلب وثيقة جديدة",
+      "editProfile": "تعديل الملف الشخصي",
+      "logout": "تسجيل خروج",
+      "download": "تنزيل",
+      "noProperties": "لا توجد عقارات مسجلة",
+      "wife": "زوجة"
+    },
+    "documents": {
+      "residenceApproval": "موافقة الإقامة في البلدة",
+      "familyRecord": "سجل العائلة",
+      "housingCertificate": "شهادة السكن",
+      "residenceCertificate": "شهادة إقامة",
+      "buildingApproval": "موافقة بناء",
+      "commercialLicense": "تصريح تجاري"
+    }
+  },
+
   "login": {
     "title": "تسجيل الدخول",
     "email": "البريد الإلكتروني",
