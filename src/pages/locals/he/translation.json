@@ -19,6 +19,63 @@
       "properties": "נכסים בבעלות",
       "documents": "מסמכים ואישורים"
     },
+    "municipalityName": "עיריית אום בטין",
+    "allRightsReserved": "כל הזכויות שמורות",
+    "profile": {
+      "documentLabels": {
+        "residentInfo": "פרטי תושב",
+        "documentDetails": "פרטי מסמך",
+        "documentType": "סוג מסמך",
+        "documentNumber": "מספר מסמך",
+        "electronicDocument": "מסמך זה נוצר אלקטרונית דרך פורטל עיריית אום בטין"
+      },
+      "title": "פרופיל תושב",
+      "subtitle": "עיריית אום בטין - פורטל שירותים דיגיטלי",
+      "sections": {
+        "residentInfo": "פרטי תושב",
+        "familyInfo": "פרטי משפחה",
+        "properties": "נכסים בבעלות",
+        "documents": "מסמכים ואישורים"
+      },
+      "labels": {
+        "fullName": "שם מלא",
+        "email": "אימייל",
+        "phone": "טלפון",
+        "idNumber": "תעודת זהות",
+        "spouse": "אישה",
+        "child": "בן/בת",
+        "birthDate": "תאריך לידה",
+        "kindergarten": "גן",
+        "units": "מספר יחידות",
+        "area": "שטח",
+        "issueDate": "תאריך הוצאה",
+        "newDocument": "בקשת מסמך חדש",
+        "editProfile": "ערוך פרופיל",
+        "logout": "התנתק",
+        "download": "הורד",
+        "noProperties": "אין נכסים רשומים",
+        "wife": "אישה",
+        "noData": "אין נתונים"
+      },
+      "documents": {
+        "residenceApproval": "אישור מגורים ביישוב",
+        "familyRecord": "רישום משפחתי",
+        "housingCertificate": "תעודת מגורים",
+        "residenceCertificate": "תעודת תושב",
+        "buildingApproval": "אישור בנייה",
+        "commercialLicense": "רישיון עסק"
+      }
+    },
+    "privacy": {
+      "title": "מדיניות פרטיות",
+      "text": "אנו מכבדים את פרטיותך. המידע הנאסף דרך אתר זה משמש אך ורק למתן שירותים מוניציפליים כגון תשלום ארנונה, מים ורישום לגנים. הנתונים לא יועברו לגורם חיצוני ללא הסכמתך, אלא אם נדרש לפי חוק. השימוש באתר מהווה הסכמה למדיניות זו."
+    },
+    "general": {
+      "loading": "טוען...",
+      "currency": "ש\"ח",
+      "notSpecified": "לא צוין",
+      "squareMeters": "מטר רבוע"
+    },
     "labels": {
       "fullName": "שם מלא",
       "email": "אימייל",

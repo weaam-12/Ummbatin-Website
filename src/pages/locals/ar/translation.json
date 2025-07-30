@@ -8,6 +8,61 @@
       "documentType": "نوع الوثيقة",
       "documentNumber": "رقم الوثيقة",
       "electronicDocument": "هذه الوثيقة صادرة إلكترونياً من بوابة بلدية أم بطين"
+    },
+    "title": "الملف الشخصي للمقيم",
+    "subtitle": "بلدية أم بطين - بوابة الخدمات الإلكترونية",
+    "sections": {
+      "residentInfo": "معلومات المقيم",
+      "familyInfo": "معلومات العائلة",
+      "properties": "العقارات المملوكة",
+      "documents": "الوثائق والموافقات"
+    },
+    "labels": {
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "idNumber": "رقم الهوية",
+      "spouse": "زوجة",
+      "child": "ابن/ابنة",
+      "birthDate": "تاريخ الميلاد",
+      "kindergarten": "روضة",
+      "units": "عدد الوحدات",
+      "area": "المساحة",
+      "issueDate": "تاريخ الإصدار",
+      "newDocument": "طلب وثيقة جديدة",
+      "editProfile": "تعديل الملف الشخصي",
+      "logout": "تسجيل خروج",
+      "download": "تنزيل",
+      "noProperties": "لا توجد عقارات مسجلة",
+      "wife": "زوجة",
+      "noData": "لا توجد بيانات"
+    },
+    "documents": {
+      "residenceApproval": "موافقة الإقامة في البلدة",
+      "familyRecord": "سجل العائلة",
+      "housingCertificate": "شهادة السكن",
+      "residenceCertificate": "شهادة إقامة",
+      "buildingApproval": "موافقة بناء",
+      "commercialLicense": "تصريح تجاري"
+    }
+  },
+  "privacy": {
+    "title": "سياسة الخصوصية",
+    "text": "نحن نحترم خصوصيتك. يتم استخدام المعلومات التي يتم جمعها عبر هذا الموقع فقط لغرض تقديم الخدمات البلدية، مثل دفع الأرنونا، المياه، وتسجيل الحضانات. لا تتم مشاركة البيانات مع أي طرف خارجي بدون موافقتك المسبقة، إلا إذا طُلب ذلك قانونيًا. باستخدامك للموقع، فإنك توافق على هذه السياسة."
+  },
+  "general": {
+    "loading": "جار التحميل...",
+    "currency": "شيقل",
+    "notSpecified": "غير محدد",
+    "squareMeters": "متر مربع"
+  },
+  "profile": {
+    "documentLabels": {
+      "residentInfo": "معلومات المواطن",
+      "documentDetails": "تفاصيل الوثيقة",
+      "documentType": "نوع الوثيقة",
+      "documentNumber": "رقم الوثيقة",
+      "electronicDocument": "هذه الوثيقة صادرة إلكترونياً من بوابة بلدية أم بطين"
     }
   },
   "profile": {

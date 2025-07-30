@@ -207,7 +207,7 @@ const Profile = () => {
                                         </div>
                                     </div>
                                     <PDFDownloadLink
-                                        document={<ProfileDocument document={doc} profile={profile} t={t} />}
+                                        document={<ProfileDocument document={doc} profile={profile} t={t} i18n={i18n} />}
                                         fileName={`${doc.name}.pdf`}
                                     >
                                         {({ loading }) => (
