@@ -21,6 +21,8 @@ import Forms from "./pages/Forms";
 import Profile from "./pages/Profile"; // Added
 import AdminComplaints from "./pages/AdminComplaints"
 import AdminKinder from "./pages/AdminKinder";
+import About from "./pages/About.jsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 const App = () => {
     return (
         <AuthProvider>
@@ -101,6 +103,16 @@ const App = () => {
                                 <Route path="/garbage-complaints" element={
                                     <ProtectedRoute>
                                         <GarbageComplaint />
+                                    </ProtectedRoute>
+                                } />
+                                <Route path="/garbage-complaints" element={
+                                    <ProtectedRoute>
+                                        <About />
+                                    </ProtectedRoute>
+                                } />
+                                <Route path="/garbage-complaints" element={
+                                    <ProtectedRoute>
+                                        <PrivacyPolicy />
                                     </ProtectedRoute>
                                 } />
                                 <Route path="/admin" element={
