@@ -1,5 +1,5 @@
 import React from "react";
-import "./NewsTicker.css";
+import "./Ticker.css";
 
 const NewsTicker = () => {
     const messages = [
