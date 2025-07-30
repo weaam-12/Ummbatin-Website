@@ -1,0 +1,64 @@
+.about-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    background: #f9fafb;
+    padding: 3rem 1rem;
+}
+
+.about-card {
+    max-width: 720px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    padding: 2.5rem;
+    border: 1px solid #e5e7eb;
+    position: relative;
+}
+
+.about-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.about-header svg {
+    color: #059669; /* أخضر */
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: 0.5rem;
+}
+
+.about-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.about-text {
+    font-size: 1.125rem;
+    color: #374151;
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+    white-space: pre-line;
+}
+
+.about-subtitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+}
+
+.about-list {
+    list-style: disc inside;
+    font-size: 1.125rem;
+    color: #374151;
+    margin-bottom: 1.5rem;
+}
+
+.about-list li {
+    margin-bottom: 0.5rem;
+}
