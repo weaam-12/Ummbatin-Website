@@ -25,32 +25,31 @@ import { axiosInstance } from "../api";
 
 // دالة مساعدة لمعالجة البيانات المتكررة
 const sanitizeNotificationData = (data) => {
+    // إذا كانت البيانات غير موجودة أو فارغة
+    if (!data) return [];
+
+    // إذا كانت البيانات مصفوفة بالفعل
+    if (Array.isArray(data)) return data;
+
     try {
         // إذا كانت البيانات سلسلة نصية، نحاول تحليلها
         if (typeof data === 'string') {
-            data = JSON.parse(data);
+            // إصلاح JSON غير الصالح عن طريق إزالة التكرار
+            const fixedData = data.replace(/"properties":\[[^\]]*\],?/g, '');
+            return JSON.parse(fixedData);
         }
 
-        // إذا كانت البيانات مصفوفة، نعالج كل عنصر
-        if (Array.isArray(data)) {
-            return data.map(item => ({
-                ...item,
-                user: item.user ? {
-                    userId: item.user.userId,
-                    fullName: item.user.fullName
-                } : null
-            }));
-        }
-
-        // إذا كانت البيانات كائن مفرد
-        if (typeof data === 'object' && data !== null) {
-            return [{
-                ...data,
-                user: data.user ? {
-                    userId: data.user.userId,
-                    fullName: data.user.fullName
-                } : null
-            }];
+        // إذا كانت البيانات كائنًا
+        if (typeof data === 'object') {
+            // إزالة التكرار يدويًا
+            const cleanData = {...data};
+            if (cleanData.user && cleanData.user.properties) {
+                cleanData.user = {
+                    userId: cleanData.user.userId,
+                    fullName: cleanData.user.fullName
+                };
+            }
+            return [cleanData];
         }
 
         return [];
@@ -135,7 +134,11 @@ const Navbar = () => {
         const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
     }, [fetchNotifications]);
-
+    const changeLanguage = (lang) => {
+        i18n.changeLanguage(lang);
+        setCurrentLanguage(lang);
+        localStorage.setItem('selectedLanguage', lang); // حفظ اللغة المختارة
+    };
     const formatTime = useCallback((dateString) => {
         if (!dateString) return t('notifications.unknown_time');
 
