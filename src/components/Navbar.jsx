@@ -38,14 +38,20 @@ const Navbar = () => {
                 try {
                     const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
                     const response = await axiosInstance.get(endpoint);
-                    setNotifications(response.data.map(n => ({
-                        id: n.notificationId,
-                        title: n.message,
-                        time: formatTime(n.createdAt),
-                        read: n.status === 'READ'
-                    })));
+
+                    if (response.data) {
+                        setNotifications(response.data.map(n => ({
+                            id: n.notificationId,
+                            title: n.message,
+                            time: formatTime(n.createdAt),
+                            read: n.status === 'READ'
+                        })));
+                    }
                 } catch (error) {
                     console.error('Failed to fetch notifications:', error);
+
+
+                    // يمكنك إضافة عرض رسالة خطأ للمستخدم هنا
                 }
             }
         };
