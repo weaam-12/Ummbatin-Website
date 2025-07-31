@@ -323,7 +323,16 @@ const Navbar = () => {
                                     )}
                                 </div>
                                 {showNotifications && (
-                                    <div className="notifications-dropdown-container">
+                                    <div style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: '100%',
+                                        background: 'white',
+                                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                                        zIndex: 1000,
+                                        width: '350px',
+                                        padding: '10px'
+                                    }}>
                                         {renderNotificationsDropdown()}
                                     </div>
                                 )}
