@@ -137,43 +137,39 @@ const Navbar = () => {
         try {
             const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
             const response = await axiosInstance.get(endpoint, {
-                timeout: 5000,
+                timeout: 10000, // Increased timeout
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 }
             });
 
-            // Handle case where response is error object
+            // Handle potential error responses
             if (response.data && response.data.error) {
                 throw new Error(response.data.error);
             }
 
-            const sanitizedData = sanitizeNotificationData(response.data);
-
-            if (!Array.isArray(sanitizedData)) {
-                throw new Error('Invalid notifications format - expected array');
-            }
-
-            const processedNotifications = sanitizedData.map(n => ({
+            // Process notifications
+            const processedNotifications = response.data.map(n => ({
                 id: n.notificationId || n.id || Date.now().toString(),
-                title: n.message || n.title || t('notifications.new_notification'),
-                time: formatTime(n.createdAt || n.date),
-                read: n.status === 'READ' || n.read || false
+                title: n.message || t('notifications.new_notification'),
+                time: formatTime(n.createdAt),
+                read: n.status === 'READ'
             }));
 
             setNotifications(processedNotifications);
         } catch (error) {
-            console.error('Failed to fetch notifications:', error);
+            console.error('Notification fetch error:', error);
             const errorMsg = error.response?.data?.error ||
                 error.message ||
                 t('notifications.fetch_error');
             setNotificationsError(errorMsg);
-            setNotifications([]);
         } finally {
             setNotificationsLoading(false);
         }
-    }, [user, isAdmin, formatTime, t]);
+    }, [user, isAdmin, t, formatTime]);
+
+
 
     useEffect(() => {
         fetchNotifications();
