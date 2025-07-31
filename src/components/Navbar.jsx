@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,13 +13,52 @@ import {
     FaTrash,
     FaGraduationCap,
     FaCog,
-    FaChartLine
+    FaChartLine,
+    FaSpinner,
+    FaExclamationTriangle
 } from "react-icons/fa";
 import logo from "./styles/img.png";
 import { useAuth } from "../AuthContext";
 import "./Navbar.css";
 import NewsTicker from "./NewsTicker";
 import { axiosInstance } from "../api";
+
+// دالة مساعدة لمعالجة البيانات المتكررة
+const sanitizeNotificationData = (data) => {
+    try {
+        // إذا كانت البيانات سلسلة نصية، نحاول تحليلها
+        if (typeof data === 'string') {
+            data = JSON.parse(data);
+        }
+
+        // إذا كانت البيانات مصفوفة، نعالج كل عنصر
+        if (Array.isArray(data)) {
+            return data.map(item => ({
+                ...item,
+                user: item.user ? {
+                    userId: item.user.userId,
+                    fullName: item.user.fullName
+                } : null
+            }));
+        }
+
+        // إذا كانت البيانات كائن مفرد
+        if (typeof data === 'object' && data !== null) {
+            return [{
+                ...data,
+                user: data.user ? {
+                    userId: data.user.userId,
+                    fullName: data.user.fullName
+                } : null
+            }];
+        }
+
+        return [];
+    } catch (error) {
+        console.error('Error sanitizing notification data:', error);
+        return [];
+    }
+};
 
 const Navbar = () => {
     const { t, i18n } = useTranslation();
@@ -29,69 +68,101 @@ const Navbar = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
-
     const [notifications, setNotifications] = useState([]);
+    const [notificationsLoading, setNotificationsLoading] = useState(false);
+    const [notificationsError, setNotificationsError] = useState(null);
+    const [lastFetchTime, setLastFetchTime] = useState(null);
+
+    const fetchNotifications = useCallback(async () => {
+        if (!user) {
+            setNotifications([]);
+            return;
+        }
+
+        setNotificationsLoading(true);
+        setNotificationsError(null);
+
+        try {
+            const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
+            const response = await axiosInstance.get(endpoint, {
+                params: {
+                    lastUpdated: lastFetchTime
+                }
+            });
+
+            const sanitizedData = sanitizeNotificationData(response.data);
+
+            if (!Array.isArray(sanitizedData) || sanitizedData.length === 0) {
+                setNotifications([]);
+                return;
+            }
+
+            const processedNotifications = sanitizedData.map(n => ({
+                id: n.notificationId || n.id || Date.now().toString(),
+                title: n.message || n.title || t('notifications.no_title'),
+                time: formatTime(n.createdAt || n.date || new Date().toISOString()),
+                read: n.status === 'READ' || n.read || false,
+                data: n // حفظ البيانات الأصلية للاستخدام لاحقًا
+            }));
+
+            setNotifications(prev => {
+                // دمج الإشعارات الجديدة مع القديمة مع منع التكرار
+                const existingIds = new Set(prev.map(notif => notif.id));
+                const newNotifications = processedNotifications.filter(
+                    notif => !existingIds.has(notif.id)
+                );
+                return [...newNotifications, ...prev].slice(0, 50); // الحد الأقصى 50 إشعار
+            });
+
+            setLastFetchTime(Date.now());
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+            setNotificationsError(t('notifications.fetch_error'));
+
+            // إعادة تعيين الإشعارات فقط إذا كانت المشكلة ليست في المصادقة
+            if (error.response?.status !== 401) {
+                setNotifications([]);
+            }
+        } finally {
+            setNotificationsLoading(false);
+        }
+    }, [user, isAdmin, t, lastFetchTime]);
 
     useEffect(() => {
-        const fetchNotifications = async () => {
-            if (user) {
-                try {
-                    const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
-                    const response = await axiosInstance.get(endpoint);
-
-                    console.log("Full notifications response:", response); // سجل الاستجابة الكاملة
-                    console.log("Notifications data:", response.data); // سجل البيانات المستلمة
-
-                    // معالجة البيانات المستلمة
-                    let notificationsData = [];
-
-                    if (response.data && Array.isArray(response.data)) {
-                        notificationsData = response.data;
-                    } else if (response.data && response.data.content && Array.isArray(response.data.content)) {
-                        // إذا كانت البيانات ضمن حقل content
-                        notificationsData = response.data.content;
-                    } else if (response.data && response.data.notifications && Array.isArray(response.data.notifications)) {
-                        // إذا كانت البيانات ضمن حقل notifications
-                        notificationsData = response.data.notifications;
-                    }
-
-                    console.log("Processed notifications:", notificationsData);
-
-                    setNotifications(notificationsData.map(n => ({
-                        id: n.notificationId || n.id,
-                        title: n.message || n.title,
-                        time: formatTime(n.createdAt || n.date),
-                        read: n.status === 'READ' || n.read
-                    })));
-                } catch (error) {
-                    console.error('Failed to fetch notifications:', error);
-                    setNotifications([]);
-                }
-            }
-        };
-
         fetchNotifications();
-    }, [user, isAdmin]);
 
-    const formatTime = (dateString) => {
-        // دالة لتنسيق الوقت (يمكن استبدالها بمكتبة مثل moment.js)
-        const now = new Date();
-        const date = new Date(dateString);
-        const diff = now - date;
+        // تحديث الإشعارات كل دقيقة
+        const interval = setInterval(fetchNotifications, 60000);
+        return () => clearInterval(interval);
+    }, [fetchNotifications]);
 
-        const minutes = Math.floor(diff / (1000 * 60));
-        if (minutes < 60) return `منذ ${minutes} دقيقة`;
+    const formatTime = useCallback((dateString) => {
+        if (!dateString) return t('notifications.unknown_time');
 
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `منذ ${hours} ساعة`;
+        try {
+            const now = new Date();
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return t('notifications.unknown_time');
 
-        const days = Math.floor(hours / 24);
-        return `منذ ${days} يوم`;
-    };
-    const changeLanguage = (lang) => {
-        i18n.changeLanguage(lang);
-        setCurrentLanguage(lang);
-    };
+            const diff = Math.floor((now - date) / 1000); // الفرق بالثواني
+
+            if (diff < 60) return t('notifications.just_now');
+            if (diff < 3600) {
+                const minutes = Math.floor(diff / 60);
+                return t('notifications.minutes_ago', { count: minutes });
+            }
+            if (diff < 86400) {
+                const hours = Math.floor(diff / 3600);
+                return t('notifications.hours_ago', { count: hours });
+            }
+
+            const days = Math.floor(diff / 86400);
+            return t('notifications.days_ago', { count: days });
+        } catch (e) {
+            console.error('Error formatting time:', e);
+            return t('notifications.unknown_time');
+        }
+    }, [t]);
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
@@ -99,10 +170,18 @@ const Navbar = () => {
 
     const toggleDropdown = () => {
         setShowDropdown(!showDropdown);
+        if (!showDropdown) {
+            setShowNotifications(false);
+        }
     };
 
     const toggleNotifications = () => {
         setShowNotifications(!showNotifications);
+        if (!showNotifications) {
+            setShowDropdown(false);
+            // جلب أحدث الإشعارات عند فتح القائمة
+            fetchNotifications();
+        }
     };
 
     const closeDropdowns = () => {
@@ -116,15 +195,36 @@ const Navbar = () => {
         navigate("/login");
     };
 
-    const markAsRead = (id) => {
-        setNotifications(notifications.map(notification =>
-            notification.id === id ? { ...notification, read: true } : notification
-        ));
+    const markAsRead = async (id) => {
+        try {
+            await axiosInstance.patch(`api/notifications/${id}/read`);
+
+            setNotifications(prev =>
+                prev.map(notification =>
+                    notification.id === id
+                        ? { ...notification, read: true }
+                        : notification
+                )
+            );
+        } catch (error) {
+            console.error('Failed to mark notification as read:', error);
+        }
+    };
+
+    const markAllAsRead = async () => {
+        try {
+            await axiosInstance.patch('api/notifications/mark-all-read');
+
+            setNotifications(prev =>
+                prev.map(notification => ({ ...notification, read: true }))
+            );
+        } catch (error) {
+            console.error('Failed to mark all notifications as read:', error);
+        }
     };
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
-    // روابط المستخدم العادي
     const userLinks = [
         { path: "/", icon: <FaHome />, text: t("common.home") },
         { path: "/complaints", icon: <FaExclamationCircle />, text: t("services.complaints") },
@@ -134,7 +234,6 @@ const Navbar = () => {
         { path: "/children", icon: <FaGraduationCap />, text: t("navbar.education") }
     ];
 
-    // روابط الأدمن فقط
     const adminLinks = [
         { path: "/admin", icon: <FaChartLine />, text: t("navbar.controlPanel") },
         { path: "/admin/general", icon: <FaCog />, text: t("navbar.generalManagement") },
@@ -143,11 +242,85 @@ const Navbar = () => {
         { path: "/admin/complaints", icon: <FaExclamationCircle />, text: t("navbar.complaintsManagement") }
     ];
 
+    const renderNotificationsDropdown = () => {
+        if (!showNotifications) return null;
+
+        return (
+            <div className="notifications-dropdown show">
+                <div className="dropdown-header">
+                    {t('notifications.title')}
+                    {unreadCount > 0 && (
+                        <button
+                            className="mark-all-read"
+                            onClick={markAllAsRead}
+                            title={t('notifications.mark_all_read')}
+                        >
+                            {t('notifications.mark_all_read')}
+                        </button>
+                    )}
+                </div>
+
+                {notificationsLoading && !lastFetchTime ? (
+                    <div className="notification-item loading">
+                        <FaSpinner className="spin" />
+                        {t('notifications.loading')}
+                    </div>
+                ) : notificationsError ? (
+                    <div className="notification-item error">
+                        <FaExclamationTriangle />
+                        {notificationsError}
+                        <button
+                            className="retry-button"
+                            onClick={fetchNotifications}
+                        >
+                            {t('notifications.retry')}
+                        </button>
+                    </div>
+                ) : notifications.length === 0 ? (
+                    <div className="notification-item empty">
+                        {t('notifications.no_notifications')}
+                    </div>
+                ) : (
+                    <>
+                        {notifications.map(notification => (
+                            <div
+                                key={notification.id}
+                                className={`notification-item ${!notification.read ? "unread" : ""}`}
+                                onClick={() => {
+                                    markAsRead(notification.id);
+                                    if (notification.data?.link) {
+                                        navigate(notification.data.link);
+                                    }
+                                }}
+                            >
+                                <div className="notification-title">
+                                    {notification.title}
+                                    {!notification.read && (
+                                        <span className="unread-dot"></span>
+                                    )}
+                                </div>
+                                <div className="notification-time">{notification.time}</div>
+                            </div>
+                        ))}
+                    </>
+                )}
+
+                <div
+                    className="view-all"
+                    onClick={() => {
+                        navigate("/notifications");
+                        closeDropdowns();
+                    }}
+                >
+                    {t('notifications.view_all')}
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="navbar-wrapper">
-
             <nav className="navbar">
-
                 <div className="navbar-container">
                     <div className="brand-container">
                         <NavLink to="/" className="navbar-brand">
@@ -191,33 +364,18 @@ const Navbar = () => {
                     <div className="navbar-right">
                         {user && (
                             <div className="notifications-menu">
-                                <div className="notifications-button" onClick={toggleNotifications}>
+                                <div
+                                    className={`notifications-button ${showNotifications ? 'active' : ''}`}
+                                    onClick={toggleNotifications}
+                                >
                                     <FaBell className="notifications-icon"/>
                                     {unreadCount > 0 && (
-                                        <span className="notifications-badge">{unreadCount}</span>
+                                        <span className="notifications-badge">
+                                            {unreadCount > 9 ? '9+' : unreadCount}
+                                        </span>
                                     )}
                                 </div>
-                                {showNotifications && (
-                                    <div className="notifications-dropdown show">
-                                        <div className="dropdown-header">الإشعارات</div>
-                                        {notifications.map(notification => (
-                                            <div
-                                                key={notification.id}
-                                                className={`notification-item ${!notification.read ? "unread" : ""}`}
-                                                onClick={() => markAsRead(notification.id)}
-                                            >
-                                                <div className="notification-title">{notification.title}</div>
-                                                <div className="notification-time">{notification.time}</div>
-                                            </div>
-                                        ))}
-                                        <div className="view-all" onClick={() => {
-                                            navigate("/notifications");
-                                            closeDropdowns();
-                                        }}>
-                                            عرض الكل
-                                        </div>
-                                    </div>
-                                )}
+                                {renderNotificationsDropdown()}
                             </div>
                         )}
 
@@ -238,7 +396,10 @@ const Navbar = () => {
                         </div>
 
                         <div className="profile-menu">
-                            <div className="profile-button" onClick={toggleDropdown}>
+                            <div
+                                className={`profile-button ${showDropdown ? 'active' : ''}`}
+                                onClick={toggleDropdown}
+                            >
                                 <FaUserCircle className="profile-icon"/>
                                 {user ? (
                                     <span>{user.fullName || user.email}</span>
@@ -299,7 +460,6 @@ const Navbar = () => {
                 </div>
             )}
         </div>
-
     );
 };
 
