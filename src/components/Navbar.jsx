@@ -19,6 +19,8 @@ import logo from "./styles/img.png";
 import { useAuth } from "../AuthContext";
 import "./Navbar.css";
 import NewsTicker from "./NewsTicker";
+import { axiosInstance } from "../api";
+
 const Navbar = () => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
@@ -34,8 +36,9 @@ const Navbar = () => {
         const fetchNotifications = async () => {
             if (user) {
                 try {
-                    const data = await fetchUserNotifications();
-                    setNotifications(data.map(n => ({
+                    const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
+                    const response = await axiosInstance.get(endpoint);
+                    setNotifications(response.data.map(n => ({
                         id: n.notificationId,
                         title: n.message,
                         time: formatTime(n.createdAt),
@@ -48,7 +51,8 @@ const Navbar = () => {
         };
 
         fetchNotifications();
-    }, [user]);
+    }, [user, isAdmin]);
+
     const formatTime = (dateString) => {
         // دالة لتنسيق الوقت (يمكن استبدالها بمكتبة مثل moment.js)
         const now = new Date();
