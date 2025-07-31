@@ -23,65 +23,6 @@ import "./Navbar.css";
 import NewsTicker from "./NewsTicker";
 import { axiosInstance } from "../api";
 
-const sanitizeNotificationData = (data) => {
-    if (!data) return [];
-
-    // If data is already an array and looks valid
-    if (Array.isArray(data) ){
-        return data.filter(item => item && (item.message || item.title));
-    }
-
-    try {
-        // If data is a string, try to parse it
-        if (typeof data === 'string') {
-            try {
-                // First try direct parsing
-                const parsed = JSON.parse(data);
-                if (Array.isArray(parsed)) return parsed.filter(Boolean);
-                if (parsed && (parsed.message || parsed.title)) return [parsed];
-                return [];
-            } catch (firstError) {
-                console.warn('First JSON parse attempt failed, trying to fix...', firstError);
-
-                // Try to fix common JSON issues
-                const fixedData = data
-                    .replace(/"properties":\[[^\]]*\],?/g, '')
-                    .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')
-                    .replace(/'/g, '"')
-                    .replace(/,\s*}/g, '}')
-                    .replace(/,\s*]/g, ']');
-
-                try {
-                    const parsed = JSON.parse(fixedData);
-                    if (Array.isArray(parsed)) return parsed.filter(Boolean);
-                    if (parsed && (parsed.message || parsed.title)) return [parsed];
-                    return [];
-                } catch (secondError) {
-                    console.error('Failed to parse even after fixing:', secondError);
-                    return [];
-                }
-            }
-        }
-
-        // If data is an object
-        if (typeof data === 'object' && !Array.isArray(data)) {
-            if (data.message || data.title) {
-                return [{
-                    notificationId: data.notificationId || data.id,
-                    message: data.message || data.title,
-                    createdAt: data.createdAt || data.date,
-                    status: data.status || (data.read ? 'READ' : 'UNREAD')
-                }];
-            }
-            return [];
-        }
-
-        return [];
-    } catch (error) {
-        console.error('Error sanitizing notification data:', error);
-        return [];
-    }
-};
 
 const Navbar = () => {
     const { t, i18n } = useTranslation();
@@ -170,7 +111,16 @@ const Navbar = () => {
         }
     }, [user, isAdmin, t, formatTime]);
 
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (showNotifications && !e.target.closest('.notifications-menu')) {
+                setShowNotifications(false);
+            }
+        };
 
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [showNotifications]);
 
     useEffect(() => {
         fetchNotifications();
@@ -196,9 +146,12 @@ const Navbar = () => {
     };
 
     const toggleNotifications = () => {
-        setShowNotifications(prev => !prev); // تبديل الحالة بدلاً من تعيينها مباشرة
+        console.log('Current showNotifications:', showNotifications); // للتحقق
+        setShowNotifications(prev => {
+            console.log('New value:', !prev); // للتحقق
+            return !prev;
+        });
         if (!showNotifications) {
-
             setShowDropdown(false);
             fetchNotifications();
         }
@@ -356,7 +309,11 @@ const Navbar = () => {
                             <div className="notifications-menu">
                                 <div
                                     className={`notifications-button ${showNotifications ? 'active' : ''}`}
-                                    onClick={toggleNotifications}
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // لمنع انتشار الحدث
+                                        toggleNotifications();
+                                    }}
+                                    tabIndex="0"
                                 >
                                     <FaBell className="notifications-icon" />
                                     {unreadCount > 0 && (
@@ -365,7 +322,11 @@ const Navbar = () => {
         </span>
                                     )}
                                 </div>
-                                {showNotifications && renderNotificationsDropdown()}
+                                {showNotifications && (
+                                    <div className="notifications-dropdown-container">
+                                        {renderNotificationsDropdown()}
+                                    </div>
+                                )}
                             </div>
                         )}
 
