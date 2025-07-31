@@ -23,22 +23,21 @@ import "./Navbar.css";
 import NewsTicker from "./NewsTicker";
 import { axiosInstance } from "../api";
 
-// دالة مساعدة لمعالجة البيانات المتكررة
 const sanitizeNotificationData = (data) => {
     if (!data) return [];
 
     // If data is already an array and looks valid
-    if (Array.isArray(data) && data.every(item => item.message || item.title)) {
-        return data;
+    if (Array.isArray(data) ){
+        return data.filter(item => item && (item.message || item.title));
     }
 
     try {
         // If data is a string, try to parse it
         if (typeof data === 'string') {
-            // First try direct parsing
             try {
+                // First try direct parsing
                 const parsed = JSON.parse(data);
-                if (Array.isArray(parsed)) return parsed;
+                if (Array.isArray(parsed)) return parsed.filter(Boolean);
                 if (parsed && (parsed.message || parsed.title)) return [parsed];
                 return [];
             } catch (firstError) {
@@ -47,14 +46,14 @@ const sanitizeNotificationData = (data) => {
                 // Try to fix common JSON issues
                 const fixedData = data
                     .replace(/"properties":\[[^\]]*\],?/g, '')
-                    .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Fix property names
-                    .replace(/'/g, '"') // Replace single quotes with double
-                    .replace(/,\s*}/g, '}') // Remove trailing commas
+                    .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')
+                    .replace(/'/g, '"')
+                    .replace(/,\s*}/g, '}')
                     .replace(/,\s*]/g, ']');
 
                 try {
                     const parsed = JSON.parse(fixedData);
-                    if (Array.isArray(parsed)) return parsed;
+                    if (Array.isArray(parsed)) return parsed.filter(Boolean);
                     if (parsed && (parsed.message || parsed.title)) return [parsed];
                     return [];
                 } catch (secondError) {
@@ -66,7 +65,6 @@ const sanitizeNotificationData = (data) => {
 
         // If data is an object
         if (typeof data === 'object' && !Array.isArray(data)) {
-            // Extract relevant notification fields
             if (data.message || data.title) {
                 return [{
                     notificationId: data.notificationId || data.id,
@@ -96,66 +94,8 @@ const Navbar = () => {
     const [notifications, setNotifications] = useState([]);
     const [notificationsLoading, setNotificationsLoading] = useState(false);
     const [notificationsError, setNotificationsError] = useState(null);
-    const [lastFetchTime, setLastFetchTime] = useState(null);
 
-    const fetchNotifications = useCallback(async () => {
-        if (!user) {
-            setNotifications([]);
-            return;
-        }
-
-        setNotificationsLoading(true);
-        setNotificationsError(null);
-
-        try {
-            const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
-            const response = await axiosInstance.get(endpoint, {
-                timeout: 5000,
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            // Debug log the raw response
-            console.log('Raw notifications response:', response.data);
-
-            const sanitizedData = sanitizeNotificationData(response.data);
-            console.log('Sanitized notifications:', sanitizedData);
-
-            if (!Array.isArray(sanitizedData)) {
-                throw new Error('Invalid notifications format - expected array');
-            }
-
-            const processedNotifications = sanitizedData.map(n => ({
-                id: n.notificationId || n.id || Date.now().toString(),
-                title: n.message || n.title || 'New notification',
-                time: formatTime(n.createdAt || n.date),
-                read: n.status === 'READ' || n.read || false
-            }));
-
-            setNotifications(processedNotifications);
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error);
-            setNotificationsError(t('notifications.fetch_error'));
-            setNotifications([]);
-        } finally {
-            setNotificationsLoading(false);
-        }
-    }, [user, isAdmin, formatTime, t]);
-
-    useEffect(() => {
-        fetchNotifications();
-
-        // تحديث الإشعارات كل دقيقة
-        const interval = setInterval(fetchNotifications, 60000);
-        return () => clearInterval(interval);
-    }, [fetchNotifications]);
-    const changeLanguage = (lang) => {
-        i18n.changeLanguage(lang);
-        setCurrentLanguage(lang);
-        localStorage.setItem('selectedLanguage', lang); // حفظ اللغة المختارة
-    };
+    // Format time function declared first
     const formatTime = useCallback((dateString) => {
         if (!dateString) return t('notifications.unknown_time');
 
@@ -164,7 +104,7 @@ const Navbar = () => {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return t('notifications.unknown_time');
 
-            const diff = Math.floor((now - date) / 1000); // الفرق بالثواني
+            const diff = Math.floor((now - date) / 1000);
 
             if (diff < 60) return t('notifications.just_now');
             if (diff < 3600) {
@@ -184,6 +124,61 @@ const Navbar = () => {
         }
     }, [t]);
 
+    // Then fetchNotifications that uses formatTime
+    const fetchNotifications = useCallback(async () => {
+        if (!user) {
+            setNotifications([]);
+            return;
+        }
+
+        setNotificationsLoading(true);
+        setNotificationsError(null);
+
+        try {
+            const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
+            const response = await axiosInstance.get(endpoint, {
+                timeout: 5000,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const sanitizedData = sanitizeNotificationData(response.data);
+
+            if (!Array.isArray(sanitizedData)) {
+                throw new Error('Invalid notifications format - expected array');
+            }
+
+            const processedNotifications = sanitizedData.map(n => ({
+                id: n.notificationId || n.id || Date.now().toString(),
+                title: n.message || n.title || t('notifications.new_notification'),
+                time: formatTime(n.createdAt || n.date),
+                read: n.status === 'READ' || n.read || false
+            }));
+
+            setNotifications(processedNotifications);
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+            setNotificationsError(t('notifications.fetch_error'));
+            setNotifications([]);
+        } finally {
+            setNotificationsLoading(false);
+        }
+    }, [user, isAdmin, formatTime, t]);
+
+    useEffect(() => {
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 60000);
+        return () => clearInterval(interval);
+    }, [fetchNotifications]);
+
+    const changeLanguage = (lang) => {
+        i18n.changeLanguage(lang);
+        setCurrentLanguage(lang);
+        localStorage.setItem('selectedLanguage', lang);
+    };
+
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
     };
@@ -199,7 +194,6 @@ const Navbar = () => {
         setShowNotifications(!showNotifications);
         if (!showNotifications) {
             setShowDropdown(false);
-            // جلب أحدث الإشعارات عند فتح القائمة
             fetchNotifications();
         }
     };
@@ -218,7 +212,6 @@ const Navbar = () => {
     const markAsRead = async (id) => {
         try {
             await axiosInstance.patch(`api/notifications/${id}/read`);
-
             setNotifications(prev =>
                 prev.map(notification =>
                     notification.id === id
@@ -234,7 +227,6 @@ const Navbar = () => {
     const markAllAsRead = async () => {
         try {
             await axiosInstance.patch('api/notifications/mark-all-read');
-
             setNotifications(prev =>
                 prev.map(notification => ({ ...notification, read: true }))
             );
@@ -268,24 +260,43 @@ const Navbar = () => {
         return (
             <div className="notifications-dropdown">
                 <div className="dropdown-header">
-                    Notifications
-                    {notificationsLoading && <span className="loading-spinner"></span>}
+                    {t('notifications.title')}
+                    {notificationsLoading && <FaSpinner className="spinner" />}
+                    {!notificationsLoading && unreadCount > 0 && (
+                        <button
+                            className="mark-all-read"
+                            onClick={markAllAsRead}
+                        >
+                            {t('notifications.mark_all_read')}
+                        </button>
+                    )}
                 </div>
 
                 {notificationsError ? (
                     <div className="notification-error">
-                        {notificationsError}
-                        <button onClick={fetchNotifications}>Retry</button>
+                        <FaExclamationTriangle />
+                        <span>{notificationsError}</span>
+                        <button onClick={fetchNotifications}>
+                            {t('notifications.retry')}
+                        </button>
                     </div>
                 ) : notifications.length === 0 ? (
-                    <div className="notification-empty">No notifications available</div>
+                    <div className="notification-empty">
+                        {t('notifications.empty')}
+                    </div>
                 ) : (
-                    notifications.map(notification => (
-                        <div key={notification.id} className={`notification-item ${notification.read ? '' : 'unread'}`}>
-                            <div className="notification-title">{notification.title}</div>
-                            <div className="notification-time">{notification.time}</div>
-                        </div>
-                    ))
+                    <>
+                        {notifications.map(notification => (
+                            <div
+                                key={notification.id}
+                                className={`notification-item ${notification.read ? '' : 'unread'}`}
+                                onClick={() => markAsRead(notification.id)}
+                            >
+                                <div className="notification-title">{notification.title}</div>
+                                <div className="notification-time">{notification.time}</div>
+                            </div>
+                        ))}
+                    </>
                 )}
             </div>
         );
@@ -297,13 +308,13 @@ const Navbar = () => {
                 <div className="navbar-container">
                     <div className="brand-container">
                         <NavLink to="/" className="navbar-brand">
-                            <img src={logo} alt="بلدية أم بطين"/>
-                            <span>بلدية أم بطين</span>
+                            <img src={logo} alt={t('navbar.logo_alt')} />
+                            <span>{t('navbar.title')}</span>
                         </NavLink>
                     </div>
 
                     <div className="menu-icon" onClick={toggleMenu}>
-                        {menuOpen ? <FaTimes/> : <FaBars/>}
+                        {menuOpen ? <FaTimes /> : <FaBars />}
                     </div>
 
                     <ul className={`navbar-links ${menuOpen ? "active" : ""}`}>
@@ -312,7 +323,7 @@ const Navbar = () => {
                                 <NavLink
                                     to={link.path}
                                     onClick={toggleMenu}
-                                    className={({isActive}) => isActive ? "active" : ""}
+                                    className={({ isActive }) => isActive ? "active" : ""}
                                 >
                                     {link.icon}
                                     {link.text}
@@ -325,7 +336,7 @@ const Navbar = () => {
                                 <NavLink
                                     to={link.path}
                                     onClick={toggleMenu}
-                                    className={({isActive}) => isActive ? "active admin-link" : "admin-link"}
+                                    className={({ isActive }) => isActive ? "active admin-link" : "admin-link"}
                                 >
                                     {link.icon}
                                     {link.text}
@@ -341,7 +352,7 @@ const Navbar = () => {
                                     className={`notifications-button ${showNotifications ? 'active' : ''}`}
                                     onClick={toggleNotifications}
                                 >
-                                    <FaBell className="notifications-icon"/>
+                                    <FaBell className="notifications-icon" />
                                     {unreadCount > 0 && (
                                         <span className="notifications-badge">
                                             {unreadCount > 9 ? '9+' : unreadCount}
@@ -373,7 +384,7 @@ const Navbar = () => {
                                 className={`profile-button ${showDropdown ? 'active' : ''}`}
                                 onClick={toggleDropdown}
                             >
-                                <FaUserCircle className="profile-icon"/>
+                                <FaUserCircle className="profile-icon" />
                                 {user ? (
                                     <span>{user.fullName || user.email}</span>
                                 ) : (
@@ -390,7 +401,7 @@ const Navbar = () => {
                                                 className="dropdown-item"
                                                 onClick={closeDropdowns}
                                             >
-                                                <FaUserCircle/>
+                                                <FaUserCircle />
                                                 {t("common.profile")}
                                             </NavLink>
                                             {isAdmin() && (
@@ -399,7 +410,7 @@ const Navbar = () => {
                                                     className="dropdown-item"
                                                     onClick={closeDropdowns}
                                                 >
-                                                    <FaUserShield/>
+                                                    <FaUserShield />
                                                     {t("common.adminPanel")}
                                                 </NavLink>
                                             )}
@@ -407,7 +418,7 @@ const Navbar = () => {
                                                 className="dropdown-item logout"
                                                 onClick={handleLogout}
                                             >
-                                                <FaTimes/>
+                                                <FaTimes />
                                                 {t("common.logout")}
                                             </div>
                                         </>
@@ -417,7 +428,7 @@ const Navbar = () => {
                                             className="dropdown-item"
                                             onClick={closeDropdowns}
                                         >
-                                            <FaUserCircle/>
+                                            <FaUserCircle />
                                             {t("common.login")}
                                         </NavLink>
                                     )}
