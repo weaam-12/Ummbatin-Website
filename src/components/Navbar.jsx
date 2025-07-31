@@ -25,23 +25,39 @@ import { axiosInstance } from "../api";
 
 // دالة مساعدة لمعالجة البيانات المتكررة
 const sanitizeNotificationData = (data) => {
-    // إذا كانت البيانات غير موجودة أو فارغة
     if (!data) return [];
 
     // إذا كانت البيانات مصفوفة بالفعل
     if (Array.isArray(data)) return data;
 
     try {
-        // إذا كانت البيانات سلسلة نصية، نحاول تحليلها
+        // إذا كانت البيانات سلسلة نصية
         if (typeof data === 'string') {
-            // إصلاح JSON غير الصالح عن طريق إزالة التكرار
-            const fixedData = data.replace(/"properties":\[[^\]]*\],?/g, '');
-            return JSON.parse(fixedData);
+            // محاولة إصلاح JSON المعطوب
+            try {
+                // المحاولة الأولى بالتحليل المباشر
+                return JSON.parse(data);
+            } catch (firstError) {
+                console.warn('First JSON parse attempt failed, trying to fix...', firstError);
+
+                // إزالة الأجزاء المتكررة المسببة للمشكلة
+                const fixedData = data
+                    .replace(/"properties":\[[^\]]*\],?/g, '') // إزالة properties المتكررة
+                    .replace(/,\s*}/g, '}') // إصلاح الفواصل الزائدة
+                    .replace(/,\s*]/g, ']'); // إصلاح الفواصل قبل الأقواس
+
+                try {
+                    return JSON.parse(fixedData);
+                } catch (secondError) {
+                    console.error('Failed to parse even after fixing:', secondError);
+                    return [];
+                }
+            }
         }
 
-        // إذا كانت البيانات كائنًا
+        // إذا كانت البيانات كائن JavaScript
         if (typeof data === 'object') {
-            // إزالة التكرار يدويًا
+            // إزالة التكرارات يدوياً
             const cleanData = {...data};
             if (cleanData.user && cleanData.user.properties) {
                 cleanData.user = {
@@ -84,48 +100,38 @@ const Navbar = () => {
         try {
             const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
             const response = await axiosInstance.get(endpoint, {
+                timeout: 5000, // timeout بعد 5 ثواني
                 params: {
-                    lastUpdated: lastFetchTime
+                    simple: true // لطلب بيانات مبسطة من الخادم
                 }
             });
 
             const sanitizedData = sanitizeNotificationData(response.data);
 
-            if (!Array.isArray(sanitizedData) || sanitizedData.length === 0) {
-                setNotifications([]);
-                return;
+            if (!Array.isArray(sanitizedData)) {
+                throw new Error('Invalid notifications format');
             }
 
             const processedNotifications = sanitizedData.map(n => ({
                 id: n.notificationId || n.id || Date.now().toString(),
-                title: n.message || n.title || t('notifications.no_title'),
-                time: formatTime(n.createdAt || n.date || new Date().toISOString()),
-                read: n.status === 'READ' || n.read || false,
-                data: n // حفظ البيانات الأصلية للاستخدام لاحقًا
+                title: n.message || n.title || 'New notification',
+                time: formatTime(n.createdAt || n.date),
+                read: n.status === 'READ' || n.read || false
             }));
 
-            setNotifications(prev => {
-                // دمج الإشعارات الجديدة مع القديمة مع منع التكرار
-                const existingIds = new Set(prev.map(notif => notif.id));
-                const newNotifications = processedNotifications.filter(
-                    notif => !existingIds.has(notif.id)
-                );
-                return [...newNotifications, ...prev].slice(0, 50); // الحد الأقصى 50 إشعار
-            });
-
-            setLastFetchTime(Date.now());
+            setNotifications(processedNotifications);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
-            setNotificationsError(t('notifications.fetch_error'));
+            setNotificationsError('Failed to load notifications. Please try again later.');
 
-            // إعادة تعيين الإشعارات فقط إذا كانت المشكلة ليست في المصادقة
+            // إعادة تعيين الإشعارات فقط إذا لم يكن خطأ مصادقة
             if (error.response?.status !== 401) {
                 setNotifications([]);
             }
         } finally {
             setNotificationsLoading(false);
         }
-    }, [user, isAdmin, t, lastFetchTime]);
+    }, [user, isAdmin, formatTime]);
 
     useEffect(() => {
         fetchNotifications();
@@ -249,74 +255,27 @@ const Navbar = () => {
         if (!showNotifications) return null;
 
         return (
-            <div className="notifications-dropdown show">
+            <div className="notifications-dropdown">
                 <div className="dropdown-header">
-                    {t('notifications.title')}
-                    {unreadCount > 0 && (
-                        <button
-                            className="mark-all-read"
-                            onClick={markAllAsRead}
-                            title={t('notifications.mark_all_read')}
-                        >
-                            {t('notifications.mark_all_read')}
-                        </button>
-                    )}
+                    Notifications
+                    {notificationsLoading && <span className="loading-spinner"></span>}
                 </div>
 
-                {notificationsLoading && !lastFetchTime ? (
-                    <div className="notification-item loading">
-                        <FaSpinner className="spin" />
-                        {t('notifications.loading')}
-                    </div>
-                ) : notificationsError ? (
-                    <div className="notification-item error">
-                        <FaExclamationTriangle />
+                {notificationsError ? (
+                    <div className="notification-error">
                         {notificationsError}
-                        <button
-                            className="retry-button"
-                            onClick={fetchNotifications}
-                        >
-                            {t('notifications.retry')}
-                        </button>
+                        <button onClick={fetchNotifications}>Retry</button>
                     </div>
                 ) : notifications.length === 0 ? (
-                    <div className="notification-item empty">
-                        {t('notifications.no_notifications')}
-                    </div>
+                    <div className="notification-empty">No notifications available</div>
                 ) : (
-                    <>
-                        {notifications.map(notification => (
-                            <div
-                                key={notification.id}
-                                className={`notification-item ${!notification.read ? "unread" : ""}`}
-                                onClick={() => {
-                                    markAsRead(notification.id);
-                                    if (notification.data?.link) {
-                                        navigate(notification.data.link);
-                                    }
-                                }}
-                            >
-                                <div className="notification-title">
-                                    {notification.title}
-                                    {!notification.read && (
-                                        <span className="unread-dot"></span>
-                                    )}
-                                </div>
-                                <div className="notification-time">{notification.time}</div>
-                            </div>
-                        ))}
-                    </>
+                    notifications.map(notification => (
+                        <div key={notification.id} className={`notification-item ${notification.read ? '' : 'unread'}`}>
+                            <div className="notification-title">{notification.title}</div>
+                            <div className="notification-time">{notification.time}</div>
+                        </div>
+                    ))
                 )}
-
-                <div
-                    className="view-all"
-                    onClick={() => {
-                        navigate("/notifications");
-                        closeDropdowns();
-                    }}
-                >
-                    {t('notifications.view_all')}
-                </div>
             </div>
         );
     };
