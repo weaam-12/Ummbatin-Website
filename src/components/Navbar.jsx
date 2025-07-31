@@ -198,6 +198,8 @@ const Navbar = () => {
     const toggleNotifications = () => {
         setShowNotifications(prev => !prev); // تبديل الحالة بدلاً من تعيينها مباشرة
         if (!showNotifications) {
+            console.log('After toggle:', !prev);
+
             setShowDropdown(false);
             fetchNotifications();
         }
@@ -360,11 +362,11 @@ const Navbar = () => {
                                     <FaBell className="notifications-icon" />
                                     {unreadCount > 0 && (
                                         <span className="notifications-badge">
-                                            {unreadCount > 9 ? '9+' : unreadCount}
-                                        </span>
+          {unreadCount > 9 ? '9+' : unreadCount}
+        </span>
                                     )}
                                 </div>
-                                {renderNotificationsDropdown()}
+                                {showNotifications && renderNotificationsDropdown()}
                             </div>
                         )}
 
