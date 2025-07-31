@@ -196,7 +196,7 @@ const Navbar = () => {
     };
 
     const toggleNotifications = () => {
-        setShowNotifications(!showNotifications);
+        setShowNotifications(prev => !prev); // تبديل الحالة بدلاً من تعيينها مباشرة
         if (!showNotifications) {
             setShowDropdown(false);
             fetchNotifications();
