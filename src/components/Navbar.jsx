@@ -27,27 +27,36 @@ import { axiosInstance } from "../api";
 const sanitizeNotificationData = (data) => {
     if (!data) return [];
 
-    // إذا كانت البيانات مصفوفة بالفعل
-    if (Array.isArray(data)) return data;
+    // If data is already an array and looks valid
+    if (Array.isArray(data) && data.every(item => item.message || item.title)) {
+        return data;
+    }
 
     try {
-        // إذا كانت البيانات سلسلة نصية
+        // If data is a string, try to parse it
         if (typeof data === 'string') {
-            // محاولة إصلاح JSON المعطوب
+            // First try direct parsing
             try {
-                // المحاولة الأولى بالتحليل المباشر
-                return JSON.parse(data);
+                const parsed = JSON.parse(data);
+                if (Array.isArray(parsed)) return parsed;
+                if (parsed && (parsed.message || parsed.title)) return [parsed];
+                return [];
             } catch (firstError) {
                 console.warn('First JSON parse attempt failed, trying to fix...', firstError);
 
-                // إزالة الأجزاء المتكررة المسببة للمشكلة
+                // Try to fix common JSON issues
                 const fixedData = data
-                    .replace(/"properties":\[[^\]]*\],?/g, '') // إزالة properties المتكررة
-                    .replace(/,\s*}/g, '}') // إصلاح الفواصل الزائدة
-                    .replace(/,\s*]/g, ']'); // إصلاح الفواصل قبل الأقواس
+                    .replace(/"properties":\[[^\]]*\],?/g, '')
+                    .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Fix property names
+                    .replace(/'/g, '"') // Replace single quotes with double
+                    .replace(/,\s*}/g, '}') // Remove trailing commas
+                    .replace(/,\s*]/g, ']');
 
                 try {
-                    return JSON.parse(fixedData);
+                    const parsed = JSON.parse(fixedData);
+                    if (Array.isArray(parsed)) return parsed;
+                    if (parsed && (parsed.message || parsed.title)) return [parsed];
+                    return [];
                 } catch (secondError) {
                     console.error('Failed to parse even after fixing:', secondError);
                     return [];
@@ -55,17 +64,18 @@ const sanitizeNotificationData = (data) => {
             }
         }
 
-        // إذا كانت البيانات كائن JavaScript
-        if (typeof data === 'object') {
-            // إزالة التكرارات يدوياً
-            const cleanData = {...data};
-            if (cleanData.user && cleanData.user.properties) {
-                cleanData.user = {
-                    userId: cleanData.user.userId,
-                    fullName: cleanData.user.fullName
-                };
+        // If data is an object
+        if (typeof data === 'object' && !Array.isArray(data)) {
+            // Extract relevant notification fields
+            if (data.message || data.title) {
+                return [{
+                    notificationId: data.notificationId || data.id,
+                    message: data.message || data.title,
+                    createdAt: data.createdAt || data.date,
+                    status: data.status || (data.read ? 'READ' : 'UNREAD')
+                }];
             }
-            return [cleanData];
+            return [];
         }
 
         return [];
@@ -100,16 +110,21 @@ const Navbar = () => {
         try {
             const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
             const response = await axiosInstance.get(endpoint, {
-                timeout: 5000, // timeout بعد 5 ثواني
-                params: {
-                    simple: true // لطلب بيانات مبسطة من الخادم
+                timeout: 5000,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
                 }
             });
 
+            // Debug log the raw response
+            console.log('Raw notifications response:', response.data);
+
             const sanitizedData = sanitizeNotificationData(response.data);
+            console.log('Sanitized notifications:', sanitizedData);
 
             if (!Array.isArray(sanitizedData)) {
-                throw new Error('Invalid notifications format');
+                throw new Error('Invalid notifications format - expected array');
             }
 
             const processedNotifications = sanitizedData.map(n => ({
@@ -122,16 +137,12 @@ const Navbar = () => {
             setNotifications(processedNotifications);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
-            setNotificationsError('Failed to load notifications. Please try again later.');
-
-            // إعادة تعيين الإشعارات فقط إذا لم يكن خطأ مصادقة
-            if (error.response?.status !== 401) {
-                setNotifications([]);
-            }
+            setNotificationsError(t('notifications.fetch_error'));
+            setNotifications([]);
         } finally {
             setNotificationsLoading(false);
         }
-    }, [user, isAdmin, formatTime]);
+    }, [user, isAdmin, formatTime, t]);
 
     useEffect(() => {
         fetchNotifications();
