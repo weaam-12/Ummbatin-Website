@@ -91,14 +91,14 @@ const Navbar = () => {
             }
 
             const notificationsData = Array.isArray(response.data) ? response.data : [];
-
+console.log()
             const processedNotifications = notificationsData.map(n => ({
                 id: n.notificationId,
                 title: n.message,
                 time: formatTime(n.createdAt),
                 read: n.status === 'READ'
             }));
-
+            console.log("processedNotifications : "+ processedNotifications)
             setNotifications(processedNotifications);
         } catch (error) {
             console.error('Notification fetch error:', error);
