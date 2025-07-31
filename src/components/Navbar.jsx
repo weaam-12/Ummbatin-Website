@@ -149,10 +149,11 @@ const Navbar = () => {
                 throw new Error(response.data.error);
             }
 
-            // Process notifications
-            const processedNotifications = response.data.map(n => ({
-                id: n.notificationId || n.id || Date.now().toString(),
-                title: n.message || t('notifications.new_notification'),
+            const notificationsData = Array.isArray(response.data) ? response.data : [];
+
+            const processedNotifications = notificationsData.map(n => ({
+                id: n.notificationId,
+                title: n.message,
                 time: formatTime(n.createdAt),
                 read: n.status === 'READ'
             }));

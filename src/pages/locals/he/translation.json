@@ -219,7 +219,9 @@
     "generalManagement": "ניהול כללי",
     "educationManagement": "ניהול חינוך",
     "paymentsManagement": "ניהול תשלומים",
-    "complaintsManagement": "ניהול תלונות"
+    "complaintsManagement": "ניהול תלונות",
+    "title": "עיריית אום בטין"
+
   },
 
   "complaints": {
