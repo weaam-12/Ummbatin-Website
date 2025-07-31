@@ -141,8 +141,17 @@ const Navbar = () => {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
+                },
+                params: {
+                    userId: user.userId // Explicitly send userId
                 }
             });
+
+            // If response is empty, return empty array
+            if (!response.data) {
+                setNotifications([]);
+                return;
+            }
 
             const sanitizedData = sanitizeNotificationData(response.data);
 
@@ -160,7 +169,22 @@ const Navbar = () => {
             setNotifications(processedNotifications);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
-            setNotificationsError(t('notifications.fetch_error'));
+
+            // More specific error messages
+            if (error.response) {
+                if (error.response.status === 401) {
+                    setNotificationsError(t('notifications.auth_error'));
+                } else if (error.response.status === 500) {
+                    setNotificationsError(t('notifications.server_error'));
+                } else {
+                    setNotificationsError(t('notifications.fetch_error'));
+                }
+            } else if (error.request) {
+                setNotificationsError(t('notifications.network_error'));
+            } else {
+                setNotificationsError(t('notifications.general_error'));
+            }
+
             setNotifications([]);
         } finally {
             setNotificationsLoading(false);
