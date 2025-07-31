@@ -493,3 +493,27 @@
 .notification-item.unread {
     background-color: #f8f9fa;
 }
+.notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.notification-title {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.notification-time {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.notification-status {
+    font-size: 0.7rem;
+    color: #999;
+}
+
+.notification-item.unread {
+    background-color: #f8f9fa;
+}

@@ -77,39 +77,27 @@ const Navbar = () => {
 
         try {
             const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
-            const response = await axiosInstance.get(endpoint, {
-                timeout: 10000, // Increased timeout
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
+            const response = await axiosInstance.get(endpoint);
 
-            // Handle potential error responses
-            if (response.data && response.data.error) {
-                throw new Error(response.data.error);
-            }
+            console.log('Raw notifications data:', response.data); // للتحقق من البيانات الخام
 
-            const notificationsData = Array.isArray(response.data) ? response.data : [];
-console.log()
-            const processedNotifications = notificationsData.map(n => ({
-                id: n.notificationId,
-                title: n.message,
-                time: formatTime(n.createdAt),
-                read: n.status === 'READ'
+            const processedNotifications = response.data.map(n => ({
+                id: n.notificationId || n.id,
+                title: n.message || n.title || 'New notification',
+                time: n.createdAt ? formatTime(n.createdAt) : 'Just now',
+                read: n.status === 'READ' || false
             }));
-            console.log("processedNotifications : "+ processedNotifications)
+
+            console.log('Processed notifications:', processedNotifications); // للتحقق
             setNotifications(processedNotifications);
+
         } catch (error) {
-            console.error('Notification fetch error:', error);
-            const errorMsg = error.response?.data?.error ||
-                error.message ||
-                t('notifications.fetch_error');
-            setNotificationsError(errorMsg);
+            console.error('Failed to fetch notifications:', error);
+            setNotificationsError(error.message);
         } finally {
             setNotificationsLoading(false);
         }
-    }, [user, isAdmin, t, formatTime]);
+    }, [user, isAdmin, formatTime]);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -251,8 +239,15 @@ console.log()
                                 className={`notification-item ${notification.read ? '' : 'unread'}`}
                                 onClick={() => markAsRead(notification.id)}
                             >
-                                <div className="notification-title">{notification.title}</div>
-                                <div className="notification-time">{notification.time}</div>
+                                <div className="notification-title">
+                                    {notification.title || 'No title'}
+                                </div>
+                                <div className="notification-time">
+                                    {notification.time || 'Unknown time'}
+                                </div>
+                                <div className="notification-status">
+                                    {notification.read ? 'Read' : 'Unread'}
+                                </div>
                             </div>
                         ))}
                     </>
