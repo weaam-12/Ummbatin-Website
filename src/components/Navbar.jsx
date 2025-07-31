@@ -23,7 +23,6 @@ import "./Navbar.css";
 import NewsTicker from "./NewsTicker";
 import { axiosInstance } from "../api";
 
-
 const Navbar = () => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
@@ -36,7 +35,6 @@ const Navbar = () => {
     const [notificationsLoading, setNotificationsLoading] = useState(false);
     const [notificationsError, setNotificationsError] = useState(null);
 
-    // Format time function declared first
     const formatTime = useCallback((dateString) => {
         if (!dateString) return t('notifications.unknown_time');
 
@@ -65,7 +63,6 @@ const Navbar = () => {
         }
     }, [t]);
 
-    // Then fetchNotifications that uses formatTime
     const fetchNotifications = useCallback(async () => {
         if (!user) {
             setNotifications([]);
@@ -79,36 +76,35 @@ const Navbar = () => {
             const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
             const response = await axiosInstance.get(endpoint);
 
-            console.log('Raw notifications data:', response.data); // للتحقق من البيانات الخام
-
             const processedNotifications = response.data.map(n => ({
                 id: n.notificationId || n.id,
-                title: n.message || n.title || 'New notification',
-                time: n.createdAt ? formatTime(n.createdAt) : 'Just now',
+                title: n.message || n.title || t('notifications.new_notification'),
+                time: n.createdAt ? formatTime(n.createdAt) : t('notifications.just_now'),
                 read: n.status === 'READ' || false
             }));
 
-            console.log('Processed notifications:', processedNotifications); // للتحقق
             setNotifications(processedNotifications);
-
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
             setNotificationsError(error.message);
         } finally {
             setNotificationsLoading(false);
         }
-    }, [user, isAdmin, formatTime]);
+    }, [user, isAdmin, formatTime, t]);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (showNotifications && !e.target.closest('.notifications-menu')) {
                 setShowNotifications(false);
             }
+            if (showDropdown && !e.target.closest('.profile-menu')) {
+                setShowDropdown(false);
+            }
         };
 
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
-    }, [showNotifications]);
+    }, [showNotifications, showDropdown]);
 
     useEffect(() => {
         fetchNotifications();
@@ -128,21 +124,13 @@ const Navbar = () => {
 
     const toggleDropdown = () => {
         setShowDropdown(!showDropdown);
-        if (!showDropdown) {
-            setShowNotifications(false);
-        }
+        if (showNotifications) setShowNotifications(false);
     };
 
     const toggleNotifications = () => {
-        console.log('Current showNotifications:', showNotifications); // للتحقق
-        setShowNotifications(prev => {
-            console.log('New value:', !prev); // للتحقق
-            return !prev;
-        });
-        if (!showNotifications) {
-            setShowDropdown(false);
-            fetchNotifications();
-        }
+        setShowNotifications(prev => !prev);
+        if (showDropdown) setShowDropdown(false);
+        if (!showNotifications) fetchNotifications();
     };
 
     const closeDropdowns = () => {
@@ -202,8 +190,6 @@ const Navbar = () => {
     ];
 
     const renderNotificationsDropdown = () => {
-        if (!showNotifications) return null;
-
         return (
             <div className="notifications-dropdown">
                 <div className="dropdown-header">
@@ -232,25 +218,27 @@ const Navbar = () => {
                         {t('notifications.empty')}
                     </div>
                 ) : (
-                    <>
+                    <div className="notifications-list">
                         {notifications.map(notification => (
                             <div
                                 key={notification.id}
                                 className={`notification-item ${notification.read ? '' : 'unread'}`}
                                 onClick={() => markAsRead(notification.id)}
                             >
-                                <div className="notification-title">
-                                    {notification.title || 'No title'}
+                                <div className="notification-content">
+                                    <div className="notification-title">
+                                        {notification.title}
+                                    </div>
+                                    <div className="notification-time">
+                                        {notification.time}
+                                    </div>
                                 </div>
-                                <div className="notification-time">
-                                    {notification.time || 'Unknown time'}
-                                </div>
-                                <div className="notification-status">
-                                    {notification.read ? 'Read' : 'Unread'}
-                                </div>
+                                {!notification.read && (
+                                    <div className="notification-unread-dot"></div>
+                                )}
                             </div>
                         ))}
-                    </>
+                    </div>
                 )}
             </div>
         );
@@ -304,33 +292,17 @@ const Navbar = () => {
                             <div className="notifications-menu">
                                 <div
                                     className={`notifications-button ${showNotifications ? 'active' : ''}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation(); // لمنع انتشار الحدث
-                                        toggleNotifications();
-                                    }}
+                                    onClick={toggleNotifications}
                                     tabIndex="0"
                                 >
                                     <FaBell className="notifications-icon" />
                                     {unreadCount > 0 && (
                                         <span className="notifications-badge">
-          {unreadCount > 9 ? '9+' : unreadCount}
-        </span>
+                                            {unreadCount > 9 ? '9+' : unreadCount}
+                                        </span>
                                     )}
                                 </div>
-                                {showNotifications && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        right: 0,
-                                        top: '100%',
-                                        background: 'white',
-                                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-                                        zIndex: 1000,
-                                        width: '350px',
-                                        padding: '10px'
-                                    }}>
-                                        {renderNotificationsDropdown()}
-                                    </div>
-                                )}
+                                {showNotifications && renderNotificationsDropdown()}
                             </div>
                         )}
 
@@ -364,7 +336,7 @@ const Navbar = () => {
                             </div>
 
                             {showDropdown && (
-                                <div className="dropdown-menu show">
+                                <div className="dropdown-menu">
                                     {user ? (
                                         <>
                                             <NavLink

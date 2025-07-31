@@ -124,7 +124,7 @@ const Home = () => {
                 {/* النافذة المنبثقة */}
                 {isModalOpen && selectedEvent && (
                     <div className={styles.modalOverlay}>
-                        <div className={styles.modal} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+                        <div className={styles.modal} dir={i18n.language === 'ar' ? 'rtl' : 'rtl'}>
                             <button className={styles.closeButton} onClick={closeModal}>
                                 {t("eventDetails.close")}
                             </button>
@@ -156,9 +156,6 @@ const Home = () => {
                                         <strong>{t("eventDetails.location")}:</strong> {selectedEvent.location}
                                     </p>
 
-                                    <p>
-                                        <strong>{t("eventDetails.organizer")}:</strong> {selectedEvent.organizer}
-                                    </p>
 
                                     <p>
                                         <strong>{t("eventDetails.description")}:</strong> {selectedEvent.description}
