@@ -338,7 +338,7 @@ const Navbar = () => {
                             </div>
 
                             {showDropdown && (
-                                <div className="dropdown-menu">
+                                <div className={`notifications-dropdown ${showNotifications ? 'show' : ''}`}>
                                     {user ? (
                                         <>
                                             <NavLink

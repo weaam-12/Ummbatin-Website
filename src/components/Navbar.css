@@ -287,10 +287,17 @@
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     padding: 0.5rem 0;
-    z-index: 1000;
+    z-index: 1001; /* تأكد أنها أعلى من أي عنصر آخر */
     opacity: 0;
     visibility: hidden;
     transition: all var(--transition-speed);
+    display: block !important; /* تأكد من أن العنصر معروض */
+}
+
+.notifications-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 .notifications-dropdown.show {
