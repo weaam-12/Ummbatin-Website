@@ -38,22 +38,34 @@ const Navbar = () => {
                 try {
                     const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
                     const response = await axiosInstance.get(endpoint);
-                    console.log("notificationsData :"+ Array.isArray(response.data));
-                    // تحقق من أن البيانات موجودة وهي مصفوفة
-                    const notificationsData = Array.isArray(response.data)
 
-                        ? response.data
-                        : [];
+                    console.log("Full notifications response:", response); // سجل الاستجابة الكاملة
+                    console.log("Notifications data:", response.data); // سجل البيانات المستلمة
+
+                    // معالجة البيانات المستلمة
+                    let notificationsData = [];
+
+                    if (response.data && Array.isArray(response.data)) {
+                        notificationsData = response.data;
+                    } else if (response.data && response.data.content && Array.isArray(response.data.content)) {
+                        // إذا كانت البيانات ضمن حقل content
+                        notificationsData = response.data.content;
+                    } else if (response.data && response.data.notifications && Array.isArray(response.data.notifications)) {
+                        // إذا كانت البيانات ضمن حقل notifications
+                        notificationsData = response.data.notifications;
+                    }
+
+                    console.log("Processed notifications:", notificationsData);
 
                     setNotifications(notificationsData.map(n => ({
-                        id: n.notificationId,
-                        title: n.message,
-                        time: formatTime(n.createdAt),
-                        read: n.status === 'READ'
+                        id: n.notificationId || n.id,
+                        title: n.message || n.title,
+                        time: formatTime(n.createdAt || n.date),
+                        read: n.status === 'READ' || n.read
                     })));
                 } catch (error) {
                     console.error('Failed to fetch notifications:', error);
-                    setNotifications([]); // تعيين مصفوفة فارغة في حالة الخطأ
+                    setNotifications([]);
                 }
             }
         };
