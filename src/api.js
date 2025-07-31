@@ -171,12 +171,6 @@ export const fetchServiceHistory = async () => {
     return response.data;
 };
 
-//===================== NOTIFICATIONS =====================
-export const fetchUserNotifications = async () => {
-    const response = await axiosInstance.get('api/notifications/me');
-    return response.data;
-};
-
 //===================== ANNOUNCEMENTS =====================
 export const fetchAnnouncements = async () => {
     const response = await axiosInstance.get('api/announcements');
@@ -387,6 +381,23 @@ export const createKindergartenPaymentIntent = async (amount, childId, kindergar
 };
 export const createPaymentIntent = async (paymentData) => {
     const response = await axiosInstance.post('api/payments/create-intent', paymentData);
+    return response.data;
+};
+//===================== NOTIFICATIONS =====================
+
+
+export const fetchUserNotifications = async () => {
+    const response = await axiosInstance.get('api/notifications/me');
+    return response.data;
+};
+
+export const fetchAdminNotifications = async () => {
+    const response = await axiosInstance.get('api/notifications/admin');
+    return response.data;
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+    const response = await axiosInstance.patch(`api/notifications/${notificationId}/read`);
     return response.data;
 };
 export default axiosInstance;

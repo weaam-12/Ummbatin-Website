@@ -27,16 +27,43 @@ const Navbar = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
-    const [notifications, setNotifications] = useState([
-        { id: 1, title: "تم دفع الفاتورة بنجاح", time: "منذ ساعتين", read: false },
-        { id: 2, title: "شكوى جديدة تحتاج إلى مراجعة", time: "منذ يوم", read: true },
-        { id: 3, title: "تمت الموافقة على طلبك", time: "منذ 3 أيام", read: true }
-    ]);
+
+    const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
-        document.body.dir = "rtl";
-    }, []);
+        const fetchNotifications = async () => {
+            if (user) {
+                try {
+                    const data = await fetchUserNotifications();
+                    setNotifications(data.map(n => ({
+                        id: n.notificationId,
+                        title: n.message,
+                        time: formatTime(n.createdAt),
+                        read: n.status === 'READ'
+                    })));
+                } catch (error) {
+                    console.error('Failed to fetch notifications:', error);
+                }
+            }
+        };
 
+        fetchNotifications();
+    }, [user]);
+    const formatTime = (dateString) => {
+        // دالة لتنسيق الوقت (يمكن استبدالها بمكتبة مثل moment.js)
+        const now = new Date();
+        const date = new Date(dateString);
+        const diff = now - date;
+
+        const minutes = Math.floor(diff / (1000 * 60));
+        if (minutes < 60) return `منذ ${minutes} دقيقة`;
+
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `منذ ${hours} ساعة`;
+
+        const days = Math.floor(hours / 24);
+        return `منذ ${days} يوم`;
+    };
     const changeLanguage = (lang) => {
         i18n.changeLanguage(lang);
         setCurrentLanguage(lang);
