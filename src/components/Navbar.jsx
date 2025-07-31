@@ -197,7 +197,7 @@ const Navbar = () => {
 
     const renderNotificationsDropdown = () => {
         return (
-            <div className="notifications-dropdown">
+            <div className={`notifications-dropdown ${showNotifications ? 'show' : ''}`}>
                 <div className="dropdown-header">
                     {t('notifications.title')}
                     {notificationsLoading && <FaSpinner className="spinner" />}
