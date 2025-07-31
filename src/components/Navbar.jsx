@@ -144,6 +144,11 @@ const Navbar = () => {
                 }
             });
 
+            // Handle case where response is error object
+            if (response.data && response.data.error) {
+                throw new Error(response.data.error);
+            }
+
             const sanitizedData = sanitizeNotificationData(response.data);
 
             if (!Array.isArray(sanitizedData)) {
@@ -160,7 +165,10 @@ const Navbar = () => {
             setNotifications(processedNotifications);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
-            setNotificationsError(t('notifications.fetch_error'));
+            const errorMsg = error.response?.data?.error ||
+                error.message ||
+                t('notifications.fetch_error');
+            setNotificationsError(errorMsg);
             setNotifications([]);
         } finally {
             setNotificationsLoading(false);
