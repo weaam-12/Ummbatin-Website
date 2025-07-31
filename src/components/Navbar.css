@@ -236,7 +236,6 @@
 /* ---------------------- الإشعارات ---------------------- */
 .notifications-menu {
     position: relative;
-    display: inline-block;
 }
 
 .notifications-button {
@@ -385,9 +384,12 @@
     }
 
     .notifications-dropdown {
-        width: 95vw;
-        left: 2.5vw;
-        right: auto;
+        position: absolute;
+        top: 110%;
+        left: 0;
+        right: 0;
+        width: 100vw;
+        max-width: none;
     }
 }
 
