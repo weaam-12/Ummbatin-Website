@@ -38,9 +38,10 @@ const Navbar = () => {
                 try {
                     const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
                     const response = await axiosInstance.get(endpoint);
-
+                    console.log("notificationsData :"+ Array.isArray(response.data));
                     // تحقق من أن البيانات موجودة وهي مصفوفة
                     const notificationsData = Array.isArray(response.data)
+
                         ? response.data
                         : [];
 
