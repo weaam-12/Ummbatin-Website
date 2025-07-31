@@ -128,6 +128,8 @@ const Navbar = () => {
     };
 
     const toggleNotifications = () => {
+        console.log('Toggle notifications called', !showNotifications);
+
         setShowNotifications(prev => !prev);
         if (showDropdown) setShowDropdown(false);
         if (!showNotifications) fetchNotifications();
