@@ -94,10 +94,14 @@ const Navbar = () => {
 
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (showNotifications && !e.target.closest('.notifications-menu')) {
+            if (showNotifications &&
+                !e.target.closest('.notifications-menu') &&
+                !e.target.closest('.notifications-button')) {
                 setShowNotifications(false);
             }
-            if (showDropdown && !e.target.closest('.profile-menu')) {
+            if (showDropdown &&
+                !e.target.closest('.profile-menu') &&
+                !e.target.closest('.profile-button')) {
                 setShowDropdown(false);
             }
         };
