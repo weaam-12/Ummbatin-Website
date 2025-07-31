@@ -58,7 +58,7 @@ const Navbar = () => {
             const days = Math.floor(diff / 86400);
             return t('notifications.days_ago', { count: days });
         } catch (e) {
-            console.error('Error formatting time:', e);
+            console.error('Errorءء formatting time:', e);
             return t('notifications.unknown_time');
         }
     }, [t]);
