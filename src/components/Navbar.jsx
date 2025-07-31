@@ -39,19 +39,20 @@ const Navbar = () => {
                     const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
                     const response = await axiosInstance.get(endpoint);
 
-                    if (response.data) {
-                        setNotifications(response.data.map(n => ({
-                            id: n.notificationId,
-                            title: n.message,
-                            time: formatTime(n.createdAt),
-                            read: n.status === 'READ'
-                        })));
-                    }
+                    // تحقق من أن البيانات موجودة وهي مصفوفة
+                    const notificationsData = Array.isArray(response.data)
+                        ? response.data
+                        : [];
+
+                    setNotifications(notificationsData.map(n => ({
+                        id: n.notificationId,
+                        title: n.message,
+                        time: formatTime(n.createdAt),
+                        read: n.status === 'READ'
+                    })));
                 } catch (error) {
                     console.error('Failed to fetch notifications:', error);
-
-
-                    // يمكنك إضافة عرض رسالة خطأ للمستخدم هنا
+                    setNotifications([]); // تعيين مصفوفة فارغة في حالة الخطأ
                 }
             }
         };
