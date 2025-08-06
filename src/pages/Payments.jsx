@@ -249,10 +249,10 @@ const Payments = () => {
             <Accordion.Item key={propertyId} eventKey={propertyId} className="mb-3">
                 <Accordion.Header>
                     <div className="d-flex justify-content-between w-100">
-                        <span>
-                            <FiHome className="me-2" />
-                            {propertyInfo.address} (مساحة: {propertyInfo.area} م²، وحدات: {propertyInfo.units})
-                        </span>
+      <span>
+        <FiHome className="me-2" />
+          {propertyInfo.address} (مساحة: {propertyInfo.area} م²، وحدات: {propertyInfo.units})
+      </span>
                         {pendingPayments.length > 0 && (
                             <Badge bg="danger" className="ms-2">
                                 {pendingPayments.length} {t('payments.pending')}
@@ -260,16 +260,19 @@ const Payments = () => {
                         )}
                     </div>
                 </Accordion.Header>
+
                 <Accordion.Body>
                     <div id={`invoice-${paymentType}-${propertyId}`} className="payment-details p-3">
                         <h5 className="mb-3">{t(`payments.types.${paymentType}`)}</h5>
 
+                        {/* الفواتير غير المدفوعة */}
                         {pendingPayments.length > 0 && (
                             <>
                                 <h6 className="mt-3 text-danger">
                                     <FiClock className="me-2" />
                                     {t('payments.pendingPayments')}
                                 </h6>
+
                                 <ListGroup className="mb-4">
                                     {pendingPayments.map((payment, i) => (
                                         <ListGroup.Item key={`pending-${i}`} className="position-relative">
@@ -283,6 +286,14 @@ const Payments = () => {
                                                     {statusLabels[payment.status] || t('payments.status.UNKNOWN')}
                                                 </Badge>
                                             </div>
+
+                                            {/* ✅ عرض عدد "القراءات" فقط إذا كانت الفاتورة من نوع مياه */}
+                                            {paymentType === 'water' && (
+                                                <div className="mt-2 text-primary fw-bold">
+                                                    💧 القراءة التقريبية: {Math.ceil(payment.amount / 30)} قراءة (30 شيقل × {Math.ceil(payment.amount / 30)})
+                                                </div>
+                                            )}
+
                                             <Button
                                                 variant={payment.status === 'FAILED' ? 'danger' : 'primary'}
                                                 size="sm"
@@ -302,10 +313,12 @@ const Payments = () => {
                             </>
                         )}
 
+                        {/* الفواتير المدفوعة */}
                         <h6 className="mt-3">
                             <FiClock className="me-2" />
                             {t('payments.invoice.paymentHistory')}
                         </h6>
+
                         <ListGroup>
                             {paidPayments.map((payment, i) => (
                                 <ListGroup.Item key={`paid-${i}`}>
@@ -319,6 +332,14 @@ const Payments = () => {
                                             {statusLabels.PAID}
                                         </Badge>
                                     </div>
+
+                                    {/* ✅ نفس المنطق، نعرض عدد "القراءات" إذا كانت مياه */}
+                                    {paymentType === 'water' && (
+                                        <div className="mt-2 text-primary fw-bold">
+                                            💧 القراءة التقريبية: {Math.ceil(payment.amount / 30)} قراءة (30 شيقل × {Math.ceil(payment.amount / 30)})
+                                        </div>
+                                    )}
+
                                     <Button
                                         variant="outline-success"
                                         size="sm"
