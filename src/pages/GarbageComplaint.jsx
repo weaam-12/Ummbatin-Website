@@ -236,62 +236,7 @@ const GarbageComplaint = () => {
                 </button>
             </form>
 
-            <div className="complaint-history">
-                <h2>{t("garbageComplaint.historyTitle")}</h2>
-
-                {complaints.length === 0 ? (
-                    <p className="no-complaints">{t("garbageComplaint.noComplaints")}</p>
-                ) : (
-                    <div className="complaints-list">
-                        {complaints.map((complaint) => (
-                            <div key={complaint.complaintId} className="complaint-item">
-                                <div className="complaint-header">
-                                    <span className={`status ${statusColors[complaint.status]}`}>
-                                        {t(`garbageComplaint.statuses.${complaint.status}`)}
-                                    </span>
-                                    <span className="ticket">#{complaint.ticketNumber}</span>
-                                    <span className="date">
-                                        {new Date(complaint.date).toLocaleDateString(i18n.language === 'he' ? 'he-IL' : 'en-US')}
-                                    </span>
-                                </div>
-
-                                <div className="complaint-details">
-                                    <p className="description">{complaint.description}</p>
-
-                                    <div className="detail-row">
-                                        <span>{t("garbageComplaint.type")}:</span>
-                                        <span>{t(`garbageComplaint.types.${complaint.type}`)}</span>
-                                    </div>
-
-                                    {complaint.location && complaint.location !== "N/A" && (
-                                        <div className="detail-row">
-                                            <span>{t("garbageComplaint.location")}:</span>
-                                            <span>{complaint.location}</span>
-                                        </div>
-                                    )}
-
-                                    {complaint.imageUrl && (
-                                        <div className="complaint-image">
-                                            <img
-                                                src={complaint.imageUrl}
-                                                alt={t("garbageComplaint.complaintImage")}
-                                            />
-                                        </div>
-                                    )}
-
-                                    {complaint.response && (
-                                        <div className="response">
-                                            <h4>{t("garbageComplaint.response")}</h4>
-                                            <p>{complaint.response}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        </div>
+       </div>
     );
 };
 
