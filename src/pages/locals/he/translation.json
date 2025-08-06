@@ -208,10 +208,6 @@
     "units": "יחידות",
     "squareMeters": "מטר רבוע"
   },
-  "labels": {
-    "fullName": "שם מלא",
-    "birthDate": "תאריך לידה"
-  },
   "payment": {
     "arnona": {
       "calculation": "ארנונה = שטח ({{area}} מ\"ר) × יחידות ({{units}}) × 50 שקלים = {{total}} שקלים"
