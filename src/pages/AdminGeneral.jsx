@@ -12,7 +12,10 @@ import './AdminGeneral.css';
 import {
     getPropertiesByUserId,
     addWaterReading,
-    fetchUsersWithProperties, axiosInstance, getUsersWithPayments, getCurrentMonthPayments
+    getUsersWithProperties, // if this is the correct name
+    axiosInstance,
+    getCurrentMonthPayments,
+    getUsersWithPayments, getAllUsers, getUserProperties
 } from '../api.js';
 import { useTranslation } from 'react-i18next';
 
@@ -252,6 +255,14 @@ const AdminGeneral = () => {
         }
     };
 
+    const fetchUsersWithProperties = async () => {
+        const users = await getAllUsers();
+        const usersWithProperties = await Promise.all(users.map(async user => {
+            const properties = await getUserProperties(user.userId);
+            return { ...user, properties };
+        }));
+        return usersWithProperties;
+    };
     // ===================== دوال جلب البيانات =====================
     const fetchUsersWithPayments = async () => {
         try {
