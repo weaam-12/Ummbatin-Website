@@ -77,14 +77,19 @@ const GarbageComplaint = () => {
         setFormLoading(true);
 
         try {
+            // إنشاء FormData بنفس نمط Complaints.jsx
             const formDataToSend = new FormData();
-            formDataToSend.append("description", formData.description);
-            formDataToSend.append("type", formData.type);
-            formDataToSend.append("location", formData.location || "N/A");
-            formDataToSend.append("userId", user.userId);
+            formDataToSend.append('data', new Blob([JSON.stringify({
+                userId: user.userId,
+                type: formData.type,
+                description: formData.description,
+                location: formData.location || "N/A"
+            })], {
+                type: 'application/json'
+            }));
 
             if (formData.image) {
-                formDataToSend.append("image", formData.image);
+                formDataToSend.append('image', formData.image);
             }
 
             const newComplaint = await submitComplaint(formDataToSend);
@@ -247,10 +252,10 @@ const GarbageComplaint = () => {
 
                                     <div className="detail-row">
                                         <span>{t("garbageComplaint.type")}:</span>
-                                        <span>{t(`garbageComplaint.types.${complaint.complaintType}`)}</span>
+                                        <span>{t(`garbageComplaint.types.${complaint.type}`)}</span>
                                     </div>
 
-                                    {complaint.location && (
+                                    {complaint.location && complaint.location !== "N/A" && (
                                         <div className="detail-row">
                                             <span>{t("garbageComplaint.location")}:</span>
                                             <span>{complaint.location}</span>
