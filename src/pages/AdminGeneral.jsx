@@ -1022,15 +1022,5 @@ const AdminGeneral = () => {
     );
 };
 
-// Helper functions (you should implement these or import them)
-async function getPropertiesByUserId(userId) {
-    // Implement this function to fetch properties by user ID
-    return [];
-}
-
-async function addWaterReading(propertyId, reading) {
-    // Implement this function to add water reading
-    return Promise.resolve();
-}
 
 export default AdminGeneral;
