@@ -51,6 +51,8 @@ function AdminDashboard() {
                 }
             });
 
+
+            console.log(response.data);
             const usersWithValidRoles = response.data.content.map(user => ({
                 ...user,
                 role: typeof user.role === 'string' ? user.role : user.role?.name || 'USER',
