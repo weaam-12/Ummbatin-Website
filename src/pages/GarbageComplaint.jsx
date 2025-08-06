@@ -6,7 +6,8 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./GarbageComplaint.css";
 import { useNavigate } from "react-router-dom";
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const GarbageComplaint = () => {
     const { t, i18n } = useTranslation();
     const { user, loading: authLoading, error: authError } = useAuth();
