@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import axiosInstance from '../api';
 import { useAuth } from '../AuthContext';
 import { FaChild, FaCheckCircle, FaMoneyBillWave } from 'react-icons/fa';
+import { FiDownload } from 'react-icons/fi';
+
 import './Children.css';
 import {
     Card, Button, Alert, Spinner, Container, Modal, Form, Row, Col
@@ -110,7 +112,59 @@ const Children = () => {
         setPaymentSuccess(false);
         setReceipt(null);
     };
+    const generateReceipt = (child, kindergarten) => {
+        setLoading(true);
+        const receiptData = {
+            paymentId: `RCPT-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+            amount: 250,
+            paymentDate: new Date().toISOString(),
+            childName: child.name,
+            kindergartenName: kindergarten?.name || t('children.unknownKindergarten')
+        };
 
+        const element = document.createElement('div');
+        element.innerHTML = `
+        <div id="temp-receipt" style="padding: 20px; font-family: Arial;">
+            <h2 style="text-align: center;">${t('payment.receipt')}</h2>
+            <hr>
+            <div style="margin-bottom: 15px;">
+                <strong>${t('payment.childName')}:</strong> ${receiptData.childName}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>${t('payment.kindergarten')}:</strong> ${receiptData.kindergartenName}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>${t('payment.amount')}:</strong> 250₪
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>${t('payment.paymentDate')}:</strong> ${new Date(receiptData.paymentDate).toLocaleString()}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>${t('payment.transactionId')}:</strong> ${receiptData.paymentId}
+            </div>
+            <hr>
+            <p style="text-align: center; font-style: italic;">
+                ${t('payment.thankYou')}
+            </p>
+        </div>
+    `;
+
+        document.body.appendChild(element);
+
+        html2canvas(element.querySelector('#temp-receipt'), { scale: 2 }).then((canvas) => {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const w = pdf.internal.pageSize.getWidth();
+            const h = (canvas.height * w) / canvas.width;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, h);
+            pdf.save(`receipt-${child.name}-${new Date().toLocaleDateString()}.pdf`);
+            document.body.removeChild(element);
+            setLoading(false);
+        }).catch(() => {
+            document.body.removeChild(element);
+            setNotification({ type: 'danger', message: t('payment.pdfError') });
+            setLoading(false);
+        });
+    };
     const reloadChildren = async () => {
         const res = await axiosInstance.get('/api/children/my-children');
         setChildren(res.data);
@@ -243,7 +297,7 @@ const Children = () => {
     }
 
     return (
-        <div className={`children-page modern ${i18n.language}`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+        <div className={`children-page modern ${i18n.language}`} dir={i18n.language === 'ar' ? 'rtl' : 'rtl'}>
             <h1 className="page-title">👶 {t('children.myChildren')}</h1>
 
             {loading && <div className="loading-indicator">{t('general.loading')}</div>}
@@ -298,7 +352,9 @@ const Children = () => {
                     <tr>
                         <th>{t('children.childName')}</th>
                         <th>{t('children.birthDate')}</th>
-                        <th>{t('children.status')}</th>
+                        <th>{t('children.kindergarten')}</th>
+                        <th>{t('children.paymentStatus')}</th>
+                        <th>{t('children.actions')}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -309,6 +365,20 @@ const Children = () => {
                                 <td>{child.name}</td>
                                 <td>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</td>
                                 <td>{kg ? kg.name : t('children.enrolled')}</td>
+                                <td>
+                            <span className="badge bg-success">
+                                {t('children.paid')} 250₪
+                            </span>
+                                </td>
+                                <td>
+                                    <Button
+                                        variant="outline-primary"
+                                        size="sm"
+                                        onClick={() => generateReceipt(child, kg)}
+                                    >
+                                        <FiDownload/> {t('children.downloadReceipt')}
+                                    </Button>
+                                </td>
                             </tr>
                         );
                     })}
@@ -325,7 +395,7 @@ const Children = () => {
                         <div className="payment-success">
                             <div id="kindergarten-receipt" className="receipt-details">
                                 <div className="text-center mb-4">
-                                    <FaCheckCircle className="text-success" size={48} />
+                                    <FaCheckCircle className="text-success" size={48}/>
                                     <h3 className="mt-2">{t('payment.successTitle')}</h3>
                                 </div>
 
@@ -443,7 +513,7 @@ const Children = () => {
                                     >
                                         {loading ? (
                                             <>
-                                                <Spinner animation="border" size="sm" className="me-2" />
+                                                <Spinner animation="border" size="sm" className="me-2"/>
                                                 {t('payment.processing')}
                                             </>
                                         ) : (

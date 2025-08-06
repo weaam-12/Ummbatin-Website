@@ -162,6 +162,8 @@
     "search": "بحث..."
   },
   "payment": {
+    "receipt": "فاتورة الدفع",
+    "thankYou": "شكراً لاستخدامكم خدماتنا",
     "arnona": {
       "calculation": "الارنونا = مساحة العقار ({{area}} م²) × عدد الوحدات ({{units}}) × 50 شيقل = {{total}} شيقل"
     },
@@ -427,7 +429,7 @@
   },
   "garbageComplaint": {
     "success": {
-      "submit": "تم إرسال شكواك بنجاح! رقم التذكرة: {{ticketNumber}}"
+      "submit": "تم إرسال شكواك بنجاح "
     },
     "errors": {
       "submitFailed": "فشل في إرسال الشكوى، يرجى المحاولة مرة أخرى"
@@ -478,6 +480,10 @@
 
   },
   "children": {
+    "paid": "تم الدفع",
+    "downloadReceipt": "تنزيل الفاتورة",
+    "paymentStatus": "حالة الدفع",
+    "actions": "إجراءات",
     "receipt": "إيصال الدفع",
     "amount": "المبلغ",
     "paymentDate": "تاريخ الدفع",

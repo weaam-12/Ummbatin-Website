@@ -494,3 +494,26 @@
         flex-direction: column;
     }
 }
+.children-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.children-table th, .children-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.children-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.badge.bg-success {
+    background-color: #28a745;
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.85rem;
+}

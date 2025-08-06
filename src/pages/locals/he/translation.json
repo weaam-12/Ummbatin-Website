@@ -147,7 +147,8 @@
       "calculation": "ארנונה = שטח ({{area}} מ\"ר) × יחידות ({{units}}) × 50 שקלים = {{total}} שקלים"
     },
     "readingApproximation": "💧 קריאה משוערת: ‎{{unitPrice}} ש\"ח × ‎{{unitsCount}} = ‎{{amount}} ש\"ח",
-
+    "receipt": "קבלת תשלום",
+    "thankYou": "תודה שבחרת בנו",
     "title": "תשלום אלקטרוני",
     "cardDetails": "פרטי כרטיס",
     "cardName": "שם בעל הכרטיס",
@@ -413,7 +414,7 @@
   },
   "garbageComplaint": {
     "success": {
-      "submit": "התלונה שלך נשלחה בהצלחה! מספר הכרטיס: {{ticketNumber}}"
+      "submit": "התלונה שלך נשלחה בהצלחה! "
     },
     "errors": {
       "submitFailed": "השליחה נכשלה, אנא נסה שוב"
@@ -464,6 +465,10 @@
 
   },
   "children": {
+    "paid": "שולם",
+    "downloadReceipt": "הורדת קבלה",
+    "paymentStatus": "סטטוס תשלום",
+    "actions": "פעולות",
     "receipt": "קבלת תשלום",
     "amount": "סכום",
     "paymentDate": "תאריך תשלום",
