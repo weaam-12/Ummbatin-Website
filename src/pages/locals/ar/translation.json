@@ -181,6 +181,123 @@
     "units": "عدد الوحدات",
     "squareMeters": "متر مربع"
   },
+  "admin": {
+    "general": {
+      "title": "لوحة تحكم الإدمن",
+      "loadError": "حدث خطأ أثناء تحميل البيانات",
+      "dashboard": {
+        "overview": "نظرة عامة",
+        "eventsCount": "عدد الفعاليات",
+        "waterBills": "فواتير المياه",
+        "arnonaBills": "فواتير الأرنونا",
+        "quickActions": "إجراءات سريعة",
+        "recentEvents": "آخر الفعاليات"
+      },
+      "menu": {
+        "dashboard": "لوحة التحكم",
+        "payments": "إدارة الفواتير",
+        "events": "إدارة الفعاليات"
+      },
+      "actions": {
+        "generateWater": "توليد فواتير المياه",
+        "generateArnona": "توليد فواتير الأرنونا",
+        "addEvent": "إضافة فعالية جديدة",
+        "addProperty": "إضافة عقار جديد",
+        "addWaterReadings": "إضافة قراءات المياه"
+      }
+    },
+    "events": {
+      "title": "إدارة الفعاليات",
+      "addTitle": "إضافة فعالية جديدة",
+      "editTitle": "تعديل الفعالية",
+      "eventTitle": "عنوان الفعالية",
+      "description": "وصف الفعالية",
+      "newImage": "صورة جديدة (اختياري)",
+      "eventImage": "صورة الفعالية",
+      "addSuccess": "تمت إضافة الفعالية بنجاح",
+      "addError": "فشل في إضافة الفعالية",
+      "updateSuccess": "تم تحديث الفعالية بنجاح",
+      "updateError": "فشل في تحديث الفعالية",
+      "deleteSuccess": "تم حذف الفعالية بنجاح",
+      "deleteError": "فشل في حذف الفعالية",
+      "changeImage": "تغيير صورة الفعالية",
+      "currentImage": "صورة الفعالية الحالية",
+      "selectNewImage": "اختر صورة جديدة",
+      "changeImageButton": "تغيير الصورة",
+      "imageChangeSuccess": "تم تغيير صورة الفعالية بنجاح",
+      "imageChangeError": "فشل في تغيير الصورة",
+      "saveChanges": "حفظ التعديلات",
+      "saveEvent": "حفظ الفعالية"
+    },
+    "properties": {
+      "addTitle": "إضافة عقار جديد",
+      "userId": "رقم المستخدم (ID)",
+      "userIdPlaceholder": "أدخل رقم المستخدم",
+      "addressPlaceholder": "أدخل عنوان العقار",
+      "areaPlaceholder": "أدخل المساحة",
+      "unitsPlaceholder": "أدخل عدد الوحدات",
+      "addSuccess": "تمت إضافة العقار بنجاح",
+      "addError": "فشل في إضافة العقار",
+      "fetchError": "فشل في جلب عقارات المستخدم",
+      "noProperties": "لا يوجد مستخدمين لديهم عقارات حالياً",
+      "saveButton": "حفظ العقار"
+    },
+    "payments": {
+      "title": "إدارة الفواتير الشهرية",
+      "billType": "نوع الفاتورة",
+      "generateArnona": "توليد فواتير الأرنونا",
+      "generateWater": "توليد فواتير المياه",
+      "arnonaSuccess": "تم توليد فواتير الأرنونا بنجاح",
+      "waterSuccess": "تم توليد فواتير المياه بنجاح",
+      "generateError": "فشل في توليد الفواتير",
+      "generateButton": "توليد الفواتير",
+      "arnonaDescription": "سيتم توليد فواتير الأرنونا لجميع العقارات بناءً على المساحة وعدد الوحدات",
+      "waterDescription": "سيتم توليد فواتير المياه لجميع العقارات بناءً على قراءات المياه"
+    },
+    "water": {
+      "addReadings": "إضافة قراءات المياه",
+      "reading": "قراءة المياه",
+      "readingPlaceholder": "أدخل القراءة",
+      "readingsSuccess": "تمت إضافة قراءات المياه بنجاح",
+      "readingsError": "فشل في إضافة قراءات المياه",
+      "saveReadings": "حفظ القراءات"
+    }
+  },
+  "payment": {
+    "status": {
+      "PAID": "مدفوع",
+      "PENDING": "قيد الانتظار",
+      "FAILED": "فشل"
+    },
+    "types": {
+      "water": "مياه",
+      "arnona": "أرنونا"
+    },
+    "invoice": {
+      "amount": "المبلغ",
+      "paymentStatus": "حالة الدفع"
+    }
+  },
+  "labels": {
+    "fullName": "الاسم الكامل",
+    "address": "العنوان",
+    "area": "المساحة",
+    "units": "عدد الوحدات"
+  },
+  "event": {
+    "date": "التاريخ",
+    "location": "الموقع"
+  },
+  "common": {
+    "close": "إغلاق",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "loading": "جاري التحميل..."
+  },
+  "general": {
+    "squareMeters": "متر مربع",
+    "currency": "شيقل"
+  },
   "login": {
     "title": "تسجيل الدخول",
     "email": "البريد الإلكتروني",
