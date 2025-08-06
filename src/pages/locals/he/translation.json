@@ -156,6 +156,7 @@
   "loading": "טוען...",
   "retry": "נסה שוב",
   "confirmDelete": "האם אתה בטוח שברצונך למחוק משתמש זה?",
+  "close": "סגור",
   "errors": {
     "fetchUsers": "שגיאה בטעינת משתמשים",
     "deleteUser": "שגיאה במחיקת משתמש",
@@ -166,6 +167,29 @@
     "totalAdmins": "מספר מנהלים",
     "totalResidents": "מספר תושבים",
     "activeUsers": "משתמשים פעילים"
+  },
+  "roles": {
+    "ADMIN": "מנהל",
+    "RESIDENT": "תושב",
+    "USER": "משתמש"
+  },
+  "pagination": {
+    "previous": "הקודם",
+    "next": "הבא",
+    "page": "עמוד"
+  },
+  "userDetails": {
+    "title": "פרטי משתמש",
+    "accountInfo": "פרטי חשבון",
+    "status": "סטטוס",
+    "active": "פעיל",
+    "inactive": "לא פעיל",
+    "wives": "נשים",
+    "children": "ילדים"
+  },
+  "labels": {
+    "fullName": "שם מלא",
+    "birthDate": "תאריך לידה"
   },
   "payment": {
     "arnona": {

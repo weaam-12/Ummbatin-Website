@@ -129,6 +129,7 @@
   "loading": "جار التحميل...",
   "retry": "إعادة المحاولة",
   "confirmDelete": "هل أنت متأكد من حذف هذا المستخدم؟",
+  "close": "إغلاق",
   "errors": {
     "fetchUsers": "فشل جلب بيانات المستخدمين",
     "deleteUser": "فشل حذف المستخدم",
@@ -139,6 +140,29 @@
     "totalAdmins": "عدد المديرين",
     "totalResidents": "عدد المقيمين",
     "activeUsers": "المستخدمون النشطون"
+  },
+  "roles": {
+    "ADMIN": "مدير",
+    "RESIDENT": "مقيم",
+    "USER": "مستخدم"
+  },
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي",
+    "page": "الصفحة"
+  },
+  "userDetails": {
+    "title": "تفاصيل المستخدم",
+    "accountInfo": "معلومات الحساب",
+    "status": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "wives": "الزوجات",
+    "children": "الأبناء"
+  },
+  "labels": {
+    "fullName": "الاسم الكامل",
+    "birthDate": "تاريخ الميلاد"
   },
   "login": {
     "title": "تسجيل الدخول",
