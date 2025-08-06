@@ -287,12 +287,29 @@ const Payments = () => {
                                                 </Badge>
                                             </div>
 
-                                            {/* ✅ عرض عدد "القراءات" فقط إذا كانت الفاتورة من نوع مياه */}
+                                            {/* قراءة المياه */}
                                             {paymentType === 'water' && (
                                                 <div className="mt-2 text-primary fw-bold">
-                                                    💧 القراءة التقريبية: {(payment.amount / 30).toFixed(2)} قراءة (30 شيقل × {Math.ceil(payment.amount / 30)})
+                                                    💧 {t('payments.readingApproximation', {
+                                                    amount: (payment.amount / 30).toFixed(2),
+                                                    unitPrice: 30,
+                                                    unitsCount: Math.ceil((payment.amount / 30).toFixed(2))
+                                                })}
                                                 </div>
                                             )}
+
+                                            {/* حساب الأرنونا */}
+                                            {paymentType === 'arnona' && (
+                                                <div className="mt-2 text-primary fw-bold">
+                                                    {t('payments.arnona.calculation', {
+                                                        area: propertyInfo.area,
+                                                        units: propertyInfo.units,
+                                                        price: 50,
+                                                        total: propertyInfo.area * propertyInfo.units * 50
+                                                    })}
+                                                </div>
+                                            )}
+
 
                                             <Button
                                                 variant={payment.status === 'FAILED' ? 'danger' : 'primary'}
@@ -334,11 +351,29 @@ const Payments = () => {
                                     </div>
 
                                     {/* ✅ نفس المنطق، نعرض عدد "القراءات" إذا كانت مياه */}
+                                    {/* قراءة المياه */}
                                     {paymentType === 'water' && (
                                         <div className="mt-2 text-primary fw-bold">
-                                            💧 القراءة التقريبية: {(payment.amount / 30).toFixed(2)} قراءة (30 شيقل × {Math.ceil(payment.amount / 30)})
+                                            💧 {t('payments.readingApproximation', {
+                                            amount: (payment.amount / 30).toFixed(2),
+                                            unitPrice: 30,
+                                            unitsCount: Math.ceil((payment.amount / 30).toFixed(2))
+                                        })}
                                         </div>
                                     )}
+
+                                    {/* حساب الأرنونا */}
+                                    {paymentType === 'arnona' && (
+                                        <div className="mt-2 text-primary fw-bold">
+                                            {t('payments.arnona.calculation', {
+                                                area: propertyInfo.area,
+                                                units: propertyInfo.units,
+                                                price: 50,
+                                                total: propertyInfo.area * propertyInfo.units * 50
+                                            })}
+                                        </div>
+                                    )}
+
 
                                     <Button
                                         variant="outline-success"
