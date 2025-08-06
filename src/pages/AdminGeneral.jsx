@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
     Container, Row, Col, Card, Button, Table, Modal,
     Alert, Spinner, Badge, Form
@@ -12,11 +12,9 @@ import './AdminGeneral.css';
 import {
     getPropertiesByUserId,
     addWaterReading,
-    fetchPayments,
-    fetchUsersWithProperties
+    fetchUsersWithProperties, axiosInstance, getUsersWithPayments, getCurrentMonthPayments
 } from '../api.js';
 import { useTranslation } from 'react-i18next';
-import pagination from "react-bootstrap/Pagination";
 
 const AdminGeneral = () => {
     const { t, i18n } = useTranslation();
@@ -255,27 +253,25 @@ const AdminGeneral = () => {
     };
 
     // ===================== دوال جلب البيانات =====================
-    const fetchUsersWithProperties = async () => {
+    const fetchUsersWithPayments = async () => {
         try {
-            const response = await axiosInstance.get("api/users/all");
-            const users = Array.isArray(response.data) ? response.data : [];
-            return users
-                .filter(u => u.properties?.length > 0)
-                .map(u => ({ ...u, property: u.properties[0] }));
+            const currentDate = new Date();
+            const month = currentDate.getMonth() + 1;
+            const year = currentDate.getFullYear();
+
+            const usersWithPayments = await getUsersWithPayments(month, year);
+            return usersWithPayments;
         } catch (error) {
-            console.error('Error fetching users:', error);
-            setNotification({ type: 'danger', message: t('admin.users.fetchError') });
+            console.error('Error fetching users with payments:', error);
             return [];
         }
     };
-
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const [users, payments] = await Promise.all([
                 fetchUsersWithProperties(),
-                fetchPayments()
             ]);
             setUsers(users);
             setPayments(payments);
@@ -308,8 +304,8 @@ const AdminGeneral = () => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const usersRes = await fetchUsersWithProperties();
-                const paymentsRes = await fetchPayments().catch(() => []);
+                const usersRes = await fetchUsersWithPayments();
+                const paymentsRes = await getCurrentMonthPayments().catch(() => []);
 
                 setUsers(usersRes);
                 setPayments(paymentsRes);
