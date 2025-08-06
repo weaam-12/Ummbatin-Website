@@ -224,9 +224,6 @@ const Profile = () => {
 
                     {/* أزرار التحكم */}
                     <div className="profile-actions">
-                        <button className="action-btn secondary-btn">
-                            <FaUserEdit/> {t("profile.labels.editProfile")}
-                        </button>
                         <button onClick={logout} className="action-btn primary-btn">
                             <FaSignOutAlt/> {t("profile.labels.logout")}
                         </button>

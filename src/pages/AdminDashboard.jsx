@@ -11,11 +11,9 @@ import {
     FiMoreVertical,
     FiEye,
     FiX,
-    FiCheck,
     FiUser,
     FiShield,
-    FiHome,
-    FiCheckCircle
+    FiHome
 } from "react-icons/fi";
 import "./AdminDashboard.css";
 
@@ -42,6 +40,7 @@ function AdminDashboard() {
         totalResidents: users.filter(u => u.role === 'RESIDENT').length,
         activeUsers: users.filter(u => u.isActive).length
     };
+
     const fetchUsers = async () => {
         try {
             setLoading(true);
@@ -64,20 +63,20 @@ function AdminDashboard() {
                 total: response.data.totalElements
             }));
         } catch (err) {
-            setError(t("errors.fetchUsers") || "فشل جلب بيانات المستخدمين");
+            setError(t("errors.fetchUsers"));
         } finally {
             setLoading(false);
         }
     };
 
     const deleteUser = async (id) => {
-        if (!window.confirm(t("confirmDelete") || "هل أنت متأكد من حذف هذا المستخدم؟")) return;
+        if (!window.confirm(t("confirmDelete"))) return;
         try {
             await axiosInstance.delete(`/api/users/${id}`);
             setUsers(prev => prev.filter(user => user.userId !== id));
             setShowDropdownId(null);
         } catch (err) {
-            setError(t("errors.deleteUser") || "فشل حذف المستخدم");
+            setError(t("errors.deleteUser"));
         }
     };
 
@@ -90,7 +89,7 @@ function AdminDashboard() {
             ));
             setShowDropdownId(null);
         } catch (err) {
-            setError(t("errors.updateRole") || "فشل تحديث صلاحية المستخدم");
+            setError(t("errors.updateRole"));
         }
     };
 
@@ -109,13 +108,12 @@ function AdminDashboard() {
             return role === 'ADMIN' ? 'danger' :
                 role === 'RESIDENT' ? 'success' : 'secondary';
         } else if (role?.id) {
-            return role.id === 1 ? 'danger' :  // Admin
-                role.id === 2 ? 'success' : // Resident
-                    'secondary';                // User
+            return role.id === 1 ? 'danger' :
+                role.id === 2 ? 'success' :
+                    'secondary';
         }
         return 'secondary';
     };
-
 
     if (loading) {
         return (
@@ -124,7 +122,7 @@ function AdminDashboard() {
                     <div className="spinner">
                         <FiRefreshCw className="spinner-icon" />
                     </div>
-                    <p>{t("loading") || "جاري التحميل..."}</p>
+                    <p>{t("loading")}</p>
                 </div>
             </div>
         );
@@ -136,7 +134,7 @@ function AdminDashboard() {
                 <div className="error-alert">
                     {error}
                     <button className="retry-btn" onClick={fetchUsers}>
-                        <FiRefreshCw /> {t("retry") || "إعادة المحاولة"}
+                        <FiRefreshCw /> {t("retry")}
                     </button>
                 </div>
             </div>
@@ -149,20 +147,20 @@ function AdminDashboard() {
                 {/* Header */}
                 <div className="dashboard-header">
                     <h1 className="dashboard-title">
-                        <FiUser /> {t("userManagement") || "إدارة المستخدمين"}
+                        <FiUser /> {t("userManagement")}
                     </h1>
                     <div className="action-buttons">
                         <button
                             className="btn btn-primary"
                             onClick={() => navigate("/register")}
                         >
-                            <FiUserPlus /> {t("register") || "تسجيل مستخدم"}
+                            <FiUserPlus /> {t("register")}
                         </button>
                         <button
                             className="btn btn-secondary"
                             onClick={fetchUsers}
                         >
-                            <FiRefreshCw /> {t("refresh") || "تحديث"}
+                            <FiRefreshCw /> {t("refresh")}
                         </button>
                     </div>
                 </div>
@@ -174,7 +172,7 @@ function AdminDashboard() {
                             <FiUser />
                         </div>
                         <div className="stat-info">
-                            <h3>إجمالي المستخدمين</h3>
+                            <h3>{t("stats.totalUsers")}</h3>
                             <p>{stats.totalUsers}</p>
                         </div>
                     </div>
@@ -184,7 +182,7 @@ function AdminDashboard() {
                             <FiShield />
                         </div>
                         <div className="stat-info">
-                            <h3>عدد المديرين</h3>
+                            <h3>{t("stats.totalAdmins")}</h3>
                             <p>{stats.totalAdmins}</p>
                         </div>
                     </div>
@@ -194,28 +192,27 @@ function AdminDashboard() {
                             <FiHome />
                         </div>
                         <div className="stat-info">
-                            <h3>عدد المقيمين</h3>
+                            <h3>{t("stats.totalResidents")}</h3>
                             <p>{stats.totalResidents}</p>
                         </div>
                     </div>
-
                 </div>
 
                 {/* Users Table */}
                 <div className="table-container">
                     {users.length === 0 ? (
                         <div className="no-results">
-                            {t("noResults") || "لا توجد نتائج"}
+                            {t("noResults")}
                         </div>
                     ) : (
                         <table className="users-table">
                             <thead>
                             <tr>
                                 <th>#</th>
-                                <th>{t("email") || "البريد الإلكتروني"}</th>
-                                <th>{t("name") || "الاسم"}</th>
-                                <th>{t("role") || "الصلاحية"}</th>
-                                <th>{t("actions") || "إجراءات"}</th>
+                                <th>{t("email")}</th>
+                                <th>{t("name")}</th>
+                                <th>{t("role")}</th>
+                                <th>{t("actions")}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -225,10 +222,9 @@ function AdminDashboard() {
                                     <td>{user.email}</td>
                                     <td>{user.fullName || "--"}</td>
                                     <td>
-                                        <span className={`role-badge badge-${getRoleVariant(user.role)}`}>
-                                               {user.role === 1 || user.role?.id === 1 ? 'مدير' :
-                                                user.role === 2 || user.role?.id === 2 ? 'مقيم' : 'مستخدم'}
-                                          </span>
+                                            <span className={`role-badge badge-${getRoleVariant(user.role)}`}>
+                                                {t(`roles.${user.role}`)}
+                                            </span>
                                     </td>
                                     <td>
                                         <div className="action-dropdown">
@@ -244,7 +240,7 @@ function AdminDashboard() {
                                                     className="dropdown-item"
                                                     onClick={() => openUserDetails(user)}
                                                 >
-                                                    <FiEye/> {t("view") || "عرض"}
+                                                    <FiEye/> {t("view")}
                                                 </button>
                                                 {user.userId !== currentUser?.userId && (
                                                     <>
@@ -252,13 +248,13 @@ function AdminDashboard() {
                                                             className="dropdown-item"
                                                             onClick={() => changeRole(user.userId, user.role)}
                                                         >
-                                                            <FiEdit/> {t("changeRole") || "تغيير الصلاحية"}
+                                                            <FiEdit/> {t("changeRole")}
                                                         </button>
                                                         <button
                                                             className="dropdown-item danger"
                                                             onClick={() => deleteUser(user.userId)}
                                                         >
-                                                            <FiTrash2/> {t("delete") || "حذف"}
+                                                            <FiTrash2/> {t("delete")}
                                                         </button>
                                                     </>
                                                 )}
@@ -279,15 +275,15 @@ function AdminDashboard() {
                         disabled={pagination.page === 0}
                         onClick={() => setPagination(prev => ({...prev, page: prev.page - 1}))}
                     >
-                        السابق
+                        {t("pagination.previous")}
                     </button>
-                    <span>الصفحة {pagination.page + 1}</span>
+                    <span>{t("pagination.page")} {pagination.page + 1}</span>
                     <button
                         className="btn btn-secondary"
                         disabled={(pagination.page + 1) * pagination.size >= pagination.total}
                         onClick={() => setPagination(prev => ({...prev, page: prev.page + 1}))}
                     >
-                        التالي
+                        {t("pagination.next")}
                     </button>
                 </div>
             </div>
@@ -297,7 +293,7 @@ function AdminDashboard() {
                 <div className="modal-overlay">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h2 className="modal-title">تفاصيل المستخدم</h2>
+                            <h2 className="modal-title">{t("userDetails.title")}</h2>
                             <button
                                 className="close-btn"
                                 onClick={() => setShowModal(false)}
@@ -307,32 +303,31 @@ function AdminDashboard() {
                         </div>
                         <div className="modal-body">
                             <div className="user-section">
-                                <h3>معلومات الحساب</h3>
-                                <p><strong>الاسم الكامل:</strong> {selectedUser.fullName || "--"}</p>
-                                <p><strong>البريد الإلكتروني:</strong> {selectedUser.email}</p>
+                                <h3>{t("userDetails.accountInfo")}</h3>
+                                <p><strong>{t("labels.fullName")}:</strong> {selectedUser.fullName || "--"}</p>
+                                <p><strong>{t("email")}:</strong> {selectedUser.email}</p>
                                 <p>
-                                    <strong>الحالة:</strong>
+                                    <strong>{t("userDetails.status")}:</strong>
                                     <span className={`role-badge badge-${selectedUser.isActive ? 'success' : 'danger'}`}>
-                            {selectedUser.isActive ? 'نشط' : 'غير نشط'}
-                        </span>
+                                        {selectedUser.isActive ? t("userDetails.active") : t("userDetails.inactive")}
+                                    </span>
                                 </p>
                                 <p>
-                                    <strong>الصلاحية:</strong>
+                                    <strong>{t("role")}:</strong>
                                     <span className={`role-badge badge-${getRoleVariant(selectedUser.role)}`}>
-                            {selectedUser.role === 'ADMIN' || selectedUser.role?.id === 1 ? 'مدير' :
-                                selectedUser.role === 'RESIDENT' || selectedUser.role?.id === 2 ? 'مقيم' : 'مستخدم'}
-                        </span>
+                                        {t(`roles.${selectedUser.role}`)}
+                                    </span>
                                 </p>
                             </div>
 
                             {selectedUser.wives?.length > 0 && (
                                 <div className="user-section">
-                                    <h3>الزوجات</h3>
+                                    <h3>{t("userDetails.wives")}</h3>
                                     <ul>
                                         {selectedUser.wives.map((wife, i) => (
                                             <li key={i}>
-                                                <strong>الاسم:</strong> {wife.name || "--"}<br />
-                                                {wife.birthDate && <><strong>تاريخ الميلاد:</strong> {wife.birthDate}</>}
+                                                <strong>{t("labels.fullName")}:</strong> {wife.name || "--"}<br />
+                                                {wife.birthDate && <><strong>{t("labels.birthDate")}:</strong> {wife.birthDate}</>}
                                             </li>
                                         ))}
                                     </ul>
@@ -341,12 +336,12 @@ function AdminDashboard() {
 
                             {selectedUser.children?.length > 0 && (
                                 <div className="user-section">
-                                    <h3>الأبناء</h3>
+                                    <h3>{t("userDetails.children")}</h3>
                                     <ul>
                                         {selectedUser.children.map((child, i) => (
                                             <li key={i}>
-                                                <strong>الاسم:</strong> {child.name || "--"}<br />
-                                                {child.birthDate && <><strong>تاريخ الميلاد:</strong> {child.birthDate}</>}
+                                                <strong>{t("labels.fullName")}:</strong> {child.name || "--"}<br />
+                                                {child.birthDate && <><strong>{t("labels.birthDate")}:</strong> {child.birthDate}</>}
                                             </li>
                                         ))}
                                     </ul>
@@ -358,7 +353,7 @@ function AdminDashboard() {
                                 className="btn btn-secondary"
                                 onClick={() => setShowModal(false)}
                             >
-                                إغلاق
+                                {t("close")}
                             </button>
                         </div>
                     </div>

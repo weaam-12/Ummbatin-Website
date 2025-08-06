@@ -115,7 +115,31 @@
       "commercialLicense": "تصريح تجاري"
     }
   },
-
+  "userManagement": "إدارة المستخدمين",
+  "register": "تسجيل مستخدم",
+  "refresh": "تحديث",
+  "email": "البريد الإلكتروني",
+  "name": "الاسم",
+  "role": "الصلاحية",
+  "actions": "إجراءات",
+  "view": "عرض",
+  "changeRole": "تغيير الصلاحية",
+  "delete": "حذف",
+  "noResults": "لا توجد نتائج",
+  "loading": "جار التحميل...",
+  "retry": "إعادة المحاولة",
+  "confirmDelete": "هل أنت متأكد من حذف هذا المستخدم؟",
+  "errors": {
+    "fetchUsers": "فشل جلب بيانات المستخدمين",
+    "deleteUser": "فشل حذف المستخدم",
+    "updateRole": "فشل تحديث صلاحية المستخدم"
+  },
+  "stats": {
+    "totalUsers": "إجمالي المستخدمين",
+    "totalAdmins": "عدد المديرين",
+    "totalResidents": "عدد المقيمين",
+    "activeUsers": "المستخدمون النشطون"
+  },
   "login": {
     "title": "تسجيل الدخول",
     "email": "البريد الإلكتروني",

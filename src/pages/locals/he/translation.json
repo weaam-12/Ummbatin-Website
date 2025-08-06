@@ -142,6 +142,31 @@
     "success": "התחברות בוצעה בהצלחה!",
     "error": "שגיאה במהלך ההתחברות."
   },
+  "userManagement": "ניהול משתמשים",
+  "register": "רישום משתמש",
+  "refresh": "רענון",
+  "email": "אימייל",
+  "name": "שם",
+  "role": "הרשאה",
+  "actions": "פעולות",
+  "view": "צפייה",
+  "changeRole": "שינוי הרשאה",
+  "delete": "מחיקה",
+  "noResults": "אין תוצאות",
+  "loading": "טוען...",
+  "retry": "נסה שוב",
+  "confirmDelete": "האם אתה בטוח שברצונך למחוק משתמש זה?",
+  "errors": {
+    "fetchUsers": "שגיאה בטעינת משתמשים",
+    "deleteUser": "שגיאה במחיקת משתמש",
+    "updateRole": "שגיאה בעדכון הרשאות"
+  },
+  "stats": {
+    "totalUsers": "סה\"כ משתמשים",
+    "totalAdmins": "מספר מנהלים",
+    "totalResidents": "מספר תושבים",
+    "activeUsers": "משתמשים פעילים"
+  },
   "payment": {
     "arnona": {
       "calculation": "ארנונה = שטח ({{area}} מ\"ר) × יחידות ({{units}}) × 50 שקלים = {{total}} שקלים"
