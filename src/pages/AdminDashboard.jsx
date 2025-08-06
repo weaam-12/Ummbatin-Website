@@ -36,8 +36,8 @@ function AdminDashboard() {
 
     const stats = {
         totalUsers: users.length,
-        totalAdmins: users.filter(u => u.role === 'ADMIN').length,
-        totalResidents: users.filter(u => u.role === 'RESIDENT').length,
+        totalAdmins: users.filter(u => u.role?.roleName === 'ADMIN').length,
+        totalResidents: users.filter(u => u.role?.roleName === 'RESIDENT').length,
         activeUsers: users.filter(u => u.isActive).length
     };
 
@@ -51,15 +51,7 @@ function AdminDashboard() {
                 }
             });
 
-
-            console.log(response.data);
-            const usersWithValidRoles = response.data.content.map(user => ({
-                ...user,
-                role: typeof user.roleName === 'string' ? user.roleName : user.roleName?.name || 'RESIDENT',
-                userId: user.userId || user.id
-            }));
-
-            setUsers(usersWithValidRoles);
+            setUsers(response.data.content);
             setPagination(prev => ({
                 ...prev,
                 total: response.data.totalElements
@@ -75,7 +67,7 @@ function AdminDashboard() {
         if (!window.confirm(t("confirmDelete"))) return;
         try {
             await axiosInstance.delete(`/api/users/${id}`);
-            setUsers(prev => prev.filter(user => user.userId !== id));
+            setUsers(prev => prev.filter(user => user.id !== id));
             setShowDropdownId(null);
         } catch (err) {
             setError(t("errors.deleteUser"));
@@ -87,7 +79,13 @@ function AdminDashboard() {
         try {
             await axiosInstance.patch(`/api/users/${id}/role`, { role: newRole });
             setUsers(prev => prev.map(user =>
-                user.userId === id ? { ...user, role: newRole } : user
+                user.id === id ? {
+                    ...user,
+                    role: {
+                        ...user.role,
+                        roleName: newRole
+                    }
+                } : user
             ));
             setShowDropdownId(null);
         } catch (err) {
@@ -106,15 +104,8 @@ function AdminDashboard() {
     };
 
     const getRoleVariant = (role) => {
-        if (typeof role === 'string') {
-            return role === 'ADMIN' ? 'danger' :
-                role === 'RESIDENT' ? 'success' : 'secondary';
-        } else if (role?.id) {
-            return role.id === 1 ? 'danger' :
-                role.id === 2 ? 'success' :
-                    'secondary';
-        }
-        return 'secondary';
+        if (!role) return 'secondary';
+        return role.roleName === 'ADMIN' ? 'danger' : 'success';
     };
 
     if (loading) {
@@ -219,42 +210,42 @@ function AdminDashboard() {
                             </thead>
                             <tbody>
                             {users.map((user, index) => (
-                                <tr key={user.userId}>
+                                <tr key={user.id}>
                                     <td>{index + 1}</td>
                                     <td>{user.email}</td>
                                     <td>{user.fullName || "--"}</td>
                                     <td>
                                             <span className={`role-badge badge-${getRoleVariant(user.role)}`}>
-                                                {t(`roles.${user.role}`)}
+                                                {t(`roles.${user.role?.roleName}`)}
                                             </span>
                                     </td>
                                     <td>
                                         <div className="action-dropdown">
                                             <button
                                                 className="dropdown-toggle"
-                                                onClick={() => toggleDropdown(user.userId)}
+                                                onClick={() => toggleDropdown(user.id)}
                                             >
                                                 <FiMoreVertical/>
                                             </button>
                                             <div
-                                                className={`dropdown-menu ${showDropdownId === user.userId ? 'show' : ''}`}>
+                                                className={`dropdown-menu ${showDropdownId === user.id ? 'show' : ''}`}>
                                                 <button
                                                     className="dropdown-item"
                                                     onClick={() => openUserDetails(user)}
                                                 >
                                                     <FiEye/> {t("view")}
                                                 </button>
-                                                {user.userId !== currentUser?.userId && (
+                                                {user.id !== currentUser?.id && (
                                                     <>
                                                         <button
                                                             className="dropdown-item"
-                                                            onClick={() => changeRole(user.userId, user.role)}
+                                                            onClick={() => changeRole(user.id, user.role?.roleName)}
                                                         >
                                                             <FiEdit/> {t("changeRole")}
                                                         </button>
                                                         <button
                                                             className="dropdown-item danger"
-                                                            onClick={() => deleteUser(user.userId)}
+                                                            onClick={() => deleteUser(user.id)}
                                                         >
                                                             <FiTrash2/> {t("delete")}
                                                         </button>
@@ -317,7 +308,7 @@ function AdminDashboard() {
                                 <p>
                                     <strong>{t("role")}:</strong>
                                     <span className={`role-badge badge-${getRoleVariant(selectedUser.role)}`}>
-                                        {t(`roles.${selectedUser.role}`)}
+                                        {t(`roles.${selectedUser.role?.roleName}`)}
                                     </span>
                                 </p>
                             </div>
