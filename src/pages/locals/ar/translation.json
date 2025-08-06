@@ -160,6 +160,27 @@
     "wives": "الزوجات",
     "children": "الأبناء"
   },
+  "userDetails": {
+    "title": "تفاصيل المستخدم",
+    "accountInfo": "معلومات الحساب",
+    "contactInfo": "معلومات الاتصال",
+    "properties": "العقارات المملوكة",
+    "wives": "الزوجات",
+    "children": "الأولاد",
+    "status": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "labels": {
+    "fullName": "الاسم الكامل",
+    "phone": "رقم الهاتف",
+    "address": "العنوان",
+    "birthDate": "تاريخ الميلاد",
+    "mother": "الأم",
+    "area": "المساحة",
+    "units": "عدد الوحدات",
+    "squareMeters": "متر مربع"
+  },
   "labels": {
     "fullName": "الاسم الكامل",
     "birthDate": "تاريخ الميلاد"

@@ -352,6 +352,152 @@ function AdminDashboard() {
                     </div>
                 </div>
             )}
+
+            {showModal && selectedUser && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h2 className="modal-title">{t("userDetails.title")}</h2>
+                            <button
+                                className="close-btn"
+                                onClick={() => setShowModal(false)}
+                            >
+                                <FiX />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {/* معلومات الحساب */}
+                            <div className="user-section">
+                                <h3>{t("userDetails.accountInfo")}</h3>
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <strong>{t("labels.fullName")}:</strong>
+                                        <span>{selectedUser.fullName || "--"}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <strong>{t("email")}:</strong>
+                                        <span>{selectedUser.email}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <strong>{t("labels.phone")}:</strong>
+                                        <span>{selectedUser.phone || "--"}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <strong>{t("userDetails.status")}:</strong>
+                                        <span className={`role-badge badge-${selectedUser.isActive ? 'success' : 'danger'}`}>
+                                {selectedUser.isActive ? t("userDetails.active") : t("userDetails.inactive")}
+                            </span>
+                                    </div>
+                                    <div className="info-item">
+                                        <strong>{t("role")}:</strong>
+                                        <span className={`role-badge badge-${getRoleVariant(selectedUser.role)}`}>
+                                {t(`roles.${selectedUser.role?.roleName}`)}
+                            </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* معلومات الاتصال */}
+                            <div className="user-section">
+                                <h3>{t("userDetails.contactInfo")}</h3>
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <strong>{t("labels.phone")}:</strong>
+                                        <span>{selectedUser.phone || "--"}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <strong>{t("labels.address")}:</strong>
+                                        <span>
+                                {selectedUser.properties?.length > 0
+                                    ? selectedUser.properties[0].address
+                                    : "--"}
+                            </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* العقارات المملوكة */}
+                            {selectedUser.properties?.length > 0 && (
+                                <div className="user-section">
+                                    <h3>{t("userDetails.properties")} ({selectedUser.properties.length})</h3>
+                                    <div className="properties-grid">
+                                        {selectedUser.properties.map((property, index) => (
+                                            <div key={index} className="property-item">
+                                                <div className="property-address">
+                                                    <strong>{t("labels.address")}:</strong> {property.address}
+                                                </div>
+                                                <div className="property-details">
+                                        <span>
+                                            <strong>{t("labels.area")}:</strong> {property.area} {t("labels.squareMeters")}
+                                        </span>
+                                                    <span>
+                                            <strong>{t("labels.units")}:</strong> {property.numberOfUnits}
+                                        </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* الزوجات */}
+                            {selectedUser.wives?.length > 0 && (
+                                <div className="user-section">
+                                    <h3>{t("userDetails.wives")} ({selectedUser.wives.length})</h3>
+                                    <div className="wives-grid">
+                                        {selectedUser.wives.map((wife, index) => (
+                                            <div key={index} className="wife-item">
+                                                <div className="wife-name">
+                                                    <strong>{t("labels.fullName")}:</strong> {wife.name || "--"}
+                                                </div>
+                                                {wife.birthDate && (
+                                                    <div className="wife-birthdate">
+                                                        <strong>{t("labels.birthDate")}:</strong> {wife.birthDate}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* الأولاد */}
+                            {selectedUser.children?.length > 0 && (
+                                <div className="user-section">
+                                    <h3>{t("userDetails.children")} ({selectedUser.children.length})</h3>
+                                    <div className="children-grid">
+                                        {selectedUser.children.map((child, index) => (
+                                            <div key={index} className="child-item">
+                                                <div className="child-name">
+                                                    <strong>{t("labels.fullName")}:</strong> {child.name || "--"}
+                                                </div>
+                                                {child.birthDate && (
+                                                    <div className="child-birthdate">
+                                                        <strong>{t("labels.birthDate")}:</strong> {child.birthDate}
+                                                    </div>
+                                                )}
+                                                {child.motherName && (
+                                                    <div className="child-mother">
+                                                        <strong>{t("labels.mother")}:</strong> {child.motherName}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setShowModal(false)}
+                            >
+                                {t("close")}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

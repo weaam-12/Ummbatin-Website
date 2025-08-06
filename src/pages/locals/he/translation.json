@@ -187,6 +187,27 @@
     "wives": "נשים",
     "children": "ילדים"
   },
+  "userDetails": {
+    "title": "פרטי משתמש",
+    "accountInfo": "פרטי חשבון",
+    "contactInfo": "פרטי יצירת קשר",
+    "properties": "נכסים בבעלות",
+    "wives": "נשים",
+    "children": "ילדים",
+    "status": "סטטוס",
+    "active": "פעיל",
+    "inactive": "לא פעיל"
+  },
+  "labels": {
+    "fullName": "שם מלא",
+    "phone": "טלפון",
+    "address": "כתובת",
+    "birthDate": "תאריך לידה",
+    "mother": "אמא",
+    "area": "שטח",
+    "units": "יחידות",
+    "squareMeters": "מטר רבוע"
+  },
   "labels": {
     "fullName": "שם מלא",
     "birthDate": "תאריך לידה"
