@@ -17,10 +17,12 @@
     background-color: var(--navbar-bg);
     box-shadow: var(--navbar-shadow);
 }
+
 .notifications-menu {
     position: relative;
     display: inline-block;
 }
+
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -37,6 +39,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 /* ---------------------- العلامة التجارية ---------------------- */
@@ -206,6 +209,7 @@
     opacity: 0;
     visibility: hidden;
     transition: all var(--transition-speed);
+    display: block;
 }
 
 .dropdown-menu.show {
@@ -221,6 +225,7 @@
     text-decoration: none;
     gap: 10px;
     transition: all var(--transition-speed);
+    white-space: nowrap;
 }
 
 .dropdown-item:hover {
@@ -237,8 +242,6 @@
 }
 
 /* ---------------------- الإشعارات ---------------------- */
-
-
 .notifications-button {
     display: flex;
     align-items: center;
@@ -287,11 +290,11 @@
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     padding: 0.5rem 0;
-    z-index: 1001; /* تأكد أنها أعلى من أي عنصر آخر */
+    z-index: 1001;
     opacity: 0;
     visibility: hidden;
     transition: all var(--transition-speed);
-    display: block !important; /* تأكد من أن العنصر معروض */
+    display: block !important;
 }
 
 .notifications-dropdown.show {
@@ -300,17 +303,24 @@
     transform: translateY(0);
 }
 
-.notifications-dropdown.show {
-    opacity: 1;
-    visibility: visible;
-}
-
 .dropdown-header {
     font-weight: bold;
     padding: 0.75rem 1rem;
     border-bottom: 1px solid #f0f0f0;
     background-color: #f9fbff;
     color: #003366;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mark-all-read {
+    background: none;
+    border: none;
+    color: var(--navbar-primary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
 }
 
 .notification-item {
@@ -338,6 +348,21 @@
     color: #777;
 }
 
+.notification-error {
+    padding: 1rem;
+    color: #d32f2f;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-direction: column;
+}
+
+.notification-empty {
+    padding: 1rem;
+    text-align: center;
+    color: #666;
+}
+
 .view-all {
     text-align: center;
     padding: 0.6rem;
@@ -349,6 +374,15 @@
 
 .view-all:hover {
     background-color: #dbeaff;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* ---------------------- التصميم المتجاوب ---------------------- */
@@ -405,4 +439,16 @@
     .search-bar input {
         width: 100%;
     }
+
+    .dropdown-menu {
+        right: auto;
+        left: 0;
+    }
+}
+
+.news-ticker-container {
+    background-color: #f5f7fb;
+    padding: 0.5rem 0;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
 }

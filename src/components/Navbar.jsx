@@ -58,7 +58,7 @@ const Navbar = () => {
             const days = Math.floor(diff / 86400);
             return t('notifications.days_ago', { count: days });
         } catch (e) {
-            console.error('Errorءء formatting time:', e);
+            console.error('Error formatting time:', e);
             return t('notifications.unknown_time');
         }
     }, [t]);
@@ -132,8 +132,6 @@ const Navbar = () => {
     };
 
     const toggleNotifications = () => {
-        console.log('Toggle notifications called', !showNotifications);
-
         setShowNotifications(prev => !prev);
         if (showDropdown) setShowDropdown(false);
         if (!showNotifications) fetchNotifications();
@@ -342,7 +340,7 @@ const Navbar = () => {
                             </div>
 
                             {showDropdown && (
-                                <div className={`notifications-dropdown ${showNotifications ? 'show' : ''}`}>
+                                <div className="dropdown-menu show">
                                     {user ? (
                                         <>
                                             <NavLink
