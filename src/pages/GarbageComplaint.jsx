@@ -240,7 +240,16 @@ const GarbageComplaint = () => {
                     {formLoading ? t("garbageComplaint.submitting") : t("garbageComplaint.submit")}
                 </button>
             </form>
-
+            <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
        </div>
     );
 };
