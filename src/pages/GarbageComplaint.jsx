@@ -77,22 +77,30 @@ const GarbageComplaint = () => {
         setFormLoading(true);
 
         try {
-            // إنشاء FormData بنفس نمط Complaints.jsx
-            const formDataToSend = new FormData();
-            formDataToSend.append('data', new Blob([JSON.stringify({
+            console.log("Submitting complaint with data:", {
                 userId: user.userId,
                 type: formData.type,
                 description: formData.description,
-                location: formData.location || "N/A"
-            })], {
-                type: 'application/json'
-            }));
+                location: formData.location,
+                image: formData.image ? "Exists" : "None"
+            });
+            const formDataToSend = new FormData();
+            formDataToSend.append('userId', user.userId);
+            formDataToSend.append('type', formData.type);
+            formDataToSend.append('description', formData.description);
+            formDataToSend.append('location', formData.location || "N/A");
 
             if (formData.image) {
                 formDataToSend.append('image', formData.image);
             }
 
-            const newComplaint = await submitComplaint(formDataToSend);
+            const newComplaint = await submitComplaint({
+                userId: user.userId,
+                type: formData.type,
+                description: formData.description,
+                location: formData.location || "N/A",
+                image: formData.image
+            });
 
             setComplaints([newComplaint, ...complaints]);
             setFormData({
