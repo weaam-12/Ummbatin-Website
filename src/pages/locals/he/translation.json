@@ -297,32 +297,28 @@
   },
   "admin": {
     "dashboard": {
-      "title": "לוח בקרה למנהל",
-      "loadError": "שגיאה בטעינת נתונים",
-      "dashboard": {
         "overview": "סקירה כללית",
         "eventsCount": "מספר אירועים",
         "waterBills": "חשבונות מים",
         "arnonaBills": "חשבונות ארנונה",
         "quickActions": "פעולות מהירות",
         "recentEvents": "אירועים אחרונים"
-      },
-      "menu": {
-        "dashboard": "לוח בקרה",
-        "payments": "ניהול תשלומים",
-        "events": "ניהול אירועים"
-      },
-      "actions": {
-        "generateWater": "יצירת חשבונות מים",
-        "generateArnona": "יצירת חשבונות ארנונה",
-        "addEvent": "הוספת אירוע חדש",
-        "addProperty": "הוספת נכס חדש",
-        "addWaterReadings": "הוספת קריאות מים"
-      }
+    },
+    "menu": {
+      "dashboard": "לוח בקרה",
+      "payments": "ניהול תשלומים",
+      "events": "ניהול אירועים"
     },
     "actions": {
       "generateArnona": "יצירת חשבונות ארנונה",
       "addProperty": "הוספת נכס חדש"
+    },
+    "actions": {
+      "generateWater": "יצירת חשבונות מים",
+      "generateArnona": "יצירת חשבונות ארנונה",
+      "addEvent": "הוספת אירוע חדש",
+      "addProperty": "הוספת נכס חדש",
+      "addWaterReadings": "הוספת קריאות מים"
     },
     "general": {
       "title": "לוח בקרה למנהל",

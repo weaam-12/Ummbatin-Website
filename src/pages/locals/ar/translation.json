@@ -185,30 +185,24 @@
     "dashboard": {
       "title": "لوحة تحكم الإدمن",
       "loadError": "حدث خطأ أثناء تحميل البيانات",
-      "dashboard": {
         "overview": "نظرة عامة",
         "eventsCount": "عدد الفعاليات",
         "waterBills": "فواتير المياه",
         "arnonaBills": "فواتير الأرنونا",
         "quickActions": "إجراءات سريعة",
         "recentEvents": "آخر الفعاليات"
-      },
-      "menu": {
-        "dashboard": "لوحة التحكم",
-        "payments": "إدارة الفواتير",
-        "events": "إدارة الفعاليات"
-      },
-      "actions": {
-        "generateWater": "توليد فواتير المياه",
-        "generateArnona": "توليد فواتير الأرنونا",
-        "addEvent": "إضافة فعالية جديدة",
-        "addProperty": "إضافة عقار جديد",
-        "addWaterReadings": "إضافة قراءات المياه"
-      }
+    },
+    "menu": {
+      "dashboard": "لوحة التحكم",
+      "payments": "إدارة الفواتير",
+      "events": "إدارة الفعاليات"
     },
     "actions": {
+      "generateWater": "توليد فواتير المياه",
       "generateArnona": "توليد فواتير الأرنونا",
-      "addProperty": "إضافة عقار جديد"
+      "addEvent": "إضافة فعالية جديدة",
+      "addProperty": "إضافة عقار جديد",
+      "addWaterReadings": "إضافة قراءات المياه"
     },
     "general": {
       "title": "لوحة تحكم الإدمن",
