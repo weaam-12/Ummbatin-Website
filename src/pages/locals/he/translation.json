@@ -295,7 +295,123 @@
     "title": "עיריית אום בטין"
 
   },
-
+  "admin": {
+    "general": {
+      "title": "לוח בקרה למנהל",
+      "loadError": "שגיאה בטעינת נתונים",
+      "dashboard": {
+        "overview": "סקירה כללית",
+        "eventsCount": "מספר אירועים",
+        "waterBills": "חשבונות מים",
+        "arnonaBills": "חשבונות ארנונה",
+        "quickActions": "פעולות מהירות",
+        "recentEvents": "אירועים אחרונים"
+      },
+      "menu": {
+        "dashboard": "לוח בקרה",
+        "payments": "ניהול תשלומים",
+        "events": "ניהול אירועים"
+      },
+      "actions": {
+        "generateWater": "יצירת חשבונות מים",
+        "generateArnona": "יצירת חשבונות ארנונה",
+        "addEvent": "הוספת אירוע חדש",
+        "addProperty": "הוספת נכס חדש",
+        "addWaterReadings": "הוספת קריאות מים"
+      }
+    },
+    "events": {
+      "title": "ניהול אירועים",
+      "addTitle": "הוספת אירוע חדש",
+      "editTitle": "עריכת אירוע",
+      "eventTitle": "כותרת האירוע",
+      "description": "תיאור",
+      "newImage": "תמונה חדשה (אופציונלי)",
+      "eventImage": "תמונת האירוע",
+      "addSuccess": "האירוע נוסף בהצלחה",
+      "addError": "שגיאה בהוספת האירוע",
+      "updateSuccess": "האירוע עודכן בהצלחה",
+      "updateError": "שגיאה בעדכון האירוע",
+      "deleteSuccess": "האירוע נמחק בהצלחה",
+      "deleteError": "שגיאה במחיקת האירוע",
+      "changeImage": "שינוי תמונת האירוע",
+      "currentImage": "תמונת האירוע הנוכחית",
+      "selectNewImage": "בחר תמונה חדשה",
+      "changeImageButton": "שנה תמונה",
+      "imageChangeSuccess": "תמונת האירוע שונתה בהצלחה",
+      "imageChangeError": "שגיאה בשינוי התמונה",
+      "saveChanges": "שמור שינויים",
+      "saveEvent": "שמור אירוע"
+    },
+    "properties": {
+      "addTitle": "הוספת נכס חדש",
+      "userId": "מספר משתמש (ID)",
+      "userIdPlaceholder": "הכנס מספר משתמש",
+      "addressPlaceholder": "הכנס כתובת הנכס",
+      "areaPlaceholder": "הכנס שטח",
+      "unitsPlaceholder": "הכנס מספר יחידות",
+      "addSuccess": "הנכס נוסף בהצלחה",
+      "addError": "שגיאה בהוספת הנכס",
+      "fetchError": "שגיאה בטעינת נכסי המשתמש",
+      "noProperties": "אין משתמשים עם נכסים כרגע",
+      "saveButton": "שמור נכס"
+    },
+    "payments": {
+      "title": "ניהול חשבונות חודשיים",
+      "billType": "סוג החשבון",
+      "generateArnona": "יצירת חשבונות ארנונה",
+      "generateWater": "יצירת חשבונות מים",
+      "arnonaSuccess": "חשבונות ארנונה נוצרו בהצלחה",
+      "waterSuccess": "חשבונות מים נוצרו בהצלחה",
+      "generateError": "שגיאה ביצירת החשבונות",
+      "generateButton": "צור חשבונות",
+      "arnonaDescription": "חשבונות ארנונה ייווצרו עבור כל הנכסים לפי שטח ומספר יחידות",
+      "waterDescription": "חשבונות מים ייווצרו עבור כל הנכסים לפי קריאות מים"
+    },
+    "water": {
+      "addReadings": "הוספת קריאות מים",
+      "reading": "קריאת מים",
+      "readingPlaceholder": "הכנס קריאה",
+      "readingsSuccess": "קריאות המים נוספו בהצלחה",
+      "readingsError": "שגיאה בהוספת קריאות מים",
+      "saveReadings": "שמור קריאות"
+    }
+  },
+  "payment": {
+    "status": {
+      "PAID": "שולם",
+      "PENDING": "ממתין",
+      "FAILED": "נכשל"
+    },
+    "types": {
+      "water": "מים",
+      "arnona": "ארנונה"
+    },
+    "invoice": {
+      "amount": "סכום",
+      "paymentStatus": "סטטוס תשלום"
+    }
+  },
+  "labels": {
+    "fullName": "שם מלא",
+    "address": "כתובת",
+    "area": "שטח",
+    "units": "מספר יחידות"
+  },
+  "event": {
+    "date": "תאריך",
+    "location": "מיקום"
+  },
+  "common": {
+    "close": "סגור",
+    "edit": "ערוך",
+    "delete": "מחק",
+    "loading": "טוען..."
+  },
+  "general": {
+    "squareMeters": "מטר רבוע",
+    "currency": "ש\"ח"
+  },
   "complaints": {
     "myComplaints": "התלונות שלי",
     "newComplaint": "תלונה חדשה",
