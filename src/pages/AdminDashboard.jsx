@@ -55,7 +55,7 @@ function AdminDashboard() {
             console.log(response.data);
             const usersWithValidRoles = response.data.content.map(user => ({
                 ...user,
-                role: typeof user.role === 'string' ? user.role : user.role?.name || 'USER',
+                role: typeof user.roleName === 'string' ? user.roleName : user.roleName?.name || 'RESIDENT',
                 userId: user.userId || user.id
             }));
 
@@ -83,7 +83,7 @@ function AdminDashboard() {
     };
 
     const changeRole = async (id, currentRole) => {
-        const newRole = currentRole === "USER" ? "ADMIN" : "USER";
+        const newRole = currentRole === "RESIDENT" ? "ADMIN" : "RESIDENT";
         try {
             await axiosInstance.patch(`/api/users/${id}/role`, { role: newRole });
             setUsers(prev => prev.map(user =>
