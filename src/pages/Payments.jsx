@@ -290,7 +290,7 @@ const Payments = () => {
                                             {/* ✅ عرض عدد "القراءات" فقط إذا كانت الفاتورة من نوع مياه */}
                                             {paymentType === 'water' && (
                                                 <div className="mt-2 text-primary fw-bold">
-                                                    💧 القراءة التقريبية: {Math.ceil(payment.amount / 30)} قراءة (30 شيقل × {Math.ceil(payment.amount / 30)})
+                                                    💧 القراءة التقريبية: {(payment.amount / 30).toFixed(2)} قراءة (30 شيقل × {Math.ceil(payment.amount / 30)})
                                                 </div>
                                             )}
 
