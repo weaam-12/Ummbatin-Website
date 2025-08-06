@@ -9,7 +9,12 @@ import {
     FiEye, FiTrash2, FiEdit
 } from 'react-icons/fi';
 import './AdminGeneral.css';
-import { axiosInstance } from '../api.js';
+import {
+    getPropertiesByUserId,
+    addWaterReading,
+    fetchPayments,
+    fetchUsersWithProperties
+} from '../api.js';
 import { useTranslation } from 'react-i18next';
 import pagination from "react-bootstrap/Pagination";
 
@@ -252,38 +257,39 @@ const AdminGeneral = () => {
     // ===================== دوال جلب البيانات =====================
     const fetchUsersWithProperties = async () => {
         try {
-            const response = await axiosInstance.get("api/users/all", {
-                params: {
-                    page: pagination.page,
-                    size: pagination.size
-                }
-            });
+            const response = await axiosInstance.get("api/users/all");
             const users = Array.isArray(response.data) ? response.data : [];
             return users
                 .filter(u => u.properties?.length > 0)
                 .map(u => ({ ...u, property: u.properties[0] }));
         } catch (error) {
             console.error('Error fetching users:', error);
-            throw error;
+            setNotification({ type: 'danger', message: t('admin.users.fetchError') });
+            return [];
         }
     };
 
-    const fetchPayments = async () => {
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
         try {
-            const currentDate = new Date();
-            const response = await axiosInstance.get('api/payments/current-month', {
-                params: {
-                    month: currentDate.getMonth() + 1,
-                    year: currentDate.getFullYear()
-                }
-            });
-            return response.data;
+            const [users, payments] = await Promise.all([
+                fetchUsersWithProperties(),
+                fetchPayments()
+            ]);
+            setUsers(users);
+            setPayments(payments);
+            await fetchEvents();
         } catch (error) {
-            console.error('Error fetching payments:', error);
-            throw error;
+            setNotification({ type: 'danger', message: t('admin.general.loadError') });
+        } finally {
+            setLoading(false);
         }
-    };
+    }, []);
 
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
     const fetchEvents = async () => {
         try {
             const response = await axiosInstance.get('api/events');
@@ -302,10 +308,9 @@ const AdminGeneral = () => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const [usersRes, paymentsRes] = await Promise.all([
-                    fetchUsersWithProperties(),
-                    fetchPayments().catch(() => [])
-                ]);
+                const usersRes = await fetchUsersWithProperties();
+                const paymentsRes = await fetchPayments().catch(() => []);
+
                 setUsers(usersRes);
                 setPayments(paymentsRes);
                 await fetchEvents();
