@@ -146,7 +146,7 @@
     "arnona": {
       "calculation": "ארנונה = שטח ({{area}} מ\"ר) × יחידות ({{units}}) × 50 שקלים = {{total}} שקלים"
     },
-    "readingApproximation": "💧 קריאה משוערת: ‎{unitPrice} ש\"ח × ‎{unitsCount} = ‎{amount} ש\"ח",
+    "readingApproximation": "💧 קריאה משוערת: ‎{{unitPrice}} ש\"ח × ‎{{unitsCount}} = ‎{{amount}} ש\"ח",
 
     "title": "תשלום אלקטרוני",
     "cardDetails": "פרטי כרטיס",
