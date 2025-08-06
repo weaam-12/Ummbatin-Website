@@ -182,6 +182,14 @@
     "squareMeters": "متر مربع"
   },
   "admin": {
+    "dashboard": {
+      "arnonaBills": "فواتير الأرنونا",
+      "eventsCount": "عدد الفعاليات"
+    },
+    "actions": {
+      "generateArnona": "توليد فواتير الأرنونا",
+      "addProperty": "إضافة عقار جديد"
+    },
     "general": {
       "title": "لوحة تحكم الإدمن",
       "loadError": "حدث خطأ أثناء تحميل البيانات",
