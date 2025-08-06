@@ -43,6 +43,7 @@ const GarbageComplaint = () => {
                 const data = await getComplaints(user.userId);
                 setComplaints(data);
             } catch (error) {
+                console.log(error);
                 toast.error(t("garbageComplaint.errors.loadFailed"));
             }
         };
@@ -111,9 +112,19 @@ const GarbageComplaint = () => {
                 imagePreview: null,
             });
 
-            toast.success(
-                t("garbageComplaint.success.submit", { ticketNumber: newComplaint.ticketNumber })
-            );
+            toast.success(t("garbageComplaint.success.submit", {
+                ticketNumber: newComplaint.ticketNumber
+            }), {
+                position: "top-center",
+                autoClose: 8000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+                icon: "✅",
+            });
         } catch (error) {
             console.error("Submission error:", error);
             toast.error(error.response?.data?.message || t("garbageComplaint.errors.submitFailed"));
@@ -137,12 +148,6 @@ const GarbageComplaint = () => {
         );
     }
 
-    const statusColors = {
-        SUBMITTED: "status-submitted",
-        IN_PROGRESS: "status-in-progress",
-        RESOLVED: "status-resolved",
-        REJECTED: "status-rejected",
-    };
 
     return (
         <div className={`garbage-complaint ${i18n.language === 'he' ? 'rtl' : ''}`}>

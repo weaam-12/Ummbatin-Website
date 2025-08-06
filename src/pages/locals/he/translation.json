@@ -412,6 +412,12 @@
     }
   },
   "garbageComplaint": {
+    "success": {
+      "submit": "התלונה שלך נשלחה בהצלחה! מספר הכרטיס: {{ticketNumber}}"
+    },
+    "errors": {
+      "submitFailed": "השליחה נכשלה, אנא נסה שוב"
+    },
     "title": "תלונות על אשפה",
     "subtitle": "אפשר לדווח כאן על בעיות אשפה באזור שלך",
     "description": "תיאור הבעיה",
