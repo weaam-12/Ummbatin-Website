@@ -290,10 +290,10 @@ const Payments = () => {
                                             {/* قراءة المياه */}
                                             {paymentType === 'water' && (
                                                 <div className="mt-2 text-primary fw-bold">
-                                                    💧 {t('payments.readingApproximation', {
+                                                    💧 {t('payment.readingApproximation', {
                                                     amount: (payment.amount / 30).toFixed(2),
                                                     unitPrice: 30,
-                                                    unitsCount: Math.ceil((payment.amount / 30).toFixed(2))
+                                                    unitsCount: Math.ceil(payment.amount / 30)
                                                 })}
                                                 </div>
                                             )}
@@ -301,7 +301,7 @@ const Payments = () => {
                                             {/* حساب الأرنونا */}
                                             {paymentType === 'arnona' && (
                                                 <div className="mt-2 text-primary fw-bold">
-                                                    {t('payments.arnona.calculation', {
+                                                    {t('payment.arnona.calculation', {
                                                         area: propertyInfo.area,
                                                         units: propertyInfo.units,
                                                         price: 50,
@@ -354,10 +354,10 @@ const Payments = () => {
                                     {/* قراءة المياه */}
                                     {paymentType === 'water' && (
                                         <div className="mt-2 text-primary fw-bold">
-                                            💧 {t('payments.readingApproximation', {
+                                            💧 {t('payment.readingApproximation', {
                                             amount: (payment.amount / 30).toFixed(2),
                                             unitPrice: 30,
-                                            unitsCount: Math.ceil((payment.amount / 30).toFixed(2))
+                                            unitsCount: Math.ceil(payment.amount / 30)
                                         })}
                                         </div>
                                     )}
@@ -365,7 +365,7 @@ const Payments = () => {
                                     {/* حساب الأرنونا */}
                                     {paymentType === 'arnona' && (
                                         <div className="mt-2 text-primary fw-bold">
-                                            {t('payments.arnona.calculation', {
+                                            {t('payment.arnona.calculation', {
                                                 area: propertyInfo.area,
                                                 units: propertyInfo.units,
                                                 price: 50,
