@@ -348,24 +348,37 @@ const AdminGeneral = () => {
             }
 
             if (currentBillType === 'WATER') {
-                // تحضير بيانات فواتير المياه لكل عقار
+                // تحضير بيانات فواتير المياه لكل عقار مع التحقق من وجود userId
                 const billsData = users
-                    .filter(user => user.properties && user.properties.length > 0)
+                    .filter(user => user.properties && user.properties.length > 0 && user.userId) // تأكد من وجود userId
                     .flatMap(user =>
                         user.properties.map(property => {
                             const readingData = waterReadings[property.propertyId];
+                            if (!user.userId) {
+                                console.error('User ID is missing for property:', property);
+                                return null;
+                            }
                             return {
                                 userId: user.userId,
                                 propertyId: property.propertyId,
-                                amount: (readingData?.reading || 0) * 30, // الضرب في سعر المتر المكعب
+                                amount: (readingData?.reading || 0) * 30,
                                 reading: readingData?.reading || 0
                             };
                         })
-                    );
+                    )
+                    .filter(item => item !== null); // تصفية العناصر الفارغة
 
+                if (billsData.length === 0) {
+                    setNotification({
+                        type: 'danger',
+                        message: 'لا توجد بيانات صالحة لإنشاء الفواتير'
+                    });
+                    return;
+                }
+
+                console.log('Sending water bills data:', billsData); // للتتبع
                 await axiosInstance.post('api/payments/generate-custom-water', billsData);
-            }
-            else {
+            } else {
                 // توليد فواتير الأرنونا
                 await axiosInstance.post('api/payments/generate-arnona', null, {
                     params: { month, year }
@@ -390,7 +403,6 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
-
     const formatPaymentStatus = (status) => {
         switch (status) {
             case 'PAID': return { text: 'مدفوع', variant: 'success' };
