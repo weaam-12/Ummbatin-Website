@@ -126,20 +126,23 @@ const AdminGeneral = () => {
 
 
     const generateRandomWaterReadings = () => {
+        console.log('Generating readings for users:', users); // للتتبع
         const readings = {};
         users.forEach(user => {
-            if (user.properties) {
+            if (user.properties && user.properties.length > 0) {
                 user.properties.forEach(property => {
-                    readings[property.propertyId] = {
-                        userId: user.userId,
-                        reading: Math.floor(Math.random() * 21) + 10 // رقم بين 10 و 30 لكل عقار
-                    };
+                    if (property.propertyId && user.userId) {
+                        readings[property.propertyId] = {
+                            userId: user.userId,
+                            reading: Math.floor(Math.random() * 21) + 10
+                        };
+                    }
                 });
             }
         });
+        console.log('Generated readings:', readings); // للتتبع
         return readings;
     };
-
     const handleOpenWaterBillsModal = () => {
         setCurrentBillType('WATER');
         setWaterReadings(generateRandomWaterReadings());
@@ -338,7 +341,8 @@ const AdminGeneral = () => {
             const currentDate = new Date();
             const month = currentDate.getMonth() + 1;
             const year = currentDate.getFullYear();
-
+            console.log('جميع المستخدمين:', users);
+            console.log('المستخدمون مع العقارات:', users.filter(u => u.properties?.length > 0));
             // تحقق من وجود مستخدمين بعقارات
             const validUsers = users.filter(user =>
                 user.properties?.length > 0 &&
