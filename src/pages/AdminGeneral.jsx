@@ -10,7 +10,6 @@ import {
 } from 'react-icons/fi';
 import './AdminGeneral.css';
 import { axiosInstance } from '../api.js';
-import pagination from "react-bootstrap/Pagination";
 
 const AdminGeneral = () => {
     // States العامة
@@ -23,6 +22,7 @@ const AdminGeneral = () => {
     const [payments, setPayments] = useState([]);
     const [showBillsModal, setShowBillsModal] = useState(false);
     const [currentBillType, setCurrentBillType] = useState('');
+    const [pagination, setPagination] = useState({ page: 0, size: 10 });
 
     // States للفعاليات
     const [events, setEvents] = useState([]);
@@ -73,6 +73,7 @@ const AdminGeneral = () => {
             await fetchEvents();
             setNotification({ type: 'success', message: 'تم حذف الفعالية بنجاح' });
         } catch (error) {
+            console.log(error);
             setNotification({ type: 'danger', message: 'فشل في حذف الفعالية' });
         } finally {
             setLoading(false);
@@ -146,6 +147,7 @@ const AdminGeneral = () => {
             setShowImageModal(false);
             setNotification({ type: 'success', message: 'تم تغيير صورة الفعالية بنجاح' });
         } catch (error) {
+            console.log(error);
             setNotification({ type: 'danger', message: 'فشل في تغيير الصورة' });
         } finally {
             setLoading(false);
@@ -164,6 +166,7 @@ const AdminGeneral = () => {
             });
             setWaterReadings(readings);
         } catch (error) {
+            console.log(error);
             setNotification({ type: 'danger', message: 'فشل في جلب عقارات المستخدم' });
         }
     };
@@ -231,8 +234,7 @@ const AdminGeneral = () => {
                     size: pagination.size
                 }
             });
-            // تأكد من الوصول إلى محتوى الصفحة (content)
-            const users = Array.isArray(response.data) ? response.data : [];
+            const users = response.data.content || []; // تأكد من هيكل الاستجابة
             return users
                 .filter(u => u.properties?.length > 0)
                 .map(u => ({ ...u, property: u.properties[0] }));
@@ -272,14 +274,22 @@ const AdminGeneral = () => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const [usersRes, paymentsRes] = await Promise.all([
-                    fetchUsersWithProperties(),
-                    fetchPayments().catch(() => [])
-                ]);
-                setUsers(usersRes);
-                setPayments(paymentsRes);
-                await fetchEvents();
+                if (activeTab === 'payments') {
+                    const paymentsRes = await fetchPayments();
+                    setPayments(paymentsRes);
+                } else if (activeTab === 'events') {
+                    await fetchEvents();
+                } else {
+                    const [usersRes, paymentsRes] = await Promise.all([
+                        fetchUsersWithProperties(),
+                        fetchPayments().catch(() => [])
+                    ]);
+                    setUsers(usersRes);
+                    setPayments(paymentsRes);
+                    await fetchEvents();
+                }
             } catch (error) {
+                console.log(error);
                 setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
             } finally {
                 setLoading(false);
@@ -287,7 +297,7 @@ const AdminGeneral = () => {
         };
 
         loadData();
-    }, []);
+    }, [activeTab]);
 
     // ===================== إدارة الفعاليات =====================
     const handleAddEvent = async () => {
@@ -337,6 +347,14 @@ const AdminGeneral = () => {
             const currentDate = new Date();
             const month = currentDate.getMonth() + 1;
             const year = currentDate.getFullYear();
+
+            if (users.filter(u => u.property).length === 0) {
+                setNotification({
+                    type: 'danger',
+                    message: 'لا يوجد مستخدمين لديهم عقارات مسجلة'
+                });
+                return;
+            }
 
             const endpoint = currentBillType === 'ARNONA'
                 ? 'api/payments/generate-arnona'
@@ -575,7 +593,7 @@ const AdminGeneral = () => {
                             {activeTab === 'payments' && (
                                 <div className="payments-section">
                                     <h3>إدارة الفواتير الشهرية</h3>
-                                    <Table striped bordered hover>
+                                    <Table striped bordered hover responsive>
                                         <thead>
                                         <tr>
                                             <th>#</th>
@@ -588,21 +606,29 @@ const AdminGeneral = () => {
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {payments.map((payment, index) => (
-                                            <tr key={payment.paymentId}>
-                                                <td>{index + 1}</td>
-                                                <td>{payment.userName || '--'}</td>
-                                                <td>{payment.paymentType === 'WATER' ? 'مياه' : 'أرنونا'}</td>
-                                                <td>{payment.amount || '--'}</td>
-                                                <td>
-                                                    <Badge bg={formatPaymentStatus(payment.status).variant}>
-                                                        {formatPaymentStatus(payment.status).text}
-                                                    </Badge>
+                                        {payments.length > 0 ? (
+                                            payments.map((payment, index) => (
+                                                <tr key={payment.paymentId || index}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{payment.userName || payment.user?.fullName || '--'}</td>
+                                                    <td>{payment.paymentType === 'WATER' ? 'مياه' : 'أرنونا'}</td>
+                                                    <td>{payment.amount ? payment.amount.toFixed(2) : '--'}</td>
+                                                    <td>
+                                                        <Badge bg={formatPaymentStatus(payment.status).variant}>
+                                                            {formatPaymentStatus(payment.status).text}
+                                                        </Badge>
+                                                    </td>
+                                                    <td>{payment.propertyAddress || payment.property?.address || '--'}</td>
+                                                    <td>{payment.propertyUnits || payment.property?.numberOfUnits || '--'}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="7" className="text-center">
+                                                    لا توجد فواتير متاحة
                                                 </td>
-                                                <td>{payment.propertyAddress || '--'}</td>
-                                                <td>{payment.propertyUnits || '--'}</td>
                                             </tr>
-                                        ))}
+                                        )}
                                         </tbody>
                                     </Table>
                                 </div>
@@ -945,7 +971,7 @@ const AdminGeneral = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {users.filter(u => u.properties && u.properties.length > 0).length === 0 ? (
+                        {users.filter(u => u.property).length === 0 ? (
                             <tr>
                                 <td colSpan={5} className="text-center text-danger">
                                     لا يوجد مستخدمين لديهم عقارات حالياً
@@ -972,7 +998,7 @@ const AdminGeneral = () => {
                     <Button
                         variant="primary"
                         onClick={handleGenerateBills}
-                        disabled={loading}
+                        disabled={loading || users.filter(u => u.property).length === 0}
                     >
                         {loading ? (
                             <>
