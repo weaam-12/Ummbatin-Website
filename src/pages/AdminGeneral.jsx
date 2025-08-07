@@ -123,18 +123,25 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
+
+
     const generateRandomWaterReadings = () => {
         const readings = {};
         users.forEach(user => {
-            if (user.property) {
-                readings[user.userId] = {
-                    propertyId: user.property.propertyId,
-                    reading: Math.floor(Math.random() * 21) + 10 // رقم بين 10 و 30
-                };
+            if (user.properties) { // تحقق من وجود عقارات للمستخدم
+                user.properties.forEach(property => {
+                    readings[property.propertyId] = { // استخدم propertyId كمفتاح بدلاً من userId
+                        userId: user.userId,
+                        reading: Math.floor(Math.random() * 21) + 10 // رقم بين 10 و 30 لكل عقار
+                    };
+                });
             }
         });
         return readings;
     };
+
+
+
     const handleOpenWaterBillsModal = () => {
         setCurrentBillType('WATER');
         setWaterReadings(generateRandomWaterReadings());
@@ -334,7 +341,7 @@ const AdminGeneral = () => {
             const month = currentDate.getMonth() + 1;
             const year = currentDate.getFullYear();
 
-            if (users.filter(u => u.property).length === 0) {
+            if (users.filter(u => u.properties?.length > 0).length === 0) {
                 setNotification({
                     type: 'danger',
                     message: 'لا يوجد مستخدمين لديهم عقارات حالياً'
@@ -343,15 +350,23 @@ const AdminGeneral = () => {
             }
 
             if (currentBillType === 'WATER') {
-                // توليد فواتير المياه (النظام الجديد)
-                const billsData = users
-                    .filter(u => u.property)
-                    .map(user => ({
-                        userId: user.userId,
-                        propertyId: user.property.propertyId,
-                        amount: waterReadings[user.userId]?.reading * 30 || 0,
-                        reading: waterReadings[user.userId]?.reading || 0
-                    }));
+                // تحضير بيانات فواتير المياه لكل عقار
+                const billsData = [];
+                users.forEach(user => {
+                    if (user.properties) {
+                        user.properties.forEach(property => {
+                            const readingData = waterReadings[property.propertyId];
+                            if (readingData) {
+                                billsData.push({
+                                    userId: user.userId,
+                                    propertyId: property.propertyId,
+                                    amount: readingData.reading * 30, // الضرب في 30
+                                    reading: readingData.reading
+                                });
+                            }
+                        });
+                    }
+                });
 
                 await axiosInstance.post('api/payments/generate-custom-water', billsData);
             } else {
@@ -378,6 +393,7 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
+
     const formatPaymentStatus = (status) => {
         switch (status) {
             case 'PAID': return { text: 'مدفوع', variant: 'success' };
@@ -903,34 +919,42 @@ const AdminGeneral = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {users.filter(u => u.property).length === 0 ? (
+                        {users.filter(user => user.properties && user.properties.length > 0).length === 0 ? (
                             <tr>
                                 <td colSpan={currentBillType === 'WATER' ? 5 : 4} className="text-center text-danger">
                                     لا يوجد مستخدمين لديهم عقارات حالياً
                                 </td>
                             </tr>
                         ) : (
-                            users.filter(u => u.property).map((user, idx) => (
-                                <tr key={user.userId}>
-                                    <td>{idx + 1}</td>
-                                    <td>{user.fullName}</td>
-                                    <td>{user.property.address}</td>
-
-                                    {currentBillType === 'WATER' && (
-                                        <>
-                                            <td>{waterReadings[user.userId]?.reading || '--'}</td>
-                                            <td>{(waterReadings[user.userId]?.reading * 30) || '--'}</td>
-                                        </>
-                                    )}
-
-                                    {currentBillType === 'ARNONA' && (
-                                        <>
-                                            <td>{user.property.area}</td>
-                                            <td>{user.property.numberOfUnits}</td>
-                                        </>
-                                    )}
-                                </tr>
-                            ))
+                            users
+                                .filter(user => user.properties && user.properties.length > 0)
+                                .flatMap((user, userIndex) =>
+                                    user.properties.map((property, propertyIndex) => (
+                                        <tr key={`${user.userId}-${property.propertyId}`}>
+                                            <td>{userIndex + propertyIndex + 1}</td>
+                                            <td>{user.fullName}</td>
+                                            <td>{property.address}</td>
+                                            {currentBillType === 'WATER' && (
+                                                <>
+                                                    <td>
+                                                        {waterReadings[property.propertyId]?.reading ||
+                                                            Math.floor(Math.random() * 21) + 10}
+                                                    </td>
+                                                    <td>
+                                                        {(waterReadings[property.propertyId]?.reading * 30) ||
+                                                            (Math.floor(Math.random() * 21) + 10) * 30}
+                                                    </td>
+                                                </>
+                                            )}
+                                            {currentBillType === 'ARNONA' && (
+                                                <>
+                                                    <td>{property.area}</td>
+                                                    <td>{property.numberOfUnits}</td>
+                                                </>
+                                            )}
+                                        </tr>
+                                    ))
+                                )
                         )}
                         </tbody>
                     </Table>
@@ -953,7 +977,7 @@ const AdminGeneral = () => {
                     <Button
                         variant="primary"
                         onClick={handleGenerateBills}
-                        disabled={loading || users.filter(u => u.property).length === 0}
+                        disabled={loading || users.filter(u => u.properties?.length > 0).length === 0}
                     >
                         {loading ? (
                             <>
