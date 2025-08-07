@@ -126,21 +126,22 @@ const AdminGeneral = () => {
 
 
     const generateRandomWaterReadings = () => {
-        console.log('Generating readings for users:', users); // للتتبع
         const readings = {};
         users.forEach(user => {
             if (user.properties && user.properties.length > 0) {
                 user.properties.forEach(property => {
-                    if (property.propertyId && user.userId) {
-                        readings[property.propertyId] = {
-                            userId: user.userId,
+                    // استخدام property.id أو property.propertyId أيهما متاح
+                    const propId = property.id || property.propertyId;
+                    if (propId && user.id) {
+                        readings[propId] = {
+                            userId: user.id,
                             reading: Math.floor(Math.random() * 21) + 10
                         };
                     }
                 });
             }
         });
-        console.log('Generated readings:', readings); // للتتبع
+        console.log('Generated readings:', readings);
         return readings;
     };
     const handleOpenWaterBillsModal = () => {
