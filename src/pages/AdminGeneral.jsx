@@ -128,9 +128,9 @@ const AdminGeneral = () => {
     const generateRandomWaterReadings = () => {
         const readings = {};
         users.forEach(user => {
-            if (user.properties) { // تحقق من وجود عقارات للمستخدم
+            if (user.properties) {
                 user.properties.forEach(property => {
-                    readings[property.propertyId] = { // استخدم propertyId كمفتاح بدلاً من userId
+                    readings[property.propertyId] = {
                         userId: user.userId,
                         reading: Math.floor(Math.random() * 21) + 10 // رقم بين 10 و 30 لكل عقار
                     };
@@ -139,8 +139,6 @@ const AdminGeneral = () => {
         });
         return readings;
     };
-
-
 
     const handleOpenWaterBillsModal = () => {
         setCurrentBillType('WATER');
@@ -351,26 +349,24 @@ const AdminGeneral = () => {
 
             if (currentBillType === 'WATER') {
                 // تحضير بيانات فواتير المياه لكل عقار
-                const billsData = [];
-                users.forEach(user => {
-                    if (user.properties) {
-                        user.properties.forEach(property => {
+                const billsData = users
+                    .filter(user => user.properties && user.properties.length > 0)
+                    .flatMap(user =>
+                        user.properties.map(property => {
                             const readingData = waterReadings[property.propertyId];
-                            if (readingData) {
-                                billsData.push({
-                                    userId: user.userId,
-                                    propertyId: property.propertyId,
-                                    amount: readingData.reading * 30, // الضرب في 30
-                                    reading: readingData.reading
-                                });
-                            }
-                        });
-                    }
-                });
+                            return {
+                                userId: user.userId,
+                                propertyId: property.propertyId,
+                                amount: (readingData?.reading || 0) * 30, // الضرب في سعر المتر المكعب
+                                reading: readingData?.reading || 0
+                            };
+                        })
+                    );
 
-                await axiosInstance.post('api/payments/generate-water', billsData);
-            } else {
-                // توليد فواتير الأرنونا (النظام القديم)
+                await axiosInstance.post('api/payments/generate-custom-water', billsData);
+            }
+            else {
+                // توليد فواتير الأرنونا
                 await axiosInstance.post('api/payments/generate-arnona', null, {
                     params: { month, year }
                 });
@@ -385,6 +381,7 @@ const AdminGeneral = () => {
             });
             setShowBillsModal(false);
         } catch (error) {
+            console.error('Error generating bills:', error);
             setNotification({
                 type: 'danger',
                 message: error.response?.data?.message || 'فشل في توليد الفواتير'
