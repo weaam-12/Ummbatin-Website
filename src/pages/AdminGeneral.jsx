@@ -339,54 +339,44 @@ const AdminGeneral = () => {
             const month = currentDate.getMonth() + 1;
             const year = currentDate.getFullYear();
 
-            if (users.filter(u => u.properties?.length > 0).length === 0) {
+            // تحقق من وجود مستخدمين بعقارات
+            const validUsers = users.filter(user =>
+                user.properties?.length > 0 &&
+                user.userId &&
+                user.properties.every(p => p.propertyId)
+            );
+
+            if (validUsers.length === 0) {
                 setNotification({
                     type: 'danger',
-                    message: 'لا يوجد مستخدمين لديهم عقارات حالياً'
+                    message: 'لا يوجد مستخدمين لديهم عقارات صالحة حالياً'
                 });
                 return;
             }
 
             if (currentBillType === 'WATER') {
-                // تحضير بيانات فواتير المياه لكل عقار مع التحقق من وجود userId
-                const billsData = users
-                    .filter(user => user.properties && user.properties.length > 0 && user.userId) // تأكد من وجود userId
-                    .flatMap(user =>
-                        user.properties.map(property => {
-                            const readingData = waterReadings[property.propertyId];
-                            if (!user.userId) {
-                                console.error('User ID is missing for property:', property);
-                                return null;
-                            }
-                            return {
-                                userId: user.userId,
-                                propertyId: property.propertyId,
-                                amount: (readingData?.reading || 0) * 30,
-                                reading: readingData?.reading || 0
-                            };
-                        })
-                    )
-                    .filter(item => item !== null); // تصفية العناصر الفارغة
+                // إنشاء فواتير المياه لكل عقار
+                const billsData = validUsers.flatMap(user =>
+                    user.properties.map(property => ({
+                        userId: user.userId,
+                        propertyId: property.propertyId,
+                        amount: (waterReadings[property.propertyId]?.reading || 15) * 30,
+                        reading: waterReadings[property.propertyId]?.reading || 15
+                    }))
+                );
 
-                if (billsData.length === 0) {
+                console.log('بيانات الفواتير المرسلة:', billsData);
+
+                // استخدام API الجديد بدلاً من الحلقة
+                const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
+
+                if (response.data.success) {
                     setNotification({
-                        type: 'danger',
-                        message: 'لا توجد بيانات صالحة لإنشاء الفواتير'
+                        type: 'success',
+                        message: `تم توليد ${billsData.length} فاتورة مياه بنجاح`
                     });
-                    return;
-                }
-
-                console.log('Sending water bills data:', billsData); // للتتبع
-                for (const bill of billsData) {
-                    await axiosInstance.post('api/payments/generate-water', null, {
-                        params: {
-                            amount: bill.amount,
-                            userId: bill.userId,
-                            propertyId: bill.propertyId,
-                            month,
-                            year
-                        }
-                    });
+                } else {
+                    throw new Error(response.data.message || 'فشل في توليد الفواتير');
                 }
             } else {
                 // توليد فواتير الأرنونا
@@ -397,22 +387,20 @@ const AdminGeneral = () => {
 
             const updatedPayments = await fetchPayments();
             setPayments(updatedPayments);
-
-            setNotification({
-                type: 'success',
-                message: `تم توليد فواتير ${currentBillType === 'ARNONA' ? 'الأرنونا' : 'المياه'} بنجاح`
-            });
             setShowBillsModal(false);
+
         } catch (error) {
             console.error('Error generating bills:', error);
             setNotification({
                 type: 'danger',
-                message: error.response?.data?.message || 'فشل في توليد الفواتير'
+                message: error.response?.data?.message || error.message || 'فشل في توليد الفواتير'
             });
         } finally {
             setLoading(false);
         }
     };
+
+
     const formatPaymentStatus = (status) => {
         switch (status) {
             case 'PAID': return { text: 'مدفوع', variant: 'success' };
