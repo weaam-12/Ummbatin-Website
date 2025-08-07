@@ -23,6 +23,7 @@ const AdminGeneral = () => {
     const [showBillsModal, setShowBillsModal] = useState(false);
     const [currentBillType, setCurrentBillType] = useState('');
     const [pagination, setPagination] = useState({ page: 0, size: 10 });
+    const [waterReadings, setWaterReadings] = useState(generateRandomWaterReadings());
 
     // States للفعاليات
     const [events, setEvents] = useState([]);
@@ -46,7 +47,6 @@ const AdminGeneral = () => {
     const [showWaterReadingModal, setShowWaterReadingModal] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
     const [userProperties, setUserProperties] = useState([]);
-    const [waterReadings, setWaterReadings] = useState({});
     const [showEditEventModal, setShowEditEventModal] = useState(false);
     const [currentEvent, setCurrentEvent] = useState(null);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -127,7 +127,18 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
-
+    const generateRandomWaterReadings = () => {
+        const readings = {};
+        users.forEach(user => {
+            if (user.property) {
+                readings[user.userId] = {
+                    propertyId: user.property.propertyId,
+                    reading: Math.floor(Math.random() * 21) + 10 // رقم بين 10 و 30
+                };
+            }
+        });
+        return readings;
+    };
     // دالة تغيير الصورة
     const handleChangeImage = async () => {
         try {
@@ -154,47 +165,8 @@ const AdminGeneral = () => {
         }
     };
     // دالة لجلب عقارات المستخدم
-    const fetchUserProperties = async (userId) => {
-        try {
-            const properties = await getPropertiesByUserId(userId);
-            setUserProperties(properties);
-
-            // تهيئة قراءات المياه لكل عقار
-            const readings = {};
-            properties.forEach(property => {
-                readings[property.property_id] = '';
-            });
-            setWaterReadings(readings);
-        } catch (error) {
-            console.log(error);
-            setNotification({ type: 'danger', message: 'فشل في جلب عقارات المستخدم' });
-        }
-    };
 
     // دالة إضافة قراءات المياه
-    const handleAddWaterReadings = async () => {
-        try {
-            setLoading(true);
-
-            // إرسال قراءات المياه لكل عقار
-            for (const propertyId in waterReadings) {
-                if (waterReadings[propertyId]) {
-                    await addWaterReading(propertyId, parseFloat(waterReadings[propertyId]));
-                }
-            }
-
-            setShowWaterReadingModal(false);
-            setSelectedUserId('');
-            setUserProperties([]);
-            setWaterReadings({});
-
-            setNotification({ type: 'success', message: 'تمت إضافة قراءات المياه بنجاح' });
-        } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في إضافة قراءات المياه: ' + (error.response?.data?.message || error.message) });
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleAddProperty = async () => {
         try {
@@ -351,20 +323,30 @@ const AdminGeneral = () => {
             if (users.filter(u => u.property).length === 0) {
                 setNotification({
                     type: 'danger',
-                    message: 'لا يوجد مستخدمين لديهم عقارات مسجلة'
+                    message: 'لا يوجد مستخدمين لديهم عقارات حالياً'
                 });
                 return;
             }
 
-            const endpoint = currentBillType === 'ARNONA'
-                ? 'api/payments/generate-arnona'
-                : 'api/payments/generate-water';
+            if (currentBillType === 'WATER') {
+                // توليد فواتير المياه (النظام الجديد)
+                const billsData = users
+                    .filter(u => u.property)
+                    .map(user => ({
+                        userId: user.userId,
+                        propertyId: user.property.propertyId,
+                        amount: waterReadings[user.userId]?.reading * 30 || 0,
+                        reading: waterReadings[user.userId]?.reading || 0
+                    }));
 
-            const params = currentBillType === 'ARNONA'
-                ? { month, year }
-                : { month, year, rate: 10 };
+                await axiosInstance.post('api/payments/generate-custom-water', billsData);
+            } else {
+                // توليد فواتير الأرنونا (النظام القديم)
+                await axiosInstance.post('api/payments/generate-arnona', null, {
+                    params: { month, year }
+                });
+            }
 
-            await axiosInstance.post(endpoint, null, { params });
             const updatedPayments = await fetchPayments();
             setPayments(updatedPayments);
 
@@ -382,7 +364,6 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
-
     const formatPaymentStatus = (status) => {
         switch (status) {
             case 'PAID': return { text: 'مدفوع', variant: 'success' };
@@ -497,9 +478,6 @@ const AdminGeneral = () => {
                                                     </Button>
                                                     <Button variant="warning" onClick={() => setShowAddPropertyModal(true)}>
                                                         <FiMapPin /> إضافة عقار جديد
-                                                    </Button>
-                                                    <Button variant="info" onClick={() => setShowWaterReadingModal(true)}>
-                                                        <FiActivity /> إضافة قراءات المياه
                                                     </Button>
                                                 </Card.Body>
                                             </Card>
@@ -704,82 +682,6 @@ const AdminGeneral = () => {
                 </Col>
             </Row>
 
-            {/* مودال إضافة قراءات المياه */}
-            <Modal show={showWaterReadingModal} onHide={() => setShowWaterReadingModal(false)} size="lg">
-                <Modal.Header closeButton>
-                    <Modal.Title>إضافة قراءات المياه</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3">
-                            <Form.Label>رقم المستخدم (ID)</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={selectedUserId}
-                                onChange={(e) => {
-                                    setSelectedUserId(e.target.value);
-                                    if (e.target.value) {
-                                        fetchUserProperties(e.target.value);
-                                    } else {
-                                        setUserProperties([]);
-                                        setWaterReadings({});
-                                    }
-                                }}
-                                placeholder="أدخل رقم المستخدم"
-                            />
-                        </Form.Group>
-
-                        {userProperties.length > 0 && (
-                            <Table striped bordered hover>
-                                <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>عنوان العقار</th>
-                                    <th>مساحة العقار</th>
-                                    <th>عدد الوحدات</th>
-                                    <th>قراءة المياه (م³)</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {userProperties.map((property, index) => (
-                                    <tr key={property.property_id}>
-                                        <td>{index + 1}</td>
-                                        <td>{property.address}</td>
-                                        <td>{property.area} م²</td>
-                                        <td>{property.number_of_units}</td>
-                                        <td>
-                                            <Form.Control
-                                                type="number"
-                                                value={waterReadings[property.property_id] || ''}
-                                                onChange={(e) => setWaterReadings({
-                                                    ...waterReadings,
-                                                    [property.property_id]: e.target.value
-                                                })}
-                                                placeholder="أدخل القراءة"
-                                                min="0"
-                                                step="0.1"
-                                            />
-                                        </td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                            </Table>
-                        )}
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowWaterReadingModal(false)}>
-                        إلغاء
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={handleAddWaterReadings}
-                        disabled={loading || userProperties.length === 0}
-                    >
-                        {loading ? 'جاري الحفظ...' : 'حفظ القراءات'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
             <Modal show={showEditEventModal} onHide={() => setShowEditEventModal(false)} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>تعديل الفعالية</Modal.Title>
@@ -955,36 +857,64 @@ const AdminGeneral = () => {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p className="text-center mb-4">
-                        {currentBillType === 'ARNONA'
-                            ? 'سيتم توليد فواتير الأرنونا لجميع العقارات بناءً على المساحة وعدد الوحدات'
-                            : 'سيتم توليد فواتير المياه لجميع العقارات بناءً على قراءات المياه'}
-                    </p>
-                    <Table striped bordered hover>
+                    {currentBillType === 'WATER' && (
+                        <Alert variant="info" className="mb-4">
+                            <strong>آلية توليد فواتير المياه:</strong>
+                            <ul className="mb-0">
+                                <li>يتم توليد قراءة عشوائية لكل عقار بين 10 و 30 متر مكعب</li>
+                                <li>سعر المتر المكعب الواحد = 30 شيكل</li>
+                                <li>المبلغ النهائي = القراءة × 30</li>
+                            </ul>
+                        </Alert>
+                    )}
+
+                    <Table striped bordered hover responsive>
                         <thead>
                         <tr>
                             <th>#</th>
                             <th>اسم المستخدم</th>
                             <th>عنوان العقار</th>
-                            <th>عدد الوحدات</th>
-                            <th>مساحة العقار</th>
+                            {currentBillType === 'WATER' && (
+                                <>
+                                    <th>قراءة المياه (م³)</th>
+                                    <th>المبلغ (شيكل)</th>
+                                </>
+                            )}
+                            {currentBillType === 'ARNONA' && (
+                                <>
+                                    <th>مساحة العقار (م²)</th>
+                                    <th>عدد الوحدات</th>
+                                </>
+                            )}
                         </tr>
                         </thead>
                         <tbody>
                         {users.filter(u => u.property).length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="text-center text-danger">
+                                <td colSpan={currentBillType === 'WATER' ? 5 : 4} className="text-center text-danger">
                                     لا يوجد مستخدمين لديهم عقارات حالياً
                                 </td>
                             </tr>
                         ) : (
-                            users.filter(u => u.property).map((u, idx) => (
-                                <tr key={u.userId}>
+                            users.filter(u => u.property).map((user, idx) => (
+                                <tr key={user.userId}>
                                     <td>{idx + 1}</td>
-                                    <td>{u.fullName}</td>
-                                    <td>{u.property.address}</td>
-                                    <td>{u.property.numberOfUnits}</td>
-                                    <td>{u.property.area} م²</td>
+                                    <td>{user.fullName}</td>
+                                    <td>{user.property.address}</td>
+
+                                    {currentBillType === 'WATER' && (
+                                        <>
+                                            <td>{waterReadings[user.userId]?.reading || '--'}</td>
+                                            <td>{(waterReadings[user.userId]?.reading * 30) || '--'}</td>
+                                        </>
+                                    )}
+
+                                    {currentBillType === 'ARNONA' && (
+                                        <>
+                                            <td>{user.property.area}</td>
+                                            <td>{user.property.numberOfUnits}</td>
+                                        </>
+                                    )}
                                 </tr>
                             ))
                         )}
@@ -995,6 +925,17 @@ const AdminGeneral = () => {
                     <Button variant="secondary" onClick={() => setShowBillsModal(false)}>
                         إلغاء
                     </Button>
+
+                    {currentBillType === 'WATER' && (
+                        <Button
+                            variant="outline-info"
+                            onClick={() => setWaterReadings(generateRandomWaterReadings())}
+                            disabled={loading}
+                        >
+                            <FiRefreshCw /> توليد قراءات جديدة
+                        </Button>
+                    )}
+
                     <Button
                         variant="primary"
                         onClick={handleGenerateBills}
@@ -1005,7 +946,7 @@ const AdminGeneral = () => {
                                 <Spinner as="span" animation="border" size="sm" />
                                 <span className="ms-2">جاري التوليد...</span>
                             </>
-                        ) : 'توليد الفواتير'}
+                        ) : `توليد ${currentBillType === 'ARNONA' ? 'الأرنونا' : 'المياه'}`}
                     </Button>
                 </Modal.Footer>
             </Modal>
