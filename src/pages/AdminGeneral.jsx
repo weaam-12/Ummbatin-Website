@@ -368,7 +368,7 @@ const AdminGeneral = () => {
                     }
                 });
 
-                await axiosInstance.post('api/payments/generate-custom-water', billsData);
+                await axiosInstance.post('api/payments/generate-water', billsData);
             } else {
                 // توليد فواتير الأرنونا (النظام القديم)
                 await axiosInstance.post('api/payments/generate-arnona', null, {
@@ -891,7 +891,6 @@ const AdminGeneral = () => {
                         <Alert variant="info" className="mb-4">
                             <strong>آلية توليد فواتير المياه:</strong>
                             <ul className="mb-0">
-                                <li>يتم توليد قراءة عشوائية لكل عقار بين 10 و 30 متر مكعب</li>
                                 <li>سعر المتر المكعب الواحد = 30 شيكل</li>
                                 <li>المبلغ النهائي = القراءة × 30</li>
                             </ul>
