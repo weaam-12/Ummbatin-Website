@@ -23,8 +23,7 @@ const AdminGeneral = () => {
     const [showBillsModal, setShowBillsModal] = useState(false);
     const [currentBillType, setCurrentBillType] = useState('');
     const [pagination, setPagination] = useState({ page: 0, size: 10 });
-    const [waterReadings, setWaterReadings] = useState(generateRandomWaterReadings());
-
+    const [waterReadings, setWaterReadings] = useState({});
     // States للفعاليات
     const [events, setEvents] = useState([]);
     const [showEventModal, setShowEventModal] = useState(false);
@@ -44,9 +43,6 @@ const AdminGeneral = () => {
         numberOfUnits: 1
     });
 
-    const [showWaterReadingModal, setShowWaterReadingModal] = useState(false);
-    const [selectedUserId, setSelectedUserId] = useState('');
-    const [userProperties, setUserProperties] = useState([]);
     const [showEditEventModal, setShowEditEventModal] = useState(false);
     const [currentEvent, setCurrentEvent] = useState(null);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -139,20 +135,38 @@ const AdminGeneral = () => {
         });
         return readings;
     };
+    const handleOpenWaterBillsModal = () => {
+        setCurrentBillType('WATER');
+        setWaterReadings(generateRandomWaterReadings());
+        setShowBillsModal(true);
+    };
+
     // دالة تغيير الصورة
     const handleChangeImage = async () => {
         try {
             setLoading(true);
 
             const formData = new FormData();
+            const eventObj = { // أضف تعريف eventObj هنا
+                title: currentEvent.title,
+                description: currentEvent.description,
+                location: currentEvent.location,
+                startDate: currentEvent.startDate,
+                endDate: currentEvent.endDate,
+                active: true
+            };
+
             formData.append(
                 'event',
                 new Blob([JSON.stringify(eventObj)], { type: 'application/json' })
             );
-            if (newEvent.image) {
-                formData.append('image', newEvent.image);
-            }newEvent
-            console.log(newEvent);
+            if (newImage) {
+                formData.append('image', newImage);
+            }
+
+            await axiosInstance.put(`api/events/${currentEvent.id}`, formData, {
+                headers: { 'Content-Type': undefined }
+            });
 
             await fetchEvents();
             setShowImageModal(false);
@@ -467,7 +481,7 @@ const AdminGeneral = () => {
                                                     <h5>إجراءات سريعة</h5>
                                                 </Card.Header>
                                                 <Card.Body className="quick-actions">
-                                                    <Button variant="success" onClick={() => { setCurrentBillType('WATER'); setShowBillsModal(true); }}>
+                                                    <Button variant="success" onClick={handleOpenWaterBillsModal}>
                                                         <FiPlus /> توليد فواتير المياه
                                                     </Button>
                                                     <Button variant="info" onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }}>
