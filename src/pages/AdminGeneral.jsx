@@ -377,7 +377,17 @@ const AdminGeneral = () => {
                 }
 
                 console.log('Sending water bills data:', billsData); // للتتبع
-                await axiosInstance.post('api/payments/generate-custom-water', billsData);
+                for (const bill of billsData) {
+                    await axiosInstance.post('api/payments/generate-water', null, {
+                        params: {
+                            amount: bill.amount,
+                            userId: bill.userId,
+                            propertyId: bill.propertyId,
+                            month,
+                            year
+                        }
+                    });
+                }
             } else {
                 // توليد فواتير الأرنونا
                 await axiosInstance.post('api/payments/generate-arnona', null, {
