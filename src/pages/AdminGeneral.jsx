@@ -342,37 +342,37 @@ const AdminGeneral = () => {
             const currentDate = new Date();
             const month = currentDate.getMonth() + 1;
             const year = currentDate.getFullYear();
-            console.log('جميع المستخدمين:', users);
-            console.log('المستخدمون مع العقارات:', users.filter(u => u.properties?.length > 0));
+
             // تحقق من وجود مستخدمين بعقارات
-            const validUsers = users.filter(user =>
-                user.properties?.length > 0 &&
-                user.userId &&
-                user.properties.every(p => p.propertyId)
+            const usersWithProperties = users.filter(user =>
+                user.properties &&
+                user.properties.length > 0 &&
+                user.id
             );
 
-            if (validUsers.length === 0) {
+            if (usersWithProperties.length === 0) {
                 setNotification({
                     type: 'danger',
-                    message: 'لا يوجد مستخدمين لديهم عقارات صالحة حالياً'
+                    message: 'لا يوجد مستخدمين لديهم عقارات مسجلة حالياً'
                 });
                 return;
             }
 
             if (currentBillType === 'WATER') {
-                // إنشاء فواتير المياه لكل عقار
-                const billsData = validUsers.flatMap(user =>
-                    user.properties.map(property => ({
-                        userId: user.userId,
-                        propertyId: property.propertyId,
-                        amount: (waterReadings[property.propertyId]?.reading || 15) * 30,
-                        reading: waterReadings[property.propertyId]?.reading || 15
-                    }))
+                const billsData = usersWithProperties.flatMap(user =>
+                    user.properties.map(property => {
+                        const propId = property.id || property.propertyId;
+                        return {
+                            userId: user.id,
+                            propertyId: propId,
+                            amount: (waterReadings[propId]?.reading || 15) * 30,
+                            reading: waterReadings[propId]?.reading || 15
+                        };
+                    })
                 );
 
                 console.log('بيانات الفواتير المرسلة:', billsData);
 
-                // استخدام API الجديد بدلاً من الحلقة
                 const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
 
                 if (response.data.success) {
@@ -380,8 +380,6 @@ const AdminGeneral = () => {
                         type: 'success',
                         message: `تم توليد ${billsData.length} فاتورة مياه بنجاح`
                     });
-                } else {
-                    throw new Error(response.data.message || 'فشل في توليد الفواتير');
                 }
             } else {
                 // توليد فواتير الأرنونا
@@ -404,7 +402,6 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
-
 
     const formatPaymentStatus = (status) => {
         switch (status) {
