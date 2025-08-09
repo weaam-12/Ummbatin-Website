@@ -219,7 +219,7 @@ const AdminKinder = () => {
                             {kg.name} - {kg.children.length} / {kg.capacity} {t('childrens').toLowerCase()}
                         </summary>
                         <div className={styles.detailsContent}>
-                            <h3>{t('children')}</h3>
+                            <h3>{t('childrens')}</h3>
                             {kg.children.length > 0 ? (
                                 <div className={styles.tableContainer}>
                                     <table className={styles.table}>
