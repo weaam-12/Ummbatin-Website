@@ -216,7 +216,7 @@ const AdminKinder = () => {
                 {kindergartens.map(kg => (
                     <details key={kg.kindergartenId} className={styles.details}>
                         <summary className={styles.detailsHeader}>
-                            {kg.name} - {kg.children.length} / {kg.capacity} {t('children').toLowerCase()}
+                            {kg.name} - {kg.children.length} / {kg.capacity} {t('childrens').toLowerCase()}
                         </summary>
                         <div className={styles.detailsContent}>
                             <h3>{t('children')}</h3>
