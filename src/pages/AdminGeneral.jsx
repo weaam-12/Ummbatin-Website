@@ -892,7 +892,15 @@ const AdminGeneral = () => {
             <Modal show={showBillsModal} onHide={() => setShowBillsModal(false)} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        {currentBillType === 'ARNONA' ? 'توليد فواتير الأرنونا' : 'توليد فواتير المياه'}
+                        {currentBillType === 'ARNONA' && (
+                            <Alert variant="info" className="mb-4">
+                                <strong>آلية توليد فواتير الأرنونا:</strong>
+                                <ul className="mb-0">
+                                    <li>سعر المتر المربع الواحد = 50 شيكل</li>
+                                    <li>المبلغ النهائي = المساحة × 50 × عدد الوحدات</li>
+                                </ul>
+                            </Alert>
+                        )}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -922,6 +930,8 @@ const AdminGeneral = () => {
                                 <>
                                     <th>مساحة العقار (م²)</th>
                                     <th>عدد الوحدات</th>
+                                    <th>المبلغ (شيكل)</th>
+
                                 </>
                             )}
                         </tr>
@@ -958,6 +968,8 @@ const AdminGeneral = () => {
                                                 <>
                                                     <td>{property.area}</td>
                                                     <td>{property.numberOfUnits}</td>
+                                                    <td>{(property.area * 50 * property.numberOfUnits).toFixed(2)}</td> {/* حساب المبلغ */}
+
                                                 </>
                                             )}
                                         </tr>
