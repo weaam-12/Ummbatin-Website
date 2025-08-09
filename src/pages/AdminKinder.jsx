@@ -6,7 +6,7 @@ import styles from './AdminKinder.module.css';
 import { fetchKindergartens, createKindergarten, deleteKindergarten, getAllUsers, updateKindergarten } from '../api';
 
 const AdminKinder = () => {
-    const { t } = useTranslation('AdminKinder');
+    const { t } = useTranslation();
     const [kindergartens, setKindergartens] = useState([]);
     const [users, setUsers] = useState([]);
     const [showAddModal, setShowAddModal] = useState(false);
