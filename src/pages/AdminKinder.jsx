@@ -230,6 +230,8 @@ const AdminKinder = () => {
                                             <th>{t('age')}</th>
                                             <th>{t('parent')}</th>
                                             <th>{t('paymentStatus')}</th>
+                                            <th>{t('status')}</th>
+
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -239,10 +241,13 @@ const AdminKinder = () => {
                                                 <td>{new Date(child.birthDate).getFullYear()}-{new Date(child.birthDate).getMonth() + 1}</td>
                                                 <td>{users.find(u => u.id === child.user?.id)?.fullName || '—'}</td>
                                                 <td>
-                                                    <span className={`${styles.badge} ${child.paid ? styles.badgeSuccess : styles.badgeDanger}`}>
-                                                        {child.paid ? t('paid') : t('unpaid')}
+                                                    <span
+                                                        className={`${styles.badge} ${child.paid ? styles.badgeSuccess : styles.badgeDanger}`}>
+                                                        {child.paid ? t('paid') : t('paid')}
                                                     </span>
                                                 </td>
+                                                <td>{child.monthly_fee}</td>
+
                                             </tr>
                                         ))}
                                         </tbody>
