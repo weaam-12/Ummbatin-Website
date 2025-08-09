@@ -22,7 +22,7 @@ const AdminKinder = () => {
         try {
             const kgs = await fetchKindergartens();
             setKindergartens(kgs);
-            console.log(JSON.stringify(kgs));
+            console.table(kgs);       // لو array يطلعها جدول
             const totalChildren = kgs.reduce((sum, kg) => sum + kg.children.length, 0);
             const pendingRequests = kgs.reduce((sum, kg) => sum + (kg.pendingRequests || 0), 0);
             const totalRevenue = kgs.reduce((sum, kg) => sum + (kg.revenue || 0), 0);
