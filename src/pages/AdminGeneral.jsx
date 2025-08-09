@@ -8,10 +8,13 @@ import {
     FiHome, FiFileText, FiDroplet, FiMapPin, FiActivity,FiImage,
     FiEye, FiTrash2, FiEdit,FiRefreshCw
 } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import './AdminGeneral.css';
 import { axiosInstance } from '../api.js';
 
 const AdminGeneral = () => {
+    const { t } = useTranslation();
+
     // States العامة
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(false);
@@ -24,6 +27,7 @@ const AdminGeneral = () => {
     const [currentBillType, setCurrentBillType] = useState('');
     const [pagination, setPagination] = useState({ page: 0, size: 10 });
     const [waterReadings, setWaterReadings] = useState({});
+
     // States للفعاليات
     const [events, setEvents] = useState([]);
     const [showEventModal, setShowEventModal] = useState(false);
@@ -67,10 +71,10 @@ const AdminGeneral = () => {
             setLoading(true);
             await axiosInstance.delete(`api/events/${eventId}`);
             await fetchEvents();
-            setNotification({ type: 'success', message: 'تم حذف الفعالية بنجاح' });
+            setNotification({ type: 'success', message: t('admin.events.deleteSuccess') });
         } catch (error) {
             console.log(error);
-            setNotification({ type: 'danger', message: 'فشل في حذف الفعالية' });
+            setNotification({ type: 'danger', message: t('admin.events.deleteError') });
         } finally {
             setLoading(false);
         }
@@ -83,7 +87,7 @@ const AdminGeneral = () => {
 
             if (!currentEvent || !currentEvent.id) {
                 console.error('Event ID is not defined');
-                setNotification({ type: 'danger', message: 'حدث خطأ في استرجاع معلومات الفعالية' });
+                setNotification({ type: 'danger', message: t('admin.events.updateError') });
                 return;
             }
 
@@ -105,32 +109,26 @@ const AdminGeneral = () => {
                 formData.append('image', newEvent.image);
             }
 
-            console.log('Current Event ID:', currentEvent.id);
-            console.log('Event Data:', eventObj);
-            console.log('Image:', newEvent.image);
-
             await axiosInstance.put(`api/events/${currentEvent.id}`, formData, {
                 headers: { 'Content-Type': undefined }
             });
 
             await fetchEvents();
             setShowEditEventModal(false);
-            setNotification({ type: 'success', message: 'تم تحديث الفعالية بنجاح' });
+            setNotification({ type: 'success', message: t('admin.events.updateSuccess') });
         } catch (error) {
-            console.error('خطأ في تحديث الفعالية:', error);
-            setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في تحديث الفعالية' });
+            console.error('Error updating event:', error);
+            setNotification({ type: 'danger', message: error.response?.data?.message || t('admin.events.updateError') });
         } finally {
             setLoading(false);
         }
     };
-
 
     const generateRandomWaterReadings = () => {
         const readings = {};
         users.forEach(user => {
             if (user.properties && user.properties.length > 0) {
                 user.properties.forEach(property => {
-                    // استخدام property.id أو property.propertyId أيهما متاح
                     const propId = property.id || property.propertyId;
                     if (propId && user.id) {
                         readings[propId] = {
@@ -141,9 +139,9 @@ const AdminGeneral = () => {
                 });
             }
         });
-        console.log('Generated readings:', readings);
         return readings;
     };
+
     const handleOpenWaterBillsModal = () => {
         setCurrentBillType('WATER');
         setWaterReadings(generateRandomWaterReadings());
@@ -156,7 +154,7 @@ const AdminGeneral = () => {
             setLoading(true);
 
             const formData = new FormData();
-            const eventObj = { // أضف تعريف eventObj هنا
+            const eventObj = {
                 title: currentEvent.title,
                 description: currentEvent.description,
                 location: currentEvent.location,
@@ -179,17 +177,14 @@ const AdminGeneral = () => {
 
             await fetchEvents();
             setShowImageModal(false);
-            setNotification({ type: 'success', message: 'تم تغيير صورة الفعالية بنجاح' });
+            setNotification({ type: 'success', message: t('admin.events.imageChangeSuccess') });
         } catch (error) {
             console.log(error);
-            setNotification({ type: 'danger', message: 'فشل في تغيير الصورة' });
+            setNotification({ type: 'danger', message: t('admin.events.imageChangeError') });
         } finally {
             setLoading(false);
         }
     };
-    // دالة لجلب عقارات المستخدم
-
-    // دالة إضافة قراءات المياه
 
     const handleAddProperty = async () => {
         try {
@@ -201,7 +196,6 @@ const AdminGeneral = () => {
                 userId: newProperty.userId
             });
 
-            // تحديث قائمة المستخدمين
             const updatedUsers = await fetchUsersWithProperties();
             setUsers(updatedUsers);
 
@@ -212,9 +206,9 @@ const AdminGeneral = () => {
                 area: '',
                 numberOfUnits: 1
             });
-            setNotification({ type: 'success', message: 'تمت إضافة العقار بنجاح' });
+            setNotification({ type: 'success', message: t('admin.properties.addSuccess') });
         } catch (error) {
-            setNotification({ type: 'danger', message: 'فشل في إضافة العقار: ' + (error.response?.data?.message || error.message) });
+            setNotification({ type: 'danger', message: t('admin.properties.addError') + ': ' + (error.response?.data?.message || error.message) });
         } finally {
             setLoading(false);
         }
@@ -229,7 +223,7 @@ const AdminGeneral = () => {
                     size: pagination.size
                 }
             });
-            const users = response.data.content || []; // تأكد من هيكل الاستجابة
+            const users = response.data.content || [];
             return users
                 .filter(u => u.properties?.length > 0)
                 .map(u => ({ ...u, property: u.properties[0] }));
@@ -264,7 +258,6 @@ const AdminGeneral = () => {
         }
     };
 
-    // تحميل البيانات الأولية
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
@@ -285,7 +278,7 @@ const AdminGeneral = () => {
                 }
             } catch (error) {
                 console.log(error);
-                setNotification({ type: 'danger', message: 'فشل في تحميل البيانات' });
+                setNotification({ type: 'danger', message: t('admin.general.loadError') });
             } finally {
                 setLoading(false);
             }
@@ -294,12 +287,10 @@ const AdminGeneral = () => {
         loadData();
     }, [activeTab]);
 
-    // ===================== إدارة الفعاليات =====================
     const handleAddEvent = async () => {
         try {
             setLoading(true);
 
-            // 1. إنشاء كائن JSON بالأسماء الصحيحة
             const eventObj = {
                 title: newEvent.title,
                 description: newEvent.description,
@@ -309,14 +300,11 @@ const AdminGeneral = () => {
                 active: true
             };
 
-            // 2. إضافة الحقل بالاسم "event"
             const formData = new FormData();
             formData.append(
                 'event',
                 new Blob([JSON.stringify(eventObj)], { type: 'application/json' })
             );
-
-            // 3. إضافة الصورة إن وُجدت
             if (newEvent.image) formData.append('image', newEvent.image);
 
             await axiosInstance.post('api/events', formData, {
@@ -326,16 +314,15 @@ const AdminGeneral = () => {
             await fetchEvents();
             setShowEventModal(false);
             setNewEvent({ title: '', description: '', location: '', image: null, date: '' });
-            setNotification({ type: 'success', message: 'تمت إضافة الفعالية بنجاح' });
+            setNotification({ type: 'success', message: t('admin.events.addSuccess') });
         } catch (error) {
             console.error(error);
-            setNotification({ type: 'danger', message: error.response?.data?.message || 'فشل في إضافة الفعالية' });
+            setNotification({ type: 'danger', message: error.response?.data?.message || t('admin.events.addError') });
         } finally {
             setLoading(false);
         }
     };
 
-    // ===================== إدارة الفواتير =====================
     const handleGenerateBills = async () => {
         try {
             setLoading(true);
@@ -343,7 +330,6 @@ const AdminGeneral = () => {
             const month = currentDate.getMonth() + 1;
             const year = currentDate.getFullYear();
 
-            // تحقق من وجود مستخدمين بعقارات
             const usersWithProperties = users.filter(user =>
                 user.properties &&
                 user.properties.length > 0 &&
@@ -353,7 +339,7 @@ const AdminGeneral = () => {
             if (usersWithProperties.length === 0) {
                 setNotification({
                     type: 'danger',
-                    message: 'لا يوجد مستخدمين لديهم عقارات مسجلة حالياً'
+                    message: t('admin.properties.noProperties')
                 });
                 return;
             }
@@ -371,20 +357,21 @@ const AdminGeneral = () => {
                     })
                 );
 
-                console.log('بيانات الفواتير المرسلة:', billsData);
-
                 const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
 
                 if (response.data.success) {
                     setNotification({
                         type: 'success',
-                        message: `تم توليد ${billsData.length} فاتورة مياه بنجاح`
+                        message: t('admin.payments.waterSuccess')
                     });
                 }
             } else {
-                // توليد فواتير الأرنونا
                 await axiosInstance.post('api/payments/generate-arnona', null, {
                     params: { month, year }
+                });
+                setNotification({
+                    type: 'success',
+                    message: t('admin.payments.arnonaSuccess')
                 });
             }
 
@@ -396,7 +383,7 @@ const AdminGeneral = () => {
             console.error('Error generating bills:', error);
             setNotification({
                 type: 'danger',
-                message: error.response?.data?.message || error.message || 'فشل في توليد الفواتير'
+                message: error.response?.data?.message || error.message || t('admin.payments.generateError')
             });
         } finally {
             setLoading(false);
@@ -405,9 +392,9 @@ const AdminGeneral = () => {
 
     const formatPaymentStatus = (status) => {
         switch (status) {
-            case 'PAID': return { text: 'مدفوع', variant: 'success' };
-            case 'PENDING': return { text: 'قيد الانتظار', variant: 'warning' };
-            case 'FAILED': return { text: 'فشل', variant: 'danger' };
+            case 'PAID': return { text: t('payment.status.PAID'), variant: 'success' };
+            case 'PENDING': return { text: t('payment.status.PENDING'), variant: 'warning' };
+            case 'FAILED': return { text: t('payment.status.FAILED'), variant: 'danger' };
             default: return { text: status, variant: 'secondary' };
         }
     };
@@ -423,20 +410,20 @@ const AdminGeneral = () => {
             <Row>
                 <Col md={3} className="sidebar">
                     <div className="sidebar-header">
-                        <h4>لوحة تحكم الإدمن</h4>
+                        <h4>{t('admin.general.title')}</h4>
                     </div>
                     <ul className="sidebar-menu">
                         <li className={activeTab === 'dashboard' ? 'active' : ''}
                             onClick={() => setActiveTab('dashboard')}>
-                            <FiHome /> لوحة التحكم
+                            <FiHome /> {t('admin.menu.dashboard')}
                         </li>
                         <li className={activeTab === 'payments' ? 'active' : ''}
                             onClick={() => setActiveTab('payments')}>
-                            <FiDollarSign /> إدارة الفواتير
+                            <FiDollarSign /> {t('admin.menu.payments')}
                         </li>
                         <li className={activeTab === 'events' ? 'active' : ''}
                             onClick={() => setActiveTab('events')}>
-                            <FiCalendar /> إدارة الفعاليات
+                            <FiCalendar /> {t('admin.menu.events')}
                         </li>
                     </ul>
                 </Col>
@@ -445,21 +432,21 @@ const AdminGeneral = () => {
                     {loading ? (
                         <div className="text-center py-5">
                             <Spinner animation="border" variant="primary" />
-                            <p className="mt-3">جاري التحميل...</p>
+                            <p className="mt-3">{t('general.loading')}</p>
                         </div>
                     ) : (
                         <>
                             {/* لوحة التحكم */}
                             {activeTab === 'dashboard' && (
                                 <div className="dashboard-overview">
-                                    <h3>نظرة عامة</h3>
+                                    <h3>{t('admin.dashboard.overview')}</h3>
                                     <Row className="mb-4">
                                         <Col md={4}>
                                             <Card className="stat-card">
                                                 <Card.Body>
                                                     <div className="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <h6>عدد الفعاليات</h6>
+                                                            <h6>{t('admin.dashboard.eventsCount')}</h6>
                                                             <h3>{events.length}</h3>
                                                         </div>
                                                         <FiUsers size={30} className="text-primary" />
@@ -472,7 +459,7 @@ const AdminGeneral = () => {
                                                 <Card.Body>
                                                     <div className="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <h6>فواتير المياه</h6>
+                                                            <h6>{t('admin.dashboard.waterBills')}</h6>
                                                             <h3>
                                                                 {payments.filter(p => p.paymentType === 'WATER').length}
                                                             </h3>
@@ -487,7 +474,7 @@ const AdminGeneral = () => {
                                                 <Card.Body>
                                                     <div className="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <h6>فواتير الأرنونا</h6>
+                                                            <h6>{t('admin.dashboard.arnonaBills')}</h6>
                                                             <h3>
                                                                 {payments.filter(p => p.paymentType === 'ARNONA').length}
                                                             </h3>
@@ -503,20 +490,20 @@ const AdminGeneral = () => {
                                         <Col md={6}>
                                             <Card className="mb-4">
                                                 <Card.Header>
-                                                    <h5>إجراءات سريعة</h5>
+                                                    <h5>{t('admin.dashboard.quickActions')}</h5>
                                                 </Card.Header>
                                                 <Card.Body className="quick-actions">
                                                     <Button variant="success" onClick={handleOpenWaterBillsModal}>
-                                                        <FiPlus /> توليد فواتير المياه
+                                                        <FiPlus /> {t('admin.actions.generateWater')}
                                                     </Button>
                                                     <Button variant="info" onClick={() => { setCurrentBillType('ARNONA'); setShowBillsModal(true); }}>
-                                                        <FiPlus /> توليد فواتير الأرنونا
+                                                        <FiPlus /> {t('admin.actions.generateArnona')}
                                                     </Button>
                                                     <Button variant="primary" onClick={() => setShowEventModal(true)}>
-                                                        <FiPlus /> إضافة فعالية جديدة
+                                                        <FiPlus /> {t('admin.actions.addEvent')}
                                                     </Button>
                                                     <Button variant="warning" onClick={() => setShowAddPropertyModal(true)}>
-                                                        <FiMapPin /> إضافة عقار جديد
+                                                        <FiMapPin /> {t('admin.actions.addProperty')}
                                                     </Button>
                                                 </Card.Body>
                                             </Card>
@@ -524,7 +511,7 @@ const AdminGeneral = () => {
                                         <Col md={6}>
                                             <Card>
                                                 <Card.Header>
-                                                    <h5>آخر الفعاليات</h5>
+                                                    <h5>{t('admin.dashboard.recentEvents')}</h5>
                                                 </Card.Header>
                                                 <Card.Body>
                                                     {events.slice(0, 3).map(event => (
@@ -545,37 +532,37 @@ const AdminGeneral = () => {
                             {/* مودال إضافة عقار جديد */}
                             <Modal show={showAddPropertyModal} onHide={() => setShowAddPropertyModal(false)}>
                                 <Modal.Header closeButton>
-                                    <Modal.Title>إضافة عقار جديد</Modal.Title>
+                                    <Modal.Title>{t('admin.properties.addTitle')}</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
                                     <Form>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>رقم المستخدم (ID)</Form.Label>
+                                            <Form.Label>{t('admin.properties.userId')}</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 value={newProperty.userId}
                                                 onChange={(e) => setNewProperty({...newProperty, userId: e.target.value})}
-                                                placeholder="أدخل رقم المستخدم"
+                                                placeholder={t('admin.properties.userIdPlaceholder')}
                                             />
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>عنوان العقار</Form.Label>
+                                            <Form.Label>{t('labels.address')}</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 value={newProperty.address}
                                                 onChange={(e) => setNewProperty({...newProperty, address: e.target.value})}
-                                                placeholder="أدخل عنوان العقار"
+                                                placeholder={t('admin.properties.addressPlaceholder')}
                                             />
                                         </Form.Group>
                                         <Row>
                                             <Col md={6}>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>مساحة العقار (م²)</Form.Label>
+                                                    <Form.Label>{t('labels.area')} ({t('general.squareMeters')})</Form.Label>
                                                     <Form.Control
                                                         type="number"
                                                         value={newProperty.area}
                                                         onChange={(e) => setNewProperty({...newProperty, area: e.target.value})}
-                                                        placeholder="أدخل المساحة"
+                                                        placeholder={t('admin.properties.areaPlaceholder')}
                                                         min="0"
                                                         step="0.01"
                                                     />
@@ -583,12 +570,12 @@ const AdminGeneral = () => {
                                             </Col>
                                             <Col md={6}>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>عدد الوحدات</Form.Label>
+                                                    <Form.Label>{t('labels.units')}</Form.Label>
                                                     <Form.Control
                                                         type="number"
                                                         value={newProperty.numberOfUnits}
                                                         onChange={(e) => setNewProperty({...newProperty, numberOfUnits: e.target.value})}
-                                                        placeholder="أدخل عدد الوحدات"
+                                                        placeholder={t('admin.properties.unitsPlaceholder')}
                                                         min="1"
                                                     />
                                                 </Form.Group>
@@ -598,10 +585,10 @@ const AdminGeneral = () => {
                                 </Modal.Body>
                                 <Modal.Footer>
                                     <Button variant="secondary" onClick={() => setShowAddPropertyModal(false)}>
-                                        إلغاء
+                                        {t('common.close')}
                                     </Button>
                                     <Button variant="primary" onClick={handleAddProperty} disabled={loading}>
-                                        {loading ? 'جاري الحفظ...' : 'حفظ العقار'}
+                                        {loading ? t('common.submitting') : t('admin.properties.saveButton')}
                                     </Button>
                                 </Modal.Footer>
                             </Modal>
@@ -609,17 +596,17 @@ const AdminGeneral = () => {
                             {/* إدارة الفواتير */}
                             {activeTab === 'payments' && (
                                 <div className="payments-section">
-                                    <h3>إدارة الفواتير الشهرية</h3>
+                                    <h3>{t('admin.payments.title')}</h3>
                                     <Table striped bordered hover responsive>
                                         <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>اسم المواطن</th>
-                                            <th>نوع الفاتورة</th>
-                                            <th>المبلغ (شيكل)</th>
-                                            <th>حالة الدفع</th>
-                                            <th>عنوان العقار</th>
-                                            <th>عدد الوحدات</th>
+                                            <th>{t('labels.fullName')}</th>
+                                            <th>{t('payment.invoice.paymentStatus')}</th>
+                                            <th>{t('payment.invoice.amount')} ({t('general.currency')})</th>
+                                            <th>{t('payment.status.status')}</th>
+                                            <th>{t('labels.address')}</th>
+                                            <th>{t('labels.units')}</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -628,7 +615,7 @@ const AdminGeneral = () => {
                                                 <tr key={payment.paymentId || index}>
                                                     <td>{index + 1}</td>
                                                     <td>{payment.userName || payment.user?.fullName || '--'}</td>
-                                                    <td>{payment.paymentType === 'WATER' ? 'مياه' : 'أرنونا'}</td>
+                                                    <td>{payment.paymentType === 'WATER' ? t('payment.types.water') : t('payment.types.arnona')}</td>
                                                     <td>{payment.amount ? payment.amount.toFixed(2) : '--'}</td>
                                                     <td>
                                                         <Badge bg={formatPaymentStatus(payment.status).variant}>
@@ -642,7 +629,7 @@ const AdminGeneral = () => {
                                         ) : (
                                             <tr>
                                                 <td colSpan="7" className="text-center">
-                                                    لا توجد فواتير متاحة
+                                                    {t('common.noData')}
                                                 </td>
                                             </tr>
                                         )}
@@ -655,9 +642,9 @@ const AdminGeneral = () => {
                             {activeTab === 'events' && (
                                 <div className="events-section">
                                     <div className="d-flex justify-content-between align-items-center mb-4">
-                                        <h3>إدارة الفعاليات</h3>
+                                        <h3>{t('admin.events.title')}</h3>
                                         <Button variant="primary" onClick={() => setShowEventModal(true)}>
-                                            <FiPlus /> إضافة فعالية جديدة
+                                            <FiPlus /> {t('admin.actions.addEvent')}
                                         </Button>
                                     </div>
                                     <Row>
@@ -672,8 +659,6 @@ const AdminGeneral = () => {
                                                                 onClick={() => {
                                                                     setCurrentEvent(event);
                                                                     setShowImageModal(true);
-                                                                    console.log('Current Event ID:', currentEvent.id);
-
                                                                 }}
                                                                 style={{ cursor: 'pointer' }}
                                                             />
@@ -700,14 +685,14 @@ const AdminGeneral = () => {
                                                             size="sm"
                                                             onClick={() => handleEditEvent(event)}
                                                         >
-                                                            <FiEdit /> تعديل
+                                                            <FiEdit /> {t('common.edit')}
                                                         </Button>
                                                         <Button
                                                             variant="danger"
                                                             size="sm"
                                                             onClick={() => handleDeleteEvent(event.id)}
                                                         >
-                                                            <FiTrash2 /> حذف
+                                                            <FiTrash2 /> {t('common.delete')}
                                                         </Button>
                                                     </Card.Footer>
                                                 </Card>
@@ -721,14 +706,15 @@ const AdminGeneral = () => {
                 </Col>
             </Row>
 
+            {/* مودال تعديل الفعالية */}
             <Modal show={showEditEventModal} onHide={() => setShowEditEventModal(false)} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>تعديل الفعالية</Modal.Title>
+                    <Modal.Title>{t('admin.events.editTitle')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>عنوان الفعالية</Form.Label>
+                            <Form.Label>{t('admin.events.eventTitle')}</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={newEvent.title}
@@ -736,7 +722,7 @@ const AdminGeneral = () => {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>وصف الفعالية</Form.Label>
+                            <Form.Label>{t('admin.events.description')}</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -747,7 +733,7 @@ const AdminGeneral = () => {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>المكان</Form.Label>
+                                    <Form.Label>{t('event.location')}</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={newEvent.location}
@@ -757,7 +743,7 @@ const AdminGeneral = () => {
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>التاريخ</Form.Label>
+                                    <Form.Label>{t('event.date')}</Form.Label>
                                     <Form.Control
                                         type="date"
                                         value={newEvent.date}
@@ -767,7 +753,7 @@ const AdminGeneral = () => {
                             </Col>
                         </Row>
                         <Form.Group className="mb-3">
-                            <Form.Label>صورة جديدة (اختياري)</Form.Label>
+                            <Form.Label>{t('admin.events.newImage')}</Form.Label>
                             <Form.Control
                                 type="file"
                                 onChange={(e) => setNewEvent({...newEvent, image: e.target.files[0]})}
@@ -777,32 +763,32 @@ const AdminGeneral = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowEditEventModal(false)}>
-                        إلغاء
+                        {t('common.close')}
                     </Button>
                     <Button variant="primary" onClick={handleUpdateEvent} disabled={loading}>
-                        {loading ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+                        {loading ? t('common.submitting') : t('admin.events.saveChanges')}
                     </Button>
                 </Modal.Footer>
             </Modal>
 
-            // إضافة مودال تغيير الصورة
+            {/* مودال تغيير الصورة */}
             <Modal show={showImageModal} onHide={() => setShowImageModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>تغيير صورة الفعالية</Modal.Title>
+                    <Modal.Title>{t('admin.events.changeImage')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {currentEvent?.imageUrl && (
                         <div className="text-center mb-3">
                             <img
                                 src={currentEvent.imageUrl}
-                                alt="صورة الفعالية الحالية"
+                                alt={t('admin.events.currentImage')}
                                 style={{ maxWidth: '100%', maxHeight: '300px' }}
                             />
                         </div>
                     )}
                     <Form>
                         <Form.Group>
-                            <Form.Label>اختر صورة جديدة</Form.Label>
+                            <Form.Label>{t('admin.events.selectNewImage')}</Form.Label>
                             <Form.Control
                                 type="file"
                                 onChange={(e) => setNewImage(e.target.files[0])}
@@ -812,26 +798,27 @@ const AdminGeneral = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowImageModal(false)}>
-                        إلغاء
+                        {t('common.close')}
                     </Button>
                     <Button
                         variant="primary"
                         onClick={handleChangeImage}
                         disabled={loading || !newImage}
                     >
-                        {loading ? 'جاري التحميل...' : 'تغيير الصورة'}
+                        {loading ? t('common.submitting') : t('admin.events.changeImageButton')}
                     </Button>
                 </Modal.Footer>
             </Modal>
+
             {/* مودال إضافة فعالية جديدة */}
             <Modal show={showEventModal} onHide={() => setShowEventModal(false)} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>إضافة فعالية جديدة</Modal.Title>
+                    <Modal.Title>{t('admin.events.addTitle')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>عنوان الفعالية</Form.Label>
+                            <Form.Label>{t('admin.events.eventTitle')}</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={newEvent.title}
@@ -839,7 +826,7 @@ const AdminGeneral = () => {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>وصف الفعالية</Form.Label>
+                            <Form.Label>{t('admin.events.description')}</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -850,7 +837,7 @@ const AdminGeneral = () => {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>المكان</Form.Label>
+                                    <Form.Label>{t('event.location')}</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={newEvent.location}
@@ -860,7 +847,7 @@ const AdminGeneral = () => {
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>التاريخ</Form.Label>
+                                    <Form.Label>{t('event.date')}</Form.Label>
                                     <Form.Control
                                         type="date"
                                         value={newEvent.date}
@@ -870,7 +857,7 @@ const AdminGeneral = () => {
                             </Col>
                         </Row>
                         <Form.Group className="mb-3">
-                            <Form.Label>صورة الفعالية</Form.Label>
+                            <Form.Label>{t('admin.events.eventImage')}</Form.Label>
                             <Form.Control
                                 type="file"
                                 onChange={(e) => setNewEvent({...newEvent, image: e.target.files[0]})}
@@ -880,10 +867,10 @@ const AdminGeneral = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowEventModal(false)}>
-                        إلغاء
+                        {t('common.close')}
                     </Button>
                     <Button variant="primary" onClick={handleAddEvent} disabled={loading}>
-                        {loading ? 'جاري الحفظ...' : 'حفظ الفعالية'}
+                        {loading ? t('common.submitting') : t('admin.events.saveEvent')}
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -892,46 +879,45 @@ const AdminGeneral = () => {
             <Modal show={showBillsModal} onHide={() => setShowBillsModal(false)} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        {currentBillType === 'ARNONA' && (
-                            <Alert variant="info" className="mb-4">
-                                <strong>آلية توليد فواتير الأرنونا:</strong>
-                                <ul className="mb-0">
-                                    <li>سعر المتر المربع الواحد = 50 شيكل</li>
-                                    <li>المبلغ النهائي = المساحة × 50 × عدد الوحدات</li>
-                                </ul>
-                            </Alert>
-                        )}
+                        {currentBillType === 'ARNONA' ? t('admin.actions.generateArnona') : t('admin.actions.generateWater')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {currentBillType === 'WATER' && (
                         <Alert variant="info" className="mb-4">
-                            <strong>آلية توليد فواتير المياه:</strong>
+                            <strong>{t('admin.payments.waterDescription')}</strong>
                             <ul className="mb-0">
-                                <li>سعر المتر المكعب الواحد = 30 شيكل</li>
-                                <li>المبلغ النهائي = القراءة × 30</li>
+                                <li>{t('payment.readingApproximation', { unitPrice: 30, unitsCount: 1, amount: 30 })}</li>
+                                <li>{t('payment.readingApproximation', { unitPrice: 30, unitsCount: 15, amount: 450 })}</li>
                             </ul>
                         </Alert>
                     )}
-
+                    {currentBillType === 'ARNONA' && (
+                        <Alert variant="info" className="mb-4">
+                            <strong>{t('admin.payments.arnonaDescription')}</strong>
+                            <ul className="mb-0">
+                                <li>{t('payment.arnona.calculation', { area: 100, units: 1, total: 5000 })}</li>
+                                <li>{t('payment.arnona.calculation', { area: 100, units: 2, total: 10000 })}</li>
+                            </ul>
+                        </Alert>
+                    )}
                     <Table striped bordered hover responsive>
                         <thead>
                         <tr>
                             <th>#</th>
-                            <th>اسم المستخدم</th>
-                            <th>عنوان العقار</th>
+                            <th>{t('labels.fullName')}</th>
+                            <th>{t('labels.address')}</th>
                             {currentBillType === 'WATER' && (
                                 <>
-                                    <th>قراءة المياه (م³)</th>
-                                    <th>المبلغ (شيكل)</th>
+                                    <th>{t('admin.water.reading')} (م³)</th>
+                                    <th>{t('payment.invoice.amount')} ({t('general.currency')})</th>
                                 </>
                             )}
                             {currentBillType === 'ARNONA' && (
                                 <>
-                                    <th>مساحة العقار (م²)</th>
-                                    <th>عدد الوحدات</th>
-                                    <th>المبلغ (شيكل)</th>
-
+                                    <th>{t('labels.area')} ({t('general.squareMeters')})</th>
+                                    <th>{t('labels.units')}</th>
+                                    <th>{t('payment.invoice.amount')} ({t('general.currency')})</th>
                                 </>
                             )}
                         </tr>
@@ -940,7 +926,7 @@ const AdminGeneral = () => {
                         {users.filter(user => user.properties && user.properties.length > 0).length === 0 ? (
                             <tr>
                                 <td colSpan={currentBillType === 'WATER' ? 5 : 4} className="text-center text-danger">
-                                    لا يوجد مستخدمين لديهم عقارات حالياً
+                                    {t('admin.properties.noProperties')}
                                 </td>
                             </tr>
                         ) : (
@@ -968,8 +954,7 @@ const AdminGeneral = () => {
                                                 <>
                                                     <td>{property.area}</td>
                                                     <td>{property.numberOfUnits}</td>
-                                                    <td>{(property.area * 50 * property.numberOfUnits).toFixed(2)}</td> {/* حساب المبلغ */}
-
+                                                    <td>{(property.area * 50 * property.numberOfUnits).toFixed(2)}</td>
                                                 </>
                                             )}
                                         </tr>
@@ -981,7 +966,7 @@ const AdminGeneral = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowBillsModal(false)}>
-                        إلغاء
+                        {t('common.close')}
                     </Button>
 
                     {currentBillType === 'WATER' && (
@@ -990,7 +975,7 @@ const AdminGeneral = () => {
                             onClick={() => setWaterReadings(generateRandomWaterReadings())}
                             disabled={loading}
                         >
-                            <FiRefreshCw /> توليد قراءات جديدة
+                            <FiRefreshCw /> {t('admin.water.addReadings')}
                         </Button>
                     )}
 
@@ -1002,9 +987,9 @@ const AdminGeneral = () => {
                         {loading ? (
                             <>
                                 <Spinner as="span" animation="border" size="sm" />
-                                <span className="ms-2">جاري التوليد...</span>
+                                <span className="ms-2">{t('common.processing')}</span>
                             </>
-                        ) : `توليد ${currentBillType === 'ARNONA' ? 'الأرنونا' : 'المياه'}`}
+                        ) : t('admin.payments.generateButton')}
                     </Button>
                 </Modal.Footer>
             </Modal>
