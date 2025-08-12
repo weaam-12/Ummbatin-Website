@@ -239,7 +239,7 @@ const AdminKinder = () => {
                                             <tr key={child.childId}>
                                                 <td>{child.name}</td>
                                                 <td>{new Date(child.birthDate).getFullYear()}-{new Date(child.birthDate).getMonth() + 1}</td>
-                                                <td>{users.find(u => u.id === child.user?.id)?.fullName || '—'}</td>
+                                                <td>{child.motherName}</td>
                                                 <td>
                                                     <span
                                                         className={`${styles.badge} ${child.paid ? styles.paid : styles.badgeDanger}`}>
