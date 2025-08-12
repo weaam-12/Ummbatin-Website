@@ -25,7 +25,7 @@ const AdminKinder = () => {
             console.table(kgs);       // لو array يطلعها جدول
             const totalChildren = kgs.reduce((sum, kg) => sum + kg.children.length, 0);
             const pendingRequests = kgs.reduce((sum, kg) => sum + (kg.pendingRequests || 0), 0);
-            const totalRevenue = kgs.reduce((sum, kg) => sum + (kg.revenue || 0), 0);
+            const totalRevenue = totalChildren*250;
             setStats({ totalChildren, pendingRequests, totalRevenue });
         } catch (error) {
             setNotification({ type: 'danger', message: t('loadError') });
