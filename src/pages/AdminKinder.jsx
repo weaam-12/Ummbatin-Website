@@ -246,7 +246,7 @@ const AdminKinder = () => {
                                                         {child.paid ? t('paid') : t('paid')}
                                                     </span>
                                                 </td>
-                                                <td>{child.monthly_fee}</td>
+                                                <td>{child.monthlyFee}</td>
 
                                             </tr>
                                         ))}
