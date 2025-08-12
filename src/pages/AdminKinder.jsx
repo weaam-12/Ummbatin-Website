@@ -187,12 +187,8 @@ const AdminKinder = () => {
                                     )}
                                 </td>
                                 <td>{kg.children.length}</td>
-                                <td>{kg.monthlyFee} {t('currency')}</td>
-                                <td>
-                                    <span className={`${styles.badge} ${kg.status === 'OPEN' ? styles.badgeSuccess : styles.badgeDanger}`}>
-                                        {kg.status === 'OPEN' ? t('open') : t('closed')}
-                                    </span>
-                                </td>
+                                <td>{250} {t('currency')}</td>
+                                <td>"OPEN"</td>
                                 <td>
                                     <button className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
                                             onClick={() => { setCurrentKg(kg); setShowEditModal(true); }}>
