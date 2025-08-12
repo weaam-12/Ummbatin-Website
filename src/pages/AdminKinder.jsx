@@ -160,7 +160,6 @@ const AdminKinder = () => {
                             <th>{t('capacity')}</th>
                             <th>{t('occupied')}</th>
                             <th>{t('fees')}</th>
-                            <th>{t('status')}</th>
                             <th>{t('actions')}</th>
                         </tr>
                         </thead>
@@ -188,7 +187,6 @@ const AdminKinder = () => {
                                 </td>
                                 <td>{kg.children.length}</td>
                                 <td>{250} {t('currency')}</td>
-                                <td>"OPEN"</td>
                                 <td>
                                     <button className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
                                             onClick={() => { setCurrentKg(kg); setShowEditModal(true); }}>
@@ -197,10 +195,6 @@ const AdminKinder = () => {
                                     <button className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
                                             onClick={() => handleDeleteKg(kg.kindergartenId)}>
                                         <FiTrash2 /> {t('delete')}
-                                    </button>
-                                    <button className={`${styles.btn} ${kg.status === 'OPEN' ? styles.btnDanger : styles.btnSuccess} ${styles.btnSm}`}
-                                            onClick={() => toggleKindergartenStatus(kg)}>
-                                        {kg.status === 'OPEN' ? t('close') : t('openBtn')}
                                     </button>
                                 </td>
                             </tr>
