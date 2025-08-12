@@ -242,11 +242,11 @@ const AdminKinder = () => {
                                                 <td>{child.motherName}</td>
                                                 <td>
                                                     <span
-                                                        className={`${styles.badge} ${child.paid ? styles.paid : styles.badgeDanger}`}>
+                                                        className={`${styles.badge} ${child.paid ? styles.paid : styles.paid}`}>
                                                         {child.paid ? t('paid') : t('paid')}
                                                     </span>
                                                 </td>
-                                                <td>{child.monthlyFee}</td>
+                                                <td>{"250₪"}</td>
 
                                             </tr>
                                         ))}
