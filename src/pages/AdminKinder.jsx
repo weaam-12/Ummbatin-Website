@@ -242,7 +242,7 @@ const AdminKinder = () => {
                                                 <td>{users.find(u => u.id === child.user?.id)?.fullName || '—'}</td>
                                                 <td>
                                                     <span
-                                                        className={`${styles.badge} ${child.paid ? styles.badgeSuccess : styles.badgeDanger}`}>
+                                                        className={`${styles.badge} ${child.paid ? styles.paid : styles.badgeDanger}`}>
                                                         {child.paid ? t('paid') : t('paid')}
                                                     </span>
                                                 </td>
