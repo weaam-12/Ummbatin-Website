@@ -19,7 +19,8 @@
     margin: 0 auto;
     overflow: hidden;
 }
-
+.pendingStrip  { margin: 1.5rem 0; padding: 1rem; background: #fff3cd; border-left: 4px solid #ffc107; }
+.pendingCard    { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
 /* الهيدر */
 .header {
     background: #0066cc;
