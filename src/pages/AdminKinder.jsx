@@ -185,7 +185,7 @@ const AdminKinder = () => {
                 {/* pending children */}
                 {pendingChildren.length > 0 && (
                     <section className={styles.pendingStrip}>
-                        <h2>طلبات تسجيل أطفال ({pendingChildren.length})</h2>
+                        <h2><h2>{t('pendingRequests')}</h2>  ({pendingChildren.length})</h2>
                         <div className={styles.tableContainer}>
                             <table className={styles.table}>
                                 <thead>
@@ -221,7 +221,9 @@ const AdminKinder = () => {
                 {kindergartens.map(kg => (
                     <details key={kg.kindergartenId} className={styles.details}>
                         <summary className={styles.detailsHeader}>
-                            {kg.name} – {kg.children?.filter(c => c.monthlyFee !== 2.5).length || 0} / {kg.capacity} أطفال مسجلين
+                            {kg.name} – {kg.children?.filter(c => c.monthlyFee !== 2.5).length || 0} / {kg.capacity}
+                            <h2>{t('registeredChildren')}</h2>
+
                         </summary>
                         <div className={styles.detailsContent}>
                             <h3>{t('childrens')}</h3>
@@ -239,11 +241,14 @@ const AdminKinder = () => {
                                                 <td>{child.childId}</td>
                                                 <td>{child.name}</td>
                                                 <td>{child.motherName || '–'}</td>
+                                                <td>{t('paid250')}</td>   {/* ثابت 250 شيقل */}
+
                                                 <td>
                                                     {child.monthlyFee === 3.5
                                                         ? <span className={`${styles.badge} ${styles.badgeSuccess}`}>{t('approved')}</span>
                                                         : <span className={`${styles.badge} ${styles.badgeSecondary}`}>{t('notRegistered')}</span>}
                                                 </td>
+
                                             </tr>
                                         ))}
                                         </tbody>

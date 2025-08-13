@@ -44,6 +44,12 @@
     "monthlyFee": "דמי חודשיים",
     "currency": "ש\"ח"
   },
+  "registeredChildren": "ילדים רשומים",
+  "approvedCount": "מאושר",
+  "motherName": "שם האם",
+  "approve": "אישור",
+  "reject": "דחייה",
+  "paid250": "שולם 250 ש\"ח",
   "municipalityName": "עיריית אום בטין",
   "allRightsReserved": "כל הזכויות שמורות",
   "profile": {

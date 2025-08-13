@@ -1,5 +1,6 @@
 {
   "AdminKinder": {
+
     "notRegistered": "",
     "title": "إدارة الحضانات",
     "addKindergarten": "إضافة حضانة",
@@ -45,6 +46,12 @@
     "monthlyFee": "الرسوم الشهرية",
     "currency": "شيقل"
   },
+  "registeredChildren": "أطفال مسجّلون",
+  "approvedCount": "مقبول",
+  "motherName": "اسم الأم",
+  "approve": "موافقة",
+  "reject": "رفض",
+  "paid250": "تم الدفع 250 شيقل",
   "municipalityName": "بلدية أم بطين",
   "allRightsReserved": "جميع الحقوق محفوظة",
   "profile": {
