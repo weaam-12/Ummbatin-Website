@@ -21,6 +21,13 @@
 }
 .pendingStrip  { margin: 1.5rem 0; padding: 1rem; background: #fff3cd; border-left: 4px solid #ffc107; }
 .pendingCard    { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+
+.pendingStrip, .approvedStrip {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
 /* الهيدر */
 .header {
     background: #0066cc;

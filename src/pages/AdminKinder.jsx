@@ -16,32 +16,32 @@ import {
 const AdminKinder = () => {
     const { t } = useTranslation();
     const [kindergartens, setKindergartens] = useState([]);
-    const [pendingKgs, setPendingKgs] = useState([]);
-    const [approvedKgs, setApprovedKgs] = useState([]);
+    const [pendingChildren, setPendingChildren] = useState([]);
+    const [approvedChildren, setApprovedChildren] = useState([]);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentKg, setCurrentKg] = useState({});
-    const [newKg, setNewKg] = useState({ name: '', location: '', capacity: '', monthlyFee: '' });
-    const [stats, setStats] = useState({ totalChildren: 0, pendingRequests: 0, approvedCount: 0 });
+    const [newKg, setNewKg] = useState({ name: '', location: '', capacity: '' });
+    const [stats, setStats] = useState({ totalChildren: 0, pendingCount: 0, approvedCount: 0 });
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
 
-    /* ----------  load data  ---------- */
+    /* ---------- load all data ---------- */
     const loadAll = async () => {
         setLoading(true);
         try {
             const kgs = await fetchKindergartens();
             setKindergartens(kgs);
 
-            const pending = kgs.filter(kg => kg.monthlyFee === 2.5);
-            const approved = kgs.filter(kg => kg.monthlyFee === 3.5);
+            const allChildren = kgs.flatMap(kg => kg.children || []);
+            const pending = allChildren.filter(c => c.monthlyFee === 2.5);
+            const approved = allChildren.filter(c => c.monthlyFee === 3.5);
 
-            setPendingKgs(pending);
-            setApprovedKgs(approved);
-
+            setPendingChildren(pending);
+            setApprovedChildren(approved);
             setStats({
-                totalChildren: kgs.reduce((sum, kg) => sum + (kg.children?.length || 0), 0),
-                pendingRequests: pending.length,
+                totalChildren: allChildren.length,
+                pendingCount: pending.length,
                 approvedCount: approved.length
             });
         } catch {
@@ -53,13 +53,13 @@ const AdminKinder = () => {
 
     useEffect(() => { loadAll(); }, []);
 
-    /* ----------  approve / reject  ---------- */
-    const handleApprove = async (id, approved) => {
+    /* ---------- approve / reject child ---------- */
+    const handleApproveChild = async (childId, approved) => {
         try {
-            const res = await fetch(
-                `/api/kindergartens/${id}/approve?approved=${approved}`,
-                { method: 'PATCH', credentials: 'include' }
-            );
+            const res = await fetch(`/api/children/${childId}/approve?approved=${approved}`, {
+                method: 'PATCH',
+                credentials: 'include'
+            });
             if (!res.ok) throw new Error();
             setNotification({ type: 'success', message: approved ? t('approved') : t('rejected') });
             loadAll();
@@ -68,13 +68,13 @@ const AdminKinder = () => {
         }
     };
 
-    /* ----------  add  ---------- */
+    /* ---------- kindergarten CRUD ---------- */
     const handleAddKg = async (e) => {
         e.preventDefault();
         try {
-            await createKindergarten({ ...newKg, monthlyFee: 1.5 });
+            await createKindergarten(newKg);
             setShowAddModal(false);
-            setNewKg({ name: '', location: '', capacity: '', monthlyFee: '' });
+            setNewKg({ name: '', location: '', capacity: '' });
             setNotification({ type: 'success', message: t('addSuccess') });
             loadAll();
         } catch {
@@ -82,7 +82,6 @@ const AdminKinder = () => {
         }
     };
 
-    /* ----------  edit  ---------- */
     const handleEditKg = async (e) => {
         e.preventDefault();
         try {
@@ -95,7 +94,6 @@ const AdminKinder = () => {
         }
     };
 
-    /* ----------  delete  ---------- */
     const handleDeleteKg = async (id) => {
         if (!window.confirm(t('confirmDelete'))) return;
         try {
@@ -107,11 +105,11 @@ const AdminKinder = () => {
         }
     };
 
-    /* ----------  render  ---------- */
+    /* ---------- render ---------- */
     return (
         <div className={styles.container}>
             <div className={styles.card}>
-                {/* Header */}
+                {/* header */}
                 <div className={styles.header}>
                     <div className={styles.headerTitle}>
                         <FiHome />
@@ -123,7 +121,7 @@ const AdminKinder = () => {
                     </button>
                 </div>
 
-                {/* Notification */}
+                {/* notification */}
                 {notification && (
                     <div className={`${styles.notification} ${
                         notification.type === 'danger' ? styles.alertDanger : styles.alertSuccess
@@ -133,65 +131,50 @@ const AdminKinder = () => {
                     </div>
                 )}
 
-                {/* Statistics */}
+                {/* stats */}
                 <div className={styles.statsGrid}>
                     <div className={styles.statCard}>
                         <div className={styles.statIcon}><FiHome /></div>
-                        <div className={styles.statInfo}>
-                            <h3>{t('totalKindergartens')}</h3>
-                            <p>{kindergartens.length}</p>
-                        </div>
+                        <div className={styles.statInfo}><h3>{t('totalKindergartens')}</h3><p>{kindergartens.length}</p></div>
                     </div>
-
                     <div className={styles.statCard}>
                         <div className={styles.statIcon}><FiUsers /></div>
-                        <div className={styles.statInfo}>
-                            <h3>{t('totalChildren')}</h3>
-                            <p>{stats.totalChildren}</p>
-                        </div>
+                        <div className={styles.statInfo}><h3>{t('totalChildren')}</h3><p>{stats.totalChildren}</p></div>
                     </div>
-
                     <div className={styles.statCard}>
                         <div className={styles.statIcon}><FiFileText /></div>
-                        <div className={styles.statInfo}>
-                            <h3>{t('pendingRequests')}</h3>
-                            <p>{stats.pendingRequests}</p>
-                        </div>
+                        <div className={styles.statInfo}><h3>{t('pendingRequests')}</h3><p>{stats.pendingCount}</p></div>
                     </div>
-
                     <div className={styles.statCard}>
                         <div className={styles.statIcon}><FiDollarSign /></div>
-                        <div className={styles.statInfo}>
-                            <h3>{t('approvedCount')}</h3>
-                            <p>{stats.approvedCount}</p>
-                        </div>
+                        <div className={styles.statInfo}><h3>{t('approvedCount')}</h3><p>{stats.approvedCount}</p></div>
                     </div>
                 </div>
 
-                {/* Pending Approvals */}
-                {pendingKgs.length > 0 && (
+                {/* pending children */}
+                {pendingChildren.length > 0 && (
                     <section className={styles.pendingStrip}>
-                        <h2>בקשות ממתינות ({pendingKgs.length})</h2>
+                        <h2>בקשות مמתינة – أطفال ({pendingChildren.length})</h2>
                         <div className={styles.tableContainer}>
                             <table className={styles.table}>
                                 <thead>
                                 <tr>
-                                    <th>#</th><th>{t('name')}</th><th>{t('location')}</th><th>{t('actions')}</th>
+                                    <th>#</th><th>{t('childName')}</th><th>{t('motherName')}</th><th>{t('actions')}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {pendingKgs.map(kg => (
-                                    <tr key={kg.kindergartenId}>
-                                        <td>{kg.kindergartenId}</td>
-                                        <td>{kg.name}</td>
-                                        <td>{kg.location}</td>
+                                {pendingChildren.map(c => (
+                                    <tr key={c.childId}>
+                                        <td>{c.childId}</td>
+                                        <td>{c.name}</td>
+                                        <td>{c.motherName || '–'}</td>
                                         <td>
                                             <button className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSm}`}
-                                                    onClick={() => handleApprove(kg.kindergartenId, true)}>
+                                                    onClick={() => handleApproveChild(c.childId, true)}>
                                                 <FiCheck /> {t('approve')}
                                             </button>
                                             <button className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
-                                                    onClick={() => handleApprove(kg.kindergartenId, false)}>
+                                                    onClick={() => handleApproveChild(c.childId, false)}>
                                                 <FiX /> {t('reject')}
                                             </button>
                                         </td>
@@ -203,26 +186,23 @@ const AdminKinder = () => {
                     </section>
                 )}
 
-                {/* Approved Kindergartens */}
-                {approvedKgs.length > 0 && (
+                {/* approved children */}
+                {approvedChildren.length > 0 && (
                     <section className={styles.approvedStrip}>
-                        <h2>{t('approvedKindergartens')} ({approvedKgs.length})</h2>
+                        <h2>{t('approvedChildren')} ({approvedChildren.length})</h2>
                         <div className={styles.tableContainer}>
                             <table className={styles.table}>
                                 <thead>
                                 <tr>
-                                    <th>#</th><th>{t('name')}</th><th>{t('location')}</th>
-                                    <th>{t('capacity')}</th><th>{t('children')}</th>
+                                    <th>#</th><th>{t('childName')}</th><th>{t('motherName')}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {approvedKgs.map(kg => (
-                                    <tr key={kg.kindergartenId}>
-                                        <td>{kg.kindergartenId}</td>
-                                        <td>{kg.name}</td>
-                                        <td>{kg.location}</td>
-                                        <td>{kg.capacity}</td>
-                                        <td>{kg.children?.length || 0}</td>
+                                {approvedChildren.map(c => (
+                                    <tr key={c.childId}>
+                                        <td>{c.childId}</td>
+                                        <td>{c.name}</td>
+                                        <td>{c.motherName || '–'}</td>
                                     </tr>
                                 ))}
                                 </tbody>
@@ -231,14 +211,13 @@ const AdminKinder = () => {
                     </section>
                 )}
 
-                {/* All Kindergartens */}
+                {/* kindergartens CRUD table */}
                 <div className={styles.tableContainer}>
                     <table className={styles.table}>
                         <thead>
                         <tr>
-                            <th>#</th><th>{t('name')}</th><th>{t('location')}</th>
-                            <th>{t('capacity')}</th><th>{t('occupied')}</th>
-                            <th>{t('status')}</th><th>{t('actions')}</th>
+                            <th>#</th><th>{t('name')}</th><th>{t('location')}</th><th>{t('capacity')}</th>
+                            <th>{t('occupied')}</th><th>{t('actions')}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -249,13 +228,6 @@ const AdminKinder = () => {
                                 <td>{kg.location}</td>
                                 <td>{kg.capacity}</td>
                                 <td>{kg.children?.length || 0}</td>
-                                <td>
-                                    {kg.monthlyFee === 3.5
-                                        ? <span className={`${styles.badge} ${styles.badgeSuccess}`}>{t('approved')}</span>
-                                        : kg.monthlyFee === 2.5
-                                            ? <span className={`${styles.badge} ${styles.badgeWarning}`}>{t('pending')}</span>
-                                            : <span className={`${styles.badge} ${styles.badgeSecondary}`}>{t('notRegistered')}</span>}
-                                </td>
                                 <td>
                                     <button className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
                                             onClick={() => { setCurrentKg(kg); setShowEditModal(true); }}>
@@ -272,7 +244,7 @@ const AdminKinder = () => {
                     </table>
                 </div>
 
-                {/* Add Modal */}
+                {/* add modal */}
                 {showAddModal && (
                     <div className={styles.modalOverlay}>
                         <div className={styles.modal}>
@@ -309,7 +281,7 @@ const AdminKinder = () => {
                     </div>
                 )}
 
-                {/* Edit Modal */}
+                {/* edit modal */}
                 {showEditModal && (
                     <div className={styles.modalOverlay}>
                         <div className={styles.modal}>

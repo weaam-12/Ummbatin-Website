@@ -1,5 +1,6 @@
 {
   "AdminKinder": {
+    "notRegistered": "",
     "title": "إدارة الحضانات",
     "addKindergarten": "إضافة حضانة",
     "totalKindergartens": "عدد الحضانات",
