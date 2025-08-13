@@ -1,4 +1,4 @@
-// AdminKinder.jsx – complete & final
+// AdminKinder.jsx – final responsive layout
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,10 +6,16 @@ import {
     FiPlus, FiEdit, FiTrash2, FiCheck, FiX
 } from 'react-icons/fi';
 import styles from './AdminKinder.module.css';
-import { fetchKindergartens, createKindergarten, deleteKindergarten, updateKindergarten } from '../api';
+import {
+    fetchKindergartens,
+    createKindergarten,
+    deleteKindergarten,
+    updateKindergarten
+} from '../api';
 
 const AdminKinder = () => {
     const { t } = useTranslation();
+    // --- state ---
     const [kindergartens, setKindergartens] = useState([]);
     const [pendingChildren, setPendingChildren] = useState([]);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -117,7 +123,6 @@ const AdminKinder = () => {
                     </button>
                 </div>
 
-                {/* notification */}
                 {notification && (
                     <div className={`${styles.notification} ${
                         notification.type === 'danger' ? styles.alertDanger : styles.alertSuccess
@@ -129,25 +134,22 @@ const AdminKinder = () => {
 
                 {/* stats */}
                 <div className={styles.statsGrid}>
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon}><FiHome /></div>
-                        <div className={styles.statInfo}><h3>{t('totalKindergartens')}</h3><p>{kindergartens.length}</p></div>
-                    </div>
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon}><FiUsers /></div>
-                        <div className={styles.statInfo}><h3>{t('totalChildren')}</h3><p>{stats.totalChildren}</p></div>
-                    </div>
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon}><FiFileText /></div>
-                        <div className={styles.statInfo}><h3>{t('pendingRequests')}</h3><p>{stats.pendingRequests}</p></div>
-                    </div>
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon}><FiDollarSign /></div>
-                        <div className={styles.statInfo}><h3>{t('approvedCount')}</h3><p>{stats.approvedCount}</p></div>
-                    </div>
+                    {[ { icon: FiHome, label: t('totalKindergartens'), value: kindergartens.length },
+                        { icon: FiUsers, label: t('totalChildren'), value: stats.totalChildren },
+                        { icon: FiFileText, label: t('pendingRequests'), value: stats.pendingRequests },
+                        { icon: FiDollarSign, label: t('approvedCount'), value: stats.approvedCount } ]
+                        .map(({ icon: Icon, label, value }) => (
+                            <div className={styles.statCard} key={label}>
+                                <div className={styles.statIcon}><Icon /></div>
+                                <div className={styles.statInfo}>
+                                    <h3>{label}</h3>
+                                    <p>{value}</p>
+                                </div>
+                            </div>
+                        ))}
                 </div>
 
-                {/* kindergartens table */}
+                {/* kindergartens */}
                 <div className={styles.tableContainer}>
                     <table className={styles.table}>
                         <thead>
@@ -254,7 +256,7 @@ const AdminKinder = () => {
                     </details>
                 ))}
 
-                {/* add modal */}
+                {/* modals */}
                 {showAddModal && (
                     <div className={styles.modalOverlay}>
                         <div className={styles.modal}>
@@ -275,19 +277,14 @@ const AdminKinder = () => {
                                     </div>
                                 </div>
                                 <div className={styles.modalFooter}>
-                                    <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowAddModal(false)}>
-                                        <FiX /> {t('cancel')}
-                                    </button>
-                                    <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
-                                        <FiCheck /> {t('save')}
-                                    </button>
+                                    <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowAddModal(false)}><FiX /> {t('cancel')}</button>
+                                    <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}><FiCheck /> {t('save')}</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 )}
 
-                {/* edit modal */}
                 {showEditModal && (
                     <div className={styles.modalOverlay}>
                         <div className={styles.modal}>
@@ -308,19 +305,14 @@ const AdminKinder = () => {
                                     </div>
                                 </div>
                                 <div className={styles.modalFooter}>
-                                    <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowEditModal(false)}>
-                                        <FiX /> {t('cancel')}
-                                    </button>
-                                    <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
-                                        <FiCheck /> {t('save')}
-                                    </button>
+                                    <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowEditModal(false)}><FiX /> {t('cancel')}</button>
+                                    <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}><FiCheck /> {t('save')}</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 )}
 
-                {/* assign modal (after reject) */}
                 {showAssignModal && currentChildToAssign && (
                     <div className={styles.modalOverlay}>
                         <div className={styles.modal}>
@@ -328,7 +320,7 @@ const AdminKinder = () => {
                             <div className={styles.modalBody}>
                                 <p>{t('chooseKindergarten')} <strong>{currentChildToAssign.name}</strong></p>
                                 <select onChange={(e) => {
-                                    const [id, name] = e.target.value.split('|');
+                                    const [id] = e.target.value.split('|');
                                     handleAssignChild(currentChildToAssign.childId, Number(id), 1.5);
                                 }}>
                                     <option value="">{t('select')}</option>
@@ -340,10 +332,7 @@ const AdminKinder = () => {
                                 </select>
                             </div>
                             <div className={styles.modalFooter}>
-                                <button className={`${styles.btn} ${styles.btnSecondary}`}
-                                        onClick={() => setShowAssignModal(false)}>
-                                    <FiX /> {t('cancel')}
-                                </button>
+                                <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowAssignModal(false)}><FiX /> {t('cancel')}</button>
                             </div>
                         </div>
                     </div>
