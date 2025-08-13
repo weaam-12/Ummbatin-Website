@@ -1,89 +1,56 @@
 // AdminKinder.jsx  (fully bilingual Arabic/Hebrew)
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-    FiHome, FiUsers, FiFileText, FiDollarSign,
-    FiPlus, FiEdit, FiTrash2, FiCheck, FiX
-} from 'react-icons/fi';
+import { FiHome, FiUsers, FiFileText, FiDollarSign, FiPlus, FiEdit, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
 import styles from './AdminKinder.module.css';
-import {
-    fetchKindergartens,
-    createKindergarten,
-    deleteKindergarten,
-    updateKindergarten
-} from '../api';
+import { fetchKindergartens, createKindergarten, deleteKindergarten, getAllUsers, updateKindergarten } from '../api';
 
 const AdminKinder = () => {
     const { t } = useTranslation();
     const [kindergartens, setKindergartens] = useState([]);
-    const [pendingKgs, setPendingKgs]   = useState([]);
+    const [users, setUsers] = useState([]);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentKg, setCurrentKg] = useState({});
     const [newKg, setNewKg] = useState({ name: '', location: '', capacity: '', monthlyFee: '' });
-    const [stats, setStats] = useState({ totalChildren: 0, pendingRequests: 0, approvedCount: 0 });
+    const [stats, setStats] = useState({ totalChildren: 0, pendingRequests: 0, totalRevenue: 0 });
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
 
-    /* ----------  Load data  ---------- */
     const loadAll = async () => {
         setLoading(true);
         try {
             const kgs = await fetchKindergartens();
             setKindergartens(kgs);
-
-            const pending = kgs.filter(kg => kg.monthlyFee === 2.5);
-            setPendingKgs(pending);
-
-            const totalChildren = kgs.reduce((sum, kg) => sum + (kg.children?.length || 0), 0);
-            const approved = kgs.filter(kg => kg.monthlyFee === 3.5).length;
-            setStats({
-                totalChildren,
-                pendingRequests: pending.length,
-                approvedCount: approved
-            });
-        } catch (err) {
+            console.table(kgs);       // لو array يطلعها جدول
+            const totalChildren = kgs.reduce((sum, kg) => sum + kg.children.length, 0);
+            const pendingRequests = kgs.reduce((sum, kg) => sum + (kg.pendingRequests || 0), 0);
+            const totalRevenue = kgs.filter(kg => kg.monthlyFee === 3.5).length * 250;
+            setStats({ totalChildren, pendingRequests, totalRevenue });
+        } catch (error) {
             setNotification({ type: 'danger', message: t('loadError') });
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => { loadAll(); }, []);
+    useEffect(() => {
+        loadAll();
+    }, []);
 
-    /* ----------  Approve / Reject  ---------- */
-    const handleApprove = async (id, approved) => {
-        try {
-            const res = await fetch(
-                `/api/kindergartens/${id}/approve?approved=${approved}`,
-                { method: 'PATCH', credentials: 'include' }
-            );
-            if (!res.ok) throw new Error();
-            setNotification({
-                type: 'success',
-                message: approved ? t('approved') : t('rejected')
-            });
-            loadAll();
-        } catch {
-            setNotification({ type: 'danger', message: t('updateError') });
-        }
-    };
-
-    /* ----------  Add  ---------- */
     const handleAddKg = async (e) => {
         e.preventDefault();
         try {
-            await createKindergarten({ ...newKg, monthlyFee: 1.5 });
+            await createKindergarten(newKg);
             setShowAddModal(false);
             setNewKg({ name: '', location: '', capacity: '', monthlyFee: '' });
             setNotification({ type: 'success', message: t('addSuccess') });
             loadAll();
-        } catch {
+        } catch (error) {
             setNotification({ type: 'danger', message: t('addError') });
         }
     };
 
-    /* ----------  Edit  ---------- */
     const handleEditKg = async (e) => {
         e.preventDefault();
         try {
@@ -91,24 +58,34 @@ const AdminKinder = () => {
             setShowEditModal(false);
             setNotification({ type: 'success', message: t('editSuccess') });
             loadAll();
-        } catch {
+        } catch (error) {
             setNotification({ type: 'danger', message: t('updateError') });
         }
     };
 
-    /* ----------  Delete  ---------- */
     const handleDeleteKg = async (id) => {
-        if (!window.confirm(t('confirmDelete'))) return;
-        try {
-            await deleteKindergarten(id);
-            setNotification({ type: 'success', message: t('deleteSuccess') });
-            loadAll();
-        } catch {
-            setNotification({ type: 'danger', message: t('deleteError') });
+        if (window.confirm(t('confirmDelete'))) {
+            try {
+                await deleteKindergarten(id);
+                setNotification({ type: 'success', message: t('deleteSuccess') });
+                loadAll();
+            } catch (error) {
+                setNotification({ type: 'danger', message: t('deleteError') });
+            }
         }
     };
 
-    /* ----------  Render  ---------- */
+    const toggleKindergartenStatus = async (kg) => {
+        const newStatus = kg.status === 'OPEN' ? 'CLOSED' : 'OPEN';
+        try {
+            await updateKindergarten(kg.kindergartenId, { ...kg, status: newStatus });
+            setNotification({ type: 'success', message: t('statusChanged') });
+            loadAll();
+        } catch (error) {
+            setNotification({ type: 'danger', message: t('updateError') });
+        }
+    };
+
     return (
         <div className={styles.container}>
             <div className={styles.card}>
@@ -118,8 +95,11 @@ const AdminKinder = () => {
                         <FiHome />
                         <h1>{t('title')} - {t('municipality')}</h1>
                     </div>
-                    <button className={`${styles.btn} ${styles.btnPrimary}`}
-                            onClick={() => setShowAddModal(true)}>
+
+                    <button
+                        className={`${styles.btn} ${styles.btnPrimary}`}
+                        onClick={() => setShowAddModal(true)}
+                    >
                         <FiPlus /> {t('addKindergarten')}
                     </button>
                 </div>
@@ -163,61 +143,50 @@ const AdminKinder = () => {
                     <div className={styles.statCard}>
                         <div className={styles.statIcon}><FiDollarSign /></div>
                         <div className={styles.statInfo}>
-                            <h3>{t('approvedCount')}</h3>
-                            <p>{stats.approvedCount}</p>
+                            <h3>{t('totalRevenue')}</h3>
+                            <p>{stats.totalRevenue} {t('currency')}</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Pending Approvals Strip */}
-                {pendingKgs.length > 0 && (
-                    <section className={styles.pendingStrip}>
-                        <h2>בקשות ממתינות ({pendingKgs.length})</h2>
-                        {pendingKgs.map(kg => (
-                            <div key={kg.kindergartenId} className={styles.pendingCard}>
-                                <span>{kg.name} – {kg.location}</span>
-                                <div>
-                                    <button
-                                        className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSm}`}
-                                        onClick={() => handleApprove(kg.kindergartenId, true)}>
-                                        <FiCheck /> {t('approve')}
-                                    </button>
-                                    <button
-                                        className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
-                                        onClick={() => handleApprove(kg.kindergartenId, false)}>
-                                        <FiX /> {t('reject')}
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </section>
-                )}
-
-                {/* Main Table */}
+                {/* Kindergartens Table */}
                 <div className={styles.tableContainer}>
                     <table className={styles.table}>
                         <thead>
                         <tr>
-                            <th>#</th><th>{t('name')}</th><th>{t('location')}</th>
-                            <th>{t('capacity')}</th><th>{t('occupied')}</th>
-                            <th>{t('status')}</th><th>{t('actions')}</th>
+                            <th>#</th>
+                            <th>{t('name')}</th>
+                            <th>{t('location')}</th>
+                            <th>{t('capacity')}</th>
+                            <th>{t('occupied')}</th>
+                            <th>{t('fees')}</th>
+                            <th>{t('actions')}</th>
                         </tr>
                         </thead>
                         <tbody>
                         {kindergartens.map(kg => (
                             <tr key={kg.kindergartenId}>
                                 <td>{kg.kindergartenId}</td>
-                                <td><strong>{kg.name}</strong></td>
-                                <td>{kg.location}</td>
-                                <td>{kg.capacity}</td>
-                                <td>{kg.children?.length || 0}</td>
                                 <td>
-                                    {kg.monthlyFee === 3.5
-                                        ? <span className={`${styles.badge} ${styles.badgeSuccess}`}>{t('approved')}</span>
-                                        : kg.monthlyFee === 2.5
-                                            ? <span className={`${styles.badge} ${styles.badgeWarning}`}>{t('pending')}</span>
-                                            : <span className={`${styles.badge} ${styles.badgeSecondary}`}>{t('notRegistered')}</span>}
+                                    <strong>{kg.name}</strong>
+                                    {kg.pendingRequests > 0 && (
+                                        <span className={`${styles.badge} ${styles.badgeDanger}`}>
+                                            {kg.pendingRequests} {t('newRequests')}
+                                        </span>
+                                    )}
                                 </td>
+                                <td>{kg.location}</td>
+                                <td>
+                                    {kg.capacity}
+                                    {kg.capacity - kg.children.length <= 0 && (
+                                        <span className={`${styles.badge} ${styles.badgeDanger}`}>{t('full')}</span>
+                                    )}
+                                    {kg.capacity - kg.children.length > 0 && kg.capacity - kg.children.length <= 5 && (
+                                        <span className={`${styles.badge} ${styles.badgeWarning}`}>{t('limited')}</span>
+                                    )}
+                                </td>
+                                <td>{kg.children.length}</td>
+                                <td>{250} {t('currency')}</td>
                                 <td>
                                     <button className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
                                             onClick={() => { setCurrentKg(kg); setShowEditModal(true); }}>
@@ -234,6 +203,53 @@ const AdminKinder = () => {
                     </table>
                 </div>
 
+                {/* Kindergarten Details */}
+                {kindergartens.map(kg => (
+                    <details key={kg.kindergartenId} className={styles.details}>
+                        <summary className={styles.detailsHeader}>
+                            {kg.name} - {kg.children.length} / {kg.capacity} {t('childrens').toLowerCase()}
+                        </summary>
+                        <div className={styles.detailsContent}>
+                            <h3>{t('childrens')}</h3>
+                            {kg.children.length > 0 ? (
+                                <div className={styles.tableContainer}>
+                                    <table className={styles.table}>
+                                        <thead>
+                                        <tr>
+                                            <th>{t('childName')}</th>
+                                            <th>{t('age')}</th>
+                                            <th>{t('parent')}</th>
+                                            <th>{t('paymentStatus')}</th>
+                                            <th>{t('status')}</th>
+
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {kg.children.map(child => (
+                                            <tr key={child.childId}>
+                                                <td>{child.name}</td>
+                                                <td>{new Date(child.birthDate).getFullYear()}-{new Date(child.birthDate).getMonth() + 1}</td>
+                                                <td>{child.motherName}</td>
+                                                <td>
+                                                    <span
+                                                        className={`${styles.badge} ${child.paid ? styles.paid : styles.paid}`}>
+                                                        {child.paid ? t('paid') : t('paid')}
+                                                    </span>
+                                                </td>
+                                                <td>{"250₪"}</td>
+
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <p style={{ textAlign: 'center', color: '#666' }}>{t('noChildren')}</p>
+                            )}
+                        </div>
+                    </details>
+                ))}
+
                 {/* Add Modal */}
                 {showAddModal && (
                     <div className={styles.modalOverlay}>
@@ -242,24 +258,24 @@ const AdminKinder = () => {
                             <form onSubmit={handleAddKg} className={styles.modalBody}>
                                 <div className={styles.formGroup}>
                                     <label>{t('name')}</label>
-                                    <input type="text" value={newKg.name}
-                                           onChange={e => setNewKg({ ...newKg, name: e.target.value })} required />
+                                    <input type="text" value={newKg.name} onChange={e => setNewKg({...newKg, name: e.target.value})} required />
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label>{t('location')}</label>
-                                    <input type="text" value={newKg.location}
-                                           onChange={e => setNewKg({ ...newKg, location: e.target.value })} required />
+                                    <input type="text" value={newKg.location} onChange={e => setNewKg({...newKg, location: e.target.value})} required />
                                 </div>
                                 <div className={styles.formRow}>
                                     <div className={styles.formGroup}>
                                         <label>{t('capacity')}</label>
-                                        <input type="number" min="1" value={newKg.capacity}
-                                               onChange={e => setNewKg({ ...newKg, capacity: e.target.value })} required />
+                                        <input type="number" min="1" value={newKg.capacity} onChange={e => setNewKg({...newKg, capacity: e.target.value})} required />
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label>{t('monthlyFee')} ({t('currency')})</label>
+                                        <input type="number" min="0" value={newKg.monthlyFee} onChange={e => setNewKg({...newKg, monthlyFee: e.target.value})} required />
                                     </div>
                                 </div>
                                 <div className={styles.modalFooter}>
-                                    <button type="button" className={`${styles.btn} ${styles.btnSecondary}`}
-                                            onClick={() => setShowAddModal(false)}>
+                                    <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowAddModal(false)}>
                                         <FiX /> {t('cancel')}
                                     </button>
                                     <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
@@ -279,24 +295,24 @@ const AdminKinder = () => {
                             <form onSubmit={handleEditKg} className={styles.modalBody}>
                                 <div className={styles.formGroup}>
                                     <label>{t('name')}</label>
-                                    <input type="text" value={currentKg.name}
-                                           onChange={e => setCurrentKg({ ...currentKg, name: e.target.value })} required />
+                                    <input type="text" value={currentKg.name} onChange={e => setCurrentKg({...currentKg, name: e.target.value})} required />
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label>{t('location')}</label>
-                                    <input type="text" value={currentKg.location}
-                                           onChange={e => setCurrentKg({ ...currentKg, location: e.target.value })} required />
+                                    <input type="text" value={currentKg.location} onChange={e => setCurrentKg({...currentKg, location: e.target.value})} required />
                                 </div>
                                 <div className={styles.formRow}>
                                     <div className={styles.formGroup}>
                                         <label>{t('capacity')}</label>
-                                        <input type="number" min="1" value={currentKg.capacity}
-                                               onChange={e => setCurrentKg({ ...currentKg, capacity: e.target.value })} required />
+                                        <input type="number" min="1" value={currentKg.capacity} onChange={e => setCurrentKg({...currentKg, capacity: e.target.value})} required />
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label>{t('monthlyFee')} ({t('currency')})</label>
+                                        <input type="number" min="0" value={currentKg.monthlyFee} onChange={e => setCurrentKg({...currentKg, monthlyFee: e.target.value})} required />
                                     </div>
                                 </div>
                                 <div className={styles.modalFooter}>
-                                    <button type="button" className={`${styles.btn} ${styles.btnSecondary}`}
-                                            onClick={() => setShowEditModal(false)}>
+                                    <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowEditModal(false)}>
                                         <FiX /> {t('cancel')}
                                     </button>
                                     <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
