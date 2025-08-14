@@ -351,16 +351,6 @@ const Navbar = () => {
                                                 <FaUserCircle />
                                                 {t("common.profile")}
                                             </NavLink>
-                                            {isAdmin() && (
-                                                <NavLink
-                                                    to="/admin"
-                                                    className="dropdown-item"
-                                                    onClick={closeDropdowns}
-                                                >
-                                                    <FaUserShield />
-                                                    {t("common.adminPanel")}
-                                                </NavLink>
-                                            )}
                                             <div
                                                 className="dropdown-item logout"
                                                 onClick={handleLogout}

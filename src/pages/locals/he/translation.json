@@ -385,7 +385,87 @@
 
   },
   "admin": {
-    "dashboard": {
+    "complaints": {
+      "title": "ניהול תלונות",
+      "ticketNumber": "מספר כרטיס",
+      "type": "סוג",
+      "description": "תיאור",
+      "location": "מיקום",
+      "status": "סטטוס",
+      "response": "תגובה",
+      "date": "תאריך",
+      "actions": "פעולות",
+      "noComplaints": "לא נמצאו תלונות",
+      "loading": "טוען תלונות...",
+      "submitResponse": "שלח תגובה",
+      "cancel": "ביטול",
+      "refresh": "רענון נתונים",
+      "statuses": {
+        "SUBMITTED": "התקבל",
+        "IN_PROGRESS": "בטיפול",
+        "RESOLVED": "נפתר",
+        "REJECTED": "נדחה"
+      },
+      "notifications": {
+        "updateSuccess": "סטטוס התלונה עודכן בהצלחה",
+        "updateError": "שגיאה בעדכון הסטטוס",
+        "responseSuccess": "התגובה נשלחה בהצלחה",
+        "responseError": "שגיאה בשליחת התגובה",
+        "loadError": "שגיאה בטעינת תלונות"
+      }
+    },
+    "payments": {
+      "title": "ניהול תשלומים",
+      "userId": "מספר משתמש",
+      "userName": "שם משתמש",
+      "paymentType": "סוג תשלום",
+      "amount": "סכום",
+      "dueDate": "תאריך יעד",
+      "status": "סטטוס",
+      "paymentDate": "תאריך תשלום",
+      "noPayments": "לא נמצאו תשלומים",
+      "loading": "טוען נתוני תשלומים...",
+      "refresh": "רענון נתונים",
+      "filters": {
+        "allUsers": "כל המשתמשים",
+        "allTypes": "הכל",
+        "allStatuses": "הכל",
+        "month": "חודש",
+        "year": "שנה"
+      },
+      "types": {
+        "WATER": "מים",
+        "ARNONA": "ארנונה",
+        "KINDERGARTEN": "גן ילדים",
+        "ALL": "הכל"
+      },
+      "statuses": {
+        "PENDING": "ממתין",
+        "PAID": "שולם",
+        "COMPLETED": "הושלם",
+        "OVERDUE": "באיחור",
+        "ALL": "הכל"
+      }
+    }
+  },
+  "common": {
+    "municipality": "עיריית אום בטין",
+    "allRightsReserved": "כל הזכויות שמורות",
+    "loading": "טוען...",
+    "currency": "ש\"ח",
+    "close": "סגור",
+    "submit": "שלח",
+    "cancel": "ביטול",
+    "refresh": "רענן",
+    "actions": "פעולות",
+    "view": "צפייה",
+    "edit": "עריכה",
+    "delete": "מחיקה",
+    "noData": "אין נתונים זמינים",
+    "success": "הצלחה",
+    "error": "שגיאה"
+  },
+  "dashboard": {
         "overview": "סקירה כללית",
         "eventsCount": "מספר אירועים",
         "waterBills": "חשבונות מים",

@@ -1,6 +1,5 @@
 {
   "AdminKinder": {
-
     "notRegistered": "",
     "title": "إدارة الحضانات",
     "addKindergarten": "إضافة حضانة",
@@ -222,6 +221,86 @@
     "squareMeters": "متر مربع"
   },
   "admin": {
+    "complaints": {
+      "title": "إدارة الشكاوى",
+      "ticketNumber": "رقم التذكرة",
+      "type": "النوع",
+      "description": "الوصف",
+      "location": "الموقع",
+      "status": "الحالة",
+      "response": "الرد",
+      "date": "التاريخ",
+      "actions": "الإجراءات",
+      "noComplaints": "لا توجد شكاوى لعرضها",
+      "loading": "جاري تحميل الشكاوى...",
+      "submitResponse": "إرسال الرد",
+      "cancel": "إلغاء",
+      "refresh": "تحديث البيانات",
+      "statuses": {
+        "SUBMITTED": "مستلمة",
+        "IN_PROGRESS": "قيد المعالجة",
+        "RESOLVED": "تم الحل",
+        "REJECTED": "مرفوضة"
+      },
+      "notifications": {
+        "updateSuccess": "تم تحديث حالة الشكوى بنجاح",
+        "updateError": "فشل في تحديث الحالة",
+        "responseSuccess": "تم إرسال الرد بنجاح",
+        "responseError": "فشل في إرسال الرد",
+        "loadError": "فشل في تحميل الشكاوى"
+      }
+    },
+    "payments": {
+      "title": "إدارة المدفوعات",
+      "userId": "رقم المستخدم",
+      "userName": "اسم المستخدم",
+      "paymentType": "نوع الدفع",
+      "amount": "المبلغ",
+      "dueDate": "تاريخ الاستحقاق",
+      "status": "الحالة",
+      "paymentDate": "تاريخ الدفع",
+      "noPayments": "لا توجد مدفوعات لعرضها",
+      "loading": "جاري تحميل بيانات المدفوعات...",
+      "refresh": "تحديث البيانات",
+      "filters": {
+        "allUsers": "جميع المستخدمين",
+        "allTypes": "الكل",
+        "allStatuses": "الكل",
+        "month": "الشهر",
+        "year": "السنة"
+      },
+      "types": {
+        "WATER": "مياه",
+        "ARNONA": "أرنونا",
+        "KINDERGARTEN": "حضانة",
+        "ALL": "الكل"
+      },
+      "statuses": {
+        "PENDING": "قيد الانتظار",
+        "PAID": "تم الدفع",
+        "COMPLETED": "مكتمل",
+        "OVERDUE": "متأخر",
+        "ALL": "الكل"
+      }
+    }
+  },
+  "common": {
+    "municipality": "بلدية أم بطين",
+    "allRightsReserved": "جميع الحقوق محفوظة",
+    "loading": "جاري التحميل...",
+    "currency": "شيقل",
+    "close": "إغلاق",
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "refresh": "تحديث",
+    "actions": "إجراءات",
+    "view": "عرض",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "noData": "لا توجد بيانات متاحة",
+    "success": "نجاح",
+    "error": "خطأ"
+  },
     "dashboard": {
       "title": "لوحة تحكم الإدمن",
       "loadError": "حدث خطأ أثناء تحميل البيانات",
