@@ -44,19 +44,20 @@ const AdminComplaintsDashboard = () => {
     };
 
     const handleResponseSubmit = async (complaintId) => {
-        const response = responses[complaintId];
-        if (!response?.trim()) {
-            toast.warn("الرجاء كتابة رد أولاً");
+        const responseText = responses[complaintId];
+        if (!responseText?.trim()) {
+            toast.warn("أدخل ردًا أولاً");
             return;
         }
 
         try {
             await axiosInstance.post(`/api/complaints/${complaintId}/response`, {
-                response
+                response: responseText
             });
-            toast.success("تم إرسال الرد بنجاح");
+
+            toast.success("تم إرسال الرد وتحديث الحالة");
             setResponses(prev => ({ ...prev, [complaintId]: "" }));
-            fetchComplaints();
+            await fetchComplaints(); // ✅ إعادة تحميل البيانات من السيرفر
         } catch (err) {
             console.error(err);
             toast.error("فشل في إرسال الرد");
@@ -72,6 +73,11 @@ const AdminComplaintsDashboard = () => {
                     <CardContent className="p-4 space-y-3">
                         <div className="text-xl font-semibold">{complaint.type}</div>
                         <div>{complaint.description}</div>
+                        {complaint.response && (
+                            <div className="mt-2 p-2 bg-green-100 text-green-800 rounded">
+                                <strong>الرد:</strong> {complaint.response}
+                            </div>
+                        )}
                         {complaint.image_url && (
                             <img src={complaint.image_url} alt="Complaint" className="max-w-xs rounded" />
                         )}
