@@ -73,13 +73,10 @@ const AdminComplaintsDashboard = () => {
                     <CardContent className="p-4 space-y-3">
                         <div className="text-xl font-semibold">{complaint.type}</div>
                         <div>{complaint.description}</div>
-                        {complaint.response && (
-                            <div className="mt-2 p-2 bg-green-100 text-green-800 rounded">
-                                <strong>الرد:</strong> {complaint.response}
-                            </div>
-                        )}
+                        <div>{complaint.response}</div>
+
                         {complaint.image_url && (
-                            <img src={complaint.image_url} alt="Complaint" className="max-w-xs rounded" />
+                            <img src={complaint.image_url} alt="Complaint" className="max-w-xs rounded"/>
                         )}
                         <div className="text-sm text-gray-600">التذكرة: {complaint.ticket_number}</div>
 
@@ -91,7 +88,7 @@ const AdminComplaintsDashboard = () => {
                                 onValueChange={(value) => handleStatusChange(complaint.complaint_id, value)}
                             >
                                 <SelectTrigger className="w-[150px]">
-                                    <SelectValue />
+                                    <SelectValue/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     {statusOptions.map((status) => (
