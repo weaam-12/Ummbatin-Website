@@ -40,13 +40,8 @@ const AdminPayments = () => {
 
     const formatDate = (dateValue) => {
         if (!dateValue) return '--';
-        try {
-            const date = new Date(dateValue);
-            return isNaN(date.getTime()) ? '--' : date.toLocaleDateString('ar-SA');
-        } catch (e) {
-            console.error('Error formatting date:', e);
-            return '--';
-        }
+        const date = new Date(dateValue);
+        return date.toLocaleDateString('en-GB'); // يطلع بصيغة 14/08/1995
     };
 
     useEffect(() => {

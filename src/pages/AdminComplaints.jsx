@@ -242,50 +242,39 @@ const AdminComplaints = () => {
             </div>
 
             {/* Response Modal */}
-            {selectedComplaint && (<div className={styles.modalContent}>
-                    <div className={styles.modalHeader}>
-                        <h2 style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
-                            <FiEdit/>
-                            الرد على التذكرة #{selectedComplaint.ticketNumber}
-                        </h2>
-                    </div>
+            {selectedComplaint && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h2>
+                                <FiEdit /> الرد على التذكرة #{selectedComplaint.ticketNumber}
+                            </h2>
+                        </div>
 
-                    {/* ✅ عرض وصف الشكوى */}
-                    <div className={styles.complaintDetails}
-                         style={{marginBottom: '1rem', fontSize: '0.9rem', color: '#333'}}>
-                        <strong>وصف الشكوى:</strong>
-                        <p style={{
-                            whiteSpace: 'pre-wrap',
-                            background: '#f9f9f9',
-                            padding: '0.75rem',
-                            borderRadius: '6px',
-                            marginTop: '0.5rem'
-                        }}>
-                            {selectedComplaint.description}
-                        </p>
-                    </div>
+                        {/* عرض وصف الشكوى */}
+                        <div className={styles.complaintDetails}>
+                            <strong>وصف الشكوى:</strong>
+                            <p>{selectedComplaint.description}</p>
+                        </div>
 
-                    <div className={styles.modalBody}>
-                        <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '600'}}>
-                            نص الرد
-                        </label>
-                        <textarea
-                            value={responseText}
-                            onChange={(e) => setResponseText(e.target.value)}
-                            placeholder="اكتب ردك هنا..."
-                            className={styles.textarea}
-                        />
-                    </div>
+                        <div className={styles.modalBody}>
+                            <label>نص الرد</label>
+                            <textarea
+                                value={responseText}
+                                onChange={(e) => setResponseText(e.target.value)}
+                                placeholder="اكتب ردك هنا..."
+                                className={styles.textarea}
+                            />
+                        </div>
 
-                    <div className={styles.modalFooter}>
-                        <button className={`${styles.btn} ${styles.btnLight}`}
-                                onClick={() => setSelectedComplaint(null)}>
-                            <FiX/> إلغاء
-                        </button>
-                        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleSubmitResponse}
-                                disabled={!responseText}>
-                            <FiCheck/> إرسال الرد
-                        </button>
+                        <div className={styles.modalFooter}>
+                            <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => setSelectedComplaint(null)}>
+                                <FiX /> إلغاء
+                            </button>
+                            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleSubmitResponse} disabled={!responseText}>
+                                <FiCheck /> إرسال الرد
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
