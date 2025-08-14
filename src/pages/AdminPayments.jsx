@@ -48,15 +48,15 @@ const AdminPayments = () => {
         const fetchUsers = async () => {
             try {
                 const response = await getAllUsers();
+                let usersArray = [];
                 if (Array.isArray(response)) {
-                    setUsers(response);
+                    usersArray = response;
+                } else if (response && Array.isArray(response.content)) {
+                    usersArray = response.content;
                 } else {
-                    console.error('Expected array but got:', response);
-                    setNotification({
-                        type: 'danger',
-                        message: 'بيانات المستخدمين غير صالحة'
-                    });
+                    throw new Error("صيغة البيانات غير متوقعة");
                 }
+                setUsers(usersArray);
             } catch (error) {
                 console.error('Error fetching users:', error);
                 setNotification({
@@ -98,8 +98,9 @@ const AdminPayments = () => {
                 status: p.status || 'PENDING',
                 date: p.date || p.due_date || null,
                 fullName: p.fullName ||
-                    (users.find((u) => u.user_id === (p.user_id || p.userId))?.fullName ||
-                    'غير معروف')
+                    (users.find(u => u.id === (p.user_id || p.userId))?.fullName ||
+                        users.find(u => u.user_id === (p.user_id || p.userId))?.fullName ||
+                        'غير معروف')
             }));
 
             setPayments(enhanced);
