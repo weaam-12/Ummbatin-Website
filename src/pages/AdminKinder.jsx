@@ -192,33 +192,38 @@ const AdminKinder = () => {
                             <th>#</th>
                             <th>{t('childName')}</th>
                             <th>{t('motherName')}</th>
+                            <th>{t('kindergarten')}</th> {/* 👈 جديد */}
                             <th>{t('actions')}</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {pendingChildren.map(c => (
-                            <tr key={c.childId}>
-                                <td>{c.childId}</td>
-                                <td>{c.name}</td>
-                                <td>{c.motherName || '–'}</td>
-                                <td>
-                                    <div className={styles.actionButtons}>
-                                        <button
-                                            className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSm}`}
-                                            onClick={() => handleAssignChild(c.childId, c.kindergartenId, 3.5)}
-                                        >
-                                            <FiCheck /> {t('approve')}
-                                        </button>
-                                        <button
-                                            className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
-                                            onClick={() => { setCurrentChildToAssign(c); setShowAssignModal(true); }}
-                                        >
-                                            <FiX /> {t('reject')}
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                        {pendingChildren.map(c => {
+                            const kg = kindergartens.find(k => k.kindergartenId === c.kindergartenId);
+                            return (
+                                <tr key={c.childId}>
+                                    <td>{c.childId}</td>
+                                    <td>{c.name}</td>
+                                    <td>{c.motherName || '–'}</td>
+                                    <td>{kg ? kg.name : '–'}</td> {/* 👈 جديد */}
+                                    <td>
+                                        <div className={styles.actionButtons}>
+                                            <button
+                                                className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSm}`}
+                                                onClick={() => handleAssignChild(c.childId, c.kindergartenId, 3.5)}
+                                            >
+                                                <FiCheck /> {t('approve')}
+                                            </button>
+                                            <button
+                                                className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
+                                                onClick={() => { setCurrentChildToAssign(c); setShowAssignModal(true); }}
+                                            >
+                                                <FiX /> {t('reject')}
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
                     </table>
                 </div>
