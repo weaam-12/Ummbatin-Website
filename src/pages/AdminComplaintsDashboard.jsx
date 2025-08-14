@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { getAllComplaints, updateComplaintStatus } from "../api";
-import toast from "react-bootstrap/Toast";
+import axiosInstance from "../api"; // تأكدي من مسار axiosInstance
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const statusOptions = ["Submitted", "In Progress", "Resolved", "Rejected"];
 
 const AdminComplaintsDashboard = () => {
     const [complaints, setComplaints] = useState([]);
+    const [responses, setResponses] = useState({}); // لتخزين رد كل شكوى
 
     useEffect(() => {
         fetchComplaints();
@@ -20,39 +24,68 @@ const AdminComplaintsDashboard = () => {
             setComplaints(data);
         } catch (err) {
             console.error("Failed to fetch complaints", err);
+            toast.error("فشل في تحميل الشكاوى");
         }
     };
 
     const handleStatusChange = async (complaintId, newStatus) => {
         try {
             await updateComplaintStatus(complaintId, newStatus.toUpperCase());
+            toast.success("تم تحديث الحالة بنجاح");
             fetchComplaints();
-            toast.success("تم تحديث حالة الشكوى بنجاح");
         } catch (err) {
-            console.error("Failed to update status", err);
-            toast.error("فشل في تحديث الحالة: " + (err.response?.data || err.message));
+            console.error(err);
+            toast.error("فشل في تحديث الحالة");
+        }
+    };
+
+    const handleResponseChange = (complaintId, value) => {
+        setResponses(prev => ({ ...prev, [complaintId]: value }));
+    };
+
+    const handleResponseSubmit = async (complaintId) => {
+        const response = responses[complaintId];
+        if (!response?.trim()) {
+            toast.warn("الرجاء كتابة رد أولاً");
+            return;
+        }
+
+        try {
+            await axiosInstance.post(`/api/complaints/${complaintId}/response`, {
+                response
+            });
+            toast.success("تم إرسال الرد بنجاح");
+            setResponses(prev => ({ ...prev, [complaintId]: "" }));
+            fetchComplaints();
+        } catch (err) {
+            console.error(err);
+            toast.error("فشل في إرسال الرد");
         }
     };
 
     return (
         <div className="grid gap-4 p-4">
+            <ToastContainer position="top-right" rtl />
+
             {complaints.map((complaint) => (
                 <Card key={complaint.complaint_id} className="rounded-2xl shadow">
-                    <CardContent className="p-4 space-y-2">
-                        <div className="text-xl font-semibold">{complaint.title}</div>
+                    <CardContent className="p-4 space-y-3">
+                        <div className="text-xl font-semibold">{complaint.type}</div>
                         <div>{complaint.description}</div>
                         {complaint.image_url && (
                             <img src={complaint.image_url} alt="Complaint" className="max-w-xs rounded" />
                         )}
-                        <div className="text-sm text-gray-600">Ticket: {complaint.ticket_number}</div>
+                        <div className="text-sm text-gray-600">التذكرة: {complaint.ticket_number}</div>
+
+                        {/* تغيير الحالة */}
                         <div className="flex items-center space-x-2">
-                            <span>Status:</span>
+                            <span>الحالة:</span>
                             <Select
                                 value={complaint.status}
                                 onValueChange={(value) => handleStatusChange(complaint.complaint_id, value)}
                             >
                                 <SelectTrigger className="w-[150px]">
-                                    <SelectValue placeholder="Select status" />
+                                    <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {statusOptions.map((status) => (
@@ -63,6 +96,27 @@ const AdminComplaintsDashboard = () => {
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {/* إرسال رد */}
+                        <div className="space-y-2">
+                            <Input
+                                placeholder="اكتب ردك هنا..."
+                                value={responses[complaint.complaint_id] || ""}
+                                onChange={(e) => handleResponseChange(complaint.complaint_id, e.target.value)}
+                            />
+                            <Button
+                                onClick={() => handleResponseSubmit(complaint.complaint_id)}
+                                className="bg-blue-600 text-white"
+                            >
+                                إرسال رد
+                            </Button>
+                        </div>
+
+                        {complaint.response && (
+                            <div className="text-sm text-green-700 bg-green-100 p-2 rounded">
+                                <strong>الرد:</strong> {complaint.response}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             ))}
