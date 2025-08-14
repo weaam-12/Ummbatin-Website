@@ -282,7 +282,10 @@ export const addWaterReading = async (propertyId, amount) => {
     });
     return response.data;
 };
-
+export const updateChildAssignment = (childId, data) =>
+    axiosInstance.patch(`/api/children/${childId}/assign`, null, {
+        params: data
+    });
 export const getPropertiesByUserId = async (userId) => {
     try {
         const response = await axiosInstance.get(`/api/properties/user/${userId}`);

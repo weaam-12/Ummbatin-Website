@@ -10,7 +10,8 @@ import {
     fetchKindergartens,
     createKindergarten,
     deleteKindergarten,
-    updateKindergarten
+    updateKindergarten,
+    updateChildAssignment,
 } from '../api';
 
 const AdminKinder = () => {
@@ -57,15 +58,13 @@ const AdminKinder = () => {
     /* ---------- assign child ---------- */
     const handleAssignChild = async (childId, kindergartenId, monthlyFee) => {
         try {
-            await fetch(`/api/children/${childId}/assign?kindergartenId=${kindergartenId}&monthlyFee=${monthlyFee}`, {
-                method: 'PATCH',
-                credentials: 'include'
-            });
+            await updateChildAssignment(childId, { kindergartenId, monthlyFee });
             setNotification({ type: 'success', message: t('assigned') });
             setShowAssignModal(false);
             setCurrentChildToAssign(null);
-            loadAll();
-        } catch {
+            loadAll(); // إعادة تحميل البيانات بعد التعيين
+        } catch (error) {
+            console.error('Assign error:', error);
             setNotification({ type: 'danger', message: t('updateError') });
         }
     };
@@ -245,7 +244,7 @@ const AdminKinder = () => {
 
                                                 <td>
                                                     {child.monthlyFee === 3.5
-                                                        ? <span className={`${styles.badge} ${styles.badgeSuccess}`}>{t('approved')}</span>
+                                                        ? <span className={`${styles.badge} ${styles.badgeSuccess}`}>{t('approvedCount')}</span>
                                                         : <span className={`${styles.badge} ${styles.badgeSecondary}`}>{t('notRegistered')}</span>}
                                                 </td>
 
