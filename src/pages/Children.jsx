@@ -106,6 +106,22 @@ const Children = () => {
     }, [user]);
 
     // ----------  helpers  ----------
+    const handleDownloadReceipt = () => {
+        setLoading(true);
+        const element = document.getElementById('kindergarten-receipt');
+        html2canvas(element, { scale: 2 }).then((canvas) => {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const w = pdf.internal.pageSize.getWidth();
+            const h = (canvas.height * w) / canvas.width;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, h);
+            pdf.save(`receipt-${selectedChild.name}-${new Date().toLocaleDateString()}.pdf`);
+            setLoading(false);
+        }).catch(() => {
+            setNotification({ type: 'danger', message: t('payment.pdfError') });
+            setLoading(false);
+        });
+    };
+
     const generateReceipt = (child, kindergarten) => {
         setLoading(true);
         const receiptData = {
