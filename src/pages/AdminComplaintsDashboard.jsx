@@ -72,13 +72,32 @@ const AdminComplaintsDashboard = () => {
                 <Card key={complaint.complaint_id} className="rounded-2xl shadow">
                     <CardContent className="p-4 space-y-3">
                         <div className="text-xl font-semibold">{complaint.type}</div>
-                        <div>{complaint.description}</div>
-                        <div>{complaint.response}</div>
+
+                        {/* عرض الوصف مختصر */}
+                        <div className="text-sm text-gray-700">
+                            {complaint.description.length > 100
+                                ? complaint.description.substring(0, 100) + "..."
+                                : complaint.description}
+                        </div>
+
+                        {/* عرض التفاصيل الكاملة */}
+                        <details className="text-sm text-gray-700">
+                            <summary className="cursor-pointer font-semibold">عرض وصف الشكوى الكامل</summary>
+                            <p className="mt-1 whitespace-pre-wrap">{complaint.description}</p>
+                        </details>
 
                         {complaint.image_url && (
-                            <img src={complaint.image_url} alt="Complaint" className="max-w-xs rounded"/>
+                            <img src={complaint.image_url} alt="Complaint" className="max-w-xs rounded" />
                         )}
+
                         <div className="text-sm text-gray-600">التذكرة: {complaint.ticket_number}</div>
+
+                        {/* عرض الرد إذا موجود */}
+                        {complaint.response && (
+                            <div className="text-sm text-green-700 bg-green-100 p-2 rounded">
+                                <strong>الرد:</strong> {complaint.response}
+                            </div>
+                        )}
 
                         {/* تغيير الحالة */}
                         <div className="flex items-center space-x-2">
@@ -88,7 +107,7 @@ const AdminComplaintsDashboard = () => {
                                 onValueChange={(value) => handleStatusChange(complaint.complaint_id, value)}
                             >
                                 <SelectTrigger className="w-[150px]">
-                                    <SelectValue/>
+                                    <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {statusOptions.map((status) => (
@@ -114,12 +133,6 @@ const AdminComplaintsDashboard = () => {
                                 إرسال رد
                             </Button>
                         </div>
-
-                        {complaint.response && (
-                            <div className="text-sm text-green-700 bg-green-100 p-2 rounded">
-                                <strong>الرد:</strong> {complaint.response}
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
             ))}
