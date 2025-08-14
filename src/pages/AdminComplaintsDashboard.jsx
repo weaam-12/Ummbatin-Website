@@ -25,12 +25,12 @@ const AdminComplaintsDashboard = () => {
 
     const handleStatusChange = async (complaintId, newStatus) => {
         try {
-            await updateComplaintStatus(complaintId, newStatus);
+            await updateComplaintStatus(complaintId, newStatus.toUpperCase());
             fetchComplaints();
             toast.success("تم تحديث حالة الشكوى بنجاح");
         } catch (err) {
             console.error("Failed to update status", err);
-            toast.error("فشل في تحديث الحالة");
+            toast.error("فشل في تحديث الحالة: " + (err.response?.data || err.message));
         }
     };
 

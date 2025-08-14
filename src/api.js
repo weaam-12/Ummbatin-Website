@@ -138,10 +138,6 @@ export const submitComplaint = async ({ userId, type, description, location, ima
         return response.data;
 };
 
-export const updateComplaintStatus = async (complaintId, status) => {
-    const response = await axiosInstance.patch(`api/complaints/${complaintId}/status`, { status });
-    return response.data;
-};
 
 export const deleteComplaint = async (complaintId) => {
     await axiosInstance.delete(`api/complaints/${complaintId}`);
@@ -210,6 +206,19 @@ export const searchKindergartensByLocation = async (location) => {
 
 export const getAllComplaints = async () => {
     const response = await axiosInstance.get('api/complaints/all');
+    return response.data;
+};
+
+export const updateComplaintStatus = async (complaintId, status) => {
+    const response = await axiosInstance.patch(
+        `api/complaints/${complaintId}/status`,
+        JSON.stringify(status), // أرسلها كنص JSON
+        {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+    );
     return response.data;
 };
 
