@@ -264,7 +264,6 @@ const AdminKinder = () => {
                                             <td>{child.childId}</td>
                                             <td>{child.name}</td>
                                             <td>{child.motherName || '–'}</td>
-                                            <td>{child.kindergartenId|| '–'}</td>
 
                                             <td>
                                                 {child.monthlyFee === 3.5

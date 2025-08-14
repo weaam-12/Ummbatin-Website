@@ -208,6 +208,11 @@ export const searchKindergartensByLocation = async (location) => {
     return response.data;
 };
 
+export const getAllComplaints = async () => {
+    const response = await axiosInstance.get('api/complaints/all');
+    return response.data;
+};
+
 export const getKindergartenCapacity = async (kindergartenId) => {
     const response = await axiosInstance.get(`api/kindergartens/${kindergartenId}/capacity`);
     return response.data;

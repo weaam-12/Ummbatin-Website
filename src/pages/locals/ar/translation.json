@@ -46,7 +46,10 @@
     "monthlyFee": "الرسوم الشهرية",
     "currency": "شيقل"
   },
+  "chooseKindergarten" :" اختر روضة أطفال",
   "registeredChildren": "أطفال مسجّلون",
+  "select" : "اختر",
+  "assignChild" :"تعيين طفل",
   "approvedCount": "مقبول",
   "motherName": "اسم الأم",
   "approve": "موافقة",

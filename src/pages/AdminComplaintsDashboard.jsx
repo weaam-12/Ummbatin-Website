@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { getAllComplaints, updateComplaintStatus } from "../api";
+import toast from "react-bootstrap/Toast";
 
 const statusOptions = ["Submitted", "In Progress", "Resolved", "Rejected"];
 
@@ -26,8 +27,10 @@ const AdminComplaintsDashboard = () => {
         try {
             await updateComplaintStatus(complaintId, newStatus);
             fetchComplaints();
+            toast.success("تم تحديث حالة الشكوى بنجاح");
         } catch (err) {
             console.error("Failed to update status", err);
+            toast.error("فشل في تحديث الحالة");
         }
     };
 

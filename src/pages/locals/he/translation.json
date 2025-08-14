@@ -44,6 +44,9 @@
     "monthlyFee": "דמי חודשיים",
     "currency": "ש\"ח"
   },
+  "chooseKindergarten": "בחר גן ילדים",
+  "select": "בחר",
+  "assignChild ": "הקצה ילד",
   "registeredChildren": "ילדים רשומים",
   "approvedCount": "מאושר",
   "motherName": "שם האם",
