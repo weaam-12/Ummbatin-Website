@@ -446,32 +446,31 @@
         "OVERDUE": "באיחור",
         "ALL": "הכל"
       }
-    }
-  },
-  "common": {
-    "municipality": "עיריית אום בטין",
-    "allRightsReserved": "כל הזכויות שמורות",
-    "loading": "טוען...",
-    "currency": "ש\"ח",
-    "close": "סגור",
-    "submit": "שלח",
-    "cancel": "ביטול",
-    "refresh": "רענן",
-    "actions": "פעולות",
-    "view": "צפייה",
-    "edit": "עריכה",
-    "delete": "מחיקה",
-    "noData": "אין נתונים זמינים",
-    "success": "הצלחה",
-    "error": "שגיאה"
-  },
-  "dashboard": {
-        "overview": "סקירה כללית",
-        "eventsCount": "מספר אירועים",
-        "waterBills": "חשבונות מים",
-        "arnonaBills": "חשבונות ארנונה",
-        "quickActions": "פעולות מהירות",
-        "recentEvents": "אירועים אחרונים"
+    },
+    "common": {
+      "municipality": "עיריית אום בטין",
+      "allRightsReserved": "כל הזכויות שמורות",
+      "loading": "טוען...",
+      "currency": "ש\"ח",
+      "close": "סגור",
+      "submit": "שלח",
+      "cancel": "ביטול",
+      "refresh": "רענן",
+      "actions": "פעולות",
+      "view": "צפייה",
+      "edit": "עריכה",
+      "delete": "מחיקה",
+      "noData": "אין נתונים זמינים",
+      "success": "הצלחה",
+      "error": "שגיאה"
+    },
+    "dashboard": {
+      "overview": "סקירה כללית",
+      "eventsCount": "מספר אירועים",
+      "waterBills": "חשבונות מים",
+      "arnonaBills": "חשבונות ארנונה",
+      "quickActions": "פעולות מהירות",
+      "recentEvents": "אירועים אחרונים"
     },
     "menu": {
       "dashboard": "לוח בקרה",
@@ -544,7 +543,9 @@
       "fetchError": "שגיאה בטעינת נכסי המשתמש",
       "noProperties": "אין משתמשים עם נכסים כרגע",
       "saveButton": "שמור נכס"
-    },
+    }
+  },
+
     "payments": {
       "title": "ניהול חשבונות חודשיים",
       "billType": "סוג החשבון",
