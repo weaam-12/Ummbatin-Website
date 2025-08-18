@@ -281,33 +281,34 @@
         "COMPLETED": "مكتمل",
         "OVERDUE": "متأخر",
         "ALL": "الكل"
-      },
-  "common": {
-    "municipality": "بلدية أم بطين",
-    "allRightsReserved": "جميع الحقوق محفوظة",
-    "loading": "جاري التحميل...",
-    "currency": "شيقل",
-    "close": "إغلاق",
-    "submit": "إرسال",
-    "cancel": "إلغاء",
-    "refresh": "تحديث",
-    "actions": "إجراءات",
-    "view": "عرض",
-    "edit": "تعديل",
-    "delete": "حذف",
-    "noData": "لا توجد بيانات متاحة",
-    "success": "نجاح",
-    "error": "خطأ"
-  },
+      }
+    },
+    "common": {
+      "municipality": "بلدية أم بطين",
+      "allRightsReserved": "جميع الحقوق محفوظة",
+      "loading": "جاري التحميل...",
+      "currency": "شيقل",
+      "close": "إغلاق",
+      "submit": "إرسال",
+      "cancel": "إلغاء",
+      "refresh": "تحديث",
+      "actions": "إجراءات",
+      "view": "عرض",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "noData": "لا توجد بيانات متاحة",
+      "success": "نجاح",
+      "error": "خطأ"
+    },
     "dashboard": {
       "title": "لوحة تحكم الإدمن",
       "loadError": "حدث خطأ أثناء تحميل البيانات",
-        "overview": "نظرة عامة",
-        "eventsCount": "عدد الفعاليات",
-        "waterBills": "فواتير المياه",
-        "arnonaBills": "فواتير الأرنونا",
-        "quickActions": "إجراءات سريعة",
-        "recentEvents": "آخر الفعاليات"
+      "overview": "نظرة عامة",
+      "eventsCount": "عدد الفعاليات",
+      "waterBills": "فواتير المياه",
+      "arnonaBills": "فواتير الأرنونا",
+      "quickActions": "إجراءات سريعة",
+      "recentEvents": "آخر الفعاليات"
     },
     "menu": {
       "dashboard": "لوحة التحكم",
@@ -401,25 +402,26 @@
       "readingsError": "فشل في إضافة قراءات المياه",
       "saveReadings": "حفظ القراءات"
 
-  }
+    },
+    "common": {
+      "close": "إغلاق",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "loading": "جاري التحميل...",
+      "home": "الرئيسية",
+      "login": "تسجيل الدخول",
+      "logout": "تسجيل الخروج",
+      "profile": "الملف الشخصي",
+      "adminPanel": "لوحة الأدمن",
+      "noData": "لا توجد بيانات متاحة",
+      "viewDetails": "عرض التفاصيل",
+      "refresh": "تحديث",
+      "submit": "إرسال",
+      "submitting": "جاري الإرسال...",
+      "search": "بحث..."
+    }
   },
-  "common": {
-    "close": "إغلاق",
-    "edit": "تعديل",
-    "delete": "حذف",
-    "loading": "جاري التحميل...",
-    "home": "الرئيسية",
-    "login": "تسجيل الدخول",
-    "logout": "تسجيل الخروج",
-    "profile": "الملف الشخصي",
-    "adminPanel": "لوحة الأدمن",
-    "noData": "لا توجد بيانات متاحة",
-    "viewDetails": "عرض التفاصيل",
-    "refresh": "تحديث",
-    "submit": "إرسال",
-    "submitting": "جاري الإرسال...",
-    "search": "بحث..."
-  },
+
   "login": {
     "title": "تسجيل الدخول",
     "email": "البريد الإلكتروني",
