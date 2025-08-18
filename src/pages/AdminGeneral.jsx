@@ -785,56 +785,32 @@ const AdminGeneral = () => {
                             users
                                 .filter(u => u.properties?.length > 0)
                                 .flatMap((user, idx) =>
-                                    user.properties.map(prop => (
+                                    user.properties.map((prop, pIdx) => (
                                         <tr key={`${user.id}-${prop.id}`}>
-                                            <td>{idx + 1}</td>
+                                            <td>{idx + 1}.{pIdx + 1}</td>
                                             <td>{user.fullName}</td>
                                             <td>{prop.address}</td>
+
                                             {currentBillType === 'WATER' && (
-                                                <tbody>
-                                                {(() => {
-                                                    const flatProps = [];
-                                                    users.forEach((user) => {
-                                                        user.properties?.forEach((prop) => {
-                                                            flatProps.push({ user, prop });
-                                                        });
-                                                    });
-
-                                                    if (flatProps.length === 0) {
-                                                        return (
-                                                            <tr>
-                                                                <td colSpan="5" className="text-center text-danger">
-                                                                    {t('admin.properties.noProperties')}
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    }
-
-                                                    return flatProps.map(({ user, prop }, idx) => (
-                                                        <tr key={`${user.id}-${prop.id}`}>
-                                                            <td>{idx + 1}</td>
-                                                            <td>{user.fullName}</td>
-                                                            <td>{prop.address}</td>
-                                                            <td>
-                                                                <Form.Control
-                                                                    type="number"
-                                                                    min="0"
-                                                                    value={waterReadings[prop.id]?.reading ?? 15}
-                                                                    onChange={(e) => {
-                                                                        const val = Number(e.target.value);
-                                                                        setWaterReadings((prev) => ({
-                                                                            ...prev,
-                                                                            [prop.id]: { userId: user.id, reading: val },
-                                                                        }));
-                                                                    }}
-                                                                />
-                                                            </td>
-                                                            <td>{(waterReadings[prop.id]?.reading ?? 15) * 30}</td>
-                                                        </tr>
-                                                    ));
-                                                })()}
-                                                </tbody>
+                                                <>
+                                                    <td>
+                                                        <Form.Control
+                                                            type="number"
+                                                            min="0"
+                                                            value={waterReadings[prop.id]?.reading ?? 15}
+                                                            onChange={(e) => {
+                                                                const val = Number(e.target.value);
+                                                                setWaterReadings((prev) => ({
+                                                                    ...prev,
+                                                                    [prop.id]: {userId: user.id, reading: val},
+                                                                }));
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td>{(waterReadings[prop.id]?.reading ?? 15) * 30}</td>
+                                                </>
                                             )}
+
                                             {currentBillType === 'ARNONA' && (
                                                 <>
                                                     <td>{prop.area}</td>
@@ -859,7 +835,8 @@ const AdminGeneral = () => {
                         </Button>
                     )}
 
-                    <Button variant="primary" onClick={handleGenerateBills} disabled={loading || users.filter(u => u.properties?.length > 0).length === 0}>
+                    <Button variant="primary" onClick={handleGenerateBills}
+                            disabled={loading || users.filter(u => u.properties?.length > 0).length === 0}>
                         {loading ? t('common.submitting') : t('common.submit')}
                     </Button>
                 </Modal.Footer>
