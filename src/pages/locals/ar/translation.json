@@ -402,7 +402,7 @@
       "readingsSuccess": "تمت إضافة قراءات المياه بنجاح",
       "readingsError": "فشل في إضافة قراءات المياه",
       "saveReadings": "حفظ القراءات"
-    }
+
   },
   "common": {
     "close": "إغلاق",
