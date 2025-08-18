@@ -281,9 +281,7 @@
         "COMPLETED": "مكتمل",
         "OVERDUE": "متأخر",
         "ALL": "الكل"
-      }
-    }
-  },
+      },
   "common": {
     "municipality": "بلدية أم بطين",
     "allRightsReserved": "جميع الحقوق محفوظة",
@@ -403,6 +401,7 @@
       "readingsError": "فشل في إضافة قراءات المياه",
       "saveReadings": "حفظ القراءات"
 
+  }
   },
   "common": {
     "close": "إغلاق",
