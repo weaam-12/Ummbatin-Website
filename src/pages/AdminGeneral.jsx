@@ -33,6 +33,7 @@ const AdminGeneral = () => {
 
     const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
     const [newProperty, setNewProperty] = useState({ userId: '', address: '', area: '', numberOfUnits: 1 });
+    const [manualMode, setManualMode] = useState(false);
 
     const [showEditEventModal, setShowEditEventModal] = useState(false);
     const [currentEvent, setCurrentEvent] = useState(null);
@@ -121,7 +122,18 @@ const AdminGeneral = () => {
 
     const handleOpenWaterBillsModal = () => {
         setCurrentBillType('WATER');
-        setWaterReadings(generateRandomWaterReadings());
+        const initial = {};
+        users.forEach(u =>
+            u.properties?.forEach(p => {
+                const propId = p.id || p.propertyId;
+                initial[propId] = {
+                    userId: u.id,
+                    reading: waterReadings[propId]?.reading ?? 15
+                };
+            })
+        );
+        setWaterReadings(initial);
+        setManualMode(true);
         setShowBillsModal(true);
     };
 
@@ -749,7 +761,7 @@ const AdminGeneral = () => {
                             <th>{t('labels.address')}</th>
                             {currentBillType === 'WATER' && (
                                 <>
-                                    <th>{t('admin.water.reading')} (م³)</th>
+                                    <th>{t('admin.water.reading')} </th>
                                     <th>{t('payment.amount')}</th>
                                 </>
                             )}
@@ -780,8 +792,21 @@ const AdminGeneral = () => {
                                             <td>{prop.address}</td>
                                             {currentBillType === 'WATER' && (
                                                 <>
-                                                    <td>{waterReadings[prop.id]?.reading || 15}</td>
-                                                    <td>{(waterReadings[prop.id]?.reading || 15) * 30}</td>
+                                                    <td>
+                                                        <Form.Control
+                                                            type="number"
+                                                            min="0"
+                                                            value={waterReadings[prop.id]?.reading ?? 15}
+                                                            onChange={e => {
+                                                                const val = Number(e.target.value);
+                                                                setWaterReadings(prev => ({
+                                                                    ...prev,
+                                                                    [prop.id]: { ...prev[prop.id], reading: val }
+                                                                }));
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td>{(waterReadings[prop.id]?.reading ?? 15) * 30}</td>
                                                 </>
                                             )}
                                             {currentBillType === 'ARNONA' && (
