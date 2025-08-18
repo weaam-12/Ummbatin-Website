@@ -797,11 +797,11 @@ const AdminGeneral = () => {
                                                             type="number"
                                                             min="0"
                                                             value={waterReadings[prop.id]?.reading ?? 15}
-                                                            onChange={e => {
+                                                            onChange={(e) => {
                                                                 const val = Number(e.target.value);
-                                                                setWaterReadings(prev => ({
+                                                                setWaterReadings((prev) => ({
                                                                     ...prev,
-                                                                    [prop.id]: { ...prev[prop.id], reading: val }
+                                                                    [prop.id]: { userId: user.id, reading: val },
                                                                 }));
                                                             }}
                                                         />
