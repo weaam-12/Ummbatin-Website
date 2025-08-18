@@ -285,6 +285,7 @@
     "squareMeters": "מטר רבוע"
   },
   "payment": {
+    "paymentStatus": "סטטוס תשלום",
     "status": {
       "PAID": "שולם",
       "PENDING": "ממתין",

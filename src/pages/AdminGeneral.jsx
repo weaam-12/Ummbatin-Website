@@ -527,7 +527,7 @@ const AdminGeneral = () => {
                                             <th>{t('labels.fullName')}</th>
                                             <th>{t('payment.types.water')}/{t('payment.types.arnona')}</th>
                                             <th>{t('payment.amount')}</th>
-                                            <th>{t('payment.status')}</th>
+                                            <th>{t('payment.paymentStatus')}</th>
                                             <th>{t('labels.address')}</th>
                                             <th>{t('labels.units')}</th>
                                         </tr>
