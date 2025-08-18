@@ -564,8 +564,7 @@
       "readingsSuccess": "קריאות המים נוספו בהצלחה",
       "readingsError": "שגיאה בהוספת קריאות מים",
       "saveReadings": "שמור קריאות"
-    }
-  },
+    },
   "complaints": {
     "myComplaints": "התלונות שלי",
     "newComplaint": "תלונה חדשה",

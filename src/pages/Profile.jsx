@@ -109,7 +109,7 @@ const Profile = () => {
                             </div>
                             <div className="info-row">
                                 <span className="info-label">{t("profile.labels.idNumber")}:</span>
-                                <span className="info-value">{profile.idNumber || t("general.notSpecified")}</span>
+                                <span className="info-value">{profile.id|| t("general.notSpecified")}</span>
                             </div>
                         </div>
                     </div>
