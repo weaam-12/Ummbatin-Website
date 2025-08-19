@@ -1,3 +1,4 @@
+// Children.jsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../api';
@@ -5,11 +6,9 @@ import { useAuth } from '../AuthContext';
 import { FaChild, FaCheckCircle, FaMoneyBillWave, FaClock } from 'react-icons/fa';
 import { FiDownload } from 'react-icons/fi';
 import './Children.css';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-import {
-    Card, Button, Alert, Spinner, Container, Modal, Form, Row, Col
-} from 'react-bootstrap';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Button, Alert, Spinner, Modal, Form, Row, Col } from 'react-bootstrap';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -17,8 +16,7 @@ import html2canvas from 'html2canvas';
 const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
     const [selectedKg, setSelectedKg] = useState('');
     const kg = kindergartens.find(k => String(k.kindergartenId) === selectedKg);
-    const stripe = useStripe();
-    const elements = useElements();
+
     return (
         <div className="child-card">
             <h3>{child.name}</h3>
@@ -41,16 +39,9 @@ const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
 
             {selectedKg && kg && (
                 <div className="payment-info">
-                    <p>
-                        {t('children.selectedKindergarten')}: <strong>{kg.name}</strong>
-                    </p>
-                    <p>
-                        {t('children.monthlyFees')}:{' '}
-                        <strong>35 {t('general.currency')}</strong>
-                    </p>
-                    <p>
-                        {t('children.availableSlots')}: <strong>19</strong>
-                    </p>
+                    <p>{t('children.selectedKindergarten')}: <strong>{kg.name}</strong></p>
+                    <p>{t('children.monthlyFees')}: <strong>35 {t('general.currency')}</strong></p>
+                    <p>{t('children.availableSlots')}: <strong>19</strong></p>
                 </div>
             )}
 
@@ -69,6 +60,9 @@ const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
 const Children = () => {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
+    const stripe = useStripe();
+    const elements = useElements();
+
     const [children, setChildren] = useState([]);
     const [kindergartens, setKindergartens] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -77,16 +71,9 @@ const Children = () => {
     const [selectedChild, setSelectedChild] = useState(null);
     const [selectedKindergarten, setSelectedKindergarten] = useState(null);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
-    const [receipt, setReceipt] = useState(null);
-    const [cardData, setCardData] = useState({
-        number: '',
-        name: '',
-        expiry: '',
-        cvc: ''
-    });
     const [notification, setNotification] = useState(null);
 
-    // ----------  load data  ----------
+    // load data
     const loadData = async () => {
         setLoading(true);
         try {
@@ -96,85 +83,15 @@ const Children = () => {
             ]);
             setKindergartens(kgs.data);
             setChildren(childrenRes.data);
-        } catch (error) {
-            console.error('Error loading data', error);
+        } catch (err) {
+            console.error(err);
             setError(t('children.loadError'));
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        if (user) loadData();
-    }, [user]);
-
-    // ----------  helpers  ----------
-    const handleDownloadReceipt = () => {
-        setLoading(true);
-        const element = document.getElementById('kindergarten-receipt');
-        html2canvas(element, { scale: 2 }).then((canvas) => {
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const w = pdf.internal.pageSize.getWidth();
-            const h = (canvas.height * w) / canvas.width;
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, h);
-            pdf.save(`receipt-${selectedChild.name}-${new Date().toLocaleDateString()}.pdf`);
-            setLoading(false);
-        }).catch(() => {
-            setNotification({ type: 'danger', message: t('payment.pdfError') });
-            setLoading(false);
-        });
-    };
-
-    const generateReceipt = (child, kindergarten) => {
-        setLoading(true);
-        const receiptData = {
-            paymentId: `RCPT-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
-            amount: 250,
-            paymentDate: new Date().toISOString(),
-            childName: child.name,
-            kindergartenName: kindergarten?.name || t('children.unknownKindergarten')
-        };
-
-        const element = document.createElement('div');
-        element.innerHTML = `
-            <div id="temp-receipt" style="padding:20px;font-family:Arial">
-                <h2 style="text-align:center">${t('payment.receipt')}</h2><hr>
-                <div style="margin-bottom:15px">
-                    <strong>${t('payment.childName')}:</strong> ${receiptData.childName}
-                </div>
-                <div style="margin-bottom:15px">
-                    <strong>${t('payment.kindergarten')}:</strong> ${receiptData.kindergartenName}
-                </div>
-                <div style="margin-bottom:15px">
-                    <strong>${t('payment.amount')}:</strong> 250₪
-                </div>
-                <div style="margin-bottom:15px">
-                    <strong>${t('payment.paymentDate')}:</strong> ${new Date(receiptData.paymentDate).toLocaleString()}
-                </div>
-                <div style="margin-bottom:15px">
-                    <strong>${t('payment.transactionId')}:</strong> ${receiptData.paymentId}
-                </div>
-                <hr><p style="text-align:center;font-style:italic">${t('payment.thankYou')}</p>
-            </div>
-        `;
-        document.body.appendChild(element);
-
-        html2canvas(element.querySelector('#temp-receipt'), { scale: 2 })
-            .then(canvas => {
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const w = pdf.internal.pageSize.getWidth();
-                const h = (canvas.height * w) / canvas.width;
-                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, h);
-                pdf.save(`receipt-${child.name}-${new Date().toLocaleDateString()}.pdf`);
-                document.body.removeChild(element);
-                setLoading(false);
-            })
-            .catch(() => {
-                document.body.removeChild(element);
-                setNotification({ type: 'danger', message: t('payment.pdfError') });
-                setLoading(false);
-            });
-    };
+    useEffect(() => { if (user) loadData(); }, [user]);
 
     const reloadChildren = async () => {
         const res = await axiosInstance.get('/api/children/my-children');
@@ -187,38 +104,19 @@ const Children = () => {
         setSelectedKindergarten(kg);
         setShowPayment(true);
         setPaymentSuccess(false);
-        setReceipt(null);
     };
 
     const resetPaymentModal = () => {
         setShowPayment(false);
         setPaymentSuccess(false);
-        setCardData({ number: '', name: '', expiry: '', cvc: '' });
     };
 
-    // ----------  card input formatter  ----------
-    const handleCardInput = e => {
-        const { name, value } = e.target;
-        if (name === 'number') {
-            const v = value.replace(/\s+/g, '').replace(/(\d{4})/g, '$1 ').trim();
-            setCardData({ ...cardData, [name]: v });
-        } else if (name === 'expiry') {
-            const v = value.replace(/\D/g, '').replace(/(\d{2})(\d{0,2})/, '$1/$2');
-            setCardData({ ...cardData, [name]: v });
-        } else if (name === 'cvc') {
-            const v = value.replace(/\D/g, '').substring(0, 3);
-            setCardData({ ...cardData, [name]: v });
-        } else {
-            setCardData({ ...cardData, [name]: value });
-        }
-    };
-
-    // ----------  payment processor  ----------
+    // payment processor
     const processPayment = async () => {
         setLoading(true);
 
         if (!stripe || !elements) {
-            setNotification({ type: 'danger', message: "Stripe غير جاهز" });
+            setNotification({ type: 'danger', message: 'Stripe غير جاهز' });
             setLoading(false);
             return;
         }
@@ -235,14 +133,14 @@ const Children = () => {
             return;
         }
 
-        const res = await fetch("/api/payments/validate-and-record", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        const res = await fetch('/api/payments/validate-and-record', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
                 userId: user.userId,
                 amount: 35,
                 paymentMethodId: paymentMethod.id,
-                type: "KINDERGARTEN"
+                type: 'KINDERGARTEN'
             })
         });
 
@@ -256,18 +154,18 @@ const Children = () => {
                 { params: { kindergartenId: selectedKindergarten.kindergartenId, monthlyFee: 2.5 } }
             );
             setPaymentSuccess(true);
-            setNotification({ type: 'success', message: "تم الدفع والتسجيل بنجاح!" });
+            setNotification({ type: 'success', message: 'تم الدفع والتسجيل بنجاح!' });
             await reloadChildren();
         } else {
             setNotification({ type: 'danger', message: json.error });
         }
     };
 
-    // ----------  group children  ----------
+    // helpers
     const grouped = {
-        notEnrolled:  (children || []).filter(c => c.monthlyFee === 0 || c.monthlyFee === 1.5),
-        pending:      (children || []).filter(c => c.monthlyFee === 2.5),
-        approved:     (children || []).filter(c => c.monthlyFee === 3.5)
+        notEnrolled: children.filter(c => c.monthlyFee === 0 || c.monthlyFee === 1.5),
+        pending: children.filter(c => c.monthlyFee === 2.5),
+        approved: children.filter(c => c.monthlyFee === 3.5)
     };
 
     if (!user) return (
@@ -289,60 +187,34 @@ const Children = () => {
                 </Alert>
             )}
 
-            {/* ----------  stats  ---------- */}
+            {/* stats */}
             <div className="stats-cards">
-                <div className="stat-card">
-                    <div className="stat-icon">💳</div>
-                    <div className="stat-value">{grouped?.notEnrolled?.length}</div>
-                    <div className="stat-label">{t('children.notEnrolled')}</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-icon"><FaClock/></div>
-                    <div className="stat-value">{grouped.pending.length}</div>
-                    <div className="stat-label">{t('children.pending')}</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-icon"><FaCheckCircle/></div>
-                    <div className="stat-value">{grouped.approved.length}</div>
-                    <div className="stat-label">{t('children.approved')}</div>
-                </div>
+                <div className="stat-card"><div className="stat-icon">💳</div><div>{grouped.notEnrolled.length}</div><div>{t('children.notEnrolled')}</div></div>
+                <div className="stat-card"><FaClock /><div>{grouped.pending.length}</div><div>{t('children.pending')}</div></div>
+                <div className="stat-card"><FaCheckCircle /><div>{grouped.approved.length}</div><div>{t('children.approved')}</div></div>
             </div>
 
             {loading ? (
                 <div className="loading-indicator">{t('general.loading')}</div>
             ) : (
                 <>
-                    {/* قسم غير مسجَّل */}
-                    {grouped?.notEnrolled?.length > 0 && (
+                    {grouped.notEnrolled.length > 0 && (
                         <section>
                             <h2 className="section-title">{t('children.notEnrolled')}</h2>
                             <div className="cards-section">
                                 {grouped.notEnrolled.map(child => (
-                                    <ChildCard
-                                        key={child.childId}
-                                        child={child}
-                                        kindergartens={kindergartens}
-                                        handleEnroll={handleEnrollClick}
-                                        t={t}
-                                        i18n={i18n}
-                                    />
+                                    <ChildCard key={child.childId} child={child} kindergartens={kindergartens} handleEnroll={handleEnrollClick} t={t} i18n={i18n} />
                                 ))}
                             </div>
                         </section>
                     )}
 
-                    {/* قسم قيد الانتظار */}
-                    {grouped?.pending?.length > 0 && (
+                    {grouped.pending.length > 0 && (
                         <section>
                             <h2 className="section-title">{t('children.pending')}</h2>
                             <table className="children-table">
                                 <thead>
-                                <tr>
-                                    <th>{t('children.childName')}</th>
-                                    <th>{t('children.birthDate')}</th>
-                                    <th>{t('children.kindergarten')}</th>
-                                    <th>{t('children.approvalStatus')}</th>
-                                </tr>
+                                <tr><th>{t('children.childName')}</th><th>{t('children.birthDate')}</th><th>{t('children.kindergarten')}</th><th>{t('children.approvalStatus')}</th></tr>
                                 </thead>
                                 <tbody>
                                 {grouped.pending.map(child => {
@@ -352,11 +224,7 @@ const Children = () => {
                                             <td>{child.name}</td>
                                             <td>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</td>
                                             <td>{kg?.name || '–'}</td>
-                                            <td>
-                    <span className="badge bg-warning text-dark">
-                      {t('children.waitingApproval')}
-                    </span>
-                                            </td>
+                                            <td><span className="badge bg-warning text-dark">{t('children.waitingApproval')}</span></td>
                                         </tr>
                                     );
                                 })}
@@ -365,19 +233,14 @@ const Children = () => {
                         </section>
                     )}
 
-                    {/* قسم مقبول */}
-                    {grouped?.approved?.length > 0 && (
+                    {grouped.approved.length > 0 && (
                         <section>
                             <h2 className="section-title">{t('children.registeredTitle')}</h2>
                             <table className="children-table">
                                 <thead>
                                 <tr>
-                                    <th>{t('children.childName')}</th>
-                                    <th>{t('children.birthDate')}</th>
-                                    <th>{t('children.kindergarten')}</th>
-                                    <th>{t('children.paymentStatus')}</th>
-                                    <th>{t('children.approvalStatus')}</th>
-                                    <th>{t('children.actions')}</th>
+                                    <th>{t('children.childName')}</th><th>{t('children.birthDate')}</th><th>{t('children.kindergarten')}</th>
+                                    <th>{t('children.paymentStatus')}</th><th>{t('children.approvalStatus')}</th><th>{t('children.actions')}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -388,22 +251,10 @@ const Children = () => {
                                             <td>{child.name}</td>
                                             <td>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</td>
                                             <td>{kg?.name || '–'}</td>
+                                            <td><span className="badge bg-success">250₪</span></td>
+                                            <td><span className="badge bg-success">{t('children.approved')}</span></td>
                                             <td>
-                    <span className="badge bg-success">
-                      {t('children.paid')} 250₪
-                    </span>
-                                            </td>
-                                            <td>
-                    <span className="badge bg-success">
-                      {t('children.approved')}
-                    </span>
-                                            </td>
-                                            <td>
-                                                <Button
-                                                    variant="outline-primary"
-                                                    size="sm"
-                                                    onClick={() => generateReceipt(child, kg)}
-                                                >
+                                                <Button variant="outline-primary" size="sm" onClick={() => alert('Receipt')}>
                                                     <FiDownload /> {t('children.downloadReceipt')}
                                                 </Button>
                                             </td>
@@ -417,39 +268,21 @@ const Children = () => {
                 </>
             )}
 
-
-            {/* ----------  payment modal  ---------- */}
+            {/* payment modal */}
             <Modal show={showPayment} onHide={resetPaymentModal} size="lg" centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>{t('payment.title')}</Modal.Title>
-                </Modal.Header>
+                <Modal.Header closeButton><Modal.Title>{t('payment.title')}</Modal.Title></Modal.Header>
                 <Modal.Body>
                     {paymentSuccess ? (
                         <div className="payment-success">
-                            <div id="kindergarten-receipt" className="receipt-details">
-                                <div className="text-center mb-4">
-                                    <FaCheckCircle className="text-success" size={48}/>
-                                    <h3 className="mt-2">{t('payment.successTitle')}</h3>
-                                </div>
-                                <h4 className="mb-3">{t('payment.receiptDetails')}</h4>
-                                <div className="receipt-item">
-                                    <span>{t('payment.childName')}:</span><strong>{selectedChild?.name}</strong>
-                                </div>
-                                <div className="receipt-item">
-                                    <span>{t('payment.kindergarten')}:</span><strong>{selectedKindergarten?.name}</strong>
-                                </div>
-                                <div className="receipt-item">
-                                    <span>{t('payment.amount')}:</span><strong>35 {t('payment.currency')}</strong>
-                                </div>
-                                <div className="receipt-item">
-                                    <span>{t('payment.paymentDate')}:</span><strong>{new Date().toLocaleString()}</strong>
-                                </div>
-                                <div className="receipt-item">
-                                    <span>{t('payment.transactionId')}:</span><strong>{receipt?.paymentId}</strong>
-                                </div>
+                            <div id="kindergarten-receipt">
+                                <h3 className="text-center">{t('payment.successTitle')}</h3>
+                                <p>{t('payment.childName')}: <strong>{selectedChild?.name}</strong></p>
+                                <p>{t('payment.kindergarten')}: <strong>{selectedKindergarten?.name}</strong></p>
+                                <p>{t('payment.amount')}: <strong>35 {t('payment.currency')}</strong></p>
+                                <p>{t('payment.transactionId')}: <strong>TXN-{Date.now()}</strong></p>
                             </div>
                             <div className="d-flex justify-content-between mt-4">
-                                <Button variant="success" onClick={handleDownloadReceipt}>{t('payment.downloadReceipt')}</Button>
+                                <Button variant="success" onClick={() => alert('Download')}>{t('payment.downloadReceipt')}</Button>
                                 <Button variant="primary" onClick={resetPaymentModal}>{t('payment.close')}</Button>
                             </div>
                         </div>
@@ -457,75 +290,22 @@ const Children = () => {
                         <Form>
                             <div className="payment-summary mb-4">
                                 <h5>{t('payment.summary')}</h5>
-                                <div className="summary-item">
-                                    <span>{t('payment.child')}:</span><strong>{selectedChild?.name}</strong>
-                                </div>
-                                <div className="summary-item">
-                                    <span>{t('payment.kindergarten')}:</span><strong>{selectedKindergarten?.name}</strong>
-                                </div>
-                                <div className="summary-item">
-                                    <span>{t('payment.amount')}:</span><strong>35 {t('payment.currency')}</strong>
-                                </div>
+                                <p>{t('payment.child')}: <strong>{selectedChild?.name}</strong></p>
+                                <p>{t('payment.kindergarten')}: <strong>{selectedKindergarten?.name}</strong></p>
+                                <p>{t('payment.amount')}: <strong>35 {t('payment.currency')}</strong></p>
                             </div>
 
                             <Form.Group className="mb-3">
                                 <Form.Label>{t('payment.cardDetails')}</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    name="number"
-                                    placeholder="1234 5678 9012 3456"
-                                    value={cardData.number}
-                                    onChange={handleCardInput}
-                                    maxLength={19}
-                                />
+                                <div className="stripe-card-element">
+                                    <CardElement options={{ hidePostalCode: true }} />
+                                </div>
                             </Form.Group>
-
-                            <Form.Group className="mb-3">
-                                <Form.Label>{t('payment.cardName')}</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    name="name"
-                                    placeholder={t('payment.cardNamePlaceholder')}
-                                    value={cardData.name}
-                                    onChange={handleCardInput}
-                                />
-                            </Form.Group>
-
-                            <Row>
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>{t('payment.cardDetails')}</Form.Label>
-                                        <div className="stripe-card-element">
-                                            <CardElement options={{ hidePostalCode: true }} />
-                                        </div>
-                                    </Form.Group>
-                                </Col>
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>{t('payment.cardCvv')}</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            name="cvc"
-                                            placeholder="123"
-                                            value={cardData.cvc}
-                                            onChange={handleCardInput}
-                                            maxLength={3}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                            </Row>
 
                             <div className="d-flex justify-content-between mt-4">
                                 <Button variant="secondary" onClick={resetPaymentModal}>{t('payment.cancel')}</Button>
                                 <Button variant="primary" onClick={processPayment} disabled={loading}>
-                                    {loading ? (
-                                        <>
-                                            <Spinner animation="border" size="sm" className="me-2"/>
-                                            {t('payment.processing')}
-                                        </>
-                                    ) : (
-                                        t('payment.payNow')
-                                    )}
+                                    {loading ? <><Spinner animation="border" size="sm" className="me-2" />{t('payment.processing')}</> : t('payment.payNow')}
                                 </Button>
                             </div>
                         </Form>
