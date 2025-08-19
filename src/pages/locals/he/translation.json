@@ -190,6 +190,7 @@
     "image": "תמונה",
     "file": "קובץ",
     "date": "תאריך",
+    "created":"נוצר בתאריך",
     "time": "שעה"
   },
   "eventDetails": {
