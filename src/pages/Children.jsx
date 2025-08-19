@@ -239,9 +239,9 @@ const Children = () => {
 
     // ----------  group children  ----------
     const grouped = {
-        notEnrolled:  children.filter(c => c.monthlyFee === 0 || c.monthlyFee === 1.5),
-        pending:      children.filter(c => c.monthlyFee === 2.5),
-        approved:     children.filter(c => c.monthlyFee === 3.5)
+        notEnrolled:  (children || []).filter(c => c.monthlyFee === 0 || c.monthlyFee === 1.5),
+        pending:      (children || []).filter(c => c.monthlyFee === 2.5),
+        approved:     (children || []).filter(c => c.monthlyFee === 3.5)
     };
 
     if (!user) return (
