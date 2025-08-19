@@ -822,6 +822,7 @@
   "children": {
     "needsPayment": "يحتاج دفع",
     "pending": "قيد الانتظار",
+    "approved": "تمت الموافقة",
     "waitingApproval": "بانتظار الموافقة",
     "unknownKindergarten": "روضة غير معروفة",
     "paid": "تم الدفع",

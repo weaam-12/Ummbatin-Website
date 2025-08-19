@@ -853,6 +853,7 @@
     "currency": "ש\"ח"
   },
   "children": {
+    "approved": "אושר",
     "needsPayment": "דורש תשלום",
     "pending": "ממתין",
     "waitingApproval": "ממתין לאישור",
