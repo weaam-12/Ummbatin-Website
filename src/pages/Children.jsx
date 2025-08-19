@@ -267,8 +267,8 @@ const Children = () => {
             <div className="stats-cards">
                 <div className="stat-card">
                     <div className="stat-icon">💳</div>
-                    <div className="stat-value">{grouped.needsPayment.length}</div>
-                    <div className="stat-label">{t('children.needsPayment')}</div>
+                    <div className="stat-value">{grouped?.notEnrolled?.length}</div>
+                    <div className="stat-label">{t('children.notEnrolled')}</div>
                 </div>
                 <div className="stat-card">
                     <div className="stat-icon"><FaClock/></div>
