@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fi';
 import './Payment.css';
 import { getUserPayments, getPropertiesByUserId, updatePaymentStatus } from '../api';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 const Payments = () => {
     const { t } = useTranslation();
@@ -23,6 +24,8 @@ const Payments = () => {
         water: [],
         arnona: []
     });
+    const stripe = useStripe();
+    const elements = useElements();
     const [properties, setProperties] = useState([]);
     const [debt, setDebt] = useState(0);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -116,47 +119,9 @@ const Payments = () => {
         setDebt(totalDebt);
     }, [payments]);
 
-    const handleCardInput = (e) => {
-        const { name, value } = e.target;
-        if (name === 'number') {
-            const v = value.replace(/\s+/g, '').replace(/(\d{4})/g, '$1 ').trim();
-            setCardData({...cardData, [name]: v});
-        }
-        else if (name === 'expiry') {
-            const v = value.replace(/\D/g, '').replace(/(\d{2})(\d{0,2})/, '$1/$2');
-            setCardData({...cardData, [name]: v});
-        }
-        else if (name === 'cvc') {
-            const v = value.replace(/\D/g, '').substring(0, 3);
-            setCardData({...cardData, [name]: v});
-        }
-        else {
-            setCardData({...cardData, [name]: value});
-        }
-    };
 
-    const validateCard = () => {
-        if (!/^\d{4}\s\d{4}\s\d{4}\s\d{4}$/.test(cardData.number)) {
-            return 'رقم البطاقة غير صحيح (يجب أن يكون 16 رقمًا)';
-        }
-        if (!/^\d{2}\/\d{2}$/.test(cardData.expiry)) {
-            return 'تاريخ الانتهاء غير صحيح (يجب أن يكون MM/YY)';
-        }
-        if (!/^\d{3}$/.test(cardData.cvc)) {
-            return 'رمز الأمان غير صحيح (يجب أن يكون 3 أرقام)';
-        }
-        if (cardData.name.trim().length < 3) {
-            return 'اسم حامل البطاقة قصير جدًا';
-        }
-        const [month, year] = cardData.expiry.split('/');
-        const currentYear = new Date().getFullYear() % 100;
-        const currentMonth = new Date().getMonth() + 1;
-        if (parseInt(year) < currentYear ||
-            (parseInt(year) === currentYear && parseInt(month) < currentMonth)) {
-            return 'بطاقة منتهية الصلاحية';
-        }
-        return null;
-    };
+
+
 
     const handleDownloadPDF = (type, propertyId) => {
         setLoading(true);
@@ -198,39 +163,44 @@ const Payments = () => {
     };
 
     const processPayment = async () => {
-        const validationError = validateCard();
-        if (validationError) {
-            setNotification({ type: 'danger', message: validationError });
+        if (!stripe || !elements) {
+            setNotification({ type: 'danger', message: 'Stripe غير جاهز' });
             return;
         }
 
-        setLoading(true);
+        const cardElement = elements.getElement(CardElement);
+        const { paymentMethod, error } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: cardElement,
+        });
+
+        if (error) {
+            setNotification({ type: 'danger', message: error.message });
+            return;
+        }
+
+        // الآن أرسل paymentMethod.id إلى الـ backend
         try {
-            // تحديث حالة الدفع في الخادم
-            await updatePaymentStatus(currentPayment.id, 'PAID');
-
-            // تحديث الحالة محليًا
-            const updatedPayments = { ...payments };
-            Object.values(updatedPayments[currentPayment.type]).forEach(propertyPayments => {
-                propertyPayments.payments.forEach(p => {
-                    if (p.paymentId === currentPayment.id) {
-                        p.status = "PAID";
-                        p.paymentDate = new Date().toISOString();
-                    }
-                });
+            const res = await fetch('/api/payments/validate-and-record', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    userId: user.userId,
+                    amount: currentPayment.amount,
+                    paymentMethodId: paymentMethod.id,
+                    type: currentPayment.type.toUpperCase(), // WATER أو ARNONA
+                }),
             });
-            setPayments(updatedPayments);
 
-            setPaymentSuccess(true);
-            setNotification({ type: "success", message: "تم الدفع بنجاح!" });
-        } catch (error) {
-            console.error("Payment processing error:", error);
-            setNotification({
-                type: "danger",
-                message: error.response?.data?.message || "فشل في عملية الدفع"
-            });
-        } finally {
-            setLoading(false);
+            const json = await res.json();
+            if (json.valid) {
+                setPaymentSuccess(true);
+                setNotification({ type: 'success', message: 'تم الدفع بنجاح!' });
+            } else {
+                setNotification({ type: 'danger', message: json.error });
+            }
+        } catch (e) {
+            setNotification({ type: 'danger', message: 'فشل في الدفع' });
         }
     };
 
@@ -453,56 +423,11 @@ const Payments = () => {
 
                             <Form>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>رقم البطاقة</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="number"
-                                        placeholder="1234 5678 9012 3456"
-                                        value={cardData.number}
-                                        onChange={handleCardInput}
-                                        maxLength={19}
-                                    />
+                                    <Form.Label>بيانات البطاقة</Form.Label>
+                                    <div className="stripe-card-element">
+                                        <CardElement options={{ hidePostalCode: true }} />
+                                    </div>
                                 </Form.Group>
-
-                                <Form.Group className="mb-3">
-                                    <Form.Label>اسم حامل البطاقة</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="name"
-                                        placeholder="كما هو مدون على البطاقة"
-                                        value={cardData.name}
-                                        onChange={handleCardInput}
-                                    />
-                                </Form.Group>
-
-                                <Row>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>تاريخ الانتهاء</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="expiry"
-                                                placeholder="MM/YY"
-                                                value={cardData.expiry}
-                                                onChange={handleCardInput}
-                                                maxLength={5}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>رمز الأمان (CVV)</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="cvc"
-                                                placeholder="123"
-                                                value={cardData.cvc}
-                                                onChange={handleCardInput}
-                                                maxLength={3}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
 
                                 <div className="d-flex justify-content-between mt-4">
                                     <Button variant="secondary" onClick={resetPaymentModal}>
