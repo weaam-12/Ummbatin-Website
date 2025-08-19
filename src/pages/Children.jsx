@@ -5,6 +5,8 @@ import { useAuth } from '../AuthContext';
 import { FaChild, FaCheckCircle, FaMoneyBillWave, FaClock } from 'react-icons/fa';
 import { FiDownload } from 'react-icons/fi';
 import './Children.css';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
 import {
     Card, Button, Alert, Spinner, Container, Modal, Form, Row, Col
 } from 'react-bootstrap';
@@ -15,7 +17,8 @@ import html2canvas from 'html2canvas';
 const ChildCard = ({ child, kindergartens, handleEnroll, t, i18n }) => {
     const [selectedKg, setSelectedKg] = useState('');
     const kg = kindergartens.find(k => String(k.kindergartenId) === selectedKg);
-
+    const stripe = useStripe();
+    const elements = useElements();
     return (
         <div className="child-card">
             <h3>{child.name}</h3>
@@ -213,27 +216,50 @@ const Children = () => {
     // ----------  payment processor  ----------
     const processPayment = async () => {
         setLoading(true);
-        try {
-            await axiosInstance.post('/api/payments/create-kindergarten', {
-                childId: selectedChild.childId,
-                kindergartenId: selectedKindergarten.kindergartenId,
-                amount: 3500, // 35 USD in cents
-                userId: user.userId
-            });
-            // بعد الدفع يصبح monthlyFee = 2.5 (انتظار)
-            await axiosInstance.patch(`/api/children/${selectedChild.childId}/approve`, null, {
-                params: { approved: false }
-            });
-            setPaymentSuccess(true);
-            setNotification({ type: 'success', message: t('payment.successMessage') });
-            await reloadChildren();
-        } catch (error) {
-            setNotification({
-                type: 'danger',
-                message: error.response?.data?.message || t('payment.generalError')
-            });
-        } finally {
+
+        if (!stripe || !elements) {
+            setNotification({ type: 'danger', message: "Stripe غير جاهز" });
             setLoading(false);
+            return;
+        }
+
+        const cardElement = elements.getElement(CardElement);
+        const { paymentMethod, error } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: cardElement,
+        });
+
+        if (error) {
+            setNotification({ type: 'danger', message: error.message });
+            setLoading(false);
+            return;
+        }
+
+        const res = await fetch("/api/payments/validate-and-record", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                userId: user.userId,
+                amount: 35,
+                paymentMethodId: paymentMethod.id,
+                type: "KINDERGARTEN"
+            })
+        });
+
+        const json = await res.json();
+        setLoading(false);
+
+        if (json.valid) {
+            await axiosInstance.patch(
+                `/api/children/${selectedChild.childId}/assign`,
+                null,
+                { params: { kindergartenId: selectedKindergarten.kindergartenId, monthlyFee: 2.5 } }
+            );
+            setPaymentSuccess(true);
+            setNotification({ type: 'success', message: "تم الدفع والتسجيل بنجاح!" });
+            await reloadChildren();
+        } else {
+            setNotification({ type: 'danger', message: json.error });
         }
     };
 
@@ -468,15 +494,10 @@ const Children = () => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>{t('payment.cardExpiry')}</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            name="expiry"
-                                            placeholder="MM/YY"
-                                            value={cardData.expiry}
-                                            onChange={handleCardInput}
-                                            maxLength={5}
-                                        />
+                                        <Form.Label>{t('payment.cardDetails')}</Form.Label>
+                                        <div className="stripe-card-element">
+                                            <CardElement options={{ hidePostalCode: true }} />
+                                        </div>
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>

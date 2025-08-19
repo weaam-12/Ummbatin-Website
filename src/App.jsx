@@ -23,9 +23,16 @@ import AdminComplaints from "./pages/AdminComplaints"
 import AdminKinder from "./pages/AdminKinder";
 import About from "./pages/About.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
+
 const App = () => {
     return (
         <AuthProvider>
+            <Elements stripe={stripePromise}>
+
             <Router>
                 <div className="App">
                     <Navbar />
@@ -125,6 +132,7 @@ const App = () => {
                     <Footer />
                 </div>
             </Router>
+            </Elements>
         </AuthProvider>
     );
 };
