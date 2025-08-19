@@ -7,7 +7,7 @@ import {
 } from 'react-bootstrap';
 import {
     FiUsers, FiDollarSign, FiPlus, FiCalendar,
-    FiHome, FiFileText, FiDroplet, FiMapPin, FiActivity, FiImage,
+    FiHome, FiFileText, FiDroplet, FiMapPin, FiSpeaker , FiImage,
     FiEye, FiTrash2, FiEdit, FiRefreshCw
 } from 'react-icons/fi';
 import './AdminGeneral.css';

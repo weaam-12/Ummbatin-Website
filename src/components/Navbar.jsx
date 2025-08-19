@@ -8,6 +8,7 @@ import {
     FaBell,
     FaUserShield,
     FaHome,
+    FiSpeaker,
     FaExclamationCircle,
     FaMoneyBillWave,
     FaTrash,
