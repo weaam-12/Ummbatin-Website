@@ -16,6 +16,13 @@ const AdminComplaints = () => {
     const [filter, setFilter] = useState('all');
     const [loading, setLoading] = useState(true);
 
+    const complaintTypes = [
+        { value: "uncollected", label: t("garbageComplaint.types.uncollected") },
+        { value: "overflowing", label: t("garbageComplaint.types.overflowing") },
+        { value: "damagedBin", label: t("garbageComplaint.types.damagedBin") },
+        { value: "missingBin", label: t("garbageComplaint.types.missingBin") },
+        { value: "illegalDumping", label: t("garbageComplaint.types.illegalDumping") },
+    ];
     useEffect(() => {
         loadComplaints();
     }, []);
@@ -171,8 +178,12 @@ const AdminComplaints = () => {
                                 filteredComplaints.map(complaint => (
                                     <tr key={complaint.complaintId}>
                                         <td>#{complaint.ticketNumber || '--'}</td>
-                                        <td>{complaint.type || '--'}</td>
                                         <td>
+                                            {(() => {
+                                                const typeTranslation = complaintTypes.find(type => type.value === complaint.type);
+                                                return typeTranslation ? typeTranslation.label : (complaint.type || '--');
+                                            })()}
+                                        </td>                                        <td>
                                             <div style={{
                                                 maxWidth: '200px',
                                                 whiteSpace: 'nowrap',
