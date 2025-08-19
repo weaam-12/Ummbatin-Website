@@ -311,7 +311,9 @@ const Children = () => {
                             <th>{t('children.childName')}</th>
                             <th>{t('children.birthDate')}</th>
                             <th>{t('children.kindergarten')}</th>
+                            <th>{t('children.approvalStatus')}</th> {/* العمود الجديد */}
                             <th>{t('children.status')}</th>
+
                         </tr>
                         </thead>
                         <tbody>
@@ -322,7 +324,14 @@ const Children = () => {
                                     <td>{child.name}</td>
                                     <td>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</td>
                                     <td>{kg?.name || '–'}</td>
-                                    <td><span className="badge bg-warning text-dark">{t('children.waitingApproval')}</span></td>
+                                    <td>
+  <span className="badge bg-warning text-dark">
+    {t('children.waitingApproval')}
+  </span>
+                                    </td>
+                                    <td><span
+                                        className="badge bg-warning text-dark">{t('children.waitingApproval')}</span>
+                                    </td>
                                 </tr>
                             );
                         })}
@@ -342,6 +351,8 @@ const Children = () => {
                             <th>{t('children.birthDate')}</th>
                             <th>{t('children.kindergarten')}</th>
                             <th>{t('children.paymentStatus')}</th>
+                            <th>{t('children.approvalStatus')}</th> {/* العمود الجديد */}
+
                             <th>{t('children.actions')}</th>
                         </tr>
                         </thead>
@@ -355,7 +366,13 @@ const Children = () => {
                                     <td>{kg?.name || '–'}</td>
                                     <td><span className="badge bg-success">{t('children.paid')} 250₪</span></td>
                                     <td>
-                                        <Button variant="outline-primary" size="sm" onClick={() => generateReceipt(child, kg)}>
+  <span className="badge bg-success">
+    {t('children.approved')}
+  </span>
+                                    </td>
+                                    <td>
+                                        <Button variant="outline-primary" size="sm"
+                                                onClick={() => generateReceipt(child, kg)}>
                                             <FiDownload/> {t('children.downloadReceipt')}
                                         </Button>
                                     </td>
