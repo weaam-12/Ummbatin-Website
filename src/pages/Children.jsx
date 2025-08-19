@@ -282,107 +282,115 @@ const Children = () => {
                 </div>
             </div>
 
-            {/* ----------  needs payment  ---------- */}
-            {grouped.needsPayment.length > 0 && (
-                <section>
-                    <h2 className="section-title">{t('children.needsPayment')}</h2>
-                    <div className="cards-section">
-                        {grouped.needsPayment.map(child => (
-                            <ChildCard
-                                key={child.childId}
-                                child={child}
-                                kindergartens={kindergartens}
-                                handleEnroll={handleEnrollClick}
-                                t={t}
-                                i18n={i18n}
-                            />
-                        ))}
-                    </div>
-                </section>
-            )}
+            {loading ? (
+                <div className="loading-indicator">{t('general.loading')}</div>
+            ) : (
+                <>
+                    {/* قسم غير مسجَّل */}
+                    {grouped?.notEnrolled?.length > 0 && (
+                        <section>
+                            <h2 className="section-title">{t('children.notEnrolled')}</h2>
+                            <div className="cards-section">
+                                {grouped.notEnrolled.map(child => (
+                                    <ChildCard
+                                        key={child.childId}
+                                        child={child}
+                                        kindergartens={kindergartens}
+                                        handleEnroll={handleEnrollClick}
+                                        t={t}
+                                        i18n={i18n}
+                                    />
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
-            {/* ----------  pending  ---------- */}
-            {grouped.pending.length > 0 && (
-                <section>
-                    <h2 className="section-title">{t('children.pending')}</h2>
-                    <table className="children-table">
-                        <thead>
-                        <tr>
-                            <th>{t('children.childName')}</th>
-                            <th>{t('children.birthDate')}</th>
-                            <th>{t('children.kindergarten')}</th>
-                            <th>{t('children.approvalStatus')}</th> {/* العمود الجديد */}
-                            <th>{t('children.status')}</th>
-
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {grouped.pending.map(child => {
-                            const kg = kindergartens.find(k => k.kindergartenId === child.kindergartenId);
-                            return (
-                                <tr key={child.childId}>
-                                    <td>{child.name}</td>
-                                    <td>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</td>
-                                    <td>{kg?.name || '–'}</td>
-                                    <td>
-  <span className="badge bg-warning text-dark">
-    {t('children.waitingApproval')}
-  </span>
-                                    </td>
-                                    <td><span
-                                        className="badge bg-warning text-dark">{t('children.waitingApproval')}</span>
-                                    </td>
+                    {/* قسم قيد الانتظار */}
+                    {grouped?.pending?.length > 0 && (
+                        <section>
+                            <h2 className="section-title">{t('children.pending')}</h2>
+                            <table className="children-table">
+                                <thead>
+                                <tr>
+                                    <th>{t('children.childName')}</th>
+                                    <th>{t('children.birthDate')}</th>
+                                    <th>{t('children.kindergarten')}</th>
+                                    <th>{t('children.approvalStatus')}</th>
                                 </tr>
-                            );
-                        })}
-                        </tbody>
-                    </table>
-                </section>
-            )}
+                                </thead>
+                                <tbody>
+                                {grouped.pending.map(child => {
+                                    const kg = kindergartens.find(k => k.kindergartenId === child.kindergartenId);
+                                    return (
+                                        <tr key={child.childId}>
+                                            <td>{child.name}</td>
+                                            <td>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</td>
+                                            <td>{kg?.name || '–'}</td>
+                                            <td>
+                    <span className="badge bg-warning text-dark">
+                      {t('children.waitingApproval')}
+                    </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                </tbody>
+                            </table>
+                        </section>
+                    )}
 
-            {/* ----------  approved  ---------- */}
-            {grouped.approved.length > 0 && (
-                <section>
-                    <h2 className="section-title">{t('children.registeredTitle')}</h2>
-                    <table className="children-table">
-                        <thead>
-                        <tr>
-                            <th>{t('children.childName')}</th>
-                            <th>{t('children.birthDate')}</th>
-                            <th>{t('children.kindergarten')}</th>
-                            <th>{t('children.paymentStatus')}</th>
-                            <th>{t('children.approvalStatus')}</th> {/* العمود الجديد */}
-
-                            <th>{t('children.actions')}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {grouped.approved.map(child => {
-                            const kg = kindergartens.find(k => k.kindergartenId === child.kindergartenId);
-                            return (
-                                <tr key={child.childId}>
-                                    <td>{child.name}</td>
-                                    <td>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</td>
-                                    <td>{kg?.name || '–'}</td>
-                                    <td><span className="badge bg-success">{t('children.paid')} 250₪</span></td>
-                                    <td>
-  <span className="badge bg-success">
-    {t('children.approved')}
-  </span>
-                                    </td>
-                                    <td>
-                                        <Button variant="outline-primary" size="sm"
-                                                onClick={() => generateReceipt(child, kg)}>
-                                            <FiDownload/> {t('children.downloadReceipt')}
-                                        </Button>
-                                    </td>
+                    {/* قسم مقبول */}
+                    {grouped?.approved?.length > 0 && (
+                        <section>
+                            <h2 className="section-title">{t('children.registeredTitle')}</h2>
+                            <table className="children-table">
+                                <thead>
+                                <tr>
+                                    <th>{t('children.childName')}</th>
+                                    <th>{t('children.birthDate')}</th>
+                                    <th>{t('children.kindergarten')}</th>
+                                    <th>{t('children.paymentStatus')}</th>
+                                    <th>{t('children.approvalStatus')}</th>
+                                    <th>{t('children.actions')}</th>
                                 </tr>
-                            );
-                        })}
-                        </tbody>
-                    </table>
-                </section>
+                                </thead>
+                                <tbody>
+                                {grouped.approved.map(child => {
+                                    const kg = kindergartens.find(k => k.kindergartenId === child.kindergartenId);
+                                    return (
+                                        <tr key={child.childId}>
+                                            <td>{child.name}</td>
+                                            <td>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</td>
+                                            <td>{kg?.name || '–'}</td>
+                                            <td>
+                    <span className="badge bg-success">
+                      {t('children.paid')} 250₪
+                    </span>
+                                            </td>
+                                            <td>
+                    <span className="badge bg-success">
+                      {t('children.approved')}
+                    </span>
+                                            </td>
+                                            <td>
+                                                <Button
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    onClick={() => generateReceipt(child, kg)}
+                                                >
+                                                    <FiDownload /> {t('children.downloadReceipt')}
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                </tbody>
+                            </table>
+                        </section>
+                    )}
+                </>
             )}
+
 
             {/* ----------  payment modal  ---------- */}
             <Modal show={showPayment} onHide={resetPaymentModal} size="lg" centered>
