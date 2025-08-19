@@ -605,7 +605,7 @@
       "saveButton": "שמור נכס"
     }
   },
-    "payments": {
+  "payments": {
       "title": "ניהול חשבונות חודשיים",
       "billType": "סוג החשבון",
       "generateArnona": "יצירת חשבונות ארנונה",
@@ -617,7 +617,7 @@
       "arnonaDescription": "חשבונות ארנונה ייווצרו עבור כל הנכסים לפי שטח ומספר יחידות",
       "waterDescription": "חשבונות מים ייווצרו עבור כל הנכסים לפי קריאות מים"
     },
-    "water": {
+  "water": {
       "addReadings": "הוספת קריאות מים",
       "reading": "קריאת מים",
       "readingPlaceholder": "הכנס קריאה",
@@ -851,9 +851,12 @@
   "general": {
     "loading": "טוען...",
     "currency": "ש\"ח"
-
   },
   "children": {
+    "needsPayment": "דורש תשלום",
+    "pending": "ממתין",
+    "waitingApproval": "ממתין לאישור",
+    "unknownKindergarten": "גן לא ידוע",
     "paid": "שולם",
     "downloadReceipt": "הורדת קבלה",
     "paymentStatus": "סטטוס תשלום",

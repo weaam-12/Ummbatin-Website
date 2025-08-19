@@ -415,7 +415,6 @@
       "saveButton": "حفظ العقار"
     }
   },
-
   "payments": {
     "title": "إدارة الفواتير الشهرية",
     "billType": "نوع الفاتورة",
@@ -821,6 +820,10 @@
     "login": "تسجيل الدخول"
   },
   "children": {
+    "needsPayment": "يحتاج دفع",
+    "pending": "قيد الانتظار",
+    "waitingApproval": "بانتظار الموافقة",
+    "unknownKindergarten": "روضة غير معروفة",
     "paid": "تم الدفع",
     "downloadReceipt": "تنزيل الفاتورة",
     "paymentStatus": "حالة الدفع",
