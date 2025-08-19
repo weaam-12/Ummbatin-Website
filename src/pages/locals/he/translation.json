@@ -854,6 +854,7 @@
   },
   "children": {
     "approved": "אושר",
+    "approvalStatus": "סטטוס אישור",
     "needsPayment": "דורש תשלום",
     "pending": "ממתין",
     "waitingApproval": "ממתין לאישור",
