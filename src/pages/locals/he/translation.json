@@ -416,6 +416,8 @@
       "loading": "טוען תלונות...",
       "submitResponse": "שלח תגובה",
       "cancel": "ביטול",
+      "allStatuses": "כל הסטטוסים",
+
       "refresh": "רענון נתונים",
       "statuses": {
         "allStatuses": "כל הסטטוסים",
