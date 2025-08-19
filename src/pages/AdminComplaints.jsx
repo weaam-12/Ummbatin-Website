@@ -4,9 +4,11 @@ import { useAuth } from '../AuthContext';
 import { getComplaints, updateComplaintStatus, respondToComplaint } from '../api';
 import { FiEdit, FiMessageSquare, FiX, FiCheck, FiImage, FiRefreshCw } from 'react-icons/fi';
 import styles from './AdminComplaints.module.css';
+import { useTranslation } from 'react-i18next';
 
 const AdminComplaints = () => {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [complaints, setComplaints] = useState([]);
     const [selectedComplaint, setSelectedComplaint] = useState(null);
     const [responseText, setResponseText] = useState('');
@@ -27,7 +29,7 @@ const AdminComplaints = () => {
             console.error('Error loading complaints:', error);
             setNotification({
                 type: 'danger',
-                message: 'فشل في تحميل الشكاوى: ' + (error.message || 'خطأ غير متوقع')
+                message: t('admin.complaints.notifications.loadError') + (error.message || t('general.error'))
             });
         } finally {
             setLoading(false);
@@ -47,10 +49,10 @@ const AdminComplaints = () => {
     };
 
     const statusLabels = {
-        SUBMITTED: 'مستلمة',
-        IN_PROGRESS: 'قيد المعالجة',
-        RESOLVED: 'تم الحل',
-        REJECTED: 'مرفوضة'
+        SUBMITTED: t('admin.complaints.statuses.SUBMITTED'),
+        IN_PROGRESS: t('admin.complaints.statuses.IN_PROGRESS'),
+        RESOLVED: t('admin.complaints.statuses.RESOLVED'),
+        REJECTED: t('admin.complaints.statuses.REJECTED')
     };
 
     const handleStatusChange = async (complaintId, newStatus) => {
@@ -58,14 +60,14 @@ const AdminComplaints = () => {
             await updateComplaintStatus(complaintId, newStatus);
             setNotification({
                 type: 'success',
-                message: 'تم تحديث حالة الشكوى بنجاح'
+                message: t('admin.complaints.notifications.updateSuccess')
             });
             loadComplaints();
         } catch (error) {
             console.error('Error updating status:', error);
             setNotification({
                 type: 'danger',
-                message: 'فشل في تحديث الحالة: ' + (error.message || 'خطأ غير متوقع')
+                message: t('admin.complaints.notifications.updateError') + (error.message || t('general.error'))
             });
         }
     };
@@ -77,7 +79,7 @@ const AdminComplaints = () => {
             await respondToComplaint(selectedComplaint.complaintId, responseText);
             setNotification({
                 type: 'success',
-                message: 'تم إرسال الرد بنجاح'
+                message: t('admin.complaints.notifications.responseSuccess')
             });
             setSelectedComplaint(null);
             setResponseText('');
@@ -86,7 +88,7 @@ const AdminComplaints = () => {
             console.error('Error submitting response:', error);
             setNotification({
                 type: 'danger',
-                message: 'فشل في إرسال الرد: ' + (error.message || 'خطأ غير متوقع')
+                message: t('admin.complaints.notifications.responseError') + (error.message || t('general.error'))
             });
         }
     };
@@ -94,7 +96,7 @@ const AdminComplaints = () => {
     const formatDate = (dateString) => {
         if (!dateString) return '--';
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB'); // يطلع بصيغة 14/08/1995
+        return date.toLocaleDateString('en-GB');
     };
 
     return (
@@ -104,7 +106,7 @@ const AdminComplaints = () => {
                 <div className={styles.header}>
                     <div className={styles.headerTitle}>
                         <FiMessageSquare />
-                        <h1>إدارة الشكاوى - بلدية أم بطين</h1>
+                        <h1>{t('admin.complaints.title')} - {t('municipality')}</h1>
                     </div>
 
                     <div className={styles.filters}>
@@ -114,7 +116,7 @@ const AdminComplaints = () => {
                             className={`${styles.btn} ${styles.btnLight}`}
                         >
                             <FiRefreshCw className={loading ? styles.spinner : ''} />
-                            تحديث البيانات
+                            {t('admin.complaints.refresh')}
                         </button>
 
                         <div className={styles.filterGroup}>
@@ -123,11 +125,11 @@ const AdminComplaints = () => {
                                 onChange={(e) => setFilter(e.target.value)}
                                 className={styles.filterSelect}
                             >
-                                <option value="all">جميع الشكاوى</option>
-                                <option value="SUBMITTED">مستلمة</option>
-                                <option value="IN_PROGRESS">قيد المعالجة</option>
-                                <option value="RESOLVED">تم الحل</option>
-                                <option value="REJECTED">مرفوضة</option>
+                                <option value="all">{t('admin.complaints.filters.allStatuses')}</option>
+                                <option value="SUBMITTED">{t('admin.complaints.statuses.SUBMITTED')}</option>
+                                <option value="IN_PROGRESS">{t('admin.complaints.statuses.IN_PROGRESS')}</option>
+                                <option value="RESOLVED">{t('admin.complaints.statuses.RESOLVED')}</option>
+                                <option value="REJECTED">{t('admin.complaints.statuses.REJECTED')}</option>
                             </select>
                         </div>
                     </div>
@@ -147,21 +149,21 @@ const AdminComplaints = () => {
                 {loading ? (
                     <div className={styles.loading}>
                         <div className={styles.spinner}></div>
-                        <p>جاري تحميل الشكاوى...</p>
+                        <p>{t('admin.complaints.loading')}</p>
                     </div>
                 ) : (
                     <div className={styles.tableContainer}>
                         <table className={styles.table}>
                             <thead>
                             <tr>
-                                <th>رقم التذكرة</th>
-                                <th>النوع</th>
-                                <th>الوصف</th>
-                                <th>الموقع</th>
-                                <th>الحالة</th>
-                                <th>الرد</th>
-                                <th>التاريخ</th>
-                                <th>الإجراءات</th>
+                                <th>{t('admin.complaints.ticketNumber')}</th>
+                                <th>{t('admin.complaints.type')}</th>
+                                <th>{t('admin.complaints.description')}</th>
+                                <th>{t('admin.complaints.location')}</th>
+                                <th>{t('admin.complaints.status')}</th>
+                                <th>{t('admin.complaints.response')}</th>
+                                <th>{t('admin.complaints.date')}</th>
+                                <th>{t('admin.complaints.actions')}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -207,7 +209,7 @@ const AdminComplaints = () => {
                                                 <button
                                                     className={`${styles.btnAction} ${styles.btnPrimary}`}
                                                     onClick={() => setSelectedComplaint(complaint)}
-                                                    title="الرد"
+                                                    title={t('admin.complaints.respond')}
                                                 >
                                                     <FiMessageSquare/>
                                                 </button>
@@ -216,7 +218,7 @@ const AdminComplaints = () => {
                                                     <button
                                                         className={`${styles.btnAction} ${styles.btnLight}`}
                                                         onClick={() => window.open(complaint.imageUrl, '_blank')}
-                                                        title="عرض الصورة"
+                                                        title={t('admin.complaints.viewImage')}
                                                     >
                                                         <FiImage/>
                                                     </button>
@@ -227,10 +229,10 @@ const AdminComplaints = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="7" style={{textAlign: 'center', padding: '2rem'}}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#666' }}>
+                                    <td colSpan="8" style={{textAlign: 'center', padding: '2rem'}}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#666' }}>
                                             <FiMessageSquare size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                                            لا توجد شكاوى لعرضها
+                                            {t('admin.complaints.noComplaints')}
                                         </div>
                                     </td>
                                 </tr>
@@ -247,32 +249,32 @@ const AdminComplaints = () => {
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.modalHeader}>
                             <h2>
-                                <FiEdit /> الرد على التذكرة #{selectedComplaint.ticketNumber}
+                                <FiEdit /> {t('admin.complaints.respondToTicket')} #{selectedComplaint.ticketNumber}
                             </h2>
                         </div>
 
                         {/* عرض وصف الشكوى */}
                         <div className={styles.complaintDetails}>
-                            <strong>وصف الشكوى:</strong>
+                            <strong>{t('admin.complaints.complaintDescription')}:</strong>
                             <p>{selectedComplaint.description}</p>
                         </div>
 
                         <div className={styles.modalBody}>
-                            <label>نص الرد</label>
+                            <label>{t('admin.complaints.responseText')}</label>
                             <textarea
                                 value={responseText}
                                 onChange={(e) => setResponseText(e.target.value)}
-                                placeholder="اكتب ردك هنا..."
+                                placeholder={t('admin.complaints.responsePlaceholder')}
                                 className={styles.textarea}
                             />
                         </div>
 
                         <div className={styles.modalFooter}>
                             <button className={`${styles.btn} ${styles.btnLight}`} onClick={() => setSelectedComplaint(null)}>
-                                <FiX /> إلغاء
+                                <FiX /> {t('common.cancel')}
                             </button>
                             <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleSubmitResponse} disabled={!responseText}>
-                                <FiCheck /> إرسال الرد
+                                <FiCheck /> {t('admin.complaints.submitResponse')}
                             </button>
                         </div>
                     </div>
