@@ -391,6 +391,13 @@
     "title": "עיריית אום בטין"
 
   },
+  "announcements": {
+    "title": "הודעות",
+    "addTitle": "הוספת הודעה",
+    "content": "תוכן",
+    "priority": "עדיפות",
+    "expiresAt": "תאריך תפוגה"
+  },
   "admin": {
     "complaints": {
       "viewFullDescription": "הצג את תיאור התלונה המלא",
@@ -495,14 +502,22 @@
     "menu": {
       "dashboard": "לוח בקרה",
       "payments": "ניהול תשלומים",
-      "events": "ניהול אירועים"
+      "events": "ניהול אירועים",
+      "announcements": "ניהול הודעות"
+
     },
     "actions": {
       "generateWater": "יצירת חשבונות מים",
       "generateArnona": "יצירת חשבונות ארנונה",
       "addEvent": "הוספת אירוע חדש",
       "addProperty": "הוספת נכס חדש",
-      "addWaterReadings": "הוספת קריאות מים"
+      "addWaterReadings": "הוספת קריאות מים",
+      "addAnnouncement": "הוספת הודעה"
+    },
+    "announcements": {
+      "addSuccess": "ההודעה נוספה בהצלחה",
+      "deleteSuccess": "ההודעה נמחקה בהצלחה",
+      "deleteError": "שגיאה במחיקת הודעה"
     },
     "general": {
       "refresh": "רענן נתונים",

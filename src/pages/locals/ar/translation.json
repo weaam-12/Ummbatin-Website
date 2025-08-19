@@ -220,6 +220,13 @@
     "units": "عدد الوحدات",
     "squareMeters": "متر مربع"
   },
+  "announcements": {
+    "title": "الإعلانات",
+    "addTitle": "إضافة إعلان",
+    "content": "المحتوى",
+    "priority": "الأولوية",
+    "expiresAt": "تنتهي في"
+  },
   "admin": {
     "complaints": {
       "title": "إدارة الشكاوى",
@@ -261,6 +268,11 @@
         "responseError": "فشل في إرسال الرد",
         "loadError": "فشل في تحميل الشكاوى"
       }
+    },
+    "announcements": {
+      "addSuccess": "تمت إضافة الإعلان بنجاح",
+      "deleteSuccess": "تم حذف الإعلان بنجاح",
+      "deleteError": "فشل حذف الإعلان"
     },
     "payments": {
       "title": "إدارة المدفوعات",
@@ -323,11 +335,13 @@
       "recentEvents": "آخر الفعاليات"
     },
     "menu": {
+      "announcements": "إدارة الإعلانات",
       "dashboard": "لوحة التحكم",
       "payments": "إدارة الفواتير",
       "events": "إدارة الفعاليات"
     },
     "actions": {
+      "addAnnouncement": "إضافة إعلان",
       "generateWater": "توليد فواتير المياه",
       "generateArnona": "توليد فواتير الأرنونا",
       "addEvent": "إضافة فعالية جديدة",
