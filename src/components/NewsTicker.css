@@ -25,14 +25,36 @@
     font-size: 14px;
 }
 
-@keyframes scroll {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
-}
 
 .news-ticker-loading {
     text-align: center;
     padding: 10px;
     background: #f8f9fa;
     color: #6c757d;
+}
+
+.news-ticker {
+    width: 100%;
+    overflow: hidden;
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    color: #fff;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.news-ticker-track {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 30s linear infinite;
+}
+
+.news-ticker-item {
+    display: inline-block;
+    padding-right: 4rem; /* مسافة بين الرسائل */
+    font-size: 14px;
+}
+
+@keyframes scroll {
+    0%   { transform: translateX(0%); }
+    100% { transform: translateX(-33.33%); } /* يكفي لثلاث نسخ متكررة */
 }
