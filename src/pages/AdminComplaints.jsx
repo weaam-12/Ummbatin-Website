@@ -22,6 +22,10 @@ const AdminComplaints = () => {
         { value: "damagedBin", label: t("garbageComplaint.types.damagedBin") },
         { value: "missingBin", label: t("garbageComplaint.types.missingBin") },
         { value: "illegalDumping", label: t("garbageComplaint.types.illegalDumping") },
+        { value: "Infrastructure", label: t("complaints.complaintForm.types.Infrastructure") },
+        { value: "Cleanliness", label: t("complaints.complaintForm.types.Cleanliness") },
+        { value: "Safety", label: t("complaints.complaintForm.types.Safety") },
+        { value: "Other", label: t("complaints.complaintForm.types.Other") },
     ];
     useEffect(() => {
         loadComplaints();
