@@ -46,7 +46,17 @@ const Complaints = () => {
         RESOLVED: t('complaints.status.RESOLVED'),
         REJECTED: t('complaints.status.REJECTED')
     };
-
+    const complaintTypes = [
+        { value: "uncollected", label: t("garbageComplaint.types.uncollected") },
+        { value: "overflowing", label: t("garbageComplaint.types.overflowing") },
+        { value: "damagedBin", label: t("garbageComplaint.types.damagedBin") },
+        { value: "missingBin", label: t("garbageComplaint.types.missingBin") },
+        { value: "illegalDumping", label: t("garbageComplaint.types.illegalDumping") },
+        { value: "Infrastructure", label: t("complaints.complaintForm.types.Infrastructure") },
+        { value: "Cleanliness", label: t("complaints.complaintForm.types.Cleanliness") },
+        { value: "Safety", label: t("complaints.complaintForm.types.Safety") },
+        { value: "Other", label: t("complaints.complaintForm.types.Other") },
+    ];
     useEffect(() => {
         if (!user) {
             navigate('/login');
@@ -180,8 +190,12 @@ const Complaints = () => {
                             {complaints.map(complaint => (
                                 <tr key={complaint.complaintId}>
                                     <td>{complaint.ticketNumber || '--'}</td>
-                                    <td>{complaint.type || '--'}</td>
-                                    <td>{complaint.description || '--'}</td>
+                                    <td>
+                                        {(() => {
+                                            const typeTranslation = complaintTypes.find(type => type.value === complaint.type);
+                                            return typeTranslation ? typeTranslation.label : (complaint.type || '--');
+                                        })()}
+                                    </td>                                    <td>{complaint.description || '--'}</td>
                                     <td>{complaint.location || '--'}</td>
                                     <td>
                                         <Badge bg={statusVariants[complaint.status]}>
