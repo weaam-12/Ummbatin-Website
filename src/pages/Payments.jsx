@@ -251,7 +251,7 @@ const Payments = () => {
                     <div className="d-flex justify-content-between w-100">
       <span>
         <FiHome className="me-2" />
-          {propertyInfo.address} (مساحة: {propertyInfo.area} م²، وحدات: {propertyInfo.units})
+          {propertyInfo.address}
       </span>
                         {pendingPayments.length > 0 && (
                             <Badge bg="danger" className="ms-2">
