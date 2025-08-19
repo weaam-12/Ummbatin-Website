@@ -344,14 +344,16 @@ const Navbar = () => {
                                 <div className="dropdown-menu show">
                                     {user ? (
                                         <>
-                                            <NavLink
-                                                to="/profile"
-                                                className="dropdown-item"
-                                                onClick={closeDropdowns}
-                                            >
-                                                <FaUserCircle />
-                                                {t("common.profile")}
-                                            </NavLink>
+                                            {!isAdmin() && (
+                                                <NavLink
+                                                    to="/profile"
+                                                    className="dropdown-item"
+                                                    onClick={closeDropdowns}
+                                                >
+                                                    <FaUserCircle />
+                                                    {t("common.profile")}
+                                                </NavLink>
+                                            )}
                                             <div
                                                 className="dropdown-item logout"
                                                 onClick={handleLogout}
