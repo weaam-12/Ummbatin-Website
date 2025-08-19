@@ -252,7 +252,7 @@ const Children = () => {
     );
 
     return (
-        <div className={`children-page modern ${i18n.language}`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+        <div className={`children-page modern ${i18n.language}`} dir={i18n.language === 'ar' ? 'rtl' : 'rtl'}>
             <h1 className="page-title">👶 {t('children.myChildren')}</h1>
 
             {loading && <div className="loading-indicator">{t('general.loading')}</div>}
