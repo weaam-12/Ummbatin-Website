@@ -150,22 +150,29 @@
     }
   },
   "common": {
+    "municipality": "עיריית אום בטין",
+    "allRightsReserved": "כל הזכויות שמורות",
+    "loading": "טוען...",
+    "currency": "ש\"ח",
+    "close": "סגור",
+    "submit": "שלח",
+    "cancel": "ביטול",
+    "refresh": "רענן",
+    "actions": "פעולות",
+    "view": "צפייה",
+    "edit": "עריכה",
+    "delete": "מחיקה",
+    "noData": "אין נתונים זמינים",
+    "success": "הצלחה",
+    "error": "שגיאה",
     "home": "ראשי",
     "login": "התחברות",
     "logout": "התנתקות",
     "profile": "פרופיל אישי",
     "adminPanel": "פאנל ניהול",
-    "loading": "טעינה...",
-    "noData": "אין מידע זמין",
-    "close": "סגור",
     "viewDetails": "הצג פרטים",
-    "delete": "מחק",
-    "refresh": "רענן",
-    "submit": "שלח",
     "submitting": "שולח...",
-    "search": "חיפוש...",
-    "edit": "ערוך",
-    "currency": "ש\"ח"
+    "search": "חיפוש..."
   },
   "eventDetails": {
     "title": "פרטי האירוע",
@@ -344,7 +351,6 @@
     "eventsTitle": "אירועים קרובים",
     "noEvents": "אין אירועים קרובים כרגע"
   },
-
   "services": {
     "water": "מים",
     "arnona": "ארנונה",
@@ -375,7 +381,6 @@
     "fax": "פקס: 088605680",
     "email": "אימייל: sherut@alqasoum.org.il"
   },
-
   "navbar": {
     "education": "חינוך",
     "controlPanel": "ניהול משתמשים",
@@ -547,7 +552,6 @@
       "saveButton": "שמור נכס"
     }
   },
-
     "payments": {
       "title": "ניהול חשבונות חודשיים",
       "billType": "סוג החשבון",
