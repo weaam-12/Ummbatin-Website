@@ -233,9 +233,18 @@
       "actions": "الإجراءات",
       "noComplaints": "لا توجد شكاوى لعرضها",
       "loading": "جاري تحميل الشكاوى...",
-      "submitResponse": "إرسال الرد",
       "cancel": "إلغاء",
       "refresh": "تحديث البيانات",
+      "viewFullDescription": "عرض وصف الشكوى الكامل",
+      "imageAlt": "صورة الشكوى",
+      "respond": "الرد",
+      "viewImage": "عرض الصورة",
+      "respondToTicket": "الرد على التذكرة",
+      "complaintDescription": "وصف الشكوى",
+      "responseText": "نص الرد",
+      "responsePlaceholder": "اكتب ردك هنا...",
+      "submitResponse": "إرسال الرد",
+      "emptyWarning": "أدخل ردًا أولاً",
       "statuses": {
         "SUBMITTED": "مستلمة",
         "IN_PROGRESS": "قيد المعالجة",
@@ -323,6 +332,7 @@
       "addWaterReadings": "إضافة قراءات المياه"
     },
     "general": {
+      "refresh": "تحديث البيانات",
       "title": "لوحة تحكم الإدمن",
       "loadError": "حدث خطأ أثناء تحميل البيانات",
       "dashboard": {

@@ -393,6 +393,16 @@
   },
   "admin": {
     "complaints": {
+      "viewFullDescription": "הצג את תיאור התלונה המלא",
+      "imageAlt": "תמונת התלונה",
+      "respond": "תגובה",
+      "viewImage": "הצג תמונה",
+      "respondToTicket": "הגב לכרטיס",
+      "complaintDescription": "תיאור התלונה",
+      "responseText": "טקסט התגובה",
+      "responsePlaceholder": "כתוב כאן את תגובתך...",
+      "submitResponse": "שלח תגובה",
+      "emptyWarning": "אנא הזן תגובה תחילה",
       "title": "ניהול תלונות",
       "ticketNumber": "מספר כרטיס",
       "type": "סוג",
@@ -492,6 +502,7 @@
       "addWaterReadings": "הוספת קריאות מים"
     },
     "general": {
+      "refresh": "רענן נתונים",
       "title": "לוח בקרה למנהל",
       "loadError": "שגיאה בטעינת נתונים",
       "dashboard": {
