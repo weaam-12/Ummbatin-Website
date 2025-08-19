@@ -517,7 +517,12 @@
     "announcements": {
       "addSuccess": "ההודעה נוספה בהצלחה",
       "deleteSuccess": "ההודעה נמחקה בהצלחה",
-      "deleteError": "שגיאה במחיקת הודעה"
+      "deleteError": "שגיאה במחיקת הודעה",
+      "title": "הודעות",
+      "addTitle": "הוספת הודעה",
+      "content": "תוכן",
+      "priority": "עדיפות",
+      "expiresAt": "תאריך תפוגה"
     },
     "general": {
       "refresh": "רענן נתונים",

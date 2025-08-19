@@ -272,7 +272,12 @@
     "announcements": {
       "addSuccess": "تمت إضافة الإعلان بنجاح",
       "deleteSuccess": "تم حذف الإعلان بنجاح",
-      "deleteError": "فشل حذف الإعلان"
+      "deleteError": "فشل حذف الإعلان",
+      "title": "الإعلانات",
+      "addTitle": "إضافة إعلان",
+      "content": "المحتوى",
+      "priority": "الأولوية",
+      "expiresAt": "تنتهي في"
     },
     "payments": {
       "title": "إدارة المدفوعات",
