@@ -164,7 +164,8 @@
     "submit": "שלח",
     "submitting": "שולח...",
     "search": "חיפוש...",
-    "edit": "ערוך"
+    "edit": "ערוך",
+    "currency": "ש\"ח"
   },
   "eventDetails": {
     "title": "פרטי האירוע",
