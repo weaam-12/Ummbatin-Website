@@ -418,6 +418,7 @@
       "cancel": "ביטול",
       "refresh": "רענון נתונים",
       "statuses": {
+        "allStatuses": "כל הסטטוסים",
         "SUBMITTED": "התקבל",
         "IN_PROGRESS": "בטיפול",
         "RESOLVED": "נפתר",

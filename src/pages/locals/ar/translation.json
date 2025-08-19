@@ -246,6 +246,7 @@
       "submitResponse": "إرسال الرد",
       "emptyWarning": "أدخل ردًا أولاً",
       "statuses": {
+        "allStatuses": "جميع الحالات",
         "SUBMITTED": "مستلمة",
         "IN_PROGRESS": "قيد المعالجة",
         "RESOLVED": "تم الحل",

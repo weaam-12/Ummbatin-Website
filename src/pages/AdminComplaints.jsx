@@ -125,7 +125,7 @@ const AdminComplaints = () => {
                                 onChange={(e) => setFilter(e.target.value)}
                                 className={styles.filterSelect}
                             >
-                                <option value="all">{t('admin.complaints.filters.allStatuses')}</option>
+                                <option value="all">{t('admin.complaints.allStatuses')}</option>
                                 <option value="SUBMITTED">{t('admin.complaints.statuses.SUBMITTED')}</option>
                                 <option value="IN_PROGRESS">{t('admin.complaints.statuses.IN_PROGRESS')}</option>
                                 <option value="RESOLVED">{t('admin.complaints.statuses.RESOLVED')}</option>
