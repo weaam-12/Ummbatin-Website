@@ -1,84 +1,38 @@
-.ticker-wrapper {
-    width: 100%;
-    overflow: hidden;
-    background-color: #b91c1c; /* أحمر غامق */
+.news-ticker {
+    background: linear-gradient(90deg, #007bff, #0056b3);
     color: white;
-    position: relative;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    direction: rtl; /* لأن النص بالعربي */
-    border-top: 1px solid #991b1b;
-    border-bottom: 1px solid #991b1b;
-}
-
-.ticker-content {
-    display: inline-block;
-    white-space: nowrap;
-    animation: ticker-scroll 30s linear infinite;
-}
-
-@keyframes ticker-scroll {
-    0% {
-        transform: translateX(100%);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
-}
-
-.ticker-content span {
-    margin: 0 4rem;
-    font-size: 1rem;
-    font-weight: 500;
-}
-/* التنسيق العام للعناصر */
-.navbar-wrapper {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-.ticker-wrapper {
-    width: 100%;
-    overflow: hidden;
-    background-color: #f8f9fa;
     padding: 8px 0;
+    overflow: hidden;
+    position: relative;
 }
 
-.ticker-content {
-    display: inline-block;
-    white-space: nowrap;
-    animation: ticker 20s linear infinite;
-    padding-left: 100%; /* بداية من خارج الشاشة */
-}
-
-.ticker-content span {
-    margin-right: 40px; /* مسافة بين الأخبار */
-    font-size: 14px;
-    color: #333;
-}
-
-@keyframes ticker {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
-}
-.navbar {
+.news-ticker-content {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 1rem;
-    background-color: #fff;
+    white-space: nowrap;
+    animation: scroll 20s linear infinite;
 }
 
-.news-ticker-container {
-    width: 100%;
-    background-color: #f8f9fa;
-    border-top: 1px solid #e9ecef;
-    border-bottom: 1px solid #e9ecef;
+.news-ticker-label {
+    font-weight: bold;
+    margin-right: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.news-ticker-message {
+    font-size: 14px;
+}
+
+@keyframes scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+.news-ticker-loading {
+    text-align: center;
+    padding: 10px;
+    background: #f8f9fa;
+    color: #6c757d;
 }
