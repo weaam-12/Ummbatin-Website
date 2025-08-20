@@ -64,8 +64,8 @@ const Navbar = () => {
         }
     }, [t]);
 
-    const fetchNotifications = useCallback(async () => {
 
+    const fetchNotifications = useCallback(async () => {
         if (!user) {
             setNotifications([]);
             return;
@@ -78,13 +78,20 @@ const Navbar = () => {
             const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
             const response = await axiosInstance.get(endpoint);
             console.log('Response from /admin =>', response.data);
-            const list = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
-            const processedNotifications = list.map(n => ({
-                id: n.notificationId || n.id,
-                title: n.message || n.title || t('notifications.new_notification'),
-                time: n.createdAt ? formatTime(n.createdAt) : t('notifications.just_now'),
-                read: n.status === 'READ' || false
-            }));
+
+            const rawNotifications = Array.isArray(response.data)
+                ? response.data
+                : response.data?.notifications || [];
+
+            const processedNotifications = rawNotifications.map(n => {
+                // ✅ نتأكد أننا لا نمرر كائنات متداخلة بشكل غير محدود
+                return {
+                    id: n.notificationId || n.id,
+                    title: n.message || n.title || t('notifications.new_notification'),
+                    time: n.createdAt ? formatTime(n.createdAt) : t('notifications.just_now'),
+                    read: n.status === 'READ' || false
+                };
+            });
 
             setNotifications(processedNotifications);
         } catch (error) {
