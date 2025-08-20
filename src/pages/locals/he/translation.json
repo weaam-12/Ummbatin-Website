@@ -850,7 +850,9 @@
   },
   "general": {
     "loading": "טוען...",
-    "currency": "ש\"ח"
+    "currency": "ש\"ח",
+    "squareMeters": "מטר רבוע",
+    "notSpecified": "לא צוין"
   },
   "children": {
     "approved": "אושר",
