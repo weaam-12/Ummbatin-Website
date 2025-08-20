@@ -11,7 +11,9 @@ import {
     FiCreditCard, FiCheckCircle, FiClock, FiDollarSign, FiDownload, FiHome, FiX
 } from 'react-icons/fi';
 import './Payment.css';
-import { getUserPayments, getPropertiesByUserId, updatePaymentStatus } from '../api';
+import { getUserPayments, getPropertiesByUserId } from '../api';
+import { axiosInstance } from '../api';
+
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 const Payments = () => {
@@ -196,6 +198,11 @@ const Payments = () => {
             if (json.valid) {
                 setPaymentSuccess(true);
                 setNotification({ type: 'success', message: 'تم الدفع بنجاح!' });
+                await axiosInstance.post('/api/notifications', {
+                    userId: 11,
+                    message: `המשתמש מספר ${user.userId} שילם חשבונית ${currentPayment.type === 'arnona' ? 'ארנונה' : 'מים'} בסך ${currentPayment.amount} ש"ח.`,
+                    type: 'PAYMENT'
+                });
             } else {
                 setNotification({ type: 'danger', message: json.error });
             }

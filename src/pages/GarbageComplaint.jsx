@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../AuthContext";
-import { submitComplaint, getComplaints } from "../api";
+import {submitComplaint, getComplaints, axiosInstance} from "../api";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./GarbageComplaint.css";
@@ -112,7 +112,11 @@ const GarbageComplaint = () => {
                 image: null,
                 imagePreview: null,
             });
-
+            await axiosInstance.post('/api/notifications', {
+                userId: 11,
+                message: `המשתמש מספר ${user.userId} הגיש תלונת אשפה חדשה – סוג: ${formData.type}.`,
+                type: 'ADMIN_ALERT'
+            });
             toast.success(t("garbageComplaint.success.submit", {
                 ticketNumber: newComplaint.ticketNumber
             }), {

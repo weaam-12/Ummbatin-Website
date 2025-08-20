@@ -154,6 +154,11 @@ const Children = () => {
                 { params: { kindergartenId: selectedKindergarten.kindergartenId, monthlyFee: 2.5 } }
             );
             setPaymentSuccess(true);
+            await axiosInstance.post('/api/notifications', {
+                userId: 11,
+                message: `המשתמש מספר ${user.userId} ביקש להירשם לגן ילדים – הילד: ${selectedChild?.name} – הגן: ${selectedKindergarten?.name}.`,
+                type: 'ENROLLMENT'
+            });
             setNotification({ type: 'success', message: 'تم الدفع والتسجيل بنجاح!' });
             await reloadChildren();
         } else {

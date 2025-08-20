@@ -77,7 +77,8 @@ const Navbar = () => {
             const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
             const response = await axiosInstance.get(endpoint);
 
-            const processedNotifications = response.data.map(n => ({
+            const list = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
+            const processedNotifications = list.map(n => ({
                 id: n.notificationId || n.id,
                 title: n.message || n.title || t('notifications.new_notification'),
                 time: n.createdAt ? formatTime(n.createdAt) : t('notifications.just_now'),
