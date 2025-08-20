@@ -83,6 +83,8 @@ const Navbar = () => {
                 ? response.data
                 : response.data?.notifications || [];
 
+            console.log('Response preview:', JSON.stringify(rawNotifications, null, 2).substring(0, 1000));
+
             const processedNotifications = rawNotifications.map(n => {
                 // ✅ نتأكد أننا لا نمرر كائنات متداخلة بشكل غير محدود
                 return {
