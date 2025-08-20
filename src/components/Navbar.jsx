@@ -228,8 +228,11 @@ const Navbar = () => {
                             <div
                                 key={notification.id}
                                 className={`notification-item ${notification.read ? '' : 'unread'}`}
-                                onClick={() => markAsRead(notification.id)}
-                            >
+                                onClick={() => {
+                                markAsRead(notification.id);
+                                navigate(getNotificationTarget(notification.title));
+                                setShowNotifications(false);
+                            }}                            >
                                 <div className="notification-content">
                                     <div className="notification-title">
                                         {notification.title}
@@ -248,7 +251,15 @@ const Navbar = () => {
             </div>
         );
     };
-
+    const getNotificationTarget = useCallback((title) => {
+        if (!title) return '/';
+        const lower = title.toLowerCase();
+        if (lower.includes('حضانة') || lower.includes('روضة') || lower.includes('children')) {
+            return '/children';
+        }
+        if (lower.includes('شكوى')) return '/complaints';
+        if (lower.includes('دفع'))   return '/payments';        return '/';   // fallback
+    }, []);
     return (
         <div className="navbar-wrapper">
             <nav className="navbar">
