@@ -65,6 +65,7 @@ const Navbar = () => {
     }, [t]);
 
     const fetchNotifications = useCallback(async () => {
+
         if (!user) {
             setNotifications([]);
             return;
@@ -76,7 +77,7 @@ const Navbar = () => {
         try {
             const endpoint = isAdmin() ? 'api/notifications/admin' : 'api/notifications/me';
             const response = await axiosInstance.get(endpoint);
-
+            console.log('Response from /admin =>', response.data);
             const list = Array.isArray(response.data) ? response.data : response.data?.notifications || [];
             const processedNotifications = list.map(n => ({
                 id: n.notificationId || n.id,
