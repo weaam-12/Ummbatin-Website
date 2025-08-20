@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { submitComplaint, getComplaints } from '../api';
 import { useTranslation } from 'react-i18next'; // Add this import
+import { axiosInstance } from '../api';
+
 import {
     Card,
     Button,
@@ -122,9 +124,14 @@ const Complaints = () => {
             });
 
             setComplaints(prev => [response, ...prev]);
+            await axiosInstance.post('/api/notifications', {
+                userId: 11,
+                message: 'התקבלה תלונה חדשה ממשתמש.',
+                type: 'ADMIN_ALERT'
+            });
             setNotification({
                 type: 'success',
-                message: `Complaint submitted successfully! Ticket #: ${response.ticketNumber}`
+                message: `Complaint submitted successfully!`
             });
             setShowForm(false);
             setFormData({ type: '', description: '', location: '', image: null });
