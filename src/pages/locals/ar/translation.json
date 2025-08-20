@@ -892,5 +892,18 @@
   "sampleChildren": {
     "adam": "آدم",
     "mohammed": "محمد"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "unknown_time": "وقت غير معروف",
+    "just_now": "الآن",
+    "minutes_ago": "منذ دقيقة | منذ {{count}} دقائق",
+    "hours_ago": "منذ ساعة | منذ {{count}} ساعات",
+    "days_ago": "منذ يوم | منذ {{count}} أيام",
+    "new_notification": "إشعار جديد",
+    "mark_all_read": "تعيين الكل كمقروء",
+    "empty": "لا توجد إشعارات",
+    "retry": "إعادة المحاولة",
+    "loading": "جاري التحميل..."
   }
 }

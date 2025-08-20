@@ -935,5 +935,18 @@
     "to": "עד",
     "location": "מיקום",
     "organizer": "מארגן"
+  },
+  "notifications": {
+    "title": "התראות",
+    "unknown_time": "זמן לא ידוע",
+    "just_now": "עכשיו",
+    "minutes_ago": "לפני דקה | לפני {{count}} דקות",
+    "hours_ago": "לפני שעה | לפני {{count}} שעות",
+    "days_ago": "לפני יום | לפני {{count}} ימים",
+    "new_notification": "התראה חדשה",
+    "mark_all_read": "סמן הכל כנקרא",
+    "empty": "אין התראות",
+    "retry": "נסה שוב",
+    "loading": "טוען..."
   }
 }
