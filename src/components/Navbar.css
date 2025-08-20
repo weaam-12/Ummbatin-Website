@@ -17,7 +17,9 @@
     background-color: var(--navbar-bg);
     box-shadow: var(--navbar-shadow);
 }
-
+.notification-item {
+    cursor: pointer;
+}
 .notifications-menu {
     position: relative;
     display: inline-block;

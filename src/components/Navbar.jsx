@@ -194,6 +194,19 @@ const Navbar = () => {
         { path: "/admin/complaints", icon: <FaExclamationCircle />, text: t("navbar.complaintsManagement") }
     ];
 
+    const getNotificationTarget = useCallback((title) => {
+        if (!title) return '/';
+        const lower = title.toLowerCase();
+
+        if (lower.includes('حضانة') || lower.includes('روضة') || lower.includes('children')) {
+            return '/children';
+        }
+        if (lower.includes('شكوى')) return '/complaints';
+        if (lower.includes('دفع')) return '/payments';
+
+        return '/';
+    }, []);
+
     const renderNotificationsDropdown = () => {
         return (
             <div className={`notifications-dropdown ${showNotifications ? 'show' : ''}`}>
@@ -251,15 +264,7 @@ const Navbar = () => {
             </div>
         );
     };
-    const getNotificationTarget = useCallback((title) => {
-        if (!title) return '/';
-        const lower = title.toLowerCase();
-        if (lower.includes('حضانة') || lower.includes('روضة') || lower.includes('children')) {
-            return '/children';
-        }
-        if (lower.includes('شكوى')) return '/complaints';
-        if (lower.includes('دفع'))   return '/payments';        return '/';   // fallback
-    }, []);
+
     return (
         <div className="navbar-wrapper">
             <nav className="navbar">
