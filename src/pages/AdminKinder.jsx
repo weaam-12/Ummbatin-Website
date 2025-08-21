@@ -12,6 +12,7 @@ import {
     updateKindergarten,
     updateChildAssignment,
 } from '../api';
+import { axiosInstance } from '../api';
 
 const AdminKinder = () => {
     const { t } = useTranslation();
@@ -65,10 +66,15 @@ const AdminKinder = () => {
     };
 
     // Handle child assignment
-    const handleAssignChild = async (childId, kindergartenId, monthlyFee) => {
+    const handleAssignChild = async (child, kindergartenId, monthlyFee) => {
         try {
-            await updateChildAssignment(childId, { kindergartenId, monthlyFee });
+            await updateChildAssignment(child.childId, { kindergartenId, monthlyFee });
             setNotification({ type: 'success', message: t('assigned') });
+            await axiosInstance.post('/api/notifications', {
+                userId: child.userId,   // تأكّد أن enrollment يحتوي userId
+                message: 'התקבלה אישור להרשמת ילדך לגן.',
+                type: 'KINDERGARTEN_APPROVED'
+            });
             setShowAssignModal(false);
             setCurrentChildToAssign(null);
             loadAll();
@@ -209,7 +215,7 @@ const AdminKinder = () => {
                                         <div className={styles.actionButtons}>
                                             <button
                                                 className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSm}`}
-                                                onClick={() => handleAssignChild(c.childId, c.kindergartenId, 3.5)}
+                                                onClick={() => handleAssignChild(c, c.kindergartenId, 3.5)}
                                             >
                                                 <FiCheck /> {t('approve')}
                                             </button>

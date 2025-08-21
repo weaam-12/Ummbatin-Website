@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import styles from './Home.module.css';
@@ -13,6 +13,11 @@ const Home = () => {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    /* Ref for the modal’s close button so we can return focus */
+    const closeBtnRef = useRef(null);
+    const lastFocusedElement = useRef(null);
+
+    /* ---------- Fetch data ---------- */
     useEffect(() => {
         const fetchEvents = async () => {
             try {
@@ -21,10 +26,18 @@ const Home = () => {
                     .filter(event => event.active)
                     .map(event => ({
                         ...event,
-                        startDate: new Date(event.startDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'he-IL'),
-                        endDate: new Date(event.endDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'he-IL'),
-                        startTime: new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        endTime: new Date(event.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        startDate: new Date(event.startDate).toLocaleDateString(
+                            i18n.language === 'ar' ? 'ar-EG' : 'he-IL'
+                        ),
+                        endDate: new Date(event.endDate).toLocaleDateString(
+                            i18n.language === 'ar' ? 'ar-EG' : 'he-IL'
+                        ),
+                        startTime: new Date(event.startDate).toLocaleTimeString([], {
+                            hour: '2-digit', minute: '2-digit'
+                        }),
+                        endTime: new Date(event.endDate).toLocaleTimeString([], {
+                            hour: '2-digit', minute: '2-digit'
+                        })
                     }));
                 setEvents(formattedEvents);
             } catch (error) {
@@ -33,68 +46,125 @@ const Home = () => {
                 setLoading(false);
             }
         };
-
         fetchEvents();
     }, [i18n.language]);
 
-    const handleEventClick = (event) => {
+    /* ---------- Modal helpers ---------- */
+    const openModal = (event) => {
+        lastFocusedElement.current = document.activeElement;
         setSelectedEvent(event);
         setIsModalOpen(true);
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
+        lastFocusedElement.current?.focus();
     };
 
+    /* Close modal on ESC */
+    useEffect(() => {
+        const handleEsc = (e) => {
+            if (e.key === 'Escape' && isModalOpen) closeModal();
+        };
+        document.addEventListener('keydown', handleEsc);
+        return () => document.removeEventListener('keydown', handleEsc);
+    }, [isModalOpen]);
+
+    /* Focus-trap inside modal */
+    useEffect(() => {
+        if (!isModalOpen) return;
+        closeBtnRef.current?.focus();
+    }, [isModalOpen]);
+
+    /* ---------- Content ---------- */
     const services = [
-        { name: t("services.water"), icon: "💧", path: "" },
-        { name: t("services.arnona"), icon: "🏠", path: "/arnona" },
-        { name: t("services.waste"), icon: "🗑️", path: "/waste" },
-        { name: t("services.kindergarten"), icon: "🧒", path: "/kindergarten" },
-        { name: t("services.transactions"), icon: "📝", path: "/transactions" },
-        { name: t("services.emergency"), icon: "🚨", path: "/emergency" },
-        { name: t("services.payments"), icon: "💳", path: "/payments" },
-        { name: t("services.requests"), icon: "📬", path: "/requests" },
-        { name: t("services.news"), icon: "📰", path: "/news" }
+        { name: t('services.water'), icon: '💧', path: '' },
+        { name: t('services.arnona'), icon: '🏠', path: '/arnona' },
+        { name: t('services.waste'), icon: '🗑️', path: '/waste' },
+        { name: t('services.kindergarten'), icon: '🧒', path: '/kindergarten' },
+        { name: t('services.transactions'), icon: '📝', path: '/transactions' },
+        { name: t('services.emergency'), icon: '🚨', path: '/emergency' },
+        { name: t('services.payments'), icon: '💳', path: '/payments' },
+        { name: t('services.requests'), icon: '📬', path: '/requests' },
+        { name: t('services.news'), icon: '📰', path: '/news' }
     ];
 
-
     return (
-        <div className={styles.container} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+        <div
+            className={styles.container}
+            dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
+            role="main"
+            aria-label={t('homePage.title')}
+        >
             <div className={styles.mainCard}>
-                <img src={bkg} alt={t("homePage.bannerAlt")} className={styles.bannerImage} />
+                <img
+                    src={bkg}
+                    alt={t('homePage.bannerAlt')}
+                    className={styles.bannerImage}
+                />
 
-                <h1 className={styles.title}>{t("homePage.title")}</h1>
-                <p className={styles.description}>
-                    {t("homePage.description")}
-                </p>
+                <h1 className={styles.title}>{t('homePage.title')}</h1>
+                <p className={styles.description}>{t('homePage.description')}</p>
 
-                <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>{t("homePage.servicesTitle")}</h2>
-                    <div className={styles.servicesGrid}>
+                {/* ===== Services ===== */}
+                <section className={styles.section} aria-labelledby="services-heading">
+                    <h2 id="services-heading" className={styles.sectionTitle}>
+                        {t('homePage.servicesTitle')}
+                    </h2>
+                    <div
+                        className={styles.servicesGrid}
+                        role="list"
+                    >
                         {services.map((service, index) => (
                             <div
                                 key={index}
                                 className={styles.serviceItem}
+                                role="listitem"
+                                tabIndex={0}
+                                aria-label={service.name}
+                                onClick={() => service.path && navigate(service.path)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        service.path && navigate(service.path);
+                                    }
+                                }}
                             >
-                                <div className={styles.serviceIcon}>{service.icon}</div>
-                                <div className={styles.serviceName}>{service.name}</div>
+                                <span className={styles.serviceIcon} aria-hidden="true">
+                                    {service.icon}
+                                </span>
+                                <span className={styles.serviceName}>{service.name}</span>
                             </div>
                         ))}
                     </div>
                 </section>
 
-                <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>{t("homePage.eventsTitle")}</h2>
+                {/* ===== Events ===== */}
+                <section className={styles.section} aria-labelledby="events-heading">
+                    <h2 id="events-heading" className={styles.sectionTitle}>
+                        {t('homePage.eventsTitle')}
+                    </h2>
+
                     {loading ? (
-                        <p className={styles.loading}>{t("common.loading")}</p>
+                        <p className={styles.loading} aria-live="polite">
+                            {t('common.loading')}
+                        </p>
                     ) : events.length > 0 ? (
-                        <div className={styles.eventsGrid}>
+                        <div className={styles.eventsGrid} role="list">
                             {events.map((event, idx) => (
-                                <div
+                                <article
                                     key={idx}
                                     className={styles.eventCard}
-                                    onClick={() => handleEventClick(event)}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label={`${event.title} ${event.startDate}`}
+                                    onClick={() => openModal(event)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            openModal(event);
+                                        }
+                                    }}
                                 >
                                     {event.imageUrl && (
                                         <img
@@ -110,26 +180,40 @@ const Home = () => {
                                     <div className={styles.eventContent}>
                                         <h3 className={styles.eventTitle}>{event.title}</h3>
                                         <p className={styles.eventDate}>
-                                            {event.startDate} {event.startTime !== '00:00' ? `- ${event.startTime}` : ''}
+                                            {event.startDate}
+                                            {event.startTime !== '00:00' && ` - ${event.startTime}`}
                                         </p>
                                     </div>
-                                </div>
+                                </article>
                             ))}
                         </div>
                     ) : (
-                        <p className={styles.noEvents}>{t("homePage.noEvents")}</p>
+                        <p className={styles.noEvents}>{t('homePage.noEvents')}</p>
                     )}
                 </section>
 
-                {/* النافذة المنبثقة */}
+                {/* ===== Modal ===== */}
                 {isModalOpen && selectedEvent && (
-                    <div className={styles.modalOverlay}>
-                        <div className={styles.modal} dir={i18n.language === 'ar' ? 'rtl' : 'rtl'}>
-                            <button className={styles.closeButton} onClick={closeModal}>
-                                {t("eventDetails.close")}
+                    <div
+                        className={styles.modalOverlay}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="modalTitle"
+                        onClick={(e) => e.target === e.currentTarget && closeModal()}
+                    >
+                        <div className={styles.modal}>
+                            <button
+                                ref={closeBtnRef}
+                                className={styles.closeButton}
+                                onClick={closeModal}
+                                aria-label={t('eventDetails.close')}
+                            >
+                                {t('eventDetails.close')}
                             </button>
 
-                            <h2 className={styles.modalTitle}>{selectedEvent.title}</h2>
+                            <h2 id="modalTitle" className={styles.modalTitle}>
+                                {selectedEvent.title}
+                            </h2>
 
                             <div className={styles.modalContent}>
                                 {selectedEvent.imageUrl && (
@@ -146,29 +230,29 @@ const Home = () => {
 
                                 <div className={styles.modalDetails}>
                                     <p>
-                                        <strong>{t("eventDetails.date")}:</strong> {selectedEvent.startDate}
+                                        <strong>{t('eventDetails.date')}:</strong>{' '}
+                                        {selectedEvent.startDate}
                                         {selectedEvent.startTime !== '00:00' && ` - ${selectedEvent.startTime}`}
                                         {selectedEvent.endDate !== selectedEvent.startDate &&
-                                            ` ${t("event.to")} ${selectedEvent.endDate}`}
+                                            ` ${t('event.to')} ${selectedEvent.endDate}`}
                                     </p>
 
                                     <p>
-                                        <strong>{t("eventDetails.location")}:</strong> {selectedEvent.location}
+                                        <strong>{t('eventDetails.location')}:</strong>{' '}
+                                        {selectedEvent.location}
                                     </p>
 
-
                                     <p>
-                                        <strong>{t("eventDetails.description")}:</strong> {selectedEvent.description}
+                                        <strong>{t('eventDetails.description')}:</strong>{' '}
+                                        {selectedEvent.description}
                                     </p>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 )}
             </div>
         </div>
-
     );
 };
 

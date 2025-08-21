@@ -1,7 +1,7 @@
 // src/pages/AdminComplaints.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
-import { getComplaints, updateComplaintStatus, respondToComplaint } from '../api';
+import {getComplaints, updateComplaintStatus, respondToComplaint, axiosInstance} from '../api';
 import { FiEdit, FiMessageSquare, FiX, FiCheck, FiImage, FiRefreshCw } from 'react-icons/fi';
 import styles from './AdminComplaints.module.css';
 import { useTranslation } from 'react-i18next';
@@ -66,28 +66,17 @@ const AdminComplaints = () => {
         REJECTED: t('admin.complaints.statuses.REJECTED')
     };
 
-    const handleStatusChange = async (complaintId, newStatus) => {
-        try {
-            await updateComplaintStatus(complaintId, newStatus);
-            setNotification({
-                type: 'success',
-                message: t('admin.complaints.notifications.updateSuccess')
-            });
-            loadComplaints();
-        } catch (error) {
-            console.error('Error updating status:', error);
-            setNotification({
-                type: 'danger',
-                message: t('admin.complaints.notifications.updateError') + (error.message || t('general.error'))
-            });
-        }
-    };
 
     const handleSubmitResponse = async () => {
         if (!selectedComplaint || !responseText) return;
 
         try {
             await respondToComplaint(selectedComplaint.complaintId, responseText);
+            await axiosInstance.post('/api/notifications', {
+                     userId: selectedComplaint.userId,
+                     message: 'התקבלה תגובה על תלונתך.',
+                     type: 'COMPLAINT_RESPONSE'
+            });
             setNotification({
                 type: 'success',
                 message: t('admin.complaints.notifications.responseSuccess')

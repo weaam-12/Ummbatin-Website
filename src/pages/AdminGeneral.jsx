@@ -80,6 +80,23 @@ const AdminGeneral = () => {
         }
     };
 
+    // إرسال إشعار لجميع المستخدمين
+    const notifyAllUsers = async (message, type) => {
+        try {
+            const { data: allUsers } = await axiosInstance.get('api/users/all');
+            const promises = allUsers.content.map(user =>
+                axiosInstance.post('/api/notifications', {
+                    userId: user.userId,
+                    message,
+                    type
+                })
+            );
+            await Promise.all(promises);
+        } catch (error) {
+            console.error('Error notifying users:', error);
+        }
+    };
+
     const handleUpdateEvent = async () => {
         try {
             setLoading(true);
@@ -280,6 +297,7 @@ const AdminGeneral = () => {
             await fetchEvents();
             setShowEventModal(false);
             setNewEvent({ title: '', description: '', location: '', image: null, date: '' });
+            await notifyAllUsers('התווספה אירוע חדש!', 'NEW_EVENT');
             setNotification({ type: 'success', message: t('admin.events.addSuccess') });
         } catch (error) {
             setNotification({ type: 'danger', message: t('admin.events.addError') });
@@ -314,11 +332,15 @@ const AdminGeneral = () => {
                     })
                 );
                 const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
+                await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
+
                 if (response.data.success) {
                     setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
                 }
             } else {
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
+                await notifyAllUsers('נוצרה עבורך חשבונית ארנונה חדשה!', 'ARNONA_BILL');
+
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
             }
             const updatedPayments = await fetchPayments();
@@ -369,6 +391,7 @@ const AdminGeneral = () => {
                 expiresAt: newAnnouncement.expiresAt ? new Date(newAnnouncement.expiresAt) : null
             };
             await axiosInstance.post('/api/announcements', announcementData);
+            await notifyAllUsers('התווספה הודעה חדשה!', 'NEW_ANNOUNCEMENT');
             await fetchAnnouncements();
             setShowAnnouncementModal(false);
             setNewAnnouncement({ title: '', content: '', priority: 0, expiresAt: '' });
