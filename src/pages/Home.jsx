@@ -76,6 +76,13 @@ const Home = () => {
         closeBtnRef.current?.focus();
     }, [isModalOpen]);
 
+    /* ---------- Accessibility (Negishut) ---------- */
+    const [highContrast, setHighContrast] = useState(false);
+    const [largeFont, setLargeFont] = useState(false);
+
+    const toggleContrast = () => setHighContrast(!highContrast);
+    const toggleFont = () => setLargeFont(!largeFont);
+
     /* ---------- Content ---------- */
     const services = [
         { name: t('services.water'), icon: '💧', path: '' },
@@ -91,11 +98,19 @@ const Home = () => {
 
     return (
         <div
-            className={styles.container}
+            className={`${styles.container} 
+                ${highContrast ? styles.highContrast : ''} 
+                ${largeFont ? styles.largeFont : ''}`}
             dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
             role="main"
             aria-label={t('homePage.title')}
         >
+            {/* زر الإتاحة */}
+            <div className={styles.accessibilityMenu}>
+                <button onClick={toggleContrast}>♿ {t('accessibility.contrast') || "تباين عالي"}</button>
+                <button onClick={toggleFont}>{t('accessibility.font') || "تكبير الخط"}</button>
+            </div>
+
             <div className={styles.mainCard}>
                 <img
                     src={bkg}
