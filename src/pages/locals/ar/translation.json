@@ -907,6 +907,6 @@
     "loading": "جاري التحميل..."
   },
   "accessibility": "إمكانية الوصول",
-  "contrast": "تباين الألوان",
-  "font": "خط قابل للقراءة وسهل التكبير"
+  "accessibility.contrast": "تباين عالي",
+  "accessibility.font": "تكبير الخط"
 }
