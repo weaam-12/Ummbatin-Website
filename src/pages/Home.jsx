@@ -80,8 +80,25 @@ const Home = () => {
     const [highContrast, setHighContrast] = useState(false);
     const [largeFont, setLargeFont] = useState(false);
 
-    const toggleContrast = () => setHighContrast(!highContrast);
-    const toggleFont = () => setLargeFont(!largeFont);
+    const toggleContrast = () => {
+        setHighContrast(!highContrast);
+        // حفظ التفضيل في localStorage
+        localStorage.setItem('highContrast', !highContrast);
+    };
+
+    const toggleFont = () => {
+        setLargeFont(!largeFont);
+        // حفظ التفضيل في localStorage
+        localStorage.setItem('largeFont', !largeFont);
+    };
+
+    // استعادة تفضيلات إمكانية الوصول عند تحميل الصفحة
+    useEffect(() => {
+        const savedHighContrast = localStorage.getItem('highContrast') === 'true';
+        const savedLargeFont = localStorage.getItem('largeFont') === 'true';
+        setHighContrast(savedHighContrast);
+        setLargeFont(savedLargeFont);
+    }, []);
 
     /* ---------- Content ---------- */
     const services = [
@@ -106,9 +123,21 @@ const Home = () => {
             aria-label={t('homePage.title')}
         >
             {/* زر الإتاحة */}
-            <div className={styles.accessibilityMenu}>
-                <button onClick={toggleContrast}>♿ {t('accessibility.contrast') || "تباين عالي"}</button>
-                <button onClick={toggleFont}>{t('accessibility.font') || "تكبير الخط"}</button>
+            <div className={styles.accessibilityMenu} role="region" aria-label={t('accessibility')}>
+                <button
+                    onClick={toggleContrast}
+                    aria-pressed={highContrast}
+                    aria-label={t('accessibility.contrast')}
+                >
+                    ♿ {t('accessibility.contrast')}
+                </button>
+                <button
+                    onClick={toggleFont}
+                    aria-pressed={largeFont}
+                    aria-label={t('accessibility.font')}
+                >
+                    {largeFont ? 'A-' : 'A+'} {t('accessibility.font')}
+                </button>
             </div>
 
             <div className={styles.mainCard}>
@@ -129,6 +158,7 @@ const Home = () => {
                     <div
                         className={styles.servicesGrid}
                         role="list"
+                        aria-label={t('homePage.servicesTitle')}
                     >
                         {services.map((service, index) => (
                             <div
@@ -165,7 +195,7 @@ const Home = () => {
                             {t('common.loading')}
                         </p>
                     ) : events.length > 0 ? (
-                        <div className={styles.eventsGrid} role="list">
+                        <div className={styles.eventsGrid} role="list" aria-label={t('homePage.eventsTitle')}>
                             {events.map((event, idx) => (
                                 <article
                                     key={idx}

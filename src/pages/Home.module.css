@@ -7,6 +7,7 @@
     padding: 1rem;
     font-family: 'Almarai', Arial, sans-serif;
     direction: rtl;
+    transition: all 0.3s ease;
 }
 
 /* البطاقة الرئيسية */
@@ -35,6 +36,7 @@
     text-align: center;
     margin: 1.5rem 0;
     font-weight: 700;
+    transition: all 0.3s ease;
 }
 
 .description {
@@ -45,6 +47,7 @@
     margin: 0 auto 2rem;
     line-height: 1.6;
     padding: 0 1rem;
+    transition: all 0.3s ease;
 }
 
 /* قسم الخدمات */
@@ -59,6 +62,7 @@
     text-align: center;
     margin-bottom: 1.5rem;
     font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .servicesGrid {
@@ -84,16 +88,18 @@
     border: 2px solid transparent;
 }
 
-.serviceItem:hover {
+.serviceItem:hover, .serviceItem:focus {
     transform: translateY(-5px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
     border-color: #0066cc;
     background: #e6f0ff;
+    outline: none;
 }
 
 .serviceIcon {
     font-size: 2rem;
     margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
 }
 
 .serviceName {
@@ -101,6 +107,7 @@
     font-weight: 600;
     color: #333;
     text-align: center;
+    transition: all 0.3s ease;
 }
 
 /* قسم الفعاليات */
@@ -120,10 +127,11 @@
     border: 1px solid #e0e0e0;
 }
 
-.activityCard:hover {
+.activityCard:hover, .activityCard:focus {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     border-color: #0066cc;
+    outline: none;
 }
 
 .activityTitle {
@@ -131,6 +139,7 @@
     color: #0066cc;
     margin-bottom: 1rem;
     font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .activityDetail {
@@ -140,12 +149,333 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    transition: all 0.3s ease;
 }
 
 .activityDetail strong {
     color: #333;
     min-width: 60px;
     display: inline-block;
+}
+
+.eventsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    padding: 0 1rem;
+}
+
+.eventCard {
+    background: #ffffff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+}
+
+.eventCard:hover, .eventCard:focus {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    outline: none;
+}
+
+.eventImage {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+}
+
+.eventContent {
+    padding: 1.5rem;
+}
+
+.eventTitle {
+    font-size: 1.3rem;
+    color: #0066cc;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.eventDescription {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+}
+
+.eventDetails {
+    font-size: 0.9rem;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.eventDetails p {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.eventDetails strong {
+    color: #333;
+    min-width: 60px;
+    display: inline-block;
+}
+
+.loading, .noEvents {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+/* النافذة المنبثقة */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: white;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+.closeButton {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #ff0000;
+    padding: 5px 10px;
+}
+
+.closeButton:hover, .closeButton:focus {
+    background: #f0f0f0;
+    border-radius: 50%;
+    outline: none;
+}
+
+.modalTitle {
+    margin-top: 0;
+    color: #2c3e50;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.modalContent {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.modalImage {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.modalDetails {
+    line-height: 1.6;
+}
+
+.modalDetails p {
+    margin: 10px 0;
+    transition: all 0.3s ease;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.registerButton, .shareButton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.registerButton {
+    background-color: #e8fbfd;
+    color: white;
+}
+
+.shareButton {
+    background-color: #f1c40f;
+    color: #2c3e50;
+}
+
+/* زر الإتاحة */
+.accessibilityMenu {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.accessibilityMenu button {
+    margin: 5px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #333;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.accessibilityMenu button:hover, .accessibilityMenu button:focus {
+    background: #555;
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.accessibilityMenu button[aria-pressed="true"] {
+    background: #0066cc;
+    outline: 2px solid #fff;
+}
+
+/* تباين عالي */
+.highContrast {
+    background: black !important;
+    color: yellow !important;
+}
+
+.highContrast .mainCard,
+.highContrast .serviceItem,
+.highContrast .activityCard,
+.highContrast .eventCard,
+.highContrast .modal {
+    background: black !important;
+    color: yellow !important;
+    border-color: yellow !important;
+}
+
+.highContrast .title,
+.highContrast .sectionTitle,
+.highContrast .eventTitle,
+.highContrast .modalTitle,
+.highContrast .serviceName,
+.highContrast .activityTitle {
+    color: yellow !important;
+}
+
+.highContrast .description,
+.highContrast .eventDescription,
+.highContrast .eventDetails,
+.highContrast .activityDetail,
+.highContrast .modalDetails p {
+    color: yellow !important;
+}
+
+.highContrast .serviceItem:hover,
+.highContrast .serviceItem:focus,
+.highContrast .activityCard:hover,
+.highContrast .activityCard:focus,
+.highContrast .eventCard:hover,
+.highContrast .eventCard:focus {
+    border-color: yellow !important;
+    box-shadow: 0 0 10px yellow !important;
+}
+
+.highContrast .accessibilityMenu button {
+    background: yellow;
+    color: black;
+}
+
+.highContrast .accessibilityMenu button[aria-pressed="true"] {
+    background: #ffcc00;
+    outline: 2px solid black;
+}
+
+/* تكبير خط */
+.largeFont {
+    font-size: 20px !important;
+}
+
+.largeFont .title {
+    font-size: 2.4rem !important;
+}
+
+.largeFont .sectionTitle {
+    font-size: 1.8rem !important;
+}
+
+.largeFont .description {
+    font-size: 1.3rem !important;
+}
+
+.largeFont .serviceName {
+    font-size: 1.1rem !important;
+}
+
+.largeFont .eventTitle {
+    font-size: 1.5rem !important;
+}
+
+.largeFont .eventDescription,
+.largeFont .eventDetails,
+.largeFont .activityDetail,
+.largeFont .modalDetails p {
+    font-size: 1.1rem !important;
+}
+
+.largeFont .serviceItem {
+    width: 140px;
+    height: 140px;
+}
+
+.largeFont .serviceIcon {
+    font-size: 2.4rem !important;
+}
+
+/* تأثيرات عند الضغط على البطاقة */
+.eventCard {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.eventCard:hover, .eventCard:focus {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    outline: none;
 }
 
 /* للجوال */
@@ -179,6 +509,20 @@
     .serviceName {
         font-size: 0.8rem;
     }
+
+    .eventsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .eventImage {
+        height: 180px;
+    }
+
+    .accessibilityMenu {
+        bottom: 10px;
+        left: 10px;
+        flex-direction: row;
+    }
 }
 
 @media (max-width: 480px) {
@@ -197,90 +541,7 @@
     .activitiesGrid {
         grid-template-columns: 1fr;
     }
-}
-.eventsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 2rem;
-    padding: 0 1rem;
-}
 
-.eventCard {
-    background: #ffffff;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border: 1px solid #e0e0e0;
-}
-
-.eventCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.eventImage {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-bottom: 1px solid #eee;
-}
-
-.eventContent {
-    padding: 1.5rem;
-}
-
-.eventTitle {
-    font-size: 1.3rem;
-    color: #0066cc;
-    margin-bottom: 1rem;
-    font-weight: 600;
-}
-
-.eventDescription {
-    font-size: 0.95rem;
-    color: #555;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-}
-
-.eventDetails {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-.eventDetails p {
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.eventDetails strong {
-    color: #333;
-    min-width: 60px;
-    display: inline-block;
-}
-
-.loading, .noEvents {
-    text-align: center;
-    font-size: 1.1rem;
-    color: #666;
-    padding: 2rem;
-}
-
-/* تعديلات للجوال */
-@media (max-width: 768px) {
-    .eventsGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .eventImage {
-        height: 180px;
-    }
-}
-
-@media (max-width: 480px) {
     .eventImage {
         height: 150px;
     }
@@ -292,136 +553,37 @@
     .eventTitle {
         font-size: 1.1rem;
     }
-}
-/* النافذة المنبثقة */
-.modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+
+    .accessibilityMenu {
+        flex-direction: column;
+    }
 }
 
-.modal {
-    background-color: white;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+/* تحسينات للوضع عالي التباين على الجوال */
+@media (max-width: 768px) {
+    .highContrast .serviceItem,
+    .highContrast .activityCard,
+    .highContrast .eventCard {
+        border-width: 2px;
+    }
 }
 
-.closeButton {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #ff0000;
-}
+/* تحسينات لتكبير الخط على الجوال */
+@media (max-width: 768px) {
+    .largeFont {
+        font-size: 18px !important;
+    }
 
-.modalTitle {
-    margin-top: 0;
-    color: #2c3e50;
-    text-align: center;
-}
+    .largeFont .title {
+        font-size: 2rem !important;
+    }
 
-.modalContent {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin: 20px 0;
-}
+    .largeFont .sectionTitle {
+        font-size: 1.6rem !important;
+    }
 
-.modalImage {
-    width: 100%;
-    max-height: 300px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.modalDetails {
-    line-height: 1.6;
-}
-
-.modalDetails p {
-    margin: 10px 0;
-}
-
-.modalActions {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.registerButton, .shareButton {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.registerButton {
-    background-color: #e8fbfd;
-    color: white;
-}
-
-.shareButton {
-    background-color: #f1c40f;
-    color: #2c3e50;
-}
-
-/* تأثيرات عند الضغط على البطاقة */
-.eventCard {
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.eventCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* زر الإتاحة */
-.accessibilityMenu {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    z-index: 1000;
-}
-
-.accessibilityMenu button {
-    margin: 5px;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    background: #333;
-    color: white;
-}
-
-/* تباين عالي */
-.highContrast {
-    background: black !important;
-    color: yellow !important;
-}
-
-/* تكبير خط */
-.largeFont {
-    font-size: 20px !important;
+    .largeFont .serviceItem {
+        width: 120px;
+        height: 120px;
+    }
 }
