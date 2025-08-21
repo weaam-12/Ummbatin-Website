@@ -950,6 +950,6 @@
     "loading": "טוען..."
   },
   "accessibility": "נְגִישׁוּת",
-  "contrast": "ניגודיות",
-  "font": "גופן נגיש"
+  "accessibility.contrast": "ניגודיות",
+  "accessibility.font": "גופן נגיש"
 }
