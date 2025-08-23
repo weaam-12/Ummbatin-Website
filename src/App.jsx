@@ -17,7 +17,6 @@ import AdminPayments from "./pages/AdminPayments";
 import AdminGeneral from "./pages/AdminGeneral.jsx";
 import ErrorBoundary from "./pages/ErrorBoundary";
 import Childern from "./pages/Children.jsx";
-import Forms from "./pages/Forms";
 import Profile from "./pages/Profile"; // Added
 import AdminComplaints from "./pages/AdminComplaints"
 import AdminKinder from "./pages/AdminKinder";
@@ -102,11 +101,6 @@ const App = () => {
                                     </ProtectedRoute>
                                 } />
 
-                                <Route path="/forms" element={
-                                    <ProtectedRoute>
-                                        <Forms />
-                                    </ProtectedRoute>
-                                } />
                                 <Route path="/garbage-complaints" element={
                                     <ProtectedRoute>
                                         <GarbageComplaint />
