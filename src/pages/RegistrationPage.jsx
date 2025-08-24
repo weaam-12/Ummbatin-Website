@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axiosInstance from "../api";
-import { FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiSkipForward } from "react-icons/fi";
 import styles from './Register.module.css';
 
 const RegistrationPage = () => {
@@ -20,6 +20,8 @@ const RegistrationPage = () => {
         birthDate: "",
         wifeIndex: 0
     }]);
+    const [hasWives, setHasWives] = useState(true); // جديد: لتتبع إذا كان لديه زوجات
+    const [hasChildren, setHasChildren] = useState(true); // جديد: لتتبع إذا كان لديه أولاد
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
@@ -34,12 +36,12 @@ const RegistrationPage = () => {
                     password: account.password,
                     phone: account.phone
                 },
-                wives: wives.filter(w => w.name.trim()),
-                children: children.filter(c => c.name.trim()).map(child => ({
+                wives: hasWives ? wives.filter(w => w.name.trim()) : [],
+                children: hasChildren ? children.filter(c => c.name.trim()).map(child => ({
                     name: child.name,
                     birthDate: child.birthDate,
                     motherName: wives[child.wifeIndex]?.name || ""
-                }))
+                })) : []
             });
             navigate("/admin", {
                 state: { message: t('registration.successMessage') }
@@ -60,6 +62,16 @@ const RegistrationPage = () => {
         wifeIndex: 0
     }]);
     const removeChild = (index) => setChildren(children.filter((_, i) => i !== index));
+
+    const skipWives = () => {
+        setHasWives(false);
+        setStep(3); // التخطي إلى خطوة الأولاد مباشرة
+    };
+
+    const skipChildren = () => {
+        setHasChildren(false);
+        setStep(4); // التخطي إلى خطوة التأكيد
+    };
 
     return (
         <div className={styles.bgContainer}>
@@ -151,13 +163,22 @@ const RegistrationPage = () => {
                                     )}
                                 </div>
                             ))}
-                            <button
-                                type="button"
-                                onClick={addWife}
-                                className={styles.btnAdd}
-                            >
-                                <FiPlus /> {t('registration.addWife')}
-                            </button>
+                            <div className={styles.buttonGroup}>
+                                <button
+                                    type="button"
+                                    onClick={addWife}
+                                    className={styles.btnAdd}
+                                >
+                                    <FiPlus /> {t('registration.addWife')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={skipWives}
+                                    className={styles.btnSkip}
+                                >
+                                    <FiSkipForward /> {t('registration.skipWives')}
+                                </button>
+                            </div>
                         </div>
                     )}
 
@@ -211,13 +232,22 @@ const RegistrationPage = () => {
                                     </button>
                                 </div>
                             ))}
-                            <button
-                                type="button"
-                                onClick={addChild}
-                                className={styles.btnAdd}
-                            >
-                                <FiPlus /> {t('registration.addChild')}
-                            </button>
+                            <div className={styles.buttonGroup}>
+                                <button
+                                    type="button"
+                                    onClick={addChild}
+                                    className={styles.btnAdd}
+                                >
+                                    <FiPlus /> {t('registration.addChild')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={skipChildren}
+                                    className={styles.btnSkip}
+                                >
+                                    <FiSkipForward /> {t('registration.skipChildren')}
+                                </button>
+                            </div>
                         </div>
                     )}
 
@@ -230,24 +260,28 @@ const RegistrationPage = () => {
                                 <p><strong>{t('registration.labels.email')}:</strong> {account.email}</p>
                                 <p><strong>{t('registration.labels.phone')}:</strong> {account.phone}</p>
                             </div>
-                            <div>
-                                <h3>{t('registration.wives')} ({wives.filter(w => w.name.trim()).length})</h3>
-                                <ul>
-                                    {wives.filter(w => w.name.trim()).map((wife, i) => (
-                                        <li key={i}>{wife.name}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div>
-                                <h3>{t('registration.children')} ({children.filter(c => c.name.trim()).length})</h3>
-                                <ul>
-                                    {children.filter(c => c.name.trim()).map((child, i) => (
-                                        <li key={i}>
-                                            {child.name} - {child.birthDate}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                            {hasWives && (
+                                <div>
+                                    <h3>{t('registration.wives')} ({wives.filter(w => w.name.trim()).length})</h3>
+                                    <ul>
+                                        {wives.filter(w => w.name.trim()).map((wife, i) => (
+                                            <li key={i}>{wife.name}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            {hasChildren && (
+                                <div>
+                                    <h3>{t('registration.children')} ({children.filter(c => c.name.trim()).length})</h3>
+                                    <ul>
+                                        {children.filter(c => c.name.trim()).map((child, i) => (
+                                            <li key={i}>
+                                                {child.name} - {child.birthDate}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -266,7 +300,7 @@ const RegistrationPage = () => {
                                 className={styles.btnPrimary}
                                 disabled={
                                     (step === 1 && (!account.fullName || !account.email || !account.password)) ||
-                                    (step === 2 && wives.every(w => !w.name.trim()))
+                                    (step === 2 && hasWives && wives.every(w => !w.name.trim()))
                                 }
                             >
                                 {t('common.next')}
