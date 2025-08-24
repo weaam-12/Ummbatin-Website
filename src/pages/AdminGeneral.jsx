@@ -83,17 +83,17 @@ const AdminGeneral = () => {
     // إرسال إشعار لجميع المستخدمين
     const notifyAllUsers = async (message, type) => {
         try {
-            const { data: allUsers } = await axiosInstance.get('api/users/all');
-            const promises = allUsers.content.map(user =>
-                axiosInstance.post('/api/notifications', {
-                    userId: user.userId,
-                    message,
-                    type
-                })
-            );
-            await Promise.all(promises);
+            const response = await axiosInstance.post('/api/notifications/broadcast', {
+                message,
+                type
+            });
+
+            console.log('✅ تم إرسال الإشعار الجماعي بنجاح:', response.data);
+            return response.data;
+
         } catch (error) {
-            console.error('Error notifying users:', error);
+            console.error('Error broadcasting notification:', error.response?.data || error.message);
+            throw error;
         }
     };
 
