@@ -195,6 +195,27 @@
     background: rgba(0, 102, 204, 0.1);
 }
 
+.btnSkip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #666;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: none;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btnSkip:hover {
+    background: rgba(102, 102, 102, 0.1);
+    border-color: #999;
+}
+
 .btnIcon {
     background: none;
     border: none;
@@ -211,6 +232,14 @@
 
 .btnIcon:hover {
     background: #ffebee;
+}
+
+/* مجموعة الأزرار */
+.buttonGroup {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
 }
 
 /* شبكة الأبناء */
