@@ -1,7 +1,7 @@
 // Children.jsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import axiosInstance from '../api';
+import axiosInstance, {getUserPayments} from '../api';
 import { useAuth } from '../AuthContext';
 import { FaChild, FaCheckCircle, FaMoneyBillWave, FaClock } from 'react-icons/fa';
 import { FiDownload } from 'react-icons/fi';
@@ -111,60 +111,47 @@ const Children = () => {
         setPaymentSuccess(false);
     };
 
-    // payment processor
+
     const processPayment = async () => {
-        setLoading(true);
-
         if (!stripe || !elements) {
-            setNotification({ type: 'danger', message: 'Stripe غير جاهز' });
-            setLoading(false);
+            setNotification({ type: 'danger', message: t('stripe.notReady') });
             return;
         }
 
-        const cardElement = elements.getElement(CardElement);
-        const { paymentMethod, error } = await stripe.createPaymentMethod({
-            type: 'card',
-            card: cardElement,
-        });
+        setLoading(true);
+        try {
+            const { data } = await axiosInstance.post('/api/stripe/setup-intent');
+            const clientSecret = data.clientSecret;
 
-        if (error) {
-            setNotification({ type: 'danger', message: error.message });
-            setLoading(false);
-            return;
-        }
-
-        const res = await fetch('/api/payments/validate-and-record', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                userId: user.userId,
-                amount: 35,
-                paymentMethodId: paymentMethod.id,
-                type: 'KINDERGARTEN'
-            })
-        });
-
-        const json = await res.json();
-        setLoading(false);
-
-        if (json.valid) {
-            await axiosInstance.patch(
-                `/api/children/${selectedChild.childId}/assign`,
-                null,
-                { params: { kindergartenId: selectedKindergarten.kindergartenId, monthlyFee: 2.5 } }
-            );
-            setPaymentSuccess(true);
-            await axiosInstance.post('/api/notifications', {
-                userId: 11,
-                message: `המשתמש מספר ${user.userId} ביקש להירשם לגן ילדים – הילד: ${selectedChild?.name} – הגן: ${selectedKindergarten?.name}.`,
-                type: 'ENROLLMENT'
+            const cardElement = elements.getElement(CardElement);
+            const { setupIntent, error } = await stripe.confirmCardSetup(clientSecret, {
+                payment_method: { card: cardElement }
             });
-            setNotification({ type: 'success', message: 'تم الدفع والتسجيل بنجاح!' });
-            await reloadChildren();
-        } else {
-            setNotification({ type: 'danger', message: json.error });
+
+            if (error) {
+                setNotification({ type: 'danger', message: t('payments.cardVerificationFailed') });
+            } else {
+                await axiosInstance.patch(
+                    `/api/children/${selectedChild.childId}/assign`,
+                    null,
+                    { params: { kindergartenId: selectedKindergarten.kindergartenId, monthlyFee: 2.5 } }
+                );
+                setPaymentSuccess(true);
+                await axiosInstance.post('/api/notifications', {
+                    userId: 4,
+                    message: `המשתמש מספר ${user.userId} ביקש להירשם לגן ילדים – הילד: ${selectedChild?.name} – הגן: ${selectedKindergarten?.name}.`,
+                    type: 'ENROLLMENT'
+                });
+                setNotification({ type: 'success', message: 'تم الدفع والتسجيل بنجاح!' });
+                await reloadChildren();
+            }
+        } catch (e) {
+            setNotification({ type: 'danger', message: t('payments.paymentError') });
+        } finally {
+            setLoading(false);
         }
     };
+
 
     // helpers
     const grouped = {
