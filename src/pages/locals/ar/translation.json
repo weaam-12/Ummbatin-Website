@@ -917,6 +917,8 @@
     "notReady": "Stripe غير جاهز"
   },
   "registration": {
+    "skipWives": "تخطي (لا أملك زوجات)",
+    "skipChildren": "تخطي (لا أملك أولاد)",
     "title": "تسجيل عائلة جديدة",
     "steps": {
       "account": "الحساب",

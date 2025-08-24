@@ -960,6 +960,8 @@
     "notReady": "Stripe אינו מוכן"
   },
   "registration": {
+    "skipWives": "דלג (אין לי נשים)",
+    "skipChildren": "דלג (אין לי ילדים)",
     "title": "רישום משפחה חדשה",
     "steps": {
       "account": "חשבון",
