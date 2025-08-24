@@ -150,7 +150,8 @@ const Payments = () => {
                 type: paymentType,
                 id: paymentId,
                 amount: payment.amount,
-                description: `دفع ${paymentType}`
+                description: `دفع ${paymentType}`,
+                propertyId: payment.propertyId || propertyInfo.originalPropertyId
             });
             setShowPaymentModal(true);
         } catch (error) {
@@ -190,8 +191,7 @@ const Payments = () => {
                         userId: user.userId,
                         amount: currentPayment.amount,
                         type: currentPayment.type.toUpperCase(),
-                        service_id:8888888
-
+                        propertyId: currentPayment.propertyId
                     }
                 });
 
