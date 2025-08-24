@@ -558,7 +558,7 @@ const AdminGeneral = () => {
                                         <Row>
                                             <Col md={6}>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>{t('labels.area')} (م²)</Form.Label>
+                                                    <Form.Label>{t('labels.area')}</Form.Label>
                                                     <Form.Control
                                                         type="number"
                                                         value={newProperty.area}
@@ -881,8 +881,7 @@ const AdminGeneral = () => {
                             )}
                             {currentBillType === 'ARNONA' && (
                                 <>
-                                    <th>{t('labels.area')} (م²)</th>
-                                    <th>{t('labels.units')}</th>
+                                    <th>{t('labels.area')} </th>
                                     <th>{t('payment.amount')}</th>
                                 </>
                             )}
@@ -937,8 +936,7 @@ const AdminGeneral = () => {
                                     {currentBillType === 'ARNONA' && (
                                         <>
                                             <td>{prop.area}</td>
-                                            <td>{prop.numberOfUnits}</td>
-                                            <td>{(prop.area * 50 * prop.numberOfUnits).toFixed(2)}</td>
+                                            <td>{(prop.area * 50).toFixed(2)}</td>
                                         </>
                                     )}
                                 </tr>
