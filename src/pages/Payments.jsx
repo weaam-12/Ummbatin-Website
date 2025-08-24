@@ -170,44 +170,28 @@ const Payments = () => {
             return;
         }
 
-        const cardElement = elements.getElement(CardElement);
-        const { paymentMethod, error } = await stripe.createPaymentMethod({
-            type: 'card',
-            card: cardElement,
-        });
-
-        if (error) {
-            setNotification({ type: 'danger', message: error.message });
-            return;
-        }
-
-        // الآن أرسل paymentMethod.id إلى الـ backend
+        setLoading(true);
         try {
-            const res = await fetch('/api/payments/validate-and-record', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    userId: user.userId,
-                    amount: currentPayment.amount,
-                    paymentMethodId: paymentMethod.id,
-                    type: currentPayment.type.toUpperCase(), // WATER أو ARNONA
-                }),
+            // 1) احصل على clientSecret من الـ backend
+            const { data } = await axiosInstance.post('/api/stripe/setup-intent');
+            const clientSecret = data.clientSecret;
+
+            // 2) تأكيد الـ SetupIntent (فحص البطاقة فقط)
+            const cardElement = elements.getElement(CardElement);
+            const { setupIntent, error } = await stripe.confirmCardSetup(clientSecret, {
+                payment_method: { card: cardElement }
             });
 
-            const json = await res.json();
-            if (json.valid) {
-                setPaymentSuccess(true);
-                setNotification({ type: 'success', message: 'تم الدفع بنجاح!' });
-                await axiosInstance.post('/api/notifications', {
-                    userId: 11,
-                    message: `המשתמש מספר ${user.userId} שילם חשבונית ${currentPayment.type === 'arnona' ? 'ארנונה' : 'מים'} בסך ${currentPayment.amount} ש"ח.`,
-                    type: 'PAYMENT'
-                });
+            if (error) {
+                setNotification({ type: 'danger', message: 'فشل التحقق من البطاقة: ' + error.message });
             } else {
-                setNotification({ type: 'danger', message: json.error });
+                setNotification({ type: 'success', message: 'تم التحقق من البطاقة بنجاح!' });
+                setPaymentSuccess(true); // عشان تظهر رسالة النجاح
             }
         } catch (e) {
-            setNotification({ type: 'danger', message: 'فشل في الدفع' });
+            setNotification({ type: 'danger', message: 'فشل الاتصال بالسيرفر' });
+        } finally {
+            setLoading(false);
         }
     };
 
