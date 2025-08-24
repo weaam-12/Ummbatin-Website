@@ -327,7 +327,7 @@
       "paymentStatus": "סטטוס תשלום"
     },
     "arnona": {
-      "calculation": "ארנונה = שטח ({{area}} מ\"ר) × יחידות ({{units}}) × 50 שקלים = {{total}} שקלים"
+      "calculation": "ארנונה = שטח ({{area}} מ\"ר) × 50 שקלים = {{total}} שקלים"
     },
     "readingApproximation": "💧 קריאה משוערת: ‎{{unitPrice}} ש\"ח × ‎{{unitsCount}} = ‎{{amount}} ש\"ח",
     "receipt": "קבלת תשלום",

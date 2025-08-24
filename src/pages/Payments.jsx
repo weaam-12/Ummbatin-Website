@@ -290,9 +290,8 @@ const Payments = () => {
                                                 <div className="mt-2 text-primary fw-bold">
                                                     {t('payment.arnona.calculation', {
                                                         area: propertyInfo.area,
-                                                        units: propertyInfo.units,
                                                         price: 50,
-                                                        total: propertyInfo.area * propertyInfo.units * 50
+                                                        total: propertyInfo.area * 50
                                                     })}
                                                 </div>
                                             )}
