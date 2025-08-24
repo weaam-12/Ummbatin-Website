@@ -189,7 +189,9 @@ const Payments = () => {
                     params: {
                         userId: user.userId,
                         amount: currentPayment.amount,
-                        type: currentPayment.type.toUpperCase()
+                        type: currentPayment.type.toUpperCase(),
+                        service_id:8888888
+
                     }
                 });
 
