@@ -335,12 +335,17 @@ const AdminGeneral = () => {
                 await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
 
                 if (response.data.success) {
+                    console.log("✅ مياه success - before setNotification");
+                    console.log("Message:", t('admin.payments.arnonaSuccess'));
+                    setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                     setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
                 }
             } else {
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
                 await notifyAllUsers('נוצרה עבורך חשבונית ארנונה חדשה!', 'ARNONA_BILL');
-
+                console.log("✅ Arnona success - before setNotification");
+                console.log("Message:", t('admin.payments.arnonaSuccess'));
+                setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
             }
             const updatedPayments = await fetchPayments();
@@ -892,7 +897,6 @@ const AdminGeneral = () => {
                             const flatProps = [];
                             users.forEach((user) => {
                                 user.properties?.forEach((prop) => {
-                                    // استخدم id أو propertyId معًا لضمان الفريدية
                                     const key = prop.id || prop.propertyId;
                                     flatProps.push({user, prop, key});
                                 });
