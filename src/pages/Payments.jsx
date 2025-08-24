@@ -121,10 +121,6 @@ const Payments = () => {
         setDebt(totalDebt);
     }, [payments]);
 
-
-
-
-
     const handleDownloadPDF = (type, propertyId) => {
         setLoading(true);
         const element = document.getElementById(`invoice-${type}-${propertyId}`);
@@ -183,6 +179,11 @@ const Payments = () => {
             if (error) {
                 setNotification({ type: 'danger', message: t('payments.cardVerificationFailed') });
             } else {
+                console.log("Sending simulate-payment", {
+                    userId: user?.userId,
+                    amount: currentPayment?.amount,
+                    type: currentPayment?.type?.toUpperCase()
+                });
                 // ✅ الآن سجل الدفع كـ "PAID" في قاعدة البيانات
                 await axiosInstance.post('/api/payments/simulate-payment', null, {
                     params: {
@@ -208,6 +209,7 @@ const Payments = () => {
             setLoading(false);
         }
     };
+
     const resetPaymentModal = () => {
         setShowPaymentModal(false);
         setPaymentSuccess(false);
