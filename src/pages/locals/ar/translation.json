@@ -503,6 +503,9 @@
     "share": "مشاركة"
   },
   "payment": {
+    "unitPrice": "سعر الوحدة",
+    "total": "المجموع",
+    "reading": "القراءة",
     "paymentStatus": "حالة الدفع",
     "status": {
       "PAID": "مدفوع",

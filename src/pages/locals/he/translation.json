@@ -312,6 +312,9 @@
     "squareMeters": "מטר רבוע"
   },
   "payment": {
+    "unitPrice": "מחיר יחידה",
+    "total": "סך הכל",
+    "reading": "קריאה",
     "paymentStatus": "סטטוס תשלום",
     "status": {
       "PAID": "שולם",
