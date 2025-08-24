@@ -203,7 +203,7 @@ function AdminDashboard() {
                             <tr>
                                 <th>#</th>
                                 <th>{t("email")}</th>
-                                <th>{t("name")}</th>
+                                <th>{t("labels.fullName")}</th>
                                 <th>{t("role")}</th>
                                 <th>{t("actions")}</th>
                             </tr>
