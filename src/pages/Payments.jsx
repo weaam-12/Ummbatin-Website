@@ -280,7 +280,7 @@ const Payments = () => {
                                                     💧 {t('payment.readingApproximation', {
                                                     amount: (payment.amount / 30).toFixed(2),
                                                     unitPrice: 30,
-                                                    unitsCount: Math.ceil(payment.amount / 30)
+                                                    unitsCount: payment.amount
                                                 })}
                                                 </div>
                                             )}
