@@ -125,8 +125,8 @@ const Complaints = () => {
 
             setComplaints(prev => [response, ...prev]);
             await axiosInstance.post('/api/notifications', {
-                userId: 11,
-                message: 'התקבלה תלונה חדשה ממשתמש.',
+                userId: 4,
+                message: ` התקבלה תלונה חדשה מהמשתמש מספר ${userId}.`,
                 type: 'ADMIN_ALERT'
             });
             setNotification({
