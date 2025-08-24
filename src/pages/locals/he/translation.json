@@ -150,6 +150,7 @@
     }
   },
   "common": {
+    "description": "תיאור",
     "municipality": "עיריית אום בטין",
     "allRightsReserved": "כל הזכויות שמורות",
     "loading": "טוען...",

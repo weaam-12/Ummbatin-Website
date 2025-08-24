@@ -437,6 +437,7 @@
 
   },
   "common": {
+    "description": "وصف",
     "close": "إغلاق",
     "edit": "تعديل",
     "delete": "حذف",
