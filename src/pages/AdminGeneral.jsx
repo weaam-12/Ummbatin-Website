@@ -863,7 +863,7 @@ const AdminGeneral = () => {
                             <strong>{t('payment.types.arnona')} – {t('common.description')}</strong>
                             <ul className="mb-0">
                                 <li>{t('payment.unitPrice')}: 50 {t('general.currency')}</li>
-                                <li>{t('payment.total')} = {t('labels.area')} × 50 × {t('labels.units')}</li>
+                                <li>{t('payment.total')} = {t('labels.area')} × 50 </li>
                             </ul>
                         </Alert>
                     )}
