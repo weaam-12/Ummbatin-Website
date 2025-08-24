@@ -958,5 +958,38 @@
   "accessibility.font": "גופן נגיש",
   "stripe": {
     "notReady": "Stripe אינו מוכן"
+  },
+  "registration": {
+    "title": "רישום משפחה חדשה",
+    "steps": {
+      "account": "חשבון",
+      "wives": "נשים",
+      "children": "ילדים",
+      "confirmation": "אישור"
+    },
+    "accountInfo": "פרטי חשבון",
+    "wives": "נשים",
+    "children": "ילדים",
+    "confirmation": "אישור פרטים",
+    "placeholders": {
+      "fullName": "שם מלא",
+      "email": "אימייל",
+      "password": "סיסמה",
+      "phone": "טלפון",
+      "wifeName": "שם אישה {number}",
+      "childName": "שם ילד"
+    },
+    "addWife": "הוסף אישה",
+    "addChild": "הוסף ילד",
+    "wifeDefault": "אישה {number}",
+    "labels": {
+      "name": "שם",
+      "email": "אימייל",
+      "phone": "טלפון"
+    },
+    "registerFamily": "רשום משפחה",
+    "registering": "רושם...",
+    "successMessage": "המשפחה נרשמה בהצלחה",
+    "errorMessage": "שגיאה ברישום"
   }
 }

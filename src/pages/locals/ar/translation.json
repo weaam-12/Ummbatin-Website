@@ -915,5 +915,38 @@
   "accessibility.font": "تكبير الخط",
   "stripe": {
     "notReady": "Stripe غير جاهز"
+  },
+  "registration": {
+    "title": "تسجيل عائلة جديدة",
+    "steps": {
+      "account": "الحساب",
+      "wives": "الزوجات",
+      "children": "الأبناء",
+      "confirmation": "التأكيد"
+    },
+    "accountInfo": "معلومات الحساب",
+    "wives": "الزوجات",
+    "children": "الأبناء",
+    "confirmation": "تأكيد المعلومات",
+    "placeholders": {
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "phone": "رقم الهاتف",
+      "wifeName": "اسم الزوجة {number}",
+      "childName": "اسم الطفل"
+    },
+    "addWife": "إضافة زوجة",
+    "addChild": "إضافة طفل",
+    "wifeDefault": "الزوجة {number}",
+    "labels": {
+      "name": "الاسم",
+      "email": "البريد",
+      "phone": "الهاتف"
+    },
+    "registerFamily": "تسجيل العائلة",
+    "registering": "جاري التسجيل...",
+    "successMessage": "تم تسجيل العائلة بنجاح",
+    "errorMessage": "حدث خطأ أثناء التسجيل"
   }
 }

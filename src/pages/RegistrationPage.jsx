@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import axiosInstance from "../api";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import styles from './Register.module.css';
 
 const RegistrationPage = () => {
+    const { t } = useTranslation();
     const [step, setStep] = useState(1);
     const [account, setAccount] = useState({
         fullName: "",
@@ -40,11 +42,11 @@ const RegistrationPage = () => {
                 }))
             });
             navigate("/admin", {
-                state: { message: "تم تسجيل العائلة بنجاح" }
+                state: { message: t('registration.successMessage') }
             });
         } catch (err) {
             console.error("Registration error:", err.response?.data);
-            setError(err.response?.data?.message || "حدث خطأ أثناء التسجيل");
+            setError(err.response?.data?.message || t('registration.errorMessage'));
         } finally {
             setLoading(false);
         }
@@ -63,7 +65,7 @@ const RegistrationPage = () => {
         <div className={styles.bgContainer}>
             <div className={styles.card}>
                 <div className={styles.header}>
-                    <h1>تسجيل عائلة جديدة</h1>
+                    <h1>{t('registration.title')}</h1>
                 </div>
 
                 {error && <div className={styles.errorBox}>{error}</div>}
@@ -71,51 +73,51 @@ const RegistrationPage = () => {
                 <div className={styles.progressBar}>
                     <div className={`${styles.step} ${step === 1 ? styles.active : ''}`}>
                         <div className={styles.stepNumber}>1</div>
-                        <span>الحساب</span>
+                        <span>{t('registration.steps.account')}</span>
                     </div>
                     <div className={`${styles.step} ${step === 2 ? styles.active : ''}`}>
                         <div className={styles.stepNumber}>2</div>
-                        <span>الزوجات</span>
+                        <span>{t('registration.steps.wives')}</span>
                     </div>
                     <div className={`${styles.step} ${step === 3 ? styles.active : ''}`}>
                         <div className={styles.stepNumber}>3</div>
-                        <span>الأبناء</span>
+                        <span>{t('registration.steps.children')}</span>
                     </div>
                     <div className={`${styles.step} ${step === 4 ? styles.active : ''}`}>
                         <div className={styles.stepNumber}>4</div>
-                        <span>التأكيد</span>
+                        <span>{t('registration.steps.confirmation')}</span>
                     </div>
                 </div>
 
                 <div className={styles.body}>
                     {step === 1 && (
                         <div className={styles.inputGrid}>
-                            <h2 className={styles.sectionTitle}>معلومات الحساب</h2>
+                            <h2 className={styles.sectionTitle}>{t('registration.accountInfo')}</h2>
                             <input
                                 type="text"
                                 className={styles.input}
-                                placeholder="الاسم الكامل"
+                                placeholder={t('registration.placeholders.fullName')}
                                 value={account.fullName}
                                 onChange={(e) => setAccount({...account, fullName: e.target.value})}
                             />
                             <input
                                 type="email"
                                 className={styles.input}
-                                placeholder="البريد الإلكتروني"
+                                placeholder={t('registration.placeholders.email')}
                                 value={account.email}
                                 onChange={(e) => setAccount({...account, email: e.target.value})}
                             />
                             <input
                                 type="password"
                                 className={styles.input}
-                                placeholder="كلمة المرور"
+                                placeholder={t('registration.placeholders.password')}
                                 value={account.password}
                                 onChange={(e) => setAccount({...account, password: e.target.value})}
                             />
                             <input
                                 type="text"
                                 className={styles.input}
-                                placeholder="رقم الهاتف"
+                                placeholder={t('registration.placeholders.phone')}
                                 value={account.phone}
                                 onChange={(e) => setAccount({...account, phone: e.target.value})}
                             />
@@ -124,13 +126,13 @@ const RegistrationPage = () => {
 
                     {step === 2 && (
                         <div>
-                            <h2 className={styles.sectionTitle}>الزوجات</h2>
+                            <h2 className={styles.sectionTitle}>{t('registration.wives')}</h2>
                             {wives.map((wife, index) => (
                                 <div key={index} className={styles.wifeRow}>
                                     <input
                                         type="text"
                                         className={styles.input}
-                                        placeholder={`اسم الزوجة ${index + 1}`}
+                                        placeholder={t('registration.placeholders.wifeName', { number: index + 1 })}
                                         value={wife.name}
                                         onChange={(e) => {
                                             const newWives = [...wives];
@@ -154,20 +156,20 @@ const RegistrationPage = () => {
                                 onClick={addWife}
                                 className={styles.btnAdd}
                             >
-                                <FiPlus /> إضافة زوجة
+                                <FiPlus /> {t('registration.addWife')}
                             </button>
                         </div>
                     )}
 
                     {step === 3 && (
                         <div>
-                            <h2 className={styles.sectionTitle}>الأبناء</h2>
+                            <h2 className={styles.sectionTitle}>{t('registration.children')}</h2>
                             {children.map((child, index) => (
                                 <div key={index} className={styles.childGrid}>
                                     <input
                                         type="text"
                                         className={styles.input}
-                                        placeholder="اسم الطفل"
+                                        placeholder={t('registration.placeholders.childName')}
                                         value={child.name}
                                         onChange={(e) => {
                                             const newChildren = [...children];
@@ -196,7 +198,7 @@ const RegistrationPage = () => {
                                     >
                                         {wives.map((wife, i) => (
                                             <option key={i} value={i}>
-                                                {wife.name || `الزوجة ${i + 1}`}
+                                                {wife.name || t('registration.wifeDefault', { number: i + 1 })}
                                             </option>
                                         ))}
                                     </select>
@@ -214,22 +216,22 @@ const RegistrationPage = () => {
                                 onClick={addChild}
                                 className={styles.btnAdd}
                             >
-                                <FiPlus /> إضافة طفل
+                                <FiPlus /> {t('registration.addChild')}
                             </button>
                         </div>
                     )}
 
                     {step === 4 && (
                         <div className={styles.reviewSection}>
-                            <h2 className={styles.sectionTitle}>تأكيد المعلومات</h2>
+                            <h2 className={styles.sectionTitle}>{t('registration.confirmation')}</h2>
                             <div>
-                                <h3>معلومات الحساب</h3>
-                                <p><strong>الاسم:</strong> {account.fullName}</p>
-                                <p><strong>البريد:</strong> {account.email}</p>
-                                <p><strong>الهاتف:</strong> {account.phone}</p>
+                                <h3>{t('registration.accountInfo')}</h3>
+                                <p><strong>{t('registration.labels.name')}:</strong> {account.fullName}</p>
+                                <p><strong>{t('registration.labels.email')}:</strong> {account.email}</p>
+                                <p><strong>{t('registration.labels.phone')}:</strong> {account.phone}</p>
                             </div>
                             <div>
-                                <h3>الزوجات ({wives.filter(w => w.name.trim()).length})</h3>
+                                <h3>{t('registration.wives')} ({wives.filter(w => w.name.trim()).length})</h3>
                                 <ul>
                                     {wives.filter(w => w.name.trim()).map((wife, i) => (
                                         <li key={i}>{wife.name}</li>
@@ -237,7 +239,7 @@ const RegistrationPage = () => {
                                 </ul>
                             </div>
                             <div>
-                                <h3>الأبناء ({children.filter(c => c.name.trim()).length})</h3>
+                                <h3>{t('registration.children')} ({children.filter(c => c.name.trim()).length})</h3>
                                 <ul>
                                     {children.filter(c => c.name.trim()).map((child, i) => (
                                         <li key={i}>
@@ -255,7 +257,7 @@ const RegistrationPage = () => {
                                 onClick={() => setStep(step - 1)}
                                 className={styles.btnSecondary}
                             >
-                                السابق
+                                {t('common.previous')}
                             </button>
                         )}
                         {step < 4 ? (
@@ -267,7 +269,7 @@ const RegistrationPage = () => {
                                     (step === 2 && wives.every(w => !w.name.trim()))
                                 }
                             >
-                                التالي
+                                {t('common.next')}
                             </button>
                         ) : (
                             <button
@@ -275,7 +277,7 @@ const RegistrationPage = () => {
                                 className={styles.btnSuccess}
                                 disabled={loading}
                             >
-                                {loading ? "جاري التسجيل..." : "تسجيل العائلة"}
+                                {loading ? t('registration.registering') : t('registration.registerFamily')}
                             </button>
                         )}
                     </div>
