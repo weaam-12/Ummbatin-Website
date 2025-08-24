@@ -141,17 +141,21 @@ const Payments = () => {
         setLoading(true);
         try {
             const payment = Object.values(payments[paymentType] || {})
-                .flatMap(propertyPayments => propertyPayments.payments || [])
+                .flatMap(pp => pp.payments || [])
                 .find(p => p.paymentId === paymentId);
 
             if (!payment) throw new Error("Payment not found");
+
+            // find propertyId from the grouped data
+            const propEntry = Object.values(payments[paymentType] || {})
+                .find(pp => pp.payments.some(p => p.paymentId === paymentId));
 
             setCurrentPayment({
                 type: paymentType,
                 id: paymentId,
                 amount: payment.amount,
                 description: `دفع ${paymentType}`,
-                propertyId: payment.propertyId || propertyInfo.originalPropertyId
+                propertyId: propEntry?.propertyInfo?.originalPropertyId || payment.propertyId
             });
             setShowPaymentModal(true);
         } catch (error) {
@@ -180,30 +184,30 @@ const Payments = () => {
             if (error) {
                 setNotification({ type: 'danger', message: t('payments.cardVerificationFailed') });
             } else {
-                console.log("Sending simulate-payment", {
-                    userId: user?.userId,
-                    amount: currentPayment?.amount,
-                    type: currentPayment?.type?.toUpperCase()
-                });
-                // ✅ الآن سجل الدفع كـ "PAID" في قاعدة البيانات
-                await axiosInstance.post('/api/payments/simulate-payment', null, {
-                    params: {
-                        userId: user.userId,
-                        amount: currentPayment.amount,
-                        type: currentPayment.type.toUpperCase(),
-                        propertyId: currentPayment.propertyId
-                    }
+                // ✅ mark existing invoice as PAID
+                await axiosInstance.patch(`/api/payments/${currentPayment.id}/status`, {
+                    status: 'PAID'
                 });
 
                 setPaymentSuccess(true);
                 setNotification({ type: 'success', message: t('payments.paymentSuccess') });
 
-                // إشعار للادمن بالعبرية
+                // notify admin
                 await axiosInstance.post('/api/notifications', {
-                    userId: 4, // أو أي admin ID
+                    userId: 4,
                     message: `המשתמש מספר ${user.userId} שילם חשבונית ${currentPayment.type === 'arnona' ? 'ארנונה' : 'מים'} בסך ${currentPayment.amount} ש"ח.`,
                     type: 'PAYMENT'
                 });
+
+                // refresh payments list (optional)
+                const refreshed = await getUserPayments(user?.userId);
+                setPayments(prev => ({
+                    ...prev,
+                    [currentPayment.type]: organizePaymentsByProperty(
+                        refreshed.filter(p => p.paymentType.toLowerCase() === currentPayment.type),
+                        properties
+                    )
+                }));
             }
         } catch (e) {
             setNotification({ type: 'danger', message: t('payments.paymentError') });
@@ -211,7 +215,6 @@ const Payments = () => {
             setLoading(false);
         }
     };
-
     const resetPaymentModal = () => {
         setShowPaymentModal(false);
         setPaymentSuccess(false);
