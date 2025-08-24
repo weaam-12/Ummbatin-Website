@@ -113,7 +113,7 @@ const GarbageComplaint = () => {
                 imagePreview: null,
             });
             await axiosInstance.post('/api/notifications', {
-                userId: 11,
+                userId: 4,
                 message: `המשתמש מספר ${user.userId} הגיש תלונת אשפה חדשה – סוג: ${formData.type}.`,
                 type: 'ADMIN_ALERT'
             });
@@ -170,7 +170,7 @@ const GarbageComplaint = () => {
                         onChange={handleInputChange}
                         required
                         placeholder={t("garbageComplaint.descriptionPlaceholder")}
-                        dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                        dir={i18n.language === 'he' ? 'rtl' : 'rtl'}
                         aria-label={t("garbageComplaint.description")}
                     />
                 </div>

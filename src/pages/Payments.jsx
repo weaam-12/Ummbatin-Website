@@ -76,7 +76,7 @@ const Payments = () => {
             } catch (e) {
                 setNotification({
                     type: 'danger',
-                    message: 'فشل تحميل البيانات: ' + e.message
+                    message: t('payments.notifications.loadError')
                 });
             } finally {
                 setLoading(false);
@@ -96,7 +96,7 @@ const Payments = () => {
             if (!byProperty[propertyId]) {
                 byProperty[propertyId] = {
                     propertyInfo: {
-                        address: property?.address || payment.propertyAddress || 'عنوان غير معروف',
+                        address: property?.address || payment.propertyAddress || t('common.notSpecified'),
                         area: property?.area || payment.propertyArea || 0,
                         units: property?.numberOfUnits || payment.propertyUnits || 0,
                         originalPropertyId: property?.propertyId
@@ -144,7 +144,7 @@ const Payments = () => {
                 .flatMap(pp => pp.payments || [])
                 .find(p => p.paymentId === paymentId);
 
-            if (!payment) throw new Error("Payment not found");
+            if (!payment) throw new Error(t('payments.notifications.loadError'));
 
             // find propertyId from the grouped data
             const propEntry = Object.values(payments[paymentType] || {})
@@ -154,12 +154,12 @@ const Payments = () => {
                 type: paymentType,
                 id: paymentId,
                 amount: payment.amount,
-                description: `دفع ${paymentType}`,
+                description: t('payments.description', { type: t(`payments.types.${paymentType}`) }),
                 propertyId: propEntry?.propertyInfo?.originalPropertyId || payment.propertyId
             });
             setShowPaymentModal(true);
         } catch (error) {
-            setNotification({ type: "danger", message: error.message || "فشل في إعداد الدفع" });
+            setNotification({ type: "danger", message: error.message || t('payments.notifications.paymentError') });
         } finally {
             setLoading(false);
         }
@@ -195,7 +195,11 @@ const Payments = () => {
                 // notify admin
                 await axiosInstance.post('/api/notifications', {
                     userId: 4,
-                    message: `המשתמש מספר ${user.userId} שילם חשבונית ${currentPayment.type === 'arnona' ? 'ארנונה' : 'מים'} בסך ${currentPayment.amount} ש"ח.`,
+                    message: t('payments.adminNotification', {
+                        userId: user.userId,
+                        type: currentPayment.type === 'arnona' ? t('payments.types.arnona') : t('payments.types.water'),
+                        amount: currentPayment.amount
+                    }),
                     type: 'PAYMENT'
                 });
 
@@ -230,10 +234,10 @@ const Payments = () => {
             <Accordion.Item key={propertyId} eventKey={propertyId} className="mb-3">
                 <Accordion.Header>
                     <div className="d-flex justify-content-between w-100">
-      <span>
-        <FiHome className="me-2" />
-          {propertyInfo.address}
-      </span>
+                        <span>
+                            <FiHome className="me-2" />
+                            {propertyInfo.address}
+                        </span>
                         {pendingPayments.length > 0 && (
                             <Badge bg="danger" className="ms-2">
                                 {pendingPayments.length} {t('payments.pending')}
@@ -260,7 +264,9 @@ const Payments = () => {
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <span className="d-block">{formatDate(payment.date)}</span>
-                                                    <small className="text-muted">رقم الفاتورة: {payment.paymentId}</small>
+                                                    <small className="text-muted">
+                                                        {t('payments.invoiceNumber')}: {payment.paymentId}
+                                                    </small>
                                                 </div>
                                                 <span className="fw-bold">{payment.amount} {t('payments.currency')}</span>
                                                 <Badge bg={statusVariants[payment.status] || 'secondary'}>
@@ -290,7 +296,6 @@ const Payments = () => {
                                                     })}
                                                 </div>
                                             )}
-
 
                                             <Button
                                                 variant={payment.status === 'FAILED' ? 'danger' : 'primary'}
@@ -323,7 +328,9 @@ const Payments = () => {
                                     <div className="d-flex justify-content-between align-items-center">
                                         <div>
                                             <span className="d-block">{formatDate(payment.paymentDate || payment.date)}</span>
-                                            <small className="text-muted">رقم الفاتورة: {payment.paymentId}</small>
+                                            <small className="text-muted">
+                                                {t('payments.invoiceNumber')}: {payment.paymentId}
+                                            </small>
                                         </div>
                                         <span className="fw-bold">{payment.amount} {t('payments.currency')}</span>
                                         <Badge bg="success">
@@ -331,7 +338,6 @@ const Payments = () => {
                                         </Badge>
                                     </div>
 
-                                    {/* ✅ نفس المنطق، نعرض عدد "القراءات" إذا كانت مياه */}
                                     {/* قراءة المياه */}
                                     {paymentType === 'water' && (
                                         <div className="mt-2 text-primary fw-bold">
@@ -354,7 +360,6 @@ const Payments = () => {
                                             })}
                                         </div>
                                     )}
-
 
                                     <Button
                                         variant="outline-success"
@@ -410,31 +415,35 @@ const Payments = () => {
 
             <Modal show={showPaymentModal} onHide={resetPaymentModal} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>إدخال بيانات الدفع</Modal.Title>
+                    <Modal.Title>{t('payment.title')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {paymentSuccess ? (
                         <div className="text-center py-4">
                             <FiCheckCircle className="text-success mb-3" size={48} />
-                            <h4>تمت عملية الدفع بنجاح!</h4>
-                            <p className="text-muted">تم دفع {currentPayment?.amount} شيكل بنجاح</p>
+                            <h4>{t('payments.successTitle')}</h4>
+                            <p className="text-muted">
+                                {t('payments.successMessage')} {currentPayment?.amount} {t('payments.currency')}
+                            </p>
                             <Button variant="success" onClick={resetPaymentModal}>
-                                العودة لصفحة الفواتير
+                                {t('common.close')}
                             </Button>
                         </div>
                     ) : (
                         <>
                             <div className="mb-4">
-                                <h5 className="mb-3">فاتورة {currentPayment?.type}</h5>
+                                <h5 className="mb-3">
+                                    {t('payments.types.' + currentPayment?.type)}
+                                </h5>
                                 <div className="d-flex justify-content-between">
-                                    <span>المبلغ المطلوب:</span>
-                                    <strong>{currentPayment?.amount} شيكل</strong>
+                                    <span>{t('payment.invoice.amount')}:</span>
+                                    <strong>{currentPayment?.amount} {t('payments.currency')}</strong>
                                 </div>
                             </div>
 
                             <Form>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>بيانات البطاقة</Form.Label>
+                                    <Form.Label>{t('payment.cardDetails')}</Form.Label>
                                     <div className="stripe-card-element">
                                         <CardElement options={{ hidePostalCode: true }} />
                                     </div>
@@ -442,7 +451,7 @@ const Payments = () => {
 
                                 <div className="d-flex justify-content-between mt-4">
                                     <Button variant="secondary" onClick={resetPaymentModal}>
-                                        إلغاء
+                                        {t('common.cancel')}
                                     </Button>
                                     <Button
                                         variant="primary"
@@ -452,10 +461,10 @@ const Payments = () => {
                                         {loading ? (
                                             <>
                                                 <Spinner animation="border" size="sm" className="me-2" />
-                                                جاري المعالجة...
+                                                {t('payments.processing')}
                                             </>
                                         ) : (
-                                            'تأكيد الدفع'
+                                            t('payment.payNow')
                                         )}
                                     </Button>
                                 </div>
