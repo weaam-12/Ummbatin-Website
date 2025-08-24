@@ -166,35 +166,48 @@ const Payments = () => {
 
     const processPayment = async () => {
         if (!stripe || !elements) {
-            setNotification({ type: 'danger', message: 'Stripe غير جاهز' });
+            setNotification({ type: 'danger', message: t('stripe.notReady') });
             return;
         }
 
         setLoading(true);
         try {
-            // 1) احصل على clientSecret من الـ backend
             const { data } = await axiosInstance.post('/api/stripe/setup-intent');
             const clientSecret = data.clientSecret;
 
-            // 2) تأكيد الـ SetupIntent (فحص البطاقة فقط)
             const cardElement = elements.getElement(CardElement);
             const { setupIntent, error } = await stripe.confirmCardSetup(clientSecret, {
                 payment_method: { card: cardElement }
             });
 
             if (error) {
-                setNotification({ type: 'danger', message: 'فشل التحقق من البطاقة: ' + error.message });
+                setNotification({ type: 'danger', message: t('payments.cardVerificationFailed') });
             } else {
-                setNotification({ type: 'success', message: 'تم التحقق من البطاقة بنجاح!' });
-                setPaymentSuccess(true); // عشان تظهر رسالة النجاح
+                // ✅ الآن سجل الدفع كـ "PAID" في قاعدة البيانات
+                await axiosInstance.post('/api/payments/simulate-payment', null, {
+                    params: {
+                        userId: user.userId,
+                        amount: currentPayment.amount,
+                        type: currentPayment.type.toUpperCase()
+                    }
+                });
+
+                setPaymentSuccess(true);
+                setNotification({ type: 'success', message: t('payments.paymentSuccess') });
+
+                // إشعار للادمن بالعبرية
+                await axiosInstance.post('/api/notifications', {
+                    userId: 4, // أو أي admin ID
+                    message: `המשתמש מספר ${user.userId} שילם חשבונית ${currentPayment.type === 'arnona' ? 'ארנונה' : 'מים'} בסך ${currentPayment.amount} ש"ח.`,
+                    type: 'PAYMENT'
+                });
             }
         } catch (e) {
-            setNotification({ type: 'danger', message: 'فشل الاتصال بالسيرفر' });
+            setNotification({ type: 'danger', message: t('payments.paymentError') });
         } finally {
             setLoading(false);
         }
     };
-
     const resetPaymentModal = () => {
         setShowPaymentModal(false);
         setPaymentSuccess(false);

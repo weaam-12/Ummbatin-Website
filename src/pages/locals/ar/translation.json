@@ -662,6 +662,9 @@
     "closingNote": "هدفنا هو تسهيل حياة السكان وتحسين جودة الخدمات من خلال التحول الرقمي، لتكون أم بطين نموذجًا متقدمًا للتطور في النقب."
   },
   "payments": {
+    "cardVerificationFailed": "فشل التحقق من البطاقة",
+    "paymentSuccess": "تم الدفع بنجاح!",
+    "paymentError": "فشل في عملية الدفع",
     "totalDebt": "الدين التراكمي",
     "loading": "جاري التحميل...",
     "processing": "جاري المعالجة...",
@@ -908,5 +911,8 @@
   },
   "accessibility": "إمكانية الوصول",
   "accessibility.contrast": "تباين عالي",
-  "accessibility.font": "تكبير الخط"
+  "accessibility.font": "تكبير الخط",
+  "stripe": {
+    "notReady": "Stripe غير جاهز"
+  }
 }

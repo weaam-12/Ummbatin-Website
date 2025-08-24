@@ -691,6 +691,9 @@
     "closingNote": "המטרה שלנו היא לשפר את איכות החיים של התושבים באמצעות דיגיטציה, ולהפוך את אום בטין למודל להתפתחות בנגב."
   },
   "payments": {
+    "cardVerificationFailed": "אימות הכרטיס נכשל",
+    "paymentSuccess": "התשלום בוצע בהצלחה!",
+    "paymentError": "התשלום נכשל",
     "totalDebt": "חוב מצטבר",
     "loading": "טוען...",
     "processing": "מעבד...",
@@ -951,5 +954,8 @@
   },
   "accessibility": "נְגִישׁוּת",
   "accessibility.contrast": "נְגִישׁוּת",
-  "accessibility.font": "גופן נגיש"
+  "accessibility.font": "גופן נגיש",
+  "stripe": {
+    "notReady": "Stripe אינו מוכן"
+  }
 }
