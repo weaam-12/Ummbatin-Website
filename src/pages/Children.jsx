@@ -6,10 +6,9 @@ import { useAuth } from '../AuthContext';
 import { FaChild, FaCheckCircle, FaMoneyBillWave, FaClock } from 'react-icons/fa';
 import { FiDownload } from 'react-icons/fi';
 import './Children.css';
-
+import jsPDF from 'jspdf';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Button, Alert, Spinner, Modal, Form, Row, Col } from 'react-bootstrap';
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 // ----------  ChildCard  ----------
@@ -167,6 +166,21 @@ const Children = () => {
         </div>
     );
 
+    const handleDownloadReceipt = async (child, kindergartenName) => {
+        const doc = new jsPDF();
+        doc.setFont('helvetica');
+        doc.setFontSize(14);
+
+        doc.text(`Receipt`, 20, 20);
+        doc.text(`Child Name: ${child.name}`, 20, 40);
+        doc.text(`Kindergarten: ${kindergartenName}`, 20, 50);
+        doc.text(`Amount Paid: 35₪`, 20, 60);
+        doc.text(`Transaction ID: TXN-${Date.now()}`, 20, 70);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 80);
+
+        doc.save(`receipt_${child.name}.pdf`);
+    };
+
     return (
         <div className={`children-page modern ${i18n.language}`} dir={i18n.language === 'ar' ? 'rtl' : 'rtl'}>
             <h1 className="page-title">👶 {t('children.myChildren')}</h1>
@@ -216,7 +230,18 @@ const Children = () => {
                                             <td>{child.name}</td>
                                             <td>{new Date(child.birthDate).toLocaleDateString(i18n.language)}</td>
                                             <td>{kg?.name || '–'}</td>
-                                            <td><span className="badge bg-warning text-dark">{t('children.waitingApproval')}</span></td>
+                                            <td><span
+                                                className="badge bg-warning text-dark">{t('children.waitingApproval')}</span>
+                                            </td>
+                                            <td>
+                                                <Button
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    onClick={() => handleDownloadReceipt(child, kg?.name)}
+                                                >
+                                                    <FiDownload/> {t('children.downloadReceipt')}
+                                                </Button>
+                                            </td>
                                         </tr>
                                     );
                                 })}
@@ -246,8 +271,12 @@ const Children = () => {
                                             <td><span className="badge bg-success">250₪</span></td>
                                             <td><span className="badge bg-success">{t('children.approved')}</span></td>
                                             <td>
-                                                <Button variant="outline-primary" size="sm" onClick={() => alert('Receipt')}>
-                                                    <FiDownload /> {t('children.downloadReceipt')}
+                                                <Button
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    onClick={() => handleDownloadReceipt(child, kg?.name)}
+                                                >
+                                                    <FiDownload/> {t('children.downloadReceipt')}
                                                 </Button>
                                             </td>
                                         </tr>
