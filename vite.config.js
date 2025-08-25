@@ -1,7 +1,6 @@
 // ProfileDocument.jsx
 import React from "react";
 import { Page, Text, View, Document, StyleSheet, Image, Font } from "@react-pdf/renderer";
-import logo from "../components/styles/img.png";
 
 // تسجيل الخط (يجب تثبيت الخط أولاً أو استيراده)
 Font.register({
@@ -59,7 +58,6 @@ const ProfileDocument = ({ document, profile, t, i18n }) => (
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <Image src={logo} style={styles.logo} />
           <Text>{t("municipalityName")}</Text>
         </View>
 
