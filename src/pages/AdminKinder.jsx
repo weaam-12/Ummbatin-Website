@@ -37,6 +37,8 @@ const AdminKinder = () => {
         try {
             const kgs = await fetchKindergartens();
             setKindergartens(kgs);
+
+            console.log("kgs : "+kgs.json)
             const allChildren = kgs.flatMap(kg => kg.children || []);
             const pending = allChildren.filter(c => c.monthlyFee === 2.5);
             const approved = allChildren.filter(c => c.monthlyFee === 3.5);
@@ -75,7 +77,7 @@ const AdminKinder = () => {
 
             // إرسال الإشعار إلى المستخدم
             await axiosInstance.post('/api/notifications', {
-                userId: child.user.id, // تأكد أن child تحتوي على userId
+                userId: child.userId, // تأكد أن child تحتوي على userId
                 message: `התקבלה אישור להרשמת ${child.name} לגן ${kindergartenName}.`,
                 type: 'KINDERGARTEN_APPROVED'
             });
