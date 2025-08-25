@@ -118,8 +118,6 @@ const Profile = () => {
     // وثائق الموافقات
     const documents = [
         { id: 1, name: t("profile.documents.residenceApproval"), date: new Date().toLocaleDateString(i18n.language) },
-        { id: 2, name: t("profile.documents.familyRecord"), date: new Date().toLocaleDateString(i18n.language) },
-        { id: 3, name: t("profile.documents.housingCertificate"), date: new Date().toLocaleDateString(i18n.language) }
     ];
 
     if (loading) return <div className="loading-spinner">{t("general.loading")}</div>;
