@@ -3,7 +3,6 @@ import React from "react";
 import { Page, Text, View, Document, StyleSheet, Image, Font } from "@react-pdf/renderer";
 import logo from "../components/styles/img.png";
 
-// تسجيل الخط (يجب تثبيت الخط أولاً أو استيراده)
 Font.register({
     family: 'Noto Sans Arabic',
     src: 'https://fonts.gstatic.com/s/notosansarabic/v18/nwpxtLGrGZM2i5uSS85Mawrt3gn0e5Qh6dHhXcmt0ErG3yp4.woff2'
@@ -61,6 +60,8 @@ const ProfileDocument = ({ document, profile, t, i18n }) => (
             <View style={styles.header}>
                 <Image src={logo} style={styles.logo} />
                 <Text>{t("municipalityName")}</Text>
+                <Text>{t("municipalityName")}</Text>
+
             </View>
 
             <Text style={styles.title}>{document.name}</Text>
