@@ -69,12 +69,19 @@ const AdminKinder = () => {
     const handleAssignChild = async (child, kindergartenId, monthlyFee) => {
         try {
             await updateChildAssignment(child.childId, { kindergartenId, monthlyFee });
-            setNotification({ type: 'success', message: t('assigned') });
+
+            // البحث عن الحضانة للحصول على اسمها
+            const kindergarten = kindergartens.find(kg => kg.kindergartenId === kindergartenId);
+            const kindergartenName = kindergarten ? kindergarten.name : 'الحضانة';
+
+            // إرسال الإشعار إلى المستخدم
             await axiosInstance.post('/api/notifications', {
-                userId: child.userId,   // تأكّد أن enrollment يحتوي userId
-                message: 'התקבלה אישור להרשמת ילדך לגן.',
+                userId: child.userId, // تأكد أن child تحتوي على userId
+                message: `התקבלה אישור להרשמת ${child.name} לגן ${kindergartenName}.`,
                 type: 'KINDERGARTEN_APPROVED'
             });
+
+            setNotification({ type: 'success', message: t('assigned') });
             setShowAssignModal(false);
             setCurrentChildToAssign(null);
             loadAll();
