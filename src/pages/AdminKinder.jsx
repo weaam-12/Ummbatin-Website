@@ -38,6 +38,7 @@ const AdminKinder = () => {
             const kgs = await fetchKindergartens();
             setKindergartens(kgs);
 
+            console.log(kgs.data)
             const allChildren = kgs.flatMap(kg => kg.children || []);
             const pending = allChildren.filter(c => c.monthlyFee === 2.5);
             const approved = allChildren.filter(c => c.monthlyFee === 3.5);
