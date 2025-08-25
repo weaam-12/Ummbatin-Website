@@ -101,7 +101,8 @@ const AdminPayments = () => {
                 fullName: p.fullName ||
                     (users.find(u => u.id === (p.user_id || p.userId))?.fullName ||
                         users.find(u => u.user_id === (p.user_id || p.userId))?.fullName ||
-                        t('common.unknown'))
+                        t('common.unknown')),
+                propertyAddress: p.propertyAddress || p.property_address || '--'
             }));
 
             setPayments(enhanced);
@@ -251,7 +252,7 @@ const AdminPayments = () => {
                                 <th>{t('admin.payments.amount')}</th>
                                 <th>{t('admin.payments.dueDate')}</th>
                                 <th>{t('admin.payments.status')}</th>
-                                <th>{t('admin.payments.paymentDate')}</th>
+                                <th>{t('admin.payments.propertyAddress')}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -268,7 +269,7 @@ const AdminPayments = () => {
                                                 {statusLabels[payment.status] || payment.status || '--'}
                                             </span>
                                         </td>
-                                        <td>{formatDate(payment.paymentDate)}</td>
+                                        <td>{payment.propertyAddress || '--'}</td>
                                     </tr>
                                 ))
                             ) : (
