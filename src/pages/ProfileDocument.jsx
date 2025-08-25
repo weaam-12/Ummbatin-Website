@@ -1,13 +1,20 @@
+// ProfileDocument.jsx
 import React from "react";
-import { Page, Text, View, Document, StyleSheet, Image } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet, Image, Font } from "@react-pdf/renderer";
 import logo from "../components/styles/img.png";
+
+// تسجيل الخط (يجب تثبيت الخط أولاً أو استيراده)
+Font.register({
+    family: 'Noto Sans Arabic',
+    src: 'https://fonts.gstatic.com/s/notosansarabic/v18/nwpxtLGrGZM2i5uSS85Mawrt3gn0e5Qh6dHhXcmt0ErG3yp4.woff2'
+});
 
 const styles = StyleSheet.create({
     page: {
         flexDirection: "column",
         backgroundColor: "#FFFFFF",
         padding: 40,
-        fontFamily: "Helvetica" // الخط الافتراضي الذي يدعم اللغات
+        fontFamily: "Noto Sans Arabic"
     },
     header: {
         flexDirection: "row",
@@ -48,7 +55,7 @@ const styles = StyleSheet.create({
     }
 });
 
-const ProfileDocument = ({ document, profile, t }) => (
+const ProfileDocument = ({ document, profile, t, i18n }) => (
     <Document>
         <Page size="A4" style={styles.page}>
             <View style={styles.header}>
