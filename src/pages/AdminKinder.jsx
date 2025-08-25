@@ -37,8 +37,8 @@ const AdminKinder = () => {
         try {
             const kgs = await fetchKindergartens();
             setKindergartens(kgs);
-
-            console.log("kgs : "+kgs.json)
+            const kg = await response.json();
+            console.log("kgs : "+kg)
             const allChildren = kgs.flatMap(kg => kg.children || []);
             const pending = allChildren.filter(c => c.monthlyFee === 2.5);
             const approved = allChildren.filter(c => c.monthlyFee === 3.5);
