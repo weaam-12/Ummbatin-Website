@@ -1,22 +1,17 @@
 // ProfileDocument.jsx
 import React from "react";
-import { Page, Text, View, Document, StyleSheet, Image, Font } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet, Image } from "@react-pdf/renderer";
 import logo from "../components/styles/img.png";
-
-Font.register({
-    family: 'Noto Sans Arabic',
-    src: 'https://fonts.gstatic.com/s/notosansarabic/v18/nwpxtLGrGZM2i5uSS85Mawrt3gn0e5Qh6dHhXcmt0ErG3yp4.woff2'
-});
 
 const styles = StyleSheet.create({
     page: {
         flexDirection: "column",
         backgroundColor: "#FFFFFF",
         padding: 40,
-        fontFamily: "Noto Sans Arabic"
+        fontFamily: "Helvetica"
     },
     header: {
-        flexDirection: "row",
+        flexDirection: i18n => i18n.dir() === 'rtl' ? 'row-reverse' : 'row',
         justifyContent: "space-between",
         marginBottom: 20,
         alignItems: "center"
@@ -32,7 +27,8 @@ const styles = StyleSheet.create({
         marginVertical: 20
     },
     section: {
-        marginBottom: 10
+        marginBottom: 10,
+        textAlign: i18n => i18n.dir() === 'rtl' ? 'right' : 'left'
     },
     label: {
         fontSize: 12,
@@ -51,40 +47,77 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: 10,
         color: "#666666"
+    },
+    // أنماط للنصوص العربية
+    arabicText: {
+        fontFamily: "Helvetica",
+        writingMode: "rl-tb",
+        textAlign: "right"
     }
 });
 
-const ProfileDocument = ({ document, profile, t, i18n }) => (
-    <Document>
-        <Page size="A4" style={styles.page}>
-            <View style={styles.header}>
-                <Image src={logo} style={styles.logo} />
-                <Text>{t("municipalityName")}</Text>
-                <Text>{t("municipalityName")}</Text>
+// دالة مساعدة للتحقق إذا كان النص عربي
+const isArabicText = (text) => {
+    const arabicRegex = /[\u0600-\u06FF]/;
+    return arabicRegex.test(text);
+};
 
-            </View>
+const ProfileDocument = ({ document, profile, t, i18n }) => {
+    // تحديد إذا كانت اللغة عربية
+    const isRTL = i18n.language === 'ar';
 
-            <Text style={styles.title}>{document.name}</Text>
+    return (
+        <Document>
+            <Page size="A4" style={styles.page}>
+                <View style={styles.header(isRTL)}>
+                    <Image src={logo} style={styles.logo} />
+                    <Text style={isRTL ? styles.arabicText : {}}>
+                        {t("municipalityName")}
+                    </Text>
+                </View>
 
-            <View style={styles.section}>
-                <Text style={styles.label}>{t("profile.documentLabels.residentInfo")}:</Text>
-                <Text style={styles.value}>{t("profile.labels.fullName")}: {profile.fullName}</Text>
-                <Text style={styles.value}>{t("profile.labels.idNumber")}: {profile.idNumber}</Text>
-            </View>
+                <Text style={{...styles.title, ...(isRTL ? styles.arabicText : {})}}>
+                    {document.name}
+                </Text>
 
-            <View style={styles.section}>
-                <Text style={styles.label}>{t("profile.documentLabels.documentDetails")}:</Text>
-                <Text style={styles.value}>{t("profile.labels.documentType")}: {document.name}</Text>
-                <Text style={styles.value}>{t("profile.labels.issueDate")}: {document.date}</Text>
-                <Text style={styles.value}>{t("profile.labels.documentNumber")}: {document.id}</Text>
-            </View>
+                <View style={styles.section(isRTL)}>
+                    <Text style={{...styles.label, ...(isRTL ? styles.arabicText : {})}}>
+                        {t("profile.documentLabels.residentInfo")}:
+                    </Text>
+                    <Text style={{...styles.value, ...(isRTL ? styles.arabicText : {})}}>
+                        {t("profile.labels.fullName")}: {profile.fullName}
+                    </Text>
+                    <Text style={{...styles.value, ...(isRTL ? styles.arabicText : {})}}>
+                        {t("profile.labels.idNumber")}: {profile.idNumber}
+                    </Text>
+                </View>
 
-            <View style={styles.footer}>
-                <Text>{t("profile.documentLabels.electronicDocument")}</Text>
-                <Text>© {new Date().getFullYear()} {t("allRightsReserved")}</Text>
-            </View>
-        </Page>
-    </Document>
-);
+                <View style={styles.section(isRTL)}>
+                    <Text style={{...styles.label, ...(isRTL ? styles.arabicText : {})}}>
+                        {t("profile.documentLabels.documentDetails")}:
+                    </Text>
+                    <Text style={{...styles.value, ...(isRTL ? styles.arabicText : {})}}>
+                        {t("profile.labels.documentType")}: {document.name}
+                    </Text>
+                    <Text style={{...styles.value, ...(isRTL ? styles.arabicText : {})}}>
+                        {t("profile.labels.issueDate")}: {document.date}
+                    </Text>
+                    <Text style={{...styles.value, ...(isRTL ? styles.arabicText : {})}}>
+                        {t("profile.labels.documentNumber")}: {document.id}
+                    </Text>
+                </View>
+
+                <View style={styles.footer}>
+                    <Text style={isRTL ? styles.arabicText : {}}>
+                        {t("profile.documentLabels.electronicDocument")}
+                    </Text>
+                    <Text style={isRTL ? styles.arabicText : {}}>
+                        © {new Date().getFullYear()} {t("allRightsReserved")}
+                    </Text>
+                </View>
+            </Page>
+        </Document>
+    );
+};
 
 export default ProfileDocument;
