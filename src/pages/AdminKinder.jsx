@@ -84,7 +84,7 @@ const AdminKinder = () => {
 
             // إرسال الإشعار إلى المستخدم
             await axiosInstance.post('/api/notifications', {
-                userId: child.userId, // تأكد أن child تحتوي على userId
+                userId: child.user.id, // تأكد أن child تحتوي على userId
                 message: `התקבלה אישור להרשמת ${child.name} לגן ${kindergartenName}.`,
                 type: 'KINDERGARTEN_APPROVED'
             });
