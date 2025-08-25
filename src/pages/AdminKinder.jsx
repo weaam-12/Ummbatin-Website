@@ -38,10 +38,16 @@ const AdminKinder = () => {
             const kgs = await fetchKindergartens();
             setKindergartens(kgs);
 
-            console.log("kgs : "+kgs.json)
+            console.log("kgs:", JSON.stringify(kgs, null, 2));
+
+
+
             const allChildren = kgs.flatMap(kg => kg.children || []);
             const pending = allChildren.filter(c => c.monthlyFee === 2.5);
             const approved = allChildren.filter(c => c.monthlyFee === 3.5);
+            console.log("approved:", JSON.stringify(approved, null, 2));
+            console.log("pending:", JSON.stringify(pending, null, 2));
+            console.log("allChildren:", JSON.stringify(allChildren, null, 2));
 
             setPendingChildren(pending);
             setStats({
@@ -70,6 +76,7 @@ const AdminKinder = () => {
     const handleAssignChild = async (child, kindergartenId, monthlyFee) => {
         try {
             await updateChildAssignment(child.childId, { kindergartenId, monthlyFee });
+
 
             // البحث عن الحضانة للحصول على اسمها
             const kindergarten = kindergartens.find(kg => kg.kindergartenId === kindergartenId);
