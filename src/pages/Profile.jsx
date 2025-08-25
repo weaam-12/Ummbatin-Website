@@ -3,7 +3,7 @@ import { axiosInstance } from "../api";
 import { useAuth } from "../AuthContext";
 import { useTranslation } from "react-i18next";
 import {
-    FaUser, FaUsers, FaFileDownload, FaSignOutAlt, FaUserEdit,
+    FaUser, FaUsers, FaFileDownload, FaSignOutAlt,
     FaHome, FaFileAlt
 } from "react-icons/fa";
 import html2canvas from "html2canvas";
@@ -16,20 +16,71 @@ const Profile = () => {
     const [children, setChildren] = useState([]);
     const [properties, setProperties] = useState([]);
     const [error, setError] = useState("");
+    const [pdfLoading, setPdfLoading] = useState(false);
     const { user, loading, logout } = useAuth();
     const profileRef = useRef(null);
 
     useEffect(() => {
-        // ... كود التحميل الحالي
+        const loadProfile = async () => {
+            try {
+                const response = await axiosInstance.get('/api/users/profile');
+
+                if (!response.data) {
+                    throw new Error(t("errors.noDataReceived"));
+                }
+
+                setProfile(response.data);
+
+                if (response.data.id) {
+                    try {
+                        const [childrenRes, propertiesRes] = await Promise.all([
+                            axiosInstance.get(`/api/children/user/${response.data.id}`),
+                            axiosInstance.get(`/api/properties/user/${response.data.id}`)
+                        ]);
+
+                        setChildren(Array.isArray(childrenRes?.data) ? childrenRes.data : []);
+                        setProperties(Array.isArray(propertiesRes?.data) ? propertiesRes.data : []);
+
+                    } catch (secondaryError) {
+                        console.error("Error loading additional data:", secondaryError);
+                        setError(t("errors.additionalDataError"));
+                    }
+                }
+            } catch (err) {
+                console.error("Profile error details:", err);
+
+                if (err.response) {
+                    if (err.response.status === 401) {
+                        logout();
+                        setError(t("errors.sessionExpired"));
+                    } else if (err.response.status === 500) {
+                        setError(t("errors.serverError"));
+                    } else {
+                        setError(err.response.data?.message || t("errors.unexpectedError"));
+                    }
+                } else if (err.request) {
+                    setError(t("errors.noConnection"));
+                } else {
+                    setError(t("errors.requestError"));
+                }
+            }
+        };
+
+        if (user) {
+            loadProfile();
+        }
     }, [user, logout, t]);
 
     const downloadPDF = async (docName) => {
         if (!profileRef.current) return;
 
+        setPdfLoading(true);
         try {
             const canvas = await html2canvas(profileRef.current, {
                 useCORS: true,
-                scale: 2 // لتحسين الجودة
+                scale: 2,
+                logging: false,
+                backgroundColor: '#ffffff'
             });
 
             const imgData = canvas.toDataURL('image/png');
@@ -39,8 +90,8 @@ const Profile = () => {
                 format: 'a4'
             });
 
-            const imgWidth = 210; // A4 width in mm
-            const pageHeight = 297; // A4 height in mm
+            const imgWidth = 210;
+            const pageHeight = 297;
             const imgHeight = canvas.height * imgWidth / canvas.width;
             let heightLeft = imgHeight;
             let position = 0;
@@ -59,6 +110,8 @@ const Profile = () => {
         } catch (err) {
             console.error('Error generating PDF:', err);
             setError(t("errors.pdfGenerationError"));
+        } finally {
+            setPdfLoading(false);
         }
     };
 
@@ -83,7 +136,6 @@ const Profile = () => {
             {profile && (
                 <>
                     <div ref={profileRef} className="profile-content">
-                        {/* محتوى البروفايل الحالي */}
                         {/* معلومات المستخدم الأساسية */}
                         <div className="profile-section">
                             <div className="section-title">
@@ -104,7 +156,7 @@ const Profile = () => {
                                 </div>
                                 <div className="info-row">
                                     <span className="info-label">{t("profile.labels.idNumber")}:</span>
-                                    <span className="info-value">{profile.id|| t("general.notSpecified")}</span>
+                                    <span className="info-value">{profile.id || t("general.notSpecified")}</span>
                                 </div>
                             </div>
                         </div>
@@ -205,9 +257,10 @@ const Profile = () => {
                                     <button
                                         className="download-btn"
                                         onClick={() => downloadPDF(doc.name)}
+                                        disabled={pdfLoading}
                                     >
                                         <FaFileDownload style={{marginLeft: '5px'}}/>
-                                        {t("profile.labels.download")}
+                                        {pdfLoading ? t("general.loading") : t("profile.labels.download")}
                                     </button>
                                 </div>
                             ))}
