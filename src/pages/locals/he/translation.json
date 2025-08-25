@@ -465,6 +465,7 @@
       }
     },
     "payments": {
+      "propertyAddress": "כתובת הנכס",
       "title": "ניהול תשלומים",
       "userId": "מספר משתמש",
       "userName": "שם משתמש",

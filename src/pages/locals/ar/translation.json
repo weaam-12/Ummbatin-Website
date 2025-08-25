@@ -280,6 +280,8 @@
       "expiresAt": "تنتهي في"
     },
     "payments": {
+      "propertyAddress": "عنوان العقار",
+
       "title": "إدارة المدفوعات",
       "userId": "رقم المستخدم",
       "userName": "اسم المستخدم",
