@@ -19,6 +19,12 @@ import "./AdminDashboard.css";
 
 function AdminDashboard() {
     const [users, setUsers] = useState([]);
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        totalAdmins: 0,
+        totalResidents: 0,
+        activeUsers: 0
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
@@ -32,13 +38,33 @@ function AdminDashboard() {
 
     useEffect(() => {
         fetchUsers();
+        fetchStats();
     }, [pagination.page]);
 
-    const stats = {
-        totalUsers: users.length,
-        totalAdmins: users.filter(u => u.role?.roleName === 'ADMIN').length,
-        totalResidents: users.filter(u => u.role?.roleName === 'RESIDENT').length,
-        activeUsers: users.filter(u => u.isActive).length
+    const fetchStats = async () => {
+        try {
+            // إذا كان لديك نقطة نهاية خاصة بالإحصائيات
+            // const response = await axiosInstance.get("api/users/stats");
+            // setStats(response.data);
+
+            // بدلاً من ذلك، يمكنك جلب جميع المستخدمين مرة واحدة لحساب الإحصائيات
+            const response = await axiosInstance.get("api/users/all", {
+                params: {
+                    page: 0,
+                    size: 10000 // حجم كبير enough لاستيعاب جميع المستخدمين
+                }
+            });
+
+            const allUsers = response.data.content;
+            setStats({
+                totalUsers: response.data.totalElements,
+                totalAdmins: allUsers.filter(u => u.role?.roleName === 'ADMIN').length,
+                totalResidents: allUsers.filter(u => u.role?.roleName === 'RESIDENT').length,
+                activeUsers: allUsers.filter(u => u.isActive).length
+            });
+        } catch (err) {
+            console.error("Error fetching stats:", err);
+        }
     };
 
     const fetchUsers = async () => {
@@ -69,6 +95,8 @@ function AdminDashboard() {
             await axiosInstance.delete(`/api/users/${id}`);
             setUsers(prev => prev.filter(user => user.id !== id));
             setShowDropdownId(null);
+            // تحديث الإحصائيات بعد الحذف
+            fetchStats();
         } catch (err) {
             setError(t("errors.deleteUser"));
         }
@@ -88,6 +116,8 @@ function AdminDashboard() {
                 } : user
             ));
             setShowDropdownId(null);
+            // تحديث الإحصائيات بعد تغيير الدور
+            fetchStats();
         } catch (err) {
             setError(t("errors.updateRole"));
         }
@@ -151,7 +181,10 @@ function AdminDashboard() {
                         </button>
                         <button
                             className="btn btn-secondary"
-                            onClick={fetchUsers}
+                            onClick={() => {
+                                fetchUsers();
+                                fetchStats();
+                            }}
                         >
                             <FiRefreshCw /> {t("refresh")}
                         </button>
@@ -189,6 +222,16 @@ function AdminDashboard() {
                             <p>{stats.totalResidents}</p>
                         </div>
                     </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">
+                            <FiUser />
+                        </div>
+                        <div className="stat-info">
+                            <h3>{t("stats.activeUsers")}</h3>
+                            <p>{stats.activeUsers}</p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Users Table */}
@@ -211,7 +254,7 @@ function AdminDashboard() {
                             <tbody>
                             {users.map((user, index) => (
                                 <tr key={user.id}>
-                                    <td>{index + 1}</td>
+                                    <td>{index + 1 + (pagination.page * pagination.size)}</td>
                                     <td>{user.email}</td>
                                     <td>{user.fullName || "--"}</td>
                                     <td>
@@ -305,6 +348,10 @@ function AdminDashboard() {
                                     <div className="info-item">
                                         <strong>{t("email")}:</strong>
                                         <span>{selectedUser.email}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <strong>"ת'ז":</strong>
+                                        <span>{selectedUser.user_id}</span>
                                     </div>
                                     <div className="info-item">
                                         <strong>{t("labels.phone")}:</strong>
