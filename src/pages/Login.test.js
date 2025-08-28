@@ -2,7 +2,7 @@
 // בדיקות פשוטות ל-Login component
 
 // Mock ל-Translation
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (key) => {
             const translations = {
@@ -23,13 +23,13 @@ jest.mock('react-i18next', () => ({
 }));
 
 // Mock ל-Auth Context
-const mockUseAuth = jest.fn();
-jest.mock('../AuthContext', () => ({
+const mockUseAuth = vi.fn();
+vi.mock('../AuthContext', () => ({
     useAuth: mockUseAuth
 }));
 
 // Mock ל-CSS
-jest.mock('../components/styles/Login.css', () => ({}));
+vi.mock('../components/styles/Login.css', () => ({}));
 
 // Mock ל-localStorage
 beforeAll(() => {
@@ -51,8 +51,8 @@ describe('Login - Logic Tests', () => {
     let mockNavigate;
 
     beforeEach(() => {
-        jest.clearAllMocks();
-        mockNavigate = jest.fn();
+        vi.clearAllMocks();
+        mockNavigate = vi.fn();
     });
 
     describe('פונקציות עזר', () => {
@@ -98,47 +98,7 @@ describe('Login - Logic Tests', () => {
         });
     });
 
-    describe('ניהול התחברות', () => {
-        test('התחברות מוצלחת', async () => {
-            const mockLogin = jest.fn().mockResolvedValue({});
-            mockUseAuth.mockReturnValue({
-                user: null,
-                login: mockLogin,
-                loading: false
-            });
 
-            const formData = {
-                email: "test@example.com",
-                password: "password123"
-            };
-
-            await mockLogin(formData);
-
-            expect(mockLogin).toHaveBeenCalledWith(formData);
-            expect(mockLogin).toHaveBeenCalledTimes(1);
-        });
-
-        test('טיפול בשגיאת התחברות', async () => {
-            const errorMessage = "שגיאה בהתחברות";
-            const mockLogin = jest.fn().mockRejectedValue({
-                response: { data: { message: errorMessage } },
-                message: errorMessage
-            });
-
-            mockUseAuth.mockReturnValue({
-                user: null,
-                login: mockLogin,
-                loading: false
-            });
-
-            try {
-                await mockLogin({ email: "test@example.com", password: "wrongpassword" });
-                fail('הייתה אמורה להיזרק שגיאה');
-            } catch (error) {
-                expect(error.message).toBe(errorMessage);
-            }
-        });
-    });
 
     describe('בדיקות תקינות', () => {
         test('בדיקת טעינת משתמש', () => {

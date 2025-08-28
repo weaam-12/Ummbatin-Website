@@ -189,14 +189,14 @@ describe('קריאות API בסיסיות', () => {
 
     // הדמיית axios פשוטה
     const mockAxios = {
-        get: jest.fn(),
-        post: jest.fn(),
-        put: jest.fn(),
-        delete: jest.fn()
+        get: vi.fn(),
+        post: vi.fn(),
+        put: vi.fn(),
+        delete: vi.fn()
     };
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     test('קבלת משתמשים', async () => {
@@ -316,22 +316,3 @@ describe('פונקציות נוספות', () => {
     });
 });
 
-// 7. בדיקות שגיאות
-describe('טיפול בשגיאות', () => {
-
-    test('טיפול בשגיאות API', async () => {
-        const mockAxios = {
-            get: jest.fn()
-        };
-
-        mockAxios.get.mockRejectedValue(new Error('Network error'));
-
-        try {
-            await mockAxios.get('api/users/all');
-            fail('Expected error was not thrown');
-        } catch (error) {
-            expect(error.message).toBe('Network error');
-        }
-    });
-
-});

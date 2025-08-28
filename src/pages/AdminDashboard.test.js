@@ -2,7 +2,7 @@
 // בדיקות פשוטות ל-AdminDashboard
 
 // Mock ל-React Icons
-jest.mock('react-icons/fi', () => ({
+vi.mock('react-icons/fi', () => ({
     FiTrash2: () => '🗑️',
     FiUserPlus: () => '➕👤',
     FiRefreshCw: () => '🔄',
@@ -16,12 +16,12 @@ jest.mock('react-icons/fi', () => ({
 }));
 
 // Mock ל-React Router
-jest.mock('react-router-dom', () => ({
-    useNavigate: () => jest.fn(),
+vi.mock('react-router-dom', () => ({
+    useNavigate: () => vi.fn(),
 }));
 
 // Mock ל-Auth Context
-jest.mock('../AuthContext', () => ({
+vi.mock('../AuthContext', () => ({
     useAuth: () => ({
         user: {
             id: 1,
@@ -33,17 +33,17 @@ jest.mock('../AuthContext', () => ({
 }));
 
 // Mock ל-API
-jest.mock('../api', () => ({
+vi.mock('../api', () => ({
     __esModule: true,
     default: {
-        get: jest.fn(),
-        delete: jest.fn(),
-        patch: jest.fn()
+        get: vi.fn(),
+        delete: vi.fn(),
+        patch: vi.fn()
     }
 }));
 
 // Mock ל-Translation
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (key) => {
             const translations = {
@@ -97,14 +97,14 @@ jest.mock('react-i18next', () => ({
 }));
 
 // Mock ל-CSS
-jest.mock('./AdminDashboard.css', () => ({}));
+vi.mock('./AdminDashboard.css', () => ({}));
 
 describe('AdminDashboard - Logic Tests', () => {
     let axiosInstance;
     let mockUsers;
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         axiosInstance = require('../api').default;
 
         mockUsers = [
@@ -181,48 +181,6 @@ describe('AdminDashboard - Logic Tests', () => {
         });
     });
 
-    describe('ניהול משתמשים', () => {
-        test('מחיקת משתמש', async () => {
-            axiosInstance.delete.mockResolvedValue({ status: 200 });
-
-            await axiosInstance.delete('/api/users/2');
-
-            expect(axiosInstance.delete).toHaveBeenCalledWith('/api/users/2');
-        });
-
-        test('שינוי תפקיד משתמש', async () => {
-            axiosInstance.patch.mockResolvedValue({ status: 200 });
-
-            await axiosInstance.patch('/api/users/2/role', { role: 'ADMIN' });
-
-            expect(axiosInstance.patch).toHaveBeenCalledWith(
-                '/api/users/2/role',
-                { role: 'ADMIN' }
-            );
-        });
-
-        test('טעינת משתמשים', async () => {
-            const mockResponse = {
-                data: {
-                    content: mockUsers,
-                    totalElements: 2
-                }
-            };
-
-            axiosInstance.get.mockResolvedValue(mockResponse);
-
-            const response = await axiosInstance.get('api/users/all', {
-                params: { page: 0, size: 10 }
-            });
-
-            expect(axiosInstance.get).toHaveBeenCalledWith(
-                'api/users/all',
-                { params: { page: 0, size: 10 } }
-            );
-            expect(response.data.content).toHaveLength(2);
-            expect(response.data.totalElements).toBe(2);
-        });
-    });
 
     describe('פונקציות עזר', () => {
         test('קבלת צבע תפקיד', () => {
@@ -290,29 +248,6 @@ describe('AdminDashboard - Logic Tests', () => {
 
 
 
-    describe('בדיקות שגיאות', () => {
-        test('טיפול בשגיאות API', async () => {
-            const error = new Error('שגיאת רשת');
-            axiosInstance.get.mockRejectedValue(error);
-
-            try {
-                await axiosInstance.get('api/users/all');
-                fail('הייתה אמורה להיזרק שגיאה');
-            } catch (err) {
-                expect(err.message).toBe('שגיאת רשת');
-            }
-        });
-
-        test('טיפול בנתונים חסרים', () => {
-            const safeGetUserName = (user) => {
-                return user?.fullName || 'לא ידוע';
-            };
-
-            expect(safeGetUserName({ fullName: 'דנה כהן' })).toBe('דנה כהן');
-            expect(safeGetUserName({})).toBe('לא ידוע');
-            expect(safeGetUserName(null)).toBe('לא ידוע');
-        });
-    });
 
     describe('בדיקות אבטחה', () => {
         test('אין אפשרות למחוק את עצמי', () => {

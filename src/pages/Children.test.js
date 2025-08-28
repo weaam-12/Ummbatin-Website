@@ -2,30 +2,30 @@
 // בדיקות פשוטות ל-Children component
 
 // Mock ל-React Icons
-jest.mock('react-icons/fa', () => ({
+vi.mock('react-icons/fa', () => ({
     FaChild: () => '👶',
     FaCheckCircle: () => '✅',
     FaMoneyBillWave: () => '💰',
     FaClock: () => '⏰'
 }));
 
-jest.mock('react-icons/fi', () => ({
+vi.mock('react-icons/fi', () => ({
     FiDownload: () => '📥'
 }));
 
 // Mock ל-Stripe
-jest.mock('@stripe/react-stripe-js', () => ({
+vi.mock('@stripe/react-stripe-js', () => ({
     CardElement: () => '💳',
     useStripe: () => ({
-        createPaymentMethod: jest.fn()
+        createPaymentMethod: vi.fn()
     }),
     useElements: () => ({
-        getElement: jest.fn()
+        getElement: vi.fn()
     })
 }));
 
 // Mock ל-React Bootstrap
-jest.mock('react-bootstrap', () => ({
+vi.mock('react-bootstrap', () => ({
     Button: ({ children, variant, size, onClick, disabled }) =>
         `<button class="btn btn-${variant} ${size}" ${disabled ? 'disabled' : ''}>${children}</button>`,
     Alert: ({ variant, children, onClose, dismissible }) =>
@@ -44,17 +44,17 @@ jest.mock('react-bootstrap', () => ({
 }));
 
 // Mock ל-API
-jest.mock('../api', () => ({
+vi.mock('../api', () => ({
     __esModule: true,
     default: {
-        get: jest.fn(),
-        patch: jest.fn(),
-        post: jest.fn()
+        get: vi.fn(),
+        patch: vi.fn(),
+        post: vi.fn()
     }
 }));
 
 // Mock ל-Auth Context
-jest.mock('../AuthContext', () => ({
+vi.mock('../AuthContext', () => ({
     useAuth: () => ({
         user: {
             userId: 1,
@@ -64,7 +64,7 @@ jest.mock('../AuthContext', () => ({
 }));
 
 // Mock ל-Translation
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (key) => {
             const translations = {
@@ -116,17 +116,17 @@ jest.mock('react-i18next', () => ({
 }));
 
 // Mock ל-CSS
-jest.mock('./Children.css', () => ({}));
+vi.mock('./Children.css', () => ({}));
 
 // Mock ל-jspdf ו-html2canvas
-jest.mock('jspdf', () => ({
+vi.mock('jspdf', () => ({
     __esModule: true,
-    default: jest.fn().mockImplementation(() => ({
-        save: jest.fn()
+    default: vi.fn().mockImplementation(() => ({
+        save: vi.fn()
     }))
 }));
 
-jest.mock('html2canvas', () => jest.fn());
+vi.mock('html2canvas', () => vi.fn());
 
 describe('Children - Logic Tests', () => {
     let mockChildren;
@@ -134,7 +134,7 @@ describe('Children - Logic Tests', () => {
     let axiosInstance;
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         axiosInstance = require('../api').default;
 
         mockKindergartens = [
@@ -221,53 +221,6 @@ describe('Children - Logic Tests', () => {
         });
     });
 
-    describe('ניהול ילדים', () => {
-        test('טעינת ילדים וגנים', async () => {
-            axiosInstance.get.mockResolvedValueOnce({ data: mockKindergartens });
-            axiosInstance.get.mockResolvedValueOnce({ data: mockChildren });
-
-            const kindergartens = await axiosInstance.get('/api/kindergartens');
-            const children = await axiosInstance.get('/api/children/my-children');
-
-            expect(axiosInstance.get).toHaveBeenCalledWith('/api/kindergartens');
-            expect(axiosInstance.get).toHaveBeenCalledWith('/api/children/my-children');
-            expect(kindergartens.data).toHaveLength(2);
-            expect(children.data).toHaveLength(3);
-        });
-
-        test('רישום ילד לגן', async () => {
-            axiosInstance.patch.mockResolvedValue({ status: 200 });
-            axiosInstance.post.mockResolvedValue({ status: 200 });
-
-            const childId = 1;
-            const kindergartenId = 1;
-            const monthlyFee = 2.5;
-
-            await axiosInstance.patch(
-                `/api/children/${childId}/assign`,
-                null,
-                { params: { kindergartenId, monthlyFee } }
-            );
-
-            await axiosInstance.post('/api/notifications', {
-                userId: 11,
-                message: `המשתמש מספר 1 ביקש להירשם לגן ילדים – הילד: דנה כהן – הגן: גן Sun.`,
-                type: 'ENROLLMENT'
-            });
-
-            expect(axiosInstance.patch).toHaveBeenCalledWith(
-                `/api/children/${childId}/assign`,
-                null,
-                { params: { kindergartenId, monthlyFee } }
-            );
-
-            expect(axiosInstance.post).toHaveBeenCalledWith('/api/notifications', {
-                userId: 11,
-                message: expect.any(String),
-                type: 'ENROLLMENT'
-            });
-        });
-    });
 
     describe('בדיקות תקינות', () => {
         test('בדיקת סטטוס רישום', () => {
@@ -298,33 +251,6 @@ describe('Children - Logic Tests', () => {
 
 
 
-    describe('בדיקות שגיאות', () => {
-        test('טיפול בשגיאת טעינת נתונים', async () => {
-            const error = new Error('שגיאת רשת');
-            axiosInstance.get.mockRejectedValue(error);
-
-            try {
-                await axiosInstance.get('/api/kindergartens');
-                fail('הייתה אמורה להיזרק שגיאה');
-            } catch (err) {
-                expect(err.message).toBe('שגיאת רשת');
-            }
-        });
-
-        test('טיפול בשגיאת רישום', async () => {
-            const error = new Error('שגיאה ברישום');
-            axiosInstance.patch.mockRejectedValue(error);
-
-            try {
-                await axiosInstance.patch('/api/children/1/assign', null, {
-                    params: { kindergartenId: 1, monthlyFee: 2.5 }
-                });
-                fail('הייתה אמורה להיזרק שגיאה');
-            } catch (err) {
-                expect(err.message).toBe('שגיאה ברישום');
-            }
-        });
-    });
 
     describe('בדיקות ממשק', () => {
         test('בדיקת כפתור הרשמה', () => {

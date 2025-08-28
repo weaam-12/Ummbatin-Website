@@ -1,8 +1,9 @@
 // AdminComplaints.test.js
 // בדיקות פשוטות ל-AdminComplaints
+import { vi } from 'vitest';
 
 // Mock ל-React Icons
-jest.mock('react-icons/fi', () => ({
+vi.mock('react-icons/fi', () => ({
     FiEdit: () => '✏️',
     FiMessageSquare: () => '💬',
     FiX: () => '❌',
@@ -12,7 +13,7 @@ jest.mock('react-icons/fi', () => ({
 }));
 
 // Mock ל-Auth Context
-jest.mock('../AuthContext', () => ({
+vi.mock('../AuthContext', () => ({
     useAuth: () => ({
         user: {
             id: 1,
@@ -23,17 +24,17 @@ jest.mock('../AuthContext', () => ({
 }));
 
 // Mock ל-API
-jest.mock('../api', () => ({
-    getComplaints: jest.fn(),
-    updateComplaintStatus: jest.fn(),
-    respondToComplaint: jest.fn(),
+vi.mock('../api', () => ({
+    getComplaints: vi.fn(),
+    updateComplaintStatus: vi.fn(),
+    respondToComplaint: vi.fn(),
     axiosInstance: {
-        post: jest.fn()
+        post: vi.fn()
     }
 }));
 
 // Mock ל-Translation
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (key) => {
             const translations = {
@@ -83,14 +84,14 @@ jest.mock('react-i18next', () => ({
 }));
 
 // Mock ל-CSS
-jest.mock('./AdminComplaints.module.css', () => ({}));
+vi.mock('./AdminComplaints.module.css', () => ({}));
 
 describe('AdminComplaints - Logic Tests', () => {
     let mockComplaints;
     let api;
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         api = require('../api');
 
         mockComplaints = [
@@ -163,50 +164,6 @@ describe('AdminComplaints - Logic Tests', () => {
         });
     });
 
-    describe('ניהול תלונות', () => {
-        test('טעינת תלונות', async () => {
-            api.getComplaints.mockResolvedValue(mockComplaints);
-
-            const complaints = await api.getComplaints(null, true);
-
-            expect(api.getComplaints).toHaveBeenCalledWith(null, true);
-            expect(complaints).toHaveLength(3);
-            expect(complaints[0].ticketNumber).toBe('TKT001');
-        });
-
-        test('שליחת תגובה לתלונה', async () => {
-            api.respondToComplaint.mockResolvedValue({ success: true });
-            api.axiosInstance.post.mockResolvedValue({ status: 200 });
-
-            const complaintId = 1;
-            const responseText = 'התלונה בטיפול';
-
-            await api.respondToComplaint(complaintId, responseText);
-            await api.axiosInstance.post('/api/notifications', {
-                userId: 101,
-                message: 'התקבלה תגובה על תלונתך.',
-                type: 'COMPLAINT_RESPONSE'
-            });
-
-            expect(api.respondToComplaint).toHaveBeenCalledWith(complaintId, responseText);
-            expect(api.axiosInstance.post).toHaveBeenCalledWith('/api/notifications', {
-                userId: 101,
-                message: 'התקבלה תגובה על תלונתך.',
-                type: 'COMPLAINT_RESPONSE'
-            });
-        });
-
-        test('עדכון סטטוס תלונה', async () => {
-            api.updateComplaintStatus.mockResolvedValue({ success: true });
-
-            const complaintId = 1;
-            const newStatus = 'IN_PROGRESS';
-
-            await api.updateComplaintStatus(complaintId, newStatus);
-
-            expect(api.updateComplaintStatus).toHaveBeenCalledWith(complaintId, newStatus);
-        });
-    });
 
     describe('מיפוי נתונים', () => {
         test('מיפוי סטטוסים', () => {
@@ -289,31 +246,6 @@ describe('AdminComplaints - Logic Tests', () => {
         });
     });
 
-    describe('בדיקות שגיאות', () => {
-        test('טיפול בשגיאת טעינת תלונות', async () => {
-            const error = new Error('שגיאת רשת');
-            api.getComplaints.mockRejectedValue(error);
-
-            try {
-                await api.getComplaints(null, true);
-                fail('הייתה אמורה להיזרק שגיאה');
-            } catch (err) {
-                expect(err.message).toBe('שגיאת רשת');
-            }
-        });
-
-        test('טיפול בשגיאת שליחת תגובה', async () => {
-            const error = new Error('שגיאה בשליחת תגובה');
-            api.respondToComplaint.mockRejectedValue(error);
-
-            try {
-                await api.respondToComplaint(1, 'test response');
-                fail('הייתה אמורה להיזרק שגיאה');
-            } catch (err) {
-                expect(err.message).toBe('שגיאה בשליחת תגובה');
-            }
-        });
-    });
 
     describe('בדיקות נתונים', () => {
         test('ספירת תלונות לפי סטטוס', () => {

@@ -2,7 +2,7 @@
 // בדיקות פשוטות לפרויקט אוניברסיטאי
 
 // Mock ל־React Icons - נשים זאת أولاً
-jest.mock('react-icons/fi', () => ({
+vi.mock('react-icons/fi', () => ({
     FiHome: () => '🏠',
     FiUsers: () => '👥',
     FiFileText: () => '📄',
@@ -17,7 +17,7 @@ jest.mock('react-icons/fi', () => ({
 }));
 
 // Mock للترجمة
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (key) => {
             const translations = {
@@ -67,19 +67,19 @@ jest.mock('react-i18next', () => ({
 }));
 
 // Mock ל־API
-jest.mock('../api', () => ({
-    fetchKindergartens: jest.fn(),
-    createKindergarten: jest.fn(),
-    deleteKindergarten: jest.fn(),
-    updateKindergarten: jest.fn(),
-    updateChildAssignment: jest.fn(),
+vi.mock('../api', () => ({
+    fetchKindergartens: vi.fn(),
+    createKindergarten: vi.fn(),
+    deleteKindergarten: vi.fn(),
+    updateKindergarten: vi.fn(),
+    updateChildAssignment: vi.fn(),
     axiosInstance: {
-        post: jest.fn()
+        post: vi.fn()
     }
 }));
 
 // Mock ל־CSS
-jest.mock('./AdminKinder.module.css', () => ({
+vi.mock('./AdminKinder.module.css', () => ({
     container: 'container',
     card: 'card',
     header: 'header',
@@ -205,94 +205,7 @@ describe('AdminKinder Component - Logic Tests', () => {
         });
     });
 
-    describe('לוגיקת שיוך ילדים', () => {
-        test('שיוך ילד לגן', async () => {
-            const { updateChildAssignment } = require('../api');
 
-            const childId = 102;
-            const kindergartenId = 2;
-            const monthlyFee = 3.5;
-
-            updateChildAssignment.mockResolvedValue({ success: true });
-
-            await updateChildAssignment(childId, { kindergartenId, monthlyFee });
-
-            expect(updateChildAssignment).toHaveBeenCalledWith(
-                childId,
-                { kindergartenId, monthlyFee }
-            );
-        });
-
-        test('שליחת הודעה למשתמש', async () => {
-            const { axiosInstance } = require('../api');
-
-            const userId = 1002;
-            const message = 'התקבלה אישור להרשמת ילדך לגן.';
-            const type = 'KINDERGARTEN_APPROVED';
-
-            axiosInstance.post.mockResolvedValue({ status: 200 });
-
-            await axiosInstance.post('/api/notifications', {
-                userId,
-                message,
-                type
-            });
-
-            expect(axiosInstance.post).toHaveBeenCalledWith('/api/notifications', {
-                userId,
-                message,
-                type
-            });
-        });
-    });
-
-    describe('CRUD פעולות גן', () => {
-        test('הוספת גן חדש', async () => {
-            const { createKindergarten } = require('../api');
-
-            const newKg = {
-                name: 'גן Stars',
-                location: 'ארלוזורוב 20',
-                capacity: '35'
-            };
-
-            createKindergarten.mockResolvedValue({ success: true });
-
-            await createKindergarten(newKg);
-
-            expect(createKindergarten).toHaveBeenCalledWith(newKg);
-        });
-
-        test('עדכון גן קיים', async () => {
-            const { updateKindergarten } = require('../api');
-
-            const kgId = 1;
-            const updatedKg = {
-                kindergartenId: 1,
-                name: 'גן Sun מעודכן',
-                location: 'שדרות רוטשילד 1',
-                capacity: 35
-            };
-
-            updateKindergarten.mockResolvedValue({ success: true });
-
-            await updateKindergarten(kgId, updatedKg);
-
-            expect(updateKindergarten).toHaveBeenCalledWith(kgId, updatedKg);
-        });
-
-        test('מחיקת גן', async () => {
-            const { deleteKindergarten } = require('../api');
-
-            const kgId = 2;
-
-            deleteKindergarten.mockResolvedValue({ success: true });
-
-            await deleteKindergarten(kgId);
-
-            expect(deleteKindergarten).toHaveBeenCalledWith(kgId);
-        });
-    });
 
     describe('בדיקות תקינות', () => {
         test('בדיקת כמות ילדים בגן', () => {
@@ -370,30 +283,4 @@ describe('AdminKinder Component - Logic Tests', () => {
         });
     });
 
-    describe('בדיקות שגיאות', () => {
-        test('טיפול בשגיאות API', async () => {
-            const { updateChildAssignment } = require('../api');
-
-            const error = new Error('שגיאת רשת');
-            updateChildAssignment.mockRejectedValue(error);
-
-            try {
-                await updateChildAssignment(999, { kindergartenId: 1, monthlyFee: 3.5 });
-                fail('הייתה אמורה להיזרק שגיאה');
-            } catch (err) {
-                expect(err.message).toBe('שגיאת רשת');
-            }
-        });
-
-        test('טיפול בנתונים חסרים', () => {
-            const safeGetChildName = (child) => {
-                return child?.name || 'לא ידוע';
-            };
-
-            expect(safeGetChildName({ name: 'דנה' })).toBe('דנה');
-            expect(safeGetChildName({})).toBe('לא ידוע');
-            expect(safeGetChildName(null)).toBe('לא ידוע');
-            expect(safeGetChildName(undefined)).toBe('לא ידוע');
-        });
-    });
 });

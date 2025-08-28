@@ -12,8 +12,14 @@ export default defineConfig({
     css: true, // ✅ هذا يسمح بتحميل CSS بدون مشاكل
     moduleNameMapper: {
       '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    },
+    server: {
+      deps: {
+        inline: ['ws', 'buffer']
+      }
     }},
   define: {
+    global: 'globalThis',
     'Buffer': ['buffer', 'Buffer'], // أضف هذا السطر
   },
   base: "/", // تأكد أنها "/" وليس "/Ummbatin-Website"
@@ -34,6 +40,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      buffer: 'buffer',
+      ws: false,
       '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
     }
   }
