@@ -141,7 +141,7 @@ const Children = () => {
                     message: `המשתמש מספר ${user.userId} ביקש להירשם לגן ילדים – הילד: ${selectedChild?.name} – הגן: ${selectedKindergarten?.name}.`,
                     type: 'ENROLLMENT'
                 });
-                setNotification({ type: 'success', message: 'تم الدفع والتسجيل بنجاح!' });
+                setNotification({ type: 'success', message: 'התשלום בוצע והרישום הושלם בהצלחה' });
                 await reloadChildren();
             }
         } catch (e) {

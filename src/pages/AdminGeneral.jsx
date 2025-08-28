@@ -611,7 +611,7 @@ const AdminGeneral = () => {
                                             <th>{t('payment.amount')}</th>
                                             <th>{t('payment.paymentStatus')}</th>
                                             <th>{t('labels.address')}</th>
-                                            <th>{t('labels.units')}</th>
+                                            <th>{t('labels.area')}</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -628,7 +628,7 @@ const AdminGeneral = () => {
                                                         </Badge>
                                                     </td>
                                                     <td>{payment.propertyAddress || payment.property?.address || '--'}</td>
-                                                    <td>{payment.propertyUnits || payment.property?.numberOfUnits || '--'}</td>
+                                                    <td>{payment.propertyUnits || payment.property?.area || '--'}</td>
                                                 </tr>
                                             ))
                                         ) : (

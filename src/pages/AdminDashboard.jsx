@@ -311,12 +311,6 @@ function AdminDashboard() {
                                         <span>{selectedUser.phone || "--"}</span>
                                     </div>
                                     <div className="info-item">
-                                        <strong>{t("userDetails.status")}:</strong>
-                                        <span className={`role-badge badge-${selectedUser.isActive ? 'success' : 'danger'}`}>
-                                {selectedUser.isActive ? t("userDetails.active") : t("userDetails.inactive")}
-                            </span>
-                                    </div>
-                                    <div className="info-item">
                                         <strong>{t("role")}:</strong>
                                         <span className={`role-badge badge-${getRoleVariant(selectedUser.role)}`}>
                                 {t(`roles.${selectedUser.role?.roleName}`)}
@@ -338,7 +332,7 @@ function AdminDashboard() {
                                         <span>
                                 {selectedUser.properties?.length > 0
                                     ? selectedUser.properties[0].address
-                                    : "--"}
+                                    : "אין כתובת"}
                             </span>
                                     </div>
                                 </div>

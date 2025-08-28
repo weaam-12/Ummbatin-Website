@@ -123,7 +123,7 @@
     },
     "labels": {
       "fullName": "שם מלא",
-      "email": "אימייל",
+      "email": "דוא'ל",
       "phone": "טלפון",
       "idNumber": "תעודת זהות",
       "spouse": "אישה",
@@ -207,9 +207,9 @@
   },
   "login": {
     "title": "התחברות",
-    "email": "אימייל",
+    "email": "דוא'ל",
     "password": "סיסמה",
-    "emailPlaceholder": "הכנס אימייל",
+    "emailPlaceholder": "הכנס דוא'ל",
     "passwordPlaceholder": "הכנס סיסמה",
     "submit": "כניסה",
     "submitting": "מתחבר...",
@@ -219,7 +219,7 @@
   "userManagement": "ניהול משתמשים",
   "register": "רישום משתמש",
   "refresh": "רענון",
-  "email": "אימייל",
+  "email": "דוא'ל",
   "role": "הרשאה",
   "view": "צפייה",
   "changeRole": "שינוי הרשאה",
@@ -402,7 +402,7 @@
     "address": "כתובת: אום בטין",
     "phone": "טלפון: 086796101",
     "fax": "פקס: 088605680",
-    "email": "אימייל: sherut@alqasoum.org.il"
+    "email": "דוא'ל: sherut@alqasoum.org.il"
   },
   "navbar": {
     "education": "חינוך",
@@ -813,7 +813,7 @@
     },
     "contact": {
       "phone": "טלפון",
-      "email": "אימייל"
+      "email": "דוא'ל"
     }
   },
   "garbageComplaint": {
@@ -980,7 +980,7 @@
     "confirmation": "אישור פרטים",
     "placeholders": {
       "fullName": "שם מלא",
-      "email": "אימייל",
+      "email": "דוא'ל",
       "password": "סיסמה",
       "phone": "טלפון",
       "wifeName": "שם אישה {number}",
@@ -991,7 +991,7 @@
     "wifeDefault": "אישה {number}",
     "labels": {
       "name": "שם",
-      "email": "אימייל",
+      "email": "דוא'ל",
       "phone": "טלפון"
     },
     "registerFamily": "רשום משפחה",
