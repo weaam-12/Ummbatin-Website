@@ -223,15 +223,6 @@ function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="stat-card">
-                        <div className="stat-icon">
-                            <FiUser />
-                        </div>
-                        <div className="stat-info">
-                            <h3>{t("stats.activeUsers")}</h3>
-                            <p>{stats.activeUsers}</p>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Users Table */}
@@ -350,8 +341,8 @@ function AdminDashboard() {
                                         <span>{selectedUser.email}</span>
                                     </div>
                                     <div className="info-item">
-                                        <strong>"ת'ז":</strong>
-                                        <span>{selectedUser.user_id}</span>
+                                        <strong>ת'ז</strong>
+                                        <span>{selectedUser.id}</span>
                                     </div>
                                     <div className="info-item">
                                         <strong>{t("labels.phone")}:</strong>
