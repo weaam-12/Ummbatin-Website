@@ -9,6 +9,7 @@ const RegistrationPage = () => {
     const { t } = useTranslation();
     const [step, setStep] = useState(1);
     const [account, setAccount] = useState({
+        userId: "",
         fullName: "",
         email: "",
         password: "",
@@ -31,6 +32,7 @@ const RegistrationPage = () => {
         try {
             const response = await axiosInstance.post("/api/auth/register-family", {
                 user: {
+                    userId: parseInt(account.userId),
                     fullName: account.fullName,
                     email: account.email,
                     password: account.password,
@@ -111,6 +113,13 @@ const RegistrationPage = () => {
                                 placeholder={t('registration.placeholders.fullName')}
                                 value={account.fullName}
                                 onChange={(e) => setAccount({...account, fullName: e.target.value})}
+                            />
+                            <input
+                                type="number"
+                                className={styles.input}
+                                placeholder="ת'ז"
+                                value={account.userId}
+                                onChange={(e) => setAccount({...account, userId: e.target.value})}
                             />
                             <input
                                 type="email"
