@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fi';
 import './AdminGeneral.css';
 import { axiosInstance } from '../api.js';
+import { createWaterReading } from '../api';
 
 const AdminGeneral = () => {
     const { t } = useTranslation();
@@ -320,34 +321,50 @@ const AdminGeneral = () => {
             }
 
             if (currentBillType === 'WATER') {
-                const billsData = usersWithProps.flatMap(user =>
-                    user.properties.map(prop => {
+                // حفظ قراءات المياه أولاً
+                const waterReadingPromises = usersWithProps.flatMap(user =>
+                    user.properties.map(async (prop) => {
                         const propId = prop.id || prop.propertyId;
+                        const reading = waterReadings[propId]?.reading || 15;
+
+                        // حفظ قراءة المياه في قاعدة البيانات
+                        try {
+                            await createWaterReading({
+                                propertyId: propId,
+                                amount: reading,
+                                approved: true,
+                                date: new Date().toISOString(),
+                                isManual: true
+                            });
+                        } catch (error) {
+                            console.error(`Failed to save water reading for property ${propId}:`, error);
+                            // يمكنك التعامل مع الخطأ هنا أو الاستمرار رغم الخطأ
+                        }
+
                         return {
                             userId: user.id,
                             propertyId: propId,
-                            amount: (waterReadings[propId]?.reading || 15) * 30,
-                            reading: waterReadings[propId]?.reading || 15
+                            amount: reading * 30,
+                            reading: reading
                         };
                     })
                 );
+
+                // انتظار حفظ جميع قراءات المياه
+                const billsData = await Promise.all(waterReadingPromises);
+
                 const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
                 await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
 
                 if (response.data.success) {
-                    console.log("✅ مياه success - before setNotification");
-                    console.log("Message:", t('admin.payments.arnonaSuccess'));
-                    setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                     setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
                 }
             } else {
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
                 await notifyAllUsers('נוצרה עבורך חשבונית ארנונה חדשה!', 'ARNONA_BILL');
-                console.log("✅ Arnona success - before setNotification");
-                console.log("Message:", t('admin.payments.arnonaSuccess'));
-                setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
             }
+
             const updatedPayments = await fetchPayments();
             setPayments(updatedPayments);
             setShowBillsModal(false);
@@ -357,7 +374,6 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
-
     const formatPaymentStatus = (status) => {
         switch (status) {
             case 'PAID': return { text: t('payment.status.PAID'), variant: 'success' };

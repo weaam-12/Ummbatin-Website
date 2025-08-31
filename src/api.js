@@ -417,4 +417,11 @@ export const markNotificationAsRead = async (notificationId) => {
     const response = await axiosInstance.patch(`api/notifications/${notificationId}/read`);
     return response.data;
 };
+
+//===================== WATER READING =====================
+export const createWaterReading = async (waterReadingData) => {
+    const response = await axiosInstance.post('api/water-readings', waterReadingData);
+    return response.data;
+};
+
 export default axiosInstance;
