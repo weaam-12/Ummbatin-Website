@@ -134,7 +134,7 @@ const Profile = () => {
             {profile && (
                 <>
                     <div ref={profileRef} className="profile-content">
-                        {/* معلومات الסבסבסבסב الأساسية */}
+                        {/* معلومات المستخدم الأساسية */}
                         <div className="profile-section">
                             <div className="section-title">
                                 <FaUser/> {t("profile.sections.residentInfo")}

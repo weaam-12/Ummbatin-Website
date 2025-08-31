@@ -24,7 +24,6 @@ const GarbageComplaint = () => {
 
     const complaintTypes = [
         { value: "uncollected", label: t("garbageComplaint.types.uncollected") },
-        { value: "overflowing", label: t("garbageComplaint.types.overflowing") },
         { value: "damagedBin", label: t("garbageComplaint.types.damagedBin") },
         { value: "missingBin", label: t("garbageComplaint.types.missingBin") },
         { value: "illegalDumping", label: t("garbageComplaint.types.illegalDumping") },
