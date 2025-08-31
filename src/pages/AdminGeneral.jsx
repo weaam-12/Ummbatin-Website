@@ -880,7 +880,7 @@ const AdminGeneral = () => {
                             <th>{t('labels.address')}</th>
                             {currentBillType === 'WATER' && (
                                 <>
-                                    <th>{t('admin.actions.generateWater')} </th>
+                                    <th>{t('admin.actions.addWaterReadings')} </th>
                                     <th>{t('payment.amount')}</th>
                                 </>
                             )}
