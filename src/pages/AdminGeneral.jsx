@@ -25,7 +25,7 @@ const AdminGeneral = () => {
     const [payments, setPayments] = useState([]);
     const [showBillsModal, setShowBillsModal] = useState(false);
     const [currentBillType, setCurrentBillType] = useState('');
-    const [waterReadings, setWaterReadings] = useState({});       // ✅ قراءة مياه مستقلة لكل عقار
+    const [waterReadings, setWaterReadings] = useState({});       //  قراءة مياه مستقلة لكل عقار
 
     const [events, setEvents] = useState([]);
     const [showEventModal, setShowEventModal] = useState(false);
@@ -218,8 +218,28 @@ const AdminGeneral = () => {
             <Modal show={showBillsModal} onHide={() => setShowBillsModal(false)} size="lg">
                 <Modal.Header closeButton><Modal.Title>{currentBillType === 'ARNONA' ? t('admin.actions.generateArnona') : t('admin.actions.generateWater')}</Modal.Title></Modal.Header>
                 <Modal.Body>
-                    {currentBillType === 'WATER' && <Alert variant="info"><strong>{t('payment.types.water')}</strong><ul><li>سعر الم³: 30 شيكل</li><li>المبلغ = القراءة × 30</li></ul></Alert>}
-                    {currentBillType === 'ARNONA' && <Alert variant="info"><strong>{t('payment.types.arnona')}</strong><ul><li>سعر الم²: 50 شيكل</li><li>المبلغ = المساحة × 50</li></ul></Alert>}
+                    {currentBillType === 'WATER' && (
+                        <>
+                            <td>
+                                <Form.Control
+                                    type="number"
+                                    min="0"
+                                    value={waterReadings[key] ?? 0}
+                                    onChange={(e) => {
+                                        const val = Number(e.target.value);
+                                        setWaterReadings((prev) => ({ ...prev, [key]: val }));
+                                    }}
+                                />
+                            </td>
+                            <td>{(waterReadings[key] ?? 0) * 30}</td>
+                        </>
+                    )}
+                    {currentBillType === 'ARNONA' && (
+                        <>
+                            <td>{prop.area}</td>
+                            <td>{(prop.area * 50).toFixed(2)}</td>
+                        </>
+                    )}
                     <Table striped bordered hover responsive>
                         <thead>
                         <tr>
