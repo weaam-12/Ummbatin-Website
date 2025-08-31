@@ -420,7 +420,7 @@ export const markNotificationAsRead = async (notificationId) => {
 
 //===================== WATER READING =====================
 export const createWaterReading = async (waterReadingData) => {
-    const response = await axiosInstance.post('api/water-readings', waterReadingData);
+    const response = await axiosInstance.post('api/water-readings/by-property', waterReadingData);
     return response.data;
 };
 
