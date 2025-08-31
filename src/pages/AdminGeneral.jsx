@@ -219,27 +219,25 @@ const AdminGeneral = () => {
                 <Modal.Header closeButton><Modal.Title>{currentBillType === 'ARNONA' ? t('admin.actions.generateArnona') : t('admin.actions.generateWater')}</Modal.Title></Modal.Header>
                 <Modal.Body>
                     {currentBillType === 'WATER' && (
-                        <>
-                            <td>
-                                <Form.Control
-                                    type="number"
-                                    min="0"
-                                    value={waterReadings[key] ?? 0}
-                                    onChange={(e) => {
-                                        const val = Number(e.target.value);
-                                        setWaterReadings((prev) => ({ ...prev, [key]: val }));
-                                    }}
-                                />
-                            </td>
-                            <td>{(waterReadings[key] ?? 0) * 30}</td>
-                        </>
+                        <Alert variant="info">
+                            <strong>{t('payment.types.water')}</strong>
+                            <ul>
+                                <li>מחיר למ"ק מים: 30 ש"ח</li>
+                                <li>סכום = קריאת מים × 30</li>
+                            </ul>
+                        </Alert>
                     )}
                     {currentBillType === 'ARNONA' && (
-                        <>
-                            <td>{prop.area}</td>
-                            <td>{(prop.area * 50).toFixed(2)}</td>
-                        </>
+                        <Alert variant="info">
+                            <strong>{t('payment.types.arnona')}</strong>
+                            <ul>
+                                <li>מחיר למ"ר: 50 ש"ח</li>
+                                <li>סכום = שטח × 50</li>
+                            </ul>
+                        </Alert>
                     )}
+
+
                     <Table striped bordered hover responsive>
                         <thead>
                         <tr>
