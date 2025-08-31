@@ -90,7 +90,10 @@ const AdminGeneral = () => {
                     })
                 );
                 await axiosInstance.post('api/payments/generate-custom-water', billsData);
-                setNotification({ type: 'success', message: ${t('admin.payments.waterSuccess')} (${billsData.length}) });
+                setNotification({
+                    type: 'success',
+                    message: `${t('admin.payments.waterSuccess')} (${billsData.length})`
+                });
             } else {
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
