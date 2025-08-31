@@ -218,26 +218,8 @@ const AdminGeneral = () => {
             <Modal show={showBillsModal} onHide={() => setShowBillsModal(false)} size="lg">
                 <Modal.Header closeButton><Modal.Title>{currentBillType === 'ARNONA' ? t('admin.actions.generateArnona') : t('admin.actions.generateWater')}</Modal.Title></Modal.Header>
                 <Modal.Body>
-                    {currentBillType === 'WATER' && (
-                        <Alert variant="info">
-                            <strong>{t('payment.types.water')}</strong>
-                            <ul>
-                                <li>מחיר למ"ק מים: 30 ש"ח</li>
-                                <li>סכום = קריאת מים × 30</li>
-                            </ul>
-                        </Alert>
-                    )}
-                    {currentBillType === 'ARNONA' && (
-                        <Alert variant="info">
-                            <strong>{t('payment.types.arnona')}</strong>
-                            <ul>
-                                <li>מחיר למ"ר: 50 ש"ח</li>
-                                <li>סכום = שטח × 50</li>
-                            </ul>
-                        </Alert>
-                    )}
-
-
+                    {currentBillType === 'WATER' && <Alert variant="info"><strong>{t('payment.types.water')}</strong><ul><li>سعر الم³: 30 شيكل</li><li>المبلغ = القراءة × 30</li></ul></Alert>}
+                    {currentBillType === 'ARNONA' && <Alert variant="info"><strong>{t('payment.types.arnona')}</strong><ul><li>سعر الم²: 50 شيكل</li><li>المبلغ = المساحة × 50</li></ul></Alert>}
                     <Table striped bordered hover responsive>
                         <thead>
                         <tr>
