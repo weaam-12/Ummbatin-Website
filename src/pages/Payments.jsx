@@ -195,13 +195,10 @@ const Payments = () => {
                 // notify admin
                 await axiosInstance.post('/api/notifications', {
                     userId: 4,
-                    message: t('payments.adminNotification', {
-                        userId: user.userId,
-                        type: currentPayment.type === 'arnona' ? t('payments.types.arnona') : t('payments.types.water'),
-                        amount: currentPayment.amount
-                    }),
+                    message: `שולם ${currentPayment.type === 'arnona' ? t('payments.types.arnona') : t('payments.types.water')} עבור משתמש מספר ${user.userId}`,
                     type: 'PAYMENT'
                 });
+
 
                 // refresh payments list (optional)
                 const refreshed = await getUserPayments(user?.userId);
