@@ -319,18 +319,20 @@ const AdminGeneral = () => {
             }
 
             if (currentBillType === 'WATER') {
-                const billsData = usersWithProps.flatMap(user =>
-                    user.properties.map(prop => {
-                        const propId = prop.id || prop.propertyId;
-                        return {
+                const billsData = usersWithProps.flatMap(({ user, prop }) => {
+                    const propId = prop.id || prop.propertyId;
+                    const reading = waterReadings[propId] || 0;
+                    const amount = reading * 30;
+
+                    return amount > 0
+                        ? [{
                             userId: user.id,
                             propertyId: propId,
-                            amount: (waterReadings[propId]?.reading ) * 30,
-                            reading: waterReadings[propId]?.reading,
+                            amount,
                             manual: true
-                        };
-                    })
-                );
+                }]
+                : [];
+                });
                 const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
                 await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
 
