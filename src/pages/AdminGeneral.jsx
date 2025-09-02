@@ -330,8 +330,8 @@ const AdminGeneral = () => {
                             propertyId: propId,
                             amount,
                             manual: true
-                }]
-                : [];
+                        }]
+                        : [];
                 });
                 console.log("📦 billsData:", billsData);
 
@@ -342,20 +342,14 @@ const AdminGeneral = () => {
                         amount: bill.amount,
                         status: 'PENDING'
                     });
-                }                await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
-
-                if (response.data.success) {
-                    console.log("✅ مياه success - before setNotification");
-                    console.log("Message:", t('admin.payments.arnonaSuccess'));
-                    setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
-                    setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
                 }
+                await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
+
+                // تم إزالة جزء response غير الموجود
+                setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
             } else {
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
                 await notifyAllUsers('נוצרה עבורך חשבונית ארנונה חדשה!', 'ARNONA_BILL');
-                console.log("✅ Arnona success - before setNotification");
-                console.log("Message:", t('admin.payments.arnonaSuccess'));
-                setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
             }
             const updatedPayments = await fetchPayments();
@@ -367,6 +361,7 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
+
 
     const formatPaymentStatus = (status) => {
         switch (status) {
