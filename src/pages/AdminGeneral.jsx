@@ -136,7 +136,10 @@ const AdminGeneral = () => {
                 user.properties.forEach(property => {
                     const propId = property.id || property.propertyId;
                     if (propId && user.id) {
-                        readings[propId] = { userId: user.id, reading: Math.floor(Math.random() * 21) + 10 };
+                        readings[propId] = {
+                            userId: user.id,
+                            reading: Math.floor(Math.random() * 21) + 10 // 10-30
+                        };
                     }
                 });
             }
