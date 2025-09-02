@@ -1,3 +1,4 @@
+// AdminGeneral.jsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -151,11 +152,10 @@ const AdminGeneral = () => {
                 const propId = p.id || p.propertyId;
                 initial[propId] = {
                     userId: u.id,
-                    reading: waterReadings[propId]?.reading
+                    reading: waterReadings[propId]?.reading ?? 15
                 };
             })
         );
-        console.log("📦 waterReadings بعد الفتح:", initial);
         setWaterReadings(initial);
         setManualMode(true);
         setShowBillsModal(true);
@@ -320,50 +320,43 @@ const AdminGeneral = () => {
             }
 
             if (currentBillType === 'WATER') {
-                const billsData = usersWithProps.flatMap(({ user, prop }) => {
-                    const propId = prop.id || prop.propertyId;
-                    const reading = waterReadings[propId]?.reading ?? 0;
-                    const amount = reading * 30;
-
-                    return amount > 0
-                        ? [{
+                const billsData = usersWithProps.flatMap(user =>
+                    user.properties.map(prop => {
+                        const propId = prop.id || prop.propertyId;
+                        return {
                             userId: user.id,
                             propertyId: propId,
-                            amount,
-                            manual: true
-                        }]
-                        : [];
-                });
-                console.log("📦 billsData:", billsData);
-
-                for (const bill of billsData) {
-                    await axiosInstance.post('api/payments/create-water-payment', {
-                        userId: bill.userId,
-                        propertyId: bill.propertyId,
-                        amount: bill.amount,
-                        status: 'PENDING'
-                    });
-                }
+                            amount: (waterReadings[propId]?.reading || 15) * 30,
+                            reading: waterReadings[propId]?.reading || 15
+                        };
+                    })
+                );
+                const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
                 await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
 
-                // تم إزالة جزء response غير الموجود
-                setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
+                if (response.data.success) {
+                    console.log("✅ مياه success - before setNotification");
+                    console.log("Message:", t('admin.payments.arnonaSuccess'));
+                    setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
+                    setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
+                }
             } else {
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
                 await notifyAllUsers('נוצרה עבורך חשבונית ארנונה חדשה!', 'ARNONA_BILL');
+                console.log("✅ Arnona success - before setNotification");
+                console.log("Message:", t('admin.payments.arnonaSuccess'));
+                setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
             }
             const updatedPayments = await fetchPayments();
             setPayments(updatedPayments);
             setShowBillsModal(false);
         } catch (error) {
-            console.log(error);
             setNotification({ type: 'danger', message: t('admin.payments.generateError') });
         } finally {
             setLoading(false);
         }
     };
-
 
     const formatPaymentStatus = (status) => {
         switch (status) {
@@ -887,7 +880,7 @@ const AdminGeneral = () => {
                             <th>{t('labels.address')}</th>
                             {currentBillType === 'WATER' && (
                                 <>
-                                    <th>{t('admin.actions.generateWater')} </th>
+                                    <th>{t('admin.water.reading')} </th>
                                     <th>{t('payment.amount')}</th>
                                 </>
                             )}
@@ -931,7 +924,7 @@ const AdminGeneral = () => {
                                                 <Form.Control
                                                     type="number"
                                                     min="0"
-                                                    value={waterReadings[key] }
+                                                    value={waterReadings[key] ?? 15}
                                                     onChange={(e) => {
                                                         const val = Number(e.target.value);
                                                         setWaterReadings((prev) => ({
@@ -941,7 +934,7 @@ const AdminGeneral = () => {
                                                     }}
                                                 />
                                             </td>
-                                            <td>{(waterReadings[key]) * 30}</td>
+                                            <td>{(waterReadings[key] ?? 15) * 30}</td>
                                         </>
                                     )}
                                     {currentBillType === 'ARNONA' && (
