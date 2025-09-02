@@ -155,6 +155,7 @@ const AdminGeneral = () => {
                 };
             })
         );
+        console.log("📦 waterReadings بعد الفتح:", initial);
         setWaterReadings(initial);
         setManualMode(true);
         setShowBillsModal(true);
@@ -356,6 +357,7 @@ const AdminGeneral = () => {
             setPayments(updatedPayments);
             setShowBillsModal(false);
         } catch (error) {
+            console.log(error);
             setNotification({ type: 'danger', message: t('admin.payments.generateError') });
         } finally {
             setLoading(false);
