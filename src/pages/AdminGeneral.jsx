@@ -47,6 +47,7 @@ const AdminGeneral = () => {
         priority: 0,
         expiresAt: ''
     });
+
     // Helper to close notification automatically
     useEffect(() => {
         if (notification) {
@@ -136,7 +137,7 @@ const AdminGeneral = () => {
                 user.properties.forEach(property => {
                     const propId = property.id || property.propertyId;
                     if (propId && user.id) {
-                        readings[propId] = { userId: user.id, reading: Math.floor(Math.random() * 21) + 10 };
+                        readings[propId] = Math.floor(Math.random() * 21) + 10;
                     }
                 });
             }
@@ -146,17 +147,8 @@ const AdminGeneral = () => {
 
     const handleOpenWaterBillsModal = () => {
         setCurrentBillType('WATER');
-        const initial = {};
-        users.forEach(u =>
-            u.properties?.forEach(p => {
-                const propId = p.id || p.propertyId;
-                initial[propId] = {
-                    userId: u.id,
-                    reading: waterReadings[propId]?.reading
-                };
-            })
-        );
-        setWaterReadings(initial);
+        const initialReadings = generateRandomWaterReadings();
+        setWaterReadings(initialReadings);
         setManualMode(true);
         setShowBillsModal(true);
     };
@@ -245,6 +237,14 @@ const AdminGeneral = () => {
         }
     };
 
+    const validateWaterReadings = () => {
+        for (const propId in waterReadings) {
+            if (waterReadings[propId] === undefined || waterReadings[propId] === null || isNaN(waterReadings[propId])) {
+                return false;
+            }
+        }
+        return true;
+    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -320,14 +320,21 @@ const AdminGeneral = () => {
             }
 
             if (currentBillType === 'WATER') {
+                // التحقق من القراءات
+                if (!validateWaterReadings()) {
+                    setNotification({ type: 'danger', message: t('admin.payments.invalidReadings') });
+                    return;
+                }
+
                 const billsData = usersWithProps.flatMap(user =>
                     user.properties.map(prop => {
                         const propId = prop.id || prop.propertyId;
+                        const reading = waterReadings[propId] || 0;
                         return {
                             userId: user.id,
                             propertyId: propId,
-                            amount: (waterReadings[propId]?.reading) * 30,
-                            reading: waterReadings[propId]?.reading
+                            amount: reading * 30,
+                            reading: reading
                         };
                     })
                 );
@@ -335,17 +342,11 @@ const AdminGeneral = () => {
                 await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
 
                 if (response.data.success) {
-                    console.log("✅ مياه success - before setNotification");
-                    console.log("Message:", t('admin.payments.arnonaSuccess'));
-                    setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                     setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
                 }
             } else {
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
                 await notifyAllUsers('נוצרה עבורך חשבונית ארנונה חדשה!', 'ARNONA_BILL');
-                console.log("✅ Arnona success - before setNotification");
-                console.log("Message:", t('admin.payments.arnonaSuccess'));
-                setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
             }
             const updatedPayments = await fetchPayments();
@@ -924,7 +925,7 @@ const AdminGeneral = () => {
                                                 <Form.Control
                                                     type="number"
                                                     min="0"
-                                                    value={waterReadings[key]}
+                                                    value={waterReadings[key] || ''}
                                                     onChange={(e) => {
                                                         const val = Number(e.target.value);
                                                         setWaterReadings((prev) => ({
@@ -934,7 +935,7 @@ const AdminGeneral = () => {
                                                     }}
                                                 />
                                             </td>
-                                            <td>{(waterReadings[key]) * 30}</td>
+                                            <td>{((waterReadings[key] || 0) * 30).toFixed(2)}</td>
                                         </>
                                     )}
                                     {currentBillType === 'ARNONA' && (
