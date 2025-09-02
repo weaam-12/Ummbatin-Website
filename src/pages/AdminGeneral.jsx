@@ -1,3 +1,4 @@
+// AdminGeneral.jsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -82,17 +83,17 @@ const AdminGeneral = () => {
     // إرسال إشعار لجميع المستخدمين
     const notifyAllUsers = async (message, type) => {
         try {
-            const response = await axiosInstance.post('/api/notifications/broadcast', {
-                message,
-                type
-            });
-
-            console.log('✅ تم إرسال الإشعار الجماعي بنجاح:', response.data);
-            return response.data;
-
+            const { data: allUsers } = await axiosInstance.get('api/users/all');
+            const promises = allUsers.content.map(user =>
+                axiosInstance.post('/api/notifications', {
+                    userId: user.userId,
+                    message,
+                    type
+                })
+            );
+            await Promise.all(promises);
         } catch (error) {
-            console.error('Error broadcasting notification:', error.response?.data || error.message);
-            throw error;
+            console.error('Error notifying users:', error);
         }
     };
 
@@ -151,11 +152,10 @@ const AdminGeneral = () => {
                 const propId = p.id || p.propertyId;
                 initial[propId] = {
                     userId: u.id,
-                    reading: waterReadings[propId]?.reading
+                    reading: waterReadings[propId]?.reading ?? 15
                 };
             })
         );
-        console.log("📦 waterReadings بعد الفتح:", initial);
         setWaterReadings(initial);
         setManualMode(true);
         setShowBillsModal(true);
@@ -320,50 +320,38 @@ const AdminGeneral = () => {
             }
 
             if (currentBillType === 'WATER') {
-                const billsData = usersWithProps.flatMap(({ user, prop }) => {
-                    const propId = prop.id || prop.propertyId;
-                    const reading = waterReadings[propId]?.reading ?? 0;
-                    const amount = reading * 30;
-
-                    return amount > 0
-                        ? [{
+                const billsData = usersWithProps.flatMap(user =>
+                    user.properties.map(prop => {
+                        const propId = prop.id || prop.propertyId;
+                        return {
                             userId: user.id,
                             propertyId: propId,
-                            amount,
-                            manual: true
-                        }]
-                        : [];
-                });
-                console.log("📦 billsData:", billsData);
-
-                for (const bill of billsData) {
-                    await axiosInstance.post('api/payments/create-water-payment', {
-                        userId: bill.userId,
-                        propertyId: bill.propertyId,
-                        amount: bill.amount,
-                        status: 'PENDING'
-                    });
-                }
+                            amount: (waterReadings[propId]?.reading || 15) * 30,
+                            reading: waterReadings[propId]?.reading || 15
+                        };
+                    })
+                );
+                const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
                 await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
 
-                // تم إزالة جزء response غير الموجود
-                setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
+                if (response.data.success) {
+                    setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
+                }
             } else {
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
                 await notifyAllUsers('נוצרה עבורך חשבונית ארנונה חדשה!', 'ARNONA_BILL');
+
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
             }
             const updatedPayments = await fetchPayments();
             setPayments(updatedPayments);
             setShowBillsModal(false);
         } catch (error) {
-            console.log(error);
             setNotification({ type: 'danger', message: t('admin.payments.generateError') });
         } finally {
             setLoading(false);
         }
     };
-
 
     const formatPaymentStatus = (status) => {
         switch (status) {
@@ -570,7 +558,7 @@ const AdminGeneral = () => {
                                         <Row>
                                             <Col md={6}>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>{t('labels.area')}</Form.Label>
+                                                    <Form.Label>{t('labels.area')} (م²)</Form.Label>
                                                     <Form.Control
                                                         type="number"
                                                         value={newProperty.area}
@@ -618,7 +606,7 @@ const AdminGeneral = () => {
                                             <th>{t('payment.amount')}</th>
                                             <th>{t('payment.paymentStatus')}</th>
                                             <th>{t('labels.address')}</th>
-                                            <th>{t('labels.area')}</th>
+                                            <th>{t('labels.units')}</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -635,7 +623,7 @@ const AdminGeneral = () => {
                                                         </Badge>
                                                     </td>
                                                     <td>{payment.propertyAddress || payment.property?.address || '--'}</td>
-                                                    <td>{payment.propertyUnits || payment.property?.area || '--'}</td>
+                                                    <td>{payment.propertyUnits || payment.property?.numberOfUnits || '--'}</td>
                                                 </tr>
                                             ))
                                         ) : (
@@ -875,7 +863,7 @@ const AdminGeneral = () => {
                             <strong>{t('payment.types.arnona')} – {t('common.description')}</strong>
                             <ul className="mb-0">
                                 <li>{t('payment.unitPrice')}: 50 {t('general.currency')}</li>
-                                <li>{t('payment.total')} = {t('labels.area')} × 50 </li>
+                                <li>{t('payment.total')} = {t('labels.area')} × 50 × {t('labels.units')}</li>
                             </ul>
                         </Alert>
                     )}
@@ -887,13 +875,14 @@ const AdminGeneral = () => {
                             <th>{t('labels.address')}</th>
                             {currentBillType === 'WATER' && (
                                 <>
-                                    <th>{t('admin.actions.generateWater')} </th>
+                                    <th>{t('admin.water.reading')} </th>
                                     <th>{t('payment.amount')}</th>
                                 </>
                             )}
                             {currentBillType === 'ARNONA' && (
                                 <>
-                                    <th>{t('labels.area')} </th>
+                                    <th>{t('labels.area')} (م²)</th>
+                                    <th>{t('labels.units')}</th>
                                     <th>{t('payment.amount')}</th>
                                 </>
                             )}
@@ -904,6 +893,7 @@ const AdminGeneral = () => {
                             const flatProps = [];
                             users.forEach((user) => {
                                 user.properties?.forEach((prop) => {
+                                    // استخدم id أو propertyId معًا لضمان الفريدية
                                     const key = prop.id || prop.propertyId;
                                     flatProps.push({user, prop, key});
                                 });
@@ -931,7 +921,7 @@ const AdminGeneral = () => {
                                                 <Form.Control
                                                     type="number"
                                                     min="0"
-                                                    value={waterReadings[key] }
+                                                    value={waterReadings[key] ?? 15}
                                                     onChange={(e) => {
                                                         const val = Number(e.target.value);
                                                         setWaterReadings((prev) => ({
@@ -941,13 +931,14 @@ const AdminGeneral = () => {
                                                     }}
                                                 />
                                             </td>
-                                            <td>{(waterReadings[key]) * 30}</td>
+                                            <td>{(waterReadings[key] ?? 15) * 30}</td>
                                         </>
                                     )}
                                     {currentBillType === 'ARNONA' && (
                                         <>
                                             <td>{prop.area}</td>
-                                            <td>{(prop.area * 50).toFixed(2)}</td>
+                                            <td>{prop.numberOfUnits}</td>
+                                            <td>{(prop.area * 50 * prop.numberOfUnits).toFixed(2)}</td>
                                         </>
                                     )}
                                 </tr>
