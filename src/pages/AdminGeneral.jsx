@@ -152,7 +152,7 @@ const AdminGeneral = () => {
                 const propId = p.id || p.propertyId;
                 initial[propId] = {
                     userId: u.id,
-                    reading: waterReadings[propId]?.reading ?? 15
+                    reading: waterReadings[propId]?.reading
                 };
             })
         );
@@ -326,8 +326,8 @@ const AdminGeneral = () => {
                         return {
                             userId: user.id,
                             propertyId: propId,
-                            amount: (waterReadings[propId]?.reading || 15) * 30,
-                            reading: waterReadings[propId]?.reading || 15
+                            amount: (waterReadings[propId]?.reading) * 30,
+                            reading: waterReadings[propId]?.reading
                         };
                     })
                 );
@@ -924,7 +924,7 @@ const AdminGeneral = () => {
                                                 <Form.Control
                                                     type="number"
                                                     min="0"
-                                                    value={waterReadings[key] ?? 15}
+                                                    value={waterReadings[key]}
                                                     onChange={(e) => {
                                                         const val = Number(e.target.value);
                                                         setWaterReadings((prev) => ({
@@ -934,7 +934,7 @@ const AdminGeneral = () => {
                                                     }}
                                                 />
                                             </td>
-                                            <td>{(waterReadings[key] ?? 15) * 30}</td>
+                                            <td>{(waterReadings[key]) * 30}</td>
                                         </>
                                     )}
                                     {currentBillType === 'ARNONA' && (
