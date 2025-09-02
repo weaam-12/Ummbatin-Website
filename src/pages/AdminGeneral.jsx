@@ -333,7 +333,7 @@ const AdminGeneral = () => {
                             userId: user.id,
                             propertyId: propId,
                             amount: amount,
-                            reading: reading
+                            manual: true
                         };
                     })
                 );
