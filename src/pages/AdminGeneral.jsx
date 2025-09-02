@@ -88,7 +88,7 @@ const AdminGeneral = () => {
                 type
             });
 
-            console.log('✅ تم إرسال الإشعار الجماعي بنجاح:', response.data);
+            console.log(' تم إرسال الإشعار الجماعي بنجاح:', response.data);
             return response.data;
 
         } catch (error) {
@@ -323,31 +323,31 @@ const AdminGeneral = () => {
                 const billsData = usersWithProps.flatMap(user =>
                     user.properties.map(prop => {
                         const propId = prop.id || prop.propertyId;
+                        const reading = waterReadings[propId]?.reading || 0;
+                        const amount = reading * 30; // حساب المبلغ بناء على القراءة × 30
+
                         return {
                             userId: user.id,
                             propertyId: propId,
-                            amount: (waterReadings[propId]?.reading ) * 30,
-                            reading: waterReadings[propId]?.reading
+                            amount: amount,
+                            reading: reading
                         };
                     })
                 );
+
                 const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
                 await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
 
                 if (response.data.success) {
-                    console.log("✅ مياه success - before setNotification");
-                    console.log("Message:", t('admin.payments.arnonaSuccess'));
-                    setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                     setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
                 }
             } else {
+                // كود الأرنونا يبقى كما هو
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
                 await notifyAllUsers('נוצרה עבורך חשבונית ארנונה חדשה!', 'ARNONA_BILL');
-                console.log("✅ Arnona success - before setNotification");
-                console.log("Message:", t('admin.payments.arnonaSuccess'));
-                setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
             }
+
             const updatedPayments = await fetchPayments();
             setPayments(updatedPayments);
             setShowBillsModal(false);
@@ -357,6 +357,7 @@ const AdminGeneral = () => {
             setLoading(false);
         }
     };
+
 
     const formatPaymentStatus = (status) => {
         switch (status) {

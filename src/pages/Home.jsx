@@ -103,14 +103,14 @@ const Home = () => {
     /* ---------- Content ---------- */
     const services = [
         { name: t('services.water'), icon: '💧', path: '' },
-        { name: t('services.arnona'), icon: '🏠', path: '/arnona' },
-        { name: t('services.waste'), icon: '🗑️', path: '/waste' },
-        { name: t('services.kindergarten'), icon: '🧒', path: '/kindergarten' },
-        { name: t('services.transactions'), icon: '📝', path: '/transactions' },
-        { name: t('services.emergency'), icon: '🚨', path: '/emergency' },
-        { name: t('services.payments'), icon: '💳', path: '/payments' },
-        { name: t('services.requests'), icon: '📬', path: '/requests' },
-        { name: t('services.news'), icon: '📰', path: '/news' }
+        { name: t('services.arnona'), icon: '🏠', path: '' },
+        { name: t('services.waste'), icon: '🗑️', path: '' },
+        { name: t('services.kindergarten'), icon: '🧒', path: '' },
+        { name: t('services.transactions'), icon: '📝', path: '' },
+        { name: t('services.emergency'), icon: '🚨', path: '' },
+        { name: t('services.payments'), icon: '💳', path: '' },
+        { name: t('services.requests'), icon: '📬', path: '' },
+        { name: t('services.news'), icon: '📰', path: '' }
     ];
 
     return (
