@@ -326,7 +326,8 @@ const AdminGeneral = () => {
                             userId: user.id,
                             propertyId: propId,
                             amount: (waterReadings[propId]?.reading ) * 30,
-                            reading: waterReadings[propId]?.reading
+                            reading: waterReadings[propId]?.reading,
+                            manual: true
                         };
                     })
                 );
