@@ -1,4 +1,3 @@
-// AdminGeneral.jsx
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -7,7 +6,7 @@ import {
 } from 'react-bootstrap';
 import {
     FiUsers, FiDollarSign, FiPlus, FiCalendar,
-    FiHome, FiFileText, FiDroplet, FiMapPin, FiActivity, FiImage,
+    FiHome, FiFileText, FiDroplet, FiMapPin, FiSpeaker , FiImage,
     FiEye, FiTrash2, FiEdit, FiRefreshCw
 } from 'react-icons/fi';
 import './AdminGeneral.css';
@@ -33,12 +32,20 @@ const AdminGeneral = () => {
 
     const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
     const [newProperty, setNewProperty] = useState({ userId: '', address: '', area: '', numberOfUnits: 1 });
+    const [manualMode, setManualMode] = useState(false);
 
     const [showEditEventModal, setShowEditEventModal] = useState(false);
     const [currentEvent, setCurrentEvent] = useState(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [newImage, setNewImage] = useState(null);
-
+    const [announcements, setAnnouncements] = useState([]);
+    const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+    const [newAnnouncement, setNewAnnouncement] = useState({
+        title: '',
+        content: '',
+        priority: 0,
+        expiresAt: ''
+    });
     // Helper to close notification automatically
     useEffect(() => {
         if (notification) {
@@ -69,6 +76,23 @@ const AdminGeneral = () => {
             setNotification({ type: 'danger', message: t('admin.events.deleteError') });
         } finally {
             setLoading(false);
+        }
+    };
+
+    // إرسال إشعار لجميع المستخدمين
+    const notifyAllUsers = async (message, type) => {
+        try {
+            const response = await axiosInstance.post('/api/notifications/broadcast', {
+                message,
+                type
+            });
+
+            console.log('✅ تم إرسال الإشعار الجماعي بنجاح:', response.data);
+            return response.data;
+
+        } catch (error) {
+            console.error('Error broadcasting notification:', error.response?.data || error.message);
+            throw error;
         }
     };
 
@@ -121,7 +145,19 @@ const AdminGeneral = () => {
 
     const handleOpenWaterBillsModal = () => {
         setCurrentBillType('WATER');
-        setWaterReadings(generateRandomWaterReadings());
+        const initial = {};
+        users.forEach(u =>
+            u.properties?.forEach(p => {
+                const propId = p.id || p.propertyId;
+                initial[propId] = {
+                    userId: u.id,
+                    reading: waterReadings[propId]?.reading
+                };
+            })
+        );
+        console.log("📦 waterReadings بعد الفتح:", initial);
+        setWaterReadings(initial);
+        setManualMode(true);
         setShowBillsModal(true);
     };
 
@@ -209,10 +245,14 @@ const AdminGeneral = () => {
         }
     };
 
+
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
             try {
+                if (activeTab === 'announcements') {
+                    await fetchAnnouncements();
+                }
                 if (activeTab === 'payments') {
                     const paymentsRes = await fetchPayments();
                     setPayments(paymentsRes);
@@ -257,6 +297,7 @@ const AdminGeneral = () => {
             await fetchEvents();
             setShowEventModal(false);
             setNewEvent({ title: '', description: '', location: '', image: null, date: '' });
+            await notifyAllUsers('התווספה אירוע חדש!', 'NEW_EVENT');
             setNotification({ type: 'success', message: t('admin.events.addSuccess') });
         } catch (error) {
             setNotification({ type: 'danger', message: t('admin.events.addError') });
@@ -279,34 +320,50 @@ const AdminGeneral = () => {
             }
 
             if (currentBillType === 'WATER') {
-                const billsData = usersWithProps.flatMap(user =>
-                    user.properties.map(prop => {
-                        const propId = prop.id || prop.propertyId;
-                        return {
+                const billsData = usersWithProps.flatMap(({ user, prop }) => {
+                    const propId = prop.id || prop.propertyId;
+                    const reading = waterReadings[propId]?.reading ?? 0;
+                    const amount = reading * 30;
+
+                    return amount > 0
+                        ? [{
                             userId: user.id,
                             propertyId: propId,
-                            amount: (waterReadings[propId]?.reading || 15) * 30,
-                            reading: waterReadings[propId]?.reading || 15
-                        };
-                    })
-                );
-                const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
-                if (response.data.success) {
-                    setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
+                            amount,
+                            manual: true
+                        }]
+                        : [];
+                });
+                console.log("📦 billsData:", billsData);
+
+                for (const bill of billsData) {
+                    await axiosInstance.post('api/payments/create-water-payment', {
+                        userId: bill.userId,
+                        propertyId: bill.propertyId,
+                        amount: bill.amount,
+                        status: 'PENDING'
+                    });
                 }
+                await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
+
+                // تم إزالة جزء response غير الموجود
+                setNotification({ type: 'success', message: `${t('admin.payments.waterSuccess')} (${billsData.length})` });
             } else {
                 await axiosInstance.post('api/payments/generate-arnona', null, { params: { month, year } });
+                await notifyAllUsers('נוצרה עבורך חשבונית ארנונה חדשה!', 'ARNONA_BILL');
                 setNotification({ type: 'success', message: t('admin.payments.arnonaSuccess') });
             }
             const updatedPayments = await fetchPayments();
             setPayments(updatedPayments);
             setShowBillsModal(false);
         } catch (error) {
+            console.log(error);
             setNotification({ type: 'danger', message: t('admin.payments.generateError') });
         } finally {
             setLoading(false);
         }
     };
+
 
     const formatPaymentStatus = (status) => {
         switch (status) {
@@ -316,7 +373,47 @@ const AdminGeneral = () => {
             default: return { text: status, variant: 'secondary' };
         }
     };
+    const fetchAnnouncements = async () => {
+        try {
+            const response = await axiosInstance.get('/api/announcements');
+            setAnnouncements(response.data);
+        } catch (error) {
+            console.error('Failed to fetch announcements:', error);
+        }
+    };
 
+    const handleDeleteAnnouncement = async (id) => {
+        try {
+            setLoading(true);
+            await axiosInstance.delete(`/api/announcements/${id}`);
+            await fetchAnnouncements();
+            setNotification({ type: 'success', message: t('admin.announcements.deleteSuccess') });
+        } catch (error) {
+            setNotification({ type: 'danger', message: t('admin.announcements.deleteError') });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddAnnouncement = async () => {
+        try {
+            setLoading(true);
+            const announcementData = {
+                ...newAnnouncement,
+                expiresAt: newAnnouncement.expiresAt ? new Date(newAnnouncement.expiresAt) : null
+            };
+            await axiosInstance.post('/api/announcements', announcementData);
+            await notifyAllUsers('התווספה הודעה חדשה!', 'NEW_ANNOUNCEMENT');
+            await fetchAnnouncements();
+            setShowAnnouncementModal(false);
+            setNewAnnouncement({ title: '', content: '', priority: 0, expiresAt: '' });
+            setNotification({ type: 'success', message: t('admin.announcements.addSuccess') });
+        } catch (error) {
+            setNotification({ type: 'danger', message: t('admin.announcements.addError') });
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <div className="admin-dashboard">
             {notification && (
@@ -333,15 +430,19 @@ const AdminGeneral = () => {
                     <ul className="sidebar-menu">
                         <li className={activeTab === 'dashboard' ? 'active' : ''}
                             onClick={() => setActiveTab('dashboard')}>
-                            <FiHome /> {t('admin.menu.dashboard')}
+                            <FiHome/> {t('admin.menu.dashboard')}
                         </li>
                         <li className={activeTab === 'payments' ? 'active' : ''}
                             onClick={() => setActiveTab('payments')}>
-                            <FiDollarSign /> {t('admin.menu.payments')}
+                            <FiDollarSign/> {t('admin.menu.payments')}
                         </li>
                         <li className={activeTab === 'events' ? 'active' : ''}
                             onClick={() => setActiveTab('events')}>
-                            <FiCalendar /> {t('admin.menu.events')}
+                            <FiCalendar/> {t('admin.menu.events')}
+                        </li>
+                        <li className={activeTab === 'announcements' ? 'active' : ''}
+                            onClick={() => setActiveTab('announcements')}>
+                            <FiSpeaker/> {t('admin.menu.announcements')}
                         </li>
                     </ul>
                 </Col>
@@ -469,7 +570,7 @@ const AdminGeneral = () => {
                                         <Row>
                                             <Col md={6}>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>{t('labels.area')} (م²)</Form.Label>
+                                                    <Form.Label>{t('labels.area')}</Form.Label>
                                                     <Form.Control
                                                         type="number"
                                                         value={newProperty.area}
@@ -515,9 +616,9 @@ const AdminGeneral = () => {
                                             <th>{t('labels.fullName')}</th>
                                             <th>{t('payment.types.water')}/{t('payment.types.arnona')}</th>
                                             <th>{t('payment.amount')}</th>
-                                            <th>{t('payment.status')}</th>
+                                            <th>{t('payment.paymentStatus')}</th>
                                             <th>{t('labels.address')}</th>
-                                            <th>{t('labels.units')}</th>
+                                            <th>{t('labels.area')}</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -534,7 +635,7 @@ const AdminGeneral = () => {
                                                         </Badge>
                                                     </td>
                                                     <td>{payment.propertyAddress || payment.property?.address || '--'}</td>
-                                                    <td>{payment.propertyUnits || payment.property?.numberOfUnits || '--'}</td>
+                                                    <td>{payment.propertyUnits || payment.property?.area || '--'}</td>
                                                 </tr>
                                             ))
                                         ) : (
@@ -546,7 +647,44 @@ const AdminGeneral = () => {
                                     </Table>
                                 </div>
                             )}
+                            {activeTab === 'announcements' && (
+                                <div className="announcements-section">
+                                    <div className="d-flex justify-content-between align-items-center mb-4">
+                                        <h3>{t('admin.announcements.title')}</h3>
+                                        <Button variant="primary" onClick={() => setShowAnnouncementModal(true)}>
+                                            <FiPlus /> {t('admin.actions.addAnnouncement')}
+                                        </Button>
+                                    </div>
 
+                                    <Row>
+                                        {announcements.map((announcement) => (
+                                            <Col md={6} key={announcement.id} className="mb-3">
+                                                <Card>
+                                                    <Card.Body>
+                                                        <Card.Title>{announcement.title}</Card.Title>
+                                                        <Card.Text>{announcement.content}</Card.Text>
+                                                        <small className="text-muted">
+                                                            {t('common.created')}: {new Date(announcement.createdAt).toLocaleDateString()}
+                                                        </small>
+                                                        <div className="d-flex justify-content-between mt-2">
+                                                            <Badge bg={announcement.active ? 'success' : 'secondary'}>
+                                                                {announcement.active ? t('common.active') : t('common.inactive')}
+                                                            </Badge>
+                                                            <Button
+                                                                variant="danger"
+                                                                size="sm"
+                                                                onClick={() => handleDeleteAnnouncement(announcement.id)}
+                                                            >
+                                                                <FiTrash2 /> {t('common.delete')}
+                                                            </Button>
+                                                        </div>
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                        ))}
+                                    </Row>
+                                </div>
+                            )}
                             {activeTab === 'events' && (
                                 <div className="events-section">
                                     <div className="d-flex justify-content-between align-items-center mb-4">
@@ -737,7 +875,7 @@ const AdminGeneral = () => {
                             <strong>{t('payment.types.arnona')} – {t('common.description')}</strong>
                             <ul className="mb-0">
                                 <li>{t('payment.unitPrice')}: 50 {t('general.currency')}</li>
-                                <li>{t('payment.total')} = {t('labels.area')} × 50 × {t('labels.units')}</li>
+                                <li>{t('payment.total')} = {t('labels.area')} × 50 </li>
                             </ul>
                         </Alert>
                     )}
@@ -749,52 +887,72 @@ const AdminGeneral = () => {
                             <th>{t('labels.address')}</th>
                             {currentBillType === 'WATER' && (
                                 <>
-                                    <th>{t('admin.water.reading')} (م³)</th>
+                                    <th>{t('admin.actions.generateWater')} </th>
                                     <th>{t('payment.amount')}</th>
                                 </>
                             )}
                             {currentBillType === 'ARNONA' && (
                                 <>
-                                    <th>{t('labels.area')} (م²)</th>
-                                    <th>{t('labels.units')}</th>
+                                    <th>{t('labels.area')} </th>
                                     <th>{t('payment.amount')}</th>
                                 </>
                             )}
                         </tr>
                         </thead>
                         <tbody>
-                        {users.filter(u => u.properties?.length > 0).length === 0 ? (
-                            <tr>
-                                <td colSpan={currentBillType === 'WATER' ? 5 : 4} className="text-center text-danger">
-                                    {t('admin.properties.noProperties')}
-                                </td>
-                            </tr>
-                        ) : (
-                            users
-                                .filter(u => u.properties?.length > 0)
-                                .flatMap((user, idx) =>
-                                    user.properties.map(prop => (
-                                        <tr key={`${user.id}-${prop.id}`}>
-                                            <td>{idx + 1}</td>
-                                            <td>{user.fullName}</td>
-                                            <td>{prop.address}</td>
-                                            {currentBillType === 'WATER' && (
-                                                <>
-                                                    <td>{waterReadings[prop.id]?.reading || 15}</td>
-                                                    <td>{(waterReadings[prop.id]?.reading || 15) * 30}</td>
-                                                </>
-                                            )}
-                                            {currentBillType === 'ARNONA' && (
-                                                <>
-                                                    <td>{prop.area}</td>
-                                                    <td>{prop.numberOfUnits}</td>
-                                                    <td>{(prop.area * 50 * prop.numberOfUnits).toFixed(2)}</td>
-                                                </>
-                                            )}
-                                        </tr>
-                                    ))
-                                )
-                        )}
+                        {(() => {
+                            const flatProps = [];
+                            users.forEach((user) => {
+                                user.properties?.forEach((prop) => {
+                                    const key = prop.id || prop.propertyId;
+                                    flatProps.push({user, prop, key});
+                                });
+                            });
+
+                            if (flatProps.length === 0) {
+                                return (
+                                    <tr>
+                                        <td colSpan={currentBillType === 'WATER' ? 5 : 4}
+                                            className="text-center text-danger">
+                                            {t('admin.properties.noProperties')}
+                                        </td>
+                                    </tr>
+                                );
+                            }
+
+                            return flatProps.map(({user, prop, key}, idx) => (
+                                <tr key={key}>
+                                    <td>{idx + 1}</td>
+                                    <td>{user.fullName}</td>
+                                    <td>{prop.address}</td>
+                                    {currentBillType === 'WATER' && (
+                                        <>
+                                            <td>
+                                                <Form.Control
+                                                    type="number"
+                                                    min="0"
+                                                    value={waterReadings[key] }
+                                                    onChange={(e) => {
+                                                        const val = Number(e.target.value);
+                                                        setWaterReadings((prev) => ({
+                                                            ...prev,
+                                                            [key]: val,
+                                                        }));
+                                                    }}
+                                                />
+                                            </td>
+                                            <td>{(waterReadings[key]) * 30}</td>
+                                        </>
+                                    )}
+                                    {currentBillType === 'ARNONA' && (
+                                        <>
+                                            <td>{prop.area}</td>
+                                            <td>{(prop.area * 50).toFixed(2)}</td>
+                                        </>
+                                    )}
+                                </tr>
+                            ));
+                        })()}
                         </tbody>
                     </Table>
                 </Modal.Body>
@@ -802,13 +960,72 @@ const AdminGeneral = () => {
                     <Button variant="secondary" onClick={() => setShowBillsModal(false)}>{t('common.close')}</Button>
 
                     {currentBillType === 'WATER' && (
-                        <Button variant="outline-info" onClick={() => setWaterReadings(generateRandomWaterReadings())} disabled={loading}>
-                            <FiRefreshCw /> {t('common.refresh')}
+                        <Button variant="outline-info" onClick={() => setWaterReadings(generateRandomWaterReadings())}
+                                disabled={loading}>
+                            <FiRefreshCw/> {t('common.refresh')}
                         </Button>
                     )}
 
-                    <Button variant="primary" onClick={handleGenerateBills} disabled={loading || users.filter(u => u.properties?.length > 0).length === 0}>
+                    <Button variant="primary" onClick={handleGenerateBills}
+                            disabled={loading || users.filter(u => u.properties?.length > 0).length === 0}>
                         {loading ? t('common.submitting') : t('common.submit')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal show={showAnnouncementModal} onHide={() => setShowAnnouncementModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('admin.announcements.addTitle')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>{t('admin.announcements.title')}</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={newAnnouncement.title}
+                                onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>{t('admin.announcements.content')}</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={newAnnouncement.content}
+                                onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>{t('admin.announcements.priority')}</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        min="0"
+                                        value={newAnnouncement.priority}
+                                        onChange={(e) => setNewAnnouncement({...newAnnouncement, priority: parseInt(e.target.value)})}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>{t('admin.announcements.expiresAt')}</Form.Label>
+                                    <Form.Control
+                                        type="datetime-local"
+                                        value={newAnnouncement.expiresAt}
+                                        onChange={(e) => setNewAnnouncement({...newAnnouncement, expiresAt: e.target.value})}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAnnouncementModal(false)}>
+                        {t('common.close')}
+                    </Button>
+                    <Button variant="primary" onClick={handleAddAnnouncement} disabled={loading}>
+                        {loading ? t('common.submitting') : t('common.save')}
                     </Button>
                 </Modal.Footer>
             </Modal>
