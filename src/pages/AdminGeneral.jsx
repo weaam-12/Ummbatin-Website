@@ -335,8 +335,14 @@ const AdminGeneral = () => {
                 });
                 console.log("📦 billsData:", billsData);
 
-                const response = await axiosInstance.post('api/payments/generate-custom-water', billsData);
-                await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
+                for (const bill of billsData) {
+                    await axiosInstance.post('api/payments/create-water-payment', {
+                        userId: bill.userId,
+                        propertyId: bill.propertyId,
+                        amount: bill.amount,
+                        status: 'PENDING'
+                    });
+                }                await notifyAllUsers('נוצרה עבורך חשבונית מים חדשה!', 'WATER_BILL');
 
                 if (response.data.success) {
                     console.log("✅ مياه success - before setNotification");
