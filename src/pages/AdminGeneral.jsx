@@ -325,6 +325,33 @@ const AdminGeneral = () => {
                     setNotification({ type: 'danger', message: t('admin.payments.invalidReadings') });
                     return;
                 }
+                const readingsData = usersWithProps.flatMap(user =>
+                    user.properties.map(prop => {
+                        const propId = prop.id || prop.propertyId;
+                        const reading = waterReadings[propId] || 0;
+                        return {
+                            propertyId: propId,
+                            reading: reading,
+                            amount: reading * 30,
+                            date: new Date().toISOString()
+                        };
+                    })
+                );
+
+// استخدام API لإنشاء القراءات
+                const responsee = await axiosInstance.post(
+                    'api/payments/generate-water-readings', // تأكد من المسار الصحيح
+                    readingsData
+                );
+
+                if (responsee.data.success) {
+                    setNotification({
+                        type: 'success',
+                        message: `${t('admin.water.readingsSuccess')} 
+                             (${responsee.data.readingsCount} قراءة)`
+                    });
+                }
+
 
                 const billsData = usersWithProps.flatMap(user =>
                     user.properties.map(prop => {
