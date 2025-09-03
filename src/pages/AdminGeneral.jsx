@@ -330,14 +330,13 @@ const AdminGeneral = () => {
                         const propId = prop.id || prop.propertyId;
                         const reading = waterReadings[propId] || 0;
                         return {
-                            propertyId: propId,
-                            reading: reading,
-                            amount: reading * 30,
+                            propertyId: Number(propId), // تأكد أنه رقم
+                            reading: Number(reading),   // تأكد أنه رقم
+                            amount: Number(reading * 30),
                             date: new Date().toISOString()
                         };
                     })
                 );
-
 // استخدام API لإنشاء القراءات
                 const responsee = await axiosInstance.post(
                     'api/payments/generate-water-readings', // تأكد من المسار الصحيح
@@ -351,6 +350,7 @@ const AdminGeneral = () => {
                              (${responsee.data.readingsCount} قراءة)`
                     });
                 }
+
 
 
                 const billsData = usersWithProps.flatMap(user =>
