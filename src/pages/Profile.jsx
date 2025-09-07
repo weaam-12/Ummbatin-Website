@@ -34,7 +34,7 @@ const Profile = () => {
                 if (response.data.id) {
                     try {
                         const [childrenRes, propertiesRes] = await Promise.all([
-                            axiosInstance.get(`/api/children/user/${response.data.id}`),
+                            axiosInstance.get(`/api/children/my-children`),
                             axiosInstance.get(`/api/properties/user/${response.data.id}`)
                         ]);
 
