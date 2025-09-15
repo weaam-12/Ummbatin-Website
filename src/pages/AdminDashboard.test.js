@@ -81,7 +81,7 @@ vi.mock('react-i18next', () => ({
                 'userDetails.contactInfo': 'פרטי התקשרות',
                 'labels.address': 'כתובת',
                 'userDetails.properties': 'נכסים',
-                'labels.area': 'שטח',
+                'labels.area': ' שטח הנכס (במ"ר)',
                 'labels.squareMeters': 'מ"ר',
                 'labels.units': 'יחידות',
                 'userDetails.wives': 'נשים',
