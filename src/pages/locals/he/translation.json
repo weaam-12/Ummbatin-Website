@@ -333,7 +333,7 @@
     "arnona": {
       "calculation": "ארנונה = שטח ({{area}} מ\"ר) × 50 שקלים = {{total}} שקלים"
     },
-    "readingApproximation": "💧 קריאה משוערת: ‎{{unitPrice}} ש\"ח × ‎{{unitsCount}} = ‎{{amount}} ש\"ח",
+    "readingApproximation": "💧 קריאה משוערת: ‎{{unitPriceWATER}} ש\"ח × ‎{{unitsCount}} = ‎{{amount}} ש\"ח",
     "receipt": "קבלת תשלום",
     "thankYou": "תודה שבחרת בנו",
     "title": "תשלום אלקטרוני",
