@@ -92,7 +92,7 @@
         "birthDate": "תאריך לידה",
         "kindergarten": "גן",
         "units": "מספר יחידות",
-        "area": "שטח",
+        "area": "שטח(מ\"ר)",
         "issueDate": "תאריך הוצאה",
         "newDocument": "בקשת מסמך חדש",
         "editProfile": "ערוך פרופיל",
@@ -131,7 +131,7 @@
       "birthDate": "תאריך לידה",
       "kindergarten": "גן",
       "units": "מספר יחידות",
-      "area": "שטח",
+      "area": "שטח(מ\"ר)",
       "issueDate": "תאריך הוצאה",
       "newDocument": "בקשת מסמך חדש",
       "editProfile": "ערוך פרופיל",
@@ -308,12 +308,12 @@
     "address": "כתובת",
     "birthDate": "תאריך לידה",
     "mother": "אמא",
-    "area": "שטח",
+    "area": "שטח(מ\"ר)",
     "units": "יחידות",
     "squareMeters": "מטר רבוע"
   },
   "payment": {
-    "unitPrice": "מחיר יחידה",
+    "unitPrice": "מחיר ליחידה",
     "total": "סך הכל",
     "reading": "קריאה",
     "paymentStatus": "סטטוס תשלום",
@@ -999,5 +999,7 @@
     "successMessage": "המשפחה נרשמה בהצלחה",
     "errorMessage": "שגיאה ברישום"
   },
-"mychildren":"הילדים שלי"
+"mychildren":"הילדים שלי",
+"admin.water.reading": "קריאת מים "
+
 }

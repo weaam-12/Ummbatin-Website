@@ -956,5 +956,6 @@
     "successMessage": "تم تسجيل العائلة بنجاح",
     "errorMessage": "حدث خطأ أثناء التسجيل"
   },
-  "mychildren": " أبنائي "
+  "mychildren": " أبنائي ",
+  "admin.water.reading": "استهلاك المياه"
 }
