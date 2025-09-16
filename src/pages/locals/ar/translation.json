@@ -955,5 +955,6 @@
     "registering": "جاري التسجيل...",
     "successMessage": "تم تسجيل العائلة بنجاح",
     "errorMessage": "حدث خطأ أثناء التسجيل"
-  }
+  },
+  "mychildren": " أبنائي "
 }
