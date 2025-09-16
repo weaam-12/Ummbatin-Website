@@ -178,7 +178,7 @@ const Profile = () => {
 
                             {children.length > 0 && (
                                 <>
-                                    <h4 style={{marginTop: '20px', color: '#475569'}}>{t("profile.labels.children")}:</h4>
+                                    <h4 style={{marginTop: '20px', color: '#475569'}}>{t("profile.labels.child")}:</h4>
                                     <div className="family-members">
                                         {children.map((child) => (
                                             <div className="member-card" key={`child-${child.childId}`}>
