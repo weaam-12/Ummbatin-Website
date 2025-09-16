@@ -314,7 +314,6 @@
   },
   "payment": {
     "unitPrice": "מחיר ליחידה",
-    "unitPriceWATER":"מחיר ליחידה (ש\"ח/מ³)",
     "total": "סך הכל",
     "reading": "קריאה",
     "paymentStatus": "סטטוס תשלום",
@@ -1001,6 +1000,6 @@
     "errorMessage": "שגיאה ברישום"
   },
 "mychildren":"הילדים שלי",
-"admin.water.reading": "קריאת מים "
-
+"admin.water.reading": "קריאת מים ",
+"unitPriceWATER":"מחיר ליחידה (ש\"ח/מ³)"
 }
