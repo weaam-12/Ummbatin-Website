@@ -123,7 +123,7 @@
     },
     "labels": {
       "fullName": "שם מלא",
-      "email": "דוא'ל",
+      "email": "דוא״ל",
       "phone": "טלפון",
       "idNumber": "תעודת זהות",
       "spouse": "אישה",
@@ -207,9 +207,9 @@
   },
   "login": {
     "title": "התחברות",
-    "email": "דוא'ל",
+    "email": "דוא״ל",
     "password": "סיסמה",
-    "emailPlaceholder": "הכנס דוא'ל",
+    "emailPlaceholder": "הכנס דוא״ל",
     "passwordPlaceholder": "הכנס סיסמה",
     "submit": "כניסה",
     "submitting": "מתחבר...",
@@ -219,7 +219,7 @@
   "userManagement": "ניהול משתמשים",
   "register": "רישום משתמש",
   "refresh": "רענון",
-  "email": "דוא'ל",
+  "email": "דוא״ל",
   "role": "הרשאה",
   "view": "צפייה",
   "changeRole": "שינוי הרשאה",
@@ -402,7 +402,7 @@
     "address": "כתובת: אום בטין",
     "phone": "טלפון: 086796101",
     "fax": "פקס: 088605680",
-    "email": "דוא'ל: sherut@alqasoum.org.il"
+    "email": "דוא״ל: sherut@alqasoum.org.il"
   },
   "navbar": {
     "education": "חינוך",
