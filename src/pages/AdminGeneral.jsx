@@ -886,8 +886,8 @@ const AdminGeneral = () => {
                         <Alert variant="info" className="mb-4">
                             <strong>{t('payment.types.water')} – {t('common.description')}</strong>
                             <ul className="mb-0">
-                                <li>{t('payment.unitPriceWATER')}:30ש"ח {t('general.currency')}</li>
-                                <li>{t('payment.total')} = {t('payment.reading')} ×30 ש"ח </li>
+                                <li>{t('unitPriceWATER')}:30ש"ח {t('general.currency')}</li>
+                                <li>{t('payment.total')} = {t('payment.reading')} ×30  </li>
                             </ul>
                         </Alert>
                     )}
@@ -896,7 +896,7 @@ const AdminGeneral = () => {
                             <strong>{t('payment.types.arnona')} – {t('common.description')}</strong>
                             <ul className="mb-0">
                                 <li>{t('payment.unitPrice')}: 50 ש"ח {t('general.currency')}</li>
-                                <li>{t('payment.total')} = {t('labels.area')} × 50 ש"ח </li>
+                                <li>{t('payment.total')} = {t('labels.area')} × 50  </li>
                             </ul>
                         </Alert>
                     )}

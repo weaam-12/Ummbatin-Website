@@ -957,5 +957,6 @@
     "errorMessage": "حدث خطأ أثناء التسجيل"
   },
   "mychildren": " أبنائي ",
-  "admin.water.reading": "استهلاك المياه"
+  "admin.water.reading": "استهلاك المياه",
+  "unitPriceWATER":"الاستهلاك (م³)"
 }
