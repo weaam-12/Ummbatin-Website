@@ -314,6 +314,7 @@
   },
   "payment": {
     "unitPrice": "מחיר ליחידה",
+    "unitPriceWATER":"מחיר ליחידה (ש\"ח/מ³)",
     "total": "סך הכל",
     "reading": "קריאה",
     "paymentStatus": "סטטוס תשלום",
